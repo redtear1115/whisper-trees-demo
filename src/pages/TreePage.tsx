@@ -7,12 +7,17 @@ import { addWhisper, recentCheckin, useStore, visitedThisWeek, whispersOf } from
 import { Art, Card, MockTag, formatDate, relativeDays } from '../components/ui'
 import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
+import { award, isDaytime } from '../features/game/ledger'
+import { useInventory } from '../features/game/inventory'
 
 export default function TreePage() {
   const { treeId = '' } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
+  const freshGlow = (location.state as CheckinState | null)?.glow
+  const night = !isDaytime()
+  const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
 
   useEffect(() => {
@@ -55,7 +60,19 @@ export default function TreePage() {
         <span className="topbar-title">{tree.species}</span>
       </header>
 
-      <Art id="tree-hero" alt={`${tree.species}的插畫`} className="hero" />
+      <div className={`hero-wrap ${frame ? `frame ${frame}` : ''}`}>
+        <Art id={night ? 'tree-hero-night' : 'tree-hero'} alt={`${tree.species}的插畫`} className="hero" />
+        {freshGlow ? (
+          <span className="glow-pop" aria-live="polite">
+            光點 +{freshGlow}
+          </span>
+        ) : null}
+      </div>
+      {night && (
+        <p className="banner night">
+          樹木休息中。晚上還是可以留樹洞，但沒有日照加成；回家路上注意安全。
+        </p>
+      )}
 
       <CheckinBanner fresh={fresh} onSite={onSite} treeId={treeId} />
 
@@ -166,6 +183,7 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
         onSubmit={(e) => {
           e.preventDefault()
           addWhisper(treeId, text)
+          award('whisper', treeId)
           setText('')
         }}
       >

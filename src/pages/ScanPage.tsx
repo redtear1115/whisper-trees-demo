@@ -7,11 +7,14 @@ import { judgeCheckin, offsetNorth, type CheckinResult } from '../lib/geo'
 import { locate } from '../lib/locate'
 import { CHECKIN, DATA_VERSION } from '../config'
 import { isDemoMode, recordCheckin } from '../store'
+import { awardCheckin, isDaytime } from '../features/game/ledger'
 
 type Step = { kind: 'scan' } | { kind: 'working'; text: string } | { kind: 'error'; text: string }
 
 export interface CheckinState {
   checkin: CheckinResult
+  /** 這次打卡拿到的光點（0 代表今天已經拿過） */
+  glow?: number
 }
 
 export default function ScanPage() {
@@ -34,8 +37,12 @@ export default function ScanPage() {
     }
     const pos = isDemoMode() ? { lngLat: offsetNorth(tree.lngLat, CHECKIN.demoOffsetMeters), accuracy: 5 } : position
     const checkin = judgeCheckin(tree.lngLat, tree.remark, pos)
-    if (checkin.kind === 'success' || checkin.kind === 'farView') recordCheckin(id, checkin.kind)
-    navigate(`/tree/${id}`, { replace: true, state: { checkin } satisfies CheckinState })
+    let glow: number | undefined
+    if (checkin.kind === 'success' || checkin.kind === 'farView') {
+      recordCheckin(id, checkin.kind, { species: tree.species, night: !isDaytime() })
+      glow = awardCheckin(id, checkin.kind)
+    }
+    navigate(`/tree/${id}`, { replace: true, state: { checkin, glow } satisfies CheckinState })
   }
 
   if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(-1)} />

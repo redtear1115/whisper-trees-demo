@@ -1,0 +1,98 @@
+[
+ {
+  "district": "北投區",
+  "street_trees": 11663,
+  "all_trees": 18193,
+  "sidewalk_km": 88.2,
+  "trees_per_km": 132.2,
+  "empty_pits": 1024
+ },
+ {
+  "district": "大安區",
+  "street_trees": 12948,
+  "all_trees": 21303,
+  "sidewalk_km": 112.6,
+  "trees_per_km": 115.0,
+  "empty_pits": 1368
+ },
+ {
+  "district": "信義區",
+  "street_trees": 6635,
+  "all_trees": 11159,
+  "sidewalk_km": 75.2,
+  "trees_per_km": 88.2,
+  "empty_pits": 1047
+ },
+ {
+  "district": "士林區",
+  "street_trees": 10459,
+  "all_trees": 23433,
+  "sidewalk_km": 128.1,
+  "trees_per_km": 81.6,
+  "empty_pits": 1892
+ },
+ {
+  "district": "松山區",
+  "street_trees": 7965,
+  "all_trees": 11514,
+  "sidewalk_km": 105.0,
+  "trees_per_km": 75.8,
+  "empty_pits": 1388
+ },
+ {
+  "district": "中正區",
+  "street_trees": 6683,
+  "all_trees": 9128,
+  "sidewalk_km": 92.2,
+  "trees_per_km": 72.5,
+  "empty_pits": 2866
+ },
+ {
+  "district": "中山區",
+  "street_trees": 9202,
+  "all_trees": 17095,
+  "sidewalk_km": 134.8,
+  "trees_per_km": 68.2,
+  "empty_pits": 1675
+ },
+ {
+  "district": "南港區",
+  "street_trees": 6502,
+  "all_trees": 12999,
+  "sidewalk_km": 97.1,
+  "trees_per_km": 66.9,
+  "empty_pits": 1558
+ },
+ {
+  "district": "大同區",
+  "street_trees": 3300,
+  "all_trees": 4696,
+  "sidewalk_km": 51.6,
+  "trees_per_km": 63.9,
+  "empty_pits": 522
+ },
+ {
+  "district": "萬華區",
+  "street_trees": 3227,
+  "all_trees": 7178,
+  "sidewalk_km": 68.0,
+  "trees_per_km": 47.4,
+  "empty_pits": 978
+ },
+ {
+  "district": "內湖區",
+  "street_trees": 7517,
+  "all_trees": 15488,
+  "sidewalk_km": 164.2,
+  "trees_per_km": 45.8,
+  "empty_pits": 1563
+ },
+ {
+  "district": "文山區",
+  "street_trees": 4294,
+  "all_trees": 10220,
+  "sidewalk_km": 97.5,
+  "trees_per_km": 44.1,
+  "empty_pits": 900
+ }
+]

@@ -69,7 +69,8 @@
 |---|---|---|
 | `material/processed/treepits_merged.geojson` | 兩份樹穴合併，57,548 個；`has_tree: false` 為候選空樹穴 | `scripts/merge_treepits.py` |
 | `material/processed/parks_osm_match.csv`、`parks_boundary.geojson` | 公園處 813 座公園對上 OSM 範圍，622 座有範圍 | `scripts/match_parks_osm.py` |
-| `public/data/`（建置中） | 網頁用的樹木點位、樹籍查詢表、空樹穴 | 見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
+| `public/data/` | 網頁用的樹木點位（PMTiles）、樹籍查詢表、空樹穴、行政區與樹種統計 | `scripts/build_web_data.py`，見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
+| `public/api/v1/` | 開放 API 的靜態 JSON（行政區、樹種、端點清單；許願為模擬） | 同上 |
 
 推算的限制：
 
@@ -92,6 +93,10 @@
 | 「以台北通登入」 | 只做畫面，不接真的帳號 |
 | Demo 模式的 GPS 位置 | 現場不在樹旁時，用 `?demo=1` 固定位置 |
 | 垃圾桶、路燈（DLC 預告） | 只放預告圖層 |
+| 光點、商店購買、小芽造型、徽章 | 延伸功能示意，存在使用者自己的裝置（store） |
+| GM 後台的全市經濟數字、其他玩家與客訴（`src/mock/players.json`） | 沒有真實營運資料 |
+| 發包商工單進度 | 沒有真實廠商，由後台畫面手動推進 |
+| 開放 API 的 `wishes.json` | 由 `src/mock/wishes.json` 產生的固定快照，檔案內標 `"mock": true` |
 
 不使用任何真實個資；「市長，你給我聽好了」的資料不會用來反推陳情人身分。
 

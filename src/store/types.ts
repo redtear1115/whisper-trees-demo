@@ -49,6 +49,9 @@ export interface Checkin {
   treeId: string
   result: 'success' | 'farView'
   at: number
+  /** 圖鑑用；舊資料可能沒有 */
+  species?: string
+  night?: boolean
 }
 
 export type ReportKind = 'pruning' | 'sick'

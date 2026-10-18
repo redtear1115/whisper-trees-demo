@@ -17,12 +17,30 @@ export default function MorePage() {
         <Link className="menu-link" to="/wishes">
           我的許願
         </Link>
+        <Link className="menu-link" to="/me">
+          我的小芽：光點、徽章、換裝
+        </Link>
+        <Link className="menu-link" to="/shop">
+          商店
+        </Link>
+        <Link className="menu-link" to="/codex">
+          樹的圖鑑
+        </Link>
       </Card>
 
       <h2 className="section-title">後台（示範）</h2>
       <Card>
         <Link className="menu-link" to="/gov">
-          政府端：補種優先排序
+          政府端：補種優先排序、樹況回報
+        </Link>
+        <Link className="menu-link" to="/vendor">
+          發包商後台：補種與養護工單
+        </Link>
+        <Link className="menu-link" to="/gm">
+          遊戲營運後台（GM）：活動、光點規則、客服
+        </Link>
+        <Link className="menu-link" to="/developers">
+          開放資料 API
         </Link>
       </Card>
 

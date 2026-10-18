@@ -13,6 +13,8 @@ import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
 import { assetUrl } from '../assets'
+import { useBalance } from '../features/game/ledger'
+import { EventBar } from '../features/game/EventBar'
 
 let protocolAdded = false
 function ensureProtocol() {
@@ -42,6 +44,7 @@ export default function MapPage() {
   const [gap, setGap] = useState<{ high: District; low: District } | null>(null)
   const [gapOpen, setGapOpen] = useState(true)
   const wishes = useWishes()
+  const balance = useBalance()
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
     const w = allWishes(s).find((x) => x.id === id)
     return w && s.seen[id] !== undefined && s.seen[id] < w.history.length
@@ -183,6 +186,10 @@ export default function MapPage() {
       <header className="map-top">
         <Art id="logo" alt="曦語 Whisper Trees" className="logo" />
         <nav className="row gap">
+          <Link className="btn small light balance-chip" to="/me" aria-label={`我的小芽，${balance} 光點`}>
+            <Art id="glow" alt="" className="icon sm" />
+            {balance}
+          </Link>
           <Link className="btn small light" to="/wishes">
             我的許願{unseen && <span className="dot-badge" aria-label="有新進度" />}
           </Link>
@@ -194,6 +201,9 @@ export default function MapPage() {
           </button>
         </nav>
       </header>
+      <div className="map-event">
+        <EventBar />
+      </div>
 
       {gap && gapOpen && (
         <div className="gap-card">

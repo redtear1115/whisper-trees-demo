@@ -3,6 +3,7 @@ import { WISH_REASONS, type Wish } from '../../store/types'
 import { createWish } from '../../store'
 import type { LngLat } from '../../lib/geo'
 import { FEASIBILITY_TEXT } from './feasibility'
+import { award } from '../game/ledger'
 
 export interface PitInfo {
   pitId: string
@@ -21,7 +22,9 @@ export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => v
       className="wish-form"
       onSubmit={(e) => {
         e.preventDefault()
-        onDone(createWish({ ...pit, reasons, feasibility: 'emptyPit' }))
+        const wish = createWish({ ...pit, reasons, feasibility: 'emptyPit' })
+        award('wish', wish.id)
+        onDone(wish)
       }}
     >
       <p>為什麼這裡需要一棵樹？（可複選）</p>

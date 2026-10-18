@@ -6,6 +6,7 @@ import { setWishStatus, totalWater, useReports, useWishes, wishStatus } from '..
 import { REPORT_KINDS, STATUS_LABEL, type TreeReport, type WishStatus } from '../store/types'
 import { FEASIBILITY_TEXT } from '../features/wish/feasibility'
 import { MockTag, relativeDays } from '../components/ui'
+import { reportResolved, useOrders } from '../features/vendor/orders'
 
 const WEIGHT_LABEL: Record<keyof Weights, string> = {
   demand: '市民需求',
@@ -61,6 +62,9 @@ export default function GovPage() {
         <nav className="row gap">
           <Link className="btn small" to="/">
             市民端
+          </Link>
+          <Link className="btn small" to="/vendor">
+            發包商
           </Link>
           <Link className="btn small" to="/more">
             更多後台
@@ -252,6 +256,7 @@ function useFlip(order: string) {
 /** 樹況回報依路段彙整：每段幾筆、兩類各幾筆 */
 function ReportsByRoad() {
   const reports = useReports()
+  const orders = useOrders()
   const groups = new Map<string, TreeReport[]>()
   for (const r of reports) {
     const k = `${r.district} ${r.road}`
@@ -285,6 +290,7 @@ function ReportsByRoad() {
                     {r.hasPhoto && ' 📷'}
                     <span className="muted">・{relativeDays(r.at)}</span>
                     {!r.mock && <span className="new-tag">市民新回報</span>}
+                    {reportResolved(r.id, orders) && <span className="status-pill s-planted">廠商已處理</span>}
                   </li>
                 ))}
               </ul>

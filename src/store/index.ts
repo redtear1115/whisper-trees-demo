@@ -215,8 +215,8 @@ export function markSeen(wishId: string) {
 
 // ---------- 打卡與樹洞 ----------
 
-export function recordCheckin(treeId: string, result: Checkin['result']) {
-  update((s) => ({ ...s, checkins: [...s.checkins, { treeId, result, at: Date.now() }] }))
+export function recordCheckin(treeId: string, result: Checkin['result'], extra: Pick<Checkin, 'species' | 'night'> = {}) {
+  update((s) => ({ ...s, checkins: [...s.checkins, { treeId, result, at: Date.now(), ...extra }] }))
 }
 
 /** 最近一次（30 分鐘內）在這棵樹的打卡，重新整理樹的頁面時用來維持現場狀態 */
@@ -277,6 +277,7 @@ export function addReport(r: Omit<TreeReport, 'id' | 'at' | 'note'> & { note: st
 
 // ---------- 延伸功能共用的擴充欄位 ----------
 
+/** fallback 要傳模組層級的常數，否則 useStore 每次拿到新物件會無限重繪 */
 export function getExt<T>(key: string, fallback: T, s: State = state): T {
   return (s.ext[key] as T) ?? fallback
 }

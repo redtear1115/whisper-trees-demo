@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+<rect x="1" y="1" width="238" height="238" rx="12" fill="hsl(279 45% 90%)" stroke="hsl(279 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="18" fill="hsl(279 30% 30%)">sprout-4</text>
+<text x="50%" y="58%" text-anchor="middle" font-family="sans-serif" font-size="13" fill="hsl(279 20% 40%)">240×240 佔位</text>
+</svg>

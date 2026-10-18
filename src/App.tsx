@@ -8,6 +8,12 @@ const ScanPage = lazy(() => import('./pages/ScanPage'))
 const TreePage = lazy(() => import('./pages/TreePage'))
 const MyWishesPage = lazy(() => import('./pages/MyWishesPage'))
 const GovPage = lazy(() => import('./pages/GovPage'))
+const MePage = lazy(() => import('./pages/MePage'))
+const ShopPage = lazy(() => import('./pages/ShopPage'))
+const CodexPage = lazy(() => import('./pages/CodexPage'))
+const GmPage = lazy(() => import('./pages/GmPage'))
+const VendorPage = lazy(() => import('./pages/VendorPage'))
+const DevelopersPage = lazy(() => import('./pages/DevelopersPage'))
 
 function DemoBadge() {
   if (!isDemoMode()) return null
@@ -36,6 +42,12 @@ export default function App() {
           <Route path="/tree/:treeId" element={<TreePage />} />
           <Route path="/wishes" element={<MyWishesPage />} />
           <Route path="/gov" element={<GovPage />} />
+          <Route path="/me" element={<MePage />} />
+          <Route path="/shop" element={<ShopPage />} />
+          <Route path="/codex" element={<CodexPage />} />
+          <Route path="/gm" element={<GmPage />} />
+          <Route path="/vendor" element={<VendorPage />} />
+          <Route path="/developers" element={<DevelopersPage />} />
           <Route path="/more" element={<MorePage />} />
           <Route path="*" element={<MorePage />} />
         </Routes>

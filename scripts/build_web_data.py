@@ -14,6 +14,9 @@ Outputs (public/data/):
   trees.pmtiles         tree points for the map (needs tippecanoe)
   pits-empty.geojson    candidate empty pits (kind 樹穴, has_tree false)
   districts.json        street trees per km of sidewalk, per district
+  species.json          tree count per species (for the codex)
+  ../api/v1/            static open API: index, districts, species, and a
+                        mock wishes snapshot (from src/mock/, marked mock)
 
 Run: uv run scripts/build_web_data.py
 """
@@ -177,6 +180,57 @@ def build_districts(df, pits):
         print(f"  {r['district']} {r['trees_per_km']}/km  pits {r['empty_pits']}")
 
 
+def build_species(df):
+    g = df.groupby("TreeType")
+    rows = [
+        {"species": sp, "count": int(len(t)), "street": int((t["kind"] == "street").sum()),
+         "park": int((t["kind"] == "park").sum())}
+        for sp, t in g
+    ]
+    rows.sort(key=lambda r: -r["count"])
+    (OUT / "species.json").write_text(json.dumps(rows, ensure_ascii=False, separators=(",", ":")))
+    print(f"species: {len(rows)}, top: {rows[0]['species']} {rows[0]['count']}")
+
+
+def build_api():
+    """Static open API. Real data is copied from public/data/; wishes are mock."""
+    api = ROOT / "public" / "api" / "v1"
+    api.mkdir(parents=True, exist_ok=True)
+    for name in ("districts.json", "species.json"):
+        shutil.copyfile(OUT / name, api / name)
+    seed = json.loads((ROOT / "src" / "mock" / "wishes.json").read_text())
+    labels = {"received": "已收件", "surveying": "會勘中", "scheduled": "可種・已排程",
+              "planted": "已種植", "rejected": "不可種"}
+    wishes = []
+    for w in seed:
+        last = w["history"][-1]
+        wishes.append({
+            "id": w["id"], "pit_id": w["pitId"], "lng": w["lngLat"][0], "lat": w["lngLat"][1],
+            "road": w["road"], "district": w["district"], "reasons": w["reasons"],
+            "waterings": w["seedWater"], "status": last[0], "status_label": labels[last[0]],
+            **({"reason": last[2]} if len(last) > 2 else {}),
+        })
+    (api / "wishes.json").write_text(json.dumps(
+        {"mock": True, "note": "模擬資料：示範用的許願與補種進度", "wishes": wishes},
+        ensure_ascii=False, indent=1))
+    index = {
+        "name": "曦語 Whisper Trees 開放資料 API（示範）",
+        "version": "v1",
+        "data_date": "2026-10-16",
+        "license": "政府資料開放授權條款第 1 版；OSM 衍生資料 ODbL 1.0",
+        "endpoints": {
+            "trees": "/data/trees/{prefix}.json",
+            "tree_tiles": "/data/trees.pmtiles",
+            "pits_empty": "/data/pits-empty.geojson",
+            "districts": "/api/v1/districts.json",
+            "species": "/api/v1/species.json",
+            "wishes": "/api/v1/wishes.json",
+        },
+    }
+    (api / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1))
+    print(f"api: {len(index['endpoints'])} endpoints")
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     df = load_trees()
@@ -185,6 +239,8 @@ def main():
     build_lookup(df)
     pits = build_pits(df)
     build_districts(df, pits)
+    build_species(df)
+    build_api()
     build_tiles(df)
 
 

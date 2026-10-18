@@ -1,0 +1,14 @@
+{
+ "name": "曦語 Whisper Trees 開放資料 API（示範）",
+ "version": "v1",
+ "data_date": "2026-10-16",
+ "license": "政府資料開放授權條款第 1 版；OSM 衍生資料 ODbL 1.0",
+ "endpoints": {
+  "trees": "/data/trees/{prefix}.json",
+  "tree_tiles": "/data/trees.pmtiles",
+  "pits_empty": "/data/pits-empty.geojson",
+  "districts": "/api/v1/districts.json",
+  "species": "/api/v1/species.json",
+  "wishes": "/api/v1/wishes.json"
+ }
+}

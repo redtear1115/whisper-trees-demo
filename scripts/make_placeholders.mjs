@@ -16,8 +16,8 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const outDir = join(root, 'public/assets/ph')
 mkdirSync(outDir, { recursive: true })
 for (const a of assets) {
-  const small = Math.min(a.w, a.h) < 120
-  const fs = small ? Math.max(9, Math.round(a.w / 7)) : 18
+  const small = Math.min(a.w, a.h) <= 120
+  const fs = Math.max(8, Math.min(small ? Math.round(a.w / 7) : 18, Math.floor((a.w * 1.6) / a.id.length)))
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">
 <rect x="1" y="1" width="${a.w - 2}" height="${a.h - 2}" rx="${small ? 14 : 12}" fill="hsl(${hue(a.id)} 45% 90%)" stroke="hsl(${hue(a.id)} 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
 <text x="50%" y="${small ? '50%' : '46%'}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="${fs}" fill="hsl(${hue(a.id)} 30% 30%)">${esc(a.id)}</text>

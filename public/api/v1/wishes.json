@@ -1,0 +1,123 @@
+{
+ "mock": true,
+ "note": "模擬資料：示範用的許願與補種進度",
+ "wishes": [
+  {
+   "id": "mock-1",
+   "pit_id": "nwo-1695",
+   "lng": 121.529425,
+   "lat": 25.03393,
+   "road": "信義路二段",
+   "district": "中正區",
+   "reasons": [
+    "等公車",
+    "太曬"
+   ],
+   "waterings": 37,
+   "status": "scheduled",
+   "status_label": "可種・已排程"
+  },
+  {
+   "id": "mock-2",
+   "pit_id": "nwo-13684",
+   "lng": 121.528971,
+   "lat": 25.032471,
+   "road": "麗水街",
+   "district": "大安區",
+   "reasons": [
+    "通學"
+   ],
+   "waterings": 12,
+   "status": "surveying",
+   "status_label": "會勘中"
+  },
+  {
+   "id": "mock-3",
+   "pit_id": "nwo-8410",
+   "lng": 121.527462,
+   "lat": 25.034552,
+   "road": "金山南路一段",
+   "district": "中正區",
+   "reasons": [
+    "散步路線"
+   ],
+   "waterings": 58,
+   "status": "planted",
+   "status_label": "已種植"
+  },
+  {
+   "id": "mock-4",
+   "pit_id": "nwo-1686",
+   "lng": 121.530273,
+   "lat": 25.033835,
+   "road": "信義路二段",
+   "district": "中正區",
+   "reasons": [
+    "太曬"
+   ],
+   "waterings": 9,
+   "status": "rejected",
+   "status_label": "不可種",
+   "reason": "地下有自來水管線，樹穴無法開挖"
+  },
+  {
+   "id": "mock-5",
+   "pit_id": "nwo-11043",
+   "lng": 121.527487,
+   "lat": 25.034838,
+   "road": "金山南路一段",
+   "district": "中正區",
+   "reasons": [
+    "通學",
+    "等公車"
+   ],
+   "waterings": 4,
+   "status": "received",
+   "status_label": "已收件"
+  },
+  {
+   "id": "mock-6",
+   "pit_id": null,
+   "lng": 121.5612,
+   "lat": 24.9895,
+   "road": "興隆路二段",
+   "district": "文山區",
+   "reasons": [
+    "等公車",
+    "太曬"
+   ],
+   "waterings": 26,
+   "status": "received",
+   "status_label": "已收件"
+  },
+  {
+   "id": "mock-7",
+   "pit_id": null,
+   "lng": 121.5005,
+   "lat": 25.0353,
+   "road": "西園路一段",
+   "district": "萬華區",
+   "reasons": [
+    "通學"
+   ],
+   "waterings": 19,
+   "status": "surveying",
+   "status_label": "會勘中"
+  },
+  {
+   "id": "mock-8",
+   "pit_id": null,
+   "lng": 121.5862,
+   "lat": 25.0802,
+   "road": "成功路四段",
+   "district": "內湖區",
+   "reasons": [
+    "散步路線",
+    "太曬"
+   ],
+   "waterings": 7,
+   "status": "received",
+   "status_label": "已收件"
+  }
+ ]
+}

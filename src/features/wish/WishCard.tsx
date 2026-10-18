@@ -3,6 +3,7 @@ import { STATUS_FLOW, STATUS_LABEL, type Wish } from '../../store/types'
 import { hasWateredToday, totalWater, useStore, waterWish, wishStatus } from '../../store'
 import { Art, MockTag, formatDate } from '../../components/ui'
 import { FEASIBILITY_TEXT } from './feasibility'
+import { award } from '../game/ledger'
 
 /** 許願的進度時間軸與澆水 */
 export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
@@ -36,7 +37,11 @@ export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
           <button
             className="btn primary"
             disabled={watered}
-            onClick={() => setMsg(waterWish(wish.id) ? '澆水 +1，謝謝你。' : '今天已經澆過了。')}
+            onClick={() => {
+              if (!waterWish(wish.id)) return setMsg('今天已經澆過了。')
+              const glow = award('water', wish.id)
+              setMsg(glow ? `澆水 +1，謝謝你。光點 +${glow}` : '澆水 +1，謝謝你。')
+            }}
           >
             {watered ? '今天已經澆過了' : '澆水 +1'}
           </button>

@@ -55,16 +55,18 @@
 - 活動：名稱、期間、倍率（例如「植樹節雙倍光點」）。期間內市民端顯示活動橫幅。
 - 商店：價格、上下架。
 - 經濟概況（模擬）：本週發出／回收的光點、捐給補種基金的總數。
+- 玩家查詢與客服：模擬玩家與客訴（GPS 漂移、樹牌被遮住、異常速度），可以補發光點給這台裝置，原因必填並寫進玩家的光點紀錄。
 - 頁首標「示範：營運人員視角」。改動寫回 store，市民端分頁即時更新。
 
 ## 7. 對外開放 API `/developers`
 
-- 靜態 JSON，放在 `public/api/v1/`，由 `build_web_data.py` 產生：
-  - `trees/{前綴}.json`：樹籍查詢（與網站共用格式）
-  - `districts.json`：行政區統計
-  - `pits-empty.geojson`：候選空樹穴
-  - `species.json`：樹種統計
-  - `wishes.json`：許願與補種進度（**模擬**快照）
+- 靜態 JSON，由 `build_web_data.py` 產生。大檔不重複放，直接用網站的 `public/data/`：
+  - `/api/v1/index.json`：端點清單與授權
+  - `/data/trees/{前綴}.json`：樹籍查詢（與網站共用格式）
+  - `/data/pits-empty.geojson`：候選空樹穴
+  - `/api/v1/districts.json`：行政區統計
+  - `/api/v1/species.json`：樹種統計
+  - `/api/v1/wishes.json`：許願與補種進度（**模擬**快照，檔內 `"mock": true`）
 - 文件頁列出端點、欄位、範例，可以在頁面上直接試打。
 - 授權：真實資料沿用政府資料開放授權條款；OSM 衍生資料 ODbL。
 
