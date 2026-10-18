@@ -1240,3 +1240,38 @@ pre.code {
 .notice-form .btn {
   justify-self: start;
 }
+
+.mode-toggle {
+  position: absolute;
+  left: 12px;
+  bottom: calc(max(36px, env(safe-area-inset-bottom)) + 76px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 80px);
+}
+
+.mode-toggle button {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+
+.mode-toggle button.on {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+
+.mode-note {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255, 253, 248, 0.9);
+  color: var(--muted);
+}

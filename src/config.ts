@@ -23,6 +23,15 @@ export const DEMO = {
   qrText: 'http://trees.gov.taipei/show/?treeid=DA0030211045',
 }
 
+/** 「附近」模式：45° 俯視，只能在目前位置周圍移動 */
+export const NEAR = {
+  radiusMeters: 300,
+  pitch: 45,
+  bearing: -20,
+  zoom: 17,
+  minZoom: 16,
+}
+
 export const DATA_VERSION = '2026-10-16'
 
 export const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron'

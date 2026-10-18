@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { maplibregl } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { DEMO, MAP_STYLE } from '../config'
+import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, loadDistricts, type District, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
 import { allWishes, totalWater, useStore, useWishes, wishByPit } from '../store'
@@ -14,6 +14,8 @@ import { Art } from '../components/ui'
 import { assetUrl } from '../assets'
 import { useBalance } from '../features/game/ledger'
 import { EventBar } from '../features/game/EventBar'
+import { useAnchor } from '../features/map/useAnchor'
+import { boundsAround, circleRing } from '../lib/nearby'
 
 type Sheet =
   | { kind: 'tree'; tree: Tree }
@@ -25,8 +27,12 @@ type Sheet =
 
 type LayerKey = 'trees' | 'pits' | 'wishes' | 'parks'
 
-/** 地圖上次的位置，從樹的頁面回來時接著看 */
+/** 地圖上次的位置，從樹的頁面回來時接著看（全市模式） */
 let lastView: { center: LngLat; zoom: number } | null = null
+
+/** 附近：45° 俯視、只能在目前位置半徑內移動；全市：平面、可看整個台北 */
+type Mode = 'near' | 'city'
+let lastMode: Mode = 'near'
 
 export default function MapPage() {
   const el = useRef<HTMLDivElement>(null)
@@ -41,6 +47,13 @@ export default function MapPage() {
   const [panel, setPanel] = useState(false)
   const [gap, setGap] = useState<{ high: District; low: District } | null>(null)
   const [gapOpen, setGapOpen] = useState(true)
+  const [mode, setModeState] = useState<Mode>(lastMode)
+  const setMode = (m: Mode) => {
+    lastMode = m
+    setModeState(m)
+  }
+  const [ready, setReady] = useState(false)
+  const anchor = useAnchor(mode === 'near')
   const wishes = useWishes()
   const balance = useBalance()
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
@@ -61,8 +74,11 @@ export default function MapPage() {
     const m = new maplibregl.Map({
       container: el.current!,
       style: MAP_STYLE,
-      center: lastView?.center ?? DEMO.center,
-      zoom: lastView?.zoom ?? DEMO.zoom,
+      center: lastMode === 'near' ? DEMO.center : (lastView?.center ?? DEMO.center),
+      zoom: lastMode === 'near' ? NEAR.zoom : (lastView?.zoom ?? DEMO.zoom),
+      pitch: lastMode === 'near' ? NEAR.pitch : 0,
+      bearing: lastMode === 'near' ? NEAR.bearing : 0,
+      maxPitch: 60,
       attributionControl: false,
     })
     map.current = m
@@ -78,6 +94,7 @@ export default function MapPage() {
       'bottom-right',
     )
     m.on('moveend', () => {
+      if (lastMode !== 'city') return
       const c = m.getCenter()
       lastView = { center: [c.lng, c.lat], zoom: m.getZoom() }
     })
@@ -100,6 +117,29 @@ export default function MapPage() {
         source: 'parks',
         paint: { 'fill-color': '#bfdcb6', 'fill-opacity': 0.45, 'fill-outline-color': '#8fbf86' },
       })
+      // 2.5D：底圖的建物拉高成立體方塊（附近模式才看得出來）
+      m.addLayer({
+        id: 'buildings-3d',
+        type: 'fill-extrusion',
+        source: 'openmaptiles',
+        'source-layer': 'building',
+        minzoom: 15,
+        paint: {
+          'fill-extrusion-color': '#e7e2d6',
+          'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8],
+          'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+          'fill-extrusion-opacity': 0.8,
+        },
+      })
+      // 附近模式的可探索範圍
+      m.addSource('nearby', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      m.addLayer({
+        id: 'nearby-edge',
+        type: 'line',
+        source: 'nearby',
+        paint: { 'line-color': '#3f7d4e', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.7 },
+      })
+      m.addSource('me', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addLayer({
         id: 'trees',
         type: 'circle',
@@ -123,6 +163,19 @@ export default function MapPage() {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1.5, 17, 6, 19, 10],
         },
       })
+      m.addLayer({
+        id: 'me',
+        type: 'circle',
+        source: 'me',
+        paint: {
+          'circle-color': '#2f7de1',
+          'circle-radius': 7,
+          'circle-stroke-color': '#fff',
+          'circle-stroke-width': 3,
+          'circle-pitch-alignment': 'map',
+        },
+      })
+      setReady(true)
     })
     m.on('click', (e) => {
       const pad = 10
@@ -183,6 +236,52 @@ export default function MapPage() {
       map.current = null
     }
   }, [])
+
+  // 附近／全市模式：鏡頭角度與可移動範圍
+  const centeredOn = useRef<string | null>(null)
+  const anchorRef = useRef(anchor)
+  anchorRef.current = anchor
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    const nearby = m.getSource('nearby') as maplibregl.GeoJSONSource | undefined
+    const me = m.getSource('me') as maplibregl.GeoJSONSource | undefined
+    if (mode === 'city') {
+      centeredOn.current = null
+      m.setMaxBounds(null)
+      m.setMinZoom(10)
+      nearby?.setData({ type: 'FeatureCollection', features: [] })
+      me?.setData({ type: 'FeatureCollection', features: [] })
+      m.easeTo({ pitch: 0, bearing: 0, zoom: Math.min(m.getZoom(), 15), duration: 600 })
+      return
+    }
+    const key = `${anchor.source}:${anchor.lngLat.join()}`
+    nearby?.setData({ type: 'Polygon', coordinates: [circleRing(anchor.lngLat, NEAR.radiusMeters)] })
+    me?.setData(
+      anchor.source === 'gps'
+        ? { type: 'Point', coordinates: anchor.lngLat }
+        : { type: 'FeatureCollection', features: [] },
+    )
+    m.setMaxBounds(null)
+    m.setMinZoom(NEAR.minZoom)
+    if (centeredOn.current !== key) {
+      // 進附近模式、或人移動了：鏡頭移到新的中心。上一段動畫可能被打斷，所以角度與縮放用「至少」而不是沿用目前值
+      centeredOn.current = key
+      m.easeTo({
+        center: anchor.lngLat,
+        zoom: Math.max(m.getZoom(), NEAR.minZoom),
+        pitch: m.getPitch() < 30 ? NEAR.pitch : m.getPitch(),
+        bearing: m.getPitch() < 30 ? NEAR.bearing : m.getBearing(),
+        duration: 700,
+      })
+      // 動畫結束才鎖範圍，並用最新的中心（避免被打斷的動畫拿到舊位置）
+      m.once('moveend', () => {
+        if (lastMode === 'near') m.setMaxBounds(boundsAround(anchorRef.current.lngLat, NEAR.radiusMeters))
+      })
+    } else {
+      m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
+    }
+  }, [mode, anchor, ready])
 
   // 許願圖層：小樹苗，大小對應澆水數
   useEffect(() => {
@@ -329,6 +428,26 @@ export default function MapPage() {
             </div>
           )}
           {sheet.kind === 'dlc' && <DlcCard which={sheet.which} />}
+        </div>
+      )}
+
+      {!sheet && (
+        <div className="mode-toggle" role="group" aria-label="地圖模式">
+          <button className={mode === 'near' ? 'on' : ''} aria-pressed={mode === 'near'} onClick={() => setMode('near')}>
+            附近
+          </button>
+          <button className={mode === 'city' ? 'on' : ''} aria-pressed={mode === 'city'} onClick={() => setMode('city')}>
+            全市
+          </button>
+          {mode === 'near' && (
+            <span className="mode-note">
+              {anchor.source === 'gps'
+                ? `你周圍 ${NEAR.radiusMeters} 公尺`
+                : anchor.source === 'demo'
+                  ? '示範樹周圍（Demo）'
+                  : '沒有定位：示範樹周圍'}
+            </span>
+          )}
         </div>
       )}
 
