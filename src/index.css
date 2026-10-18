@@ -854,3 +854,78 @@ textarea.input {
 .error {
   color: var(--red);
 }
+
+/* ---------- report ---------- */
+
+.report form {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.kind-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.kind {
+  min-height: 52px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kind.on {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  color: #8a4f1d;
+}
+
+.report .btn.small {
+  justify-self: start;
+}
+
+.report-photo {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.report-list {
+  display: grid;
+  gap: 10px;
+}
+
+.report-road {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
+.report-road ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.kind-tag {
+  display: inline-block;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  margin-right: 6px;
+}
+
+.kind-tag.pruning {
+  background: var(--amber-soft);
+  color: #8a4f1d;
+}
+
+.kind-tag.sick {
+  background: #f6e1de;
+  color: var(--red);
+}

@@ -2,10 +2,10 @@ import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 
 import { Link } from 'react-router-dom'
 import { loadDistricts, type District } from '../lib/trees'
 import { DEFAULT_WEIGHTS, scoreAll, type Weights } from '../lib/score'
-import { setWishStatus, totalWater, useStore, useWishes, wishStatus } from '../store'
-import { STATUS_LABEL, type WishStatus } from '../store/types'
+import { setWishStatus, totalWater, useReports, useWishes, wishStatus } from '../store'
+import { REPORT_KINDS, STATUS_LABEL, type TreeReport, type WishStatus } from '../store/types'
 import { FEASIBILITY_TEXT } from '../features/wish/feasibility'
-import { MockTag } from '../components/ui'
+import { MockTag, relativeDays } from '../components/ui'
 
 const WEIGHT_LABEL: Record<keyof Weights, string> = {
   demand: '市民需求',
@@ -20,7 +20,6 @@ const PLANTED_BASE = 412
 
 export default function GovPage() {
   const wishes = useWishes()
-  const reports = useStore((s) => s.reports)
   const [districts, setDistricts] = useState<District[]>([])
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS)
   const [open, setOpen] = useState<string | null>(null)
@@ -155,24 +154,7 @@ export default function GovPage() {
       </table>
       </div>
 
-      {reports.length > 0 && (
-        <section>
-          <h2>樹況回報（依路段）</h2>
-          <ul>
-            {Object.entries(
-              reports.reduce<Record<string, string[]>>((acc, r) => {
-                const k = `${r.district} ${r.road}`
-                ;(acc[k] ??= []).push(r.kind)
-                return acc
-              }, {}),
-            ).map(([road, kinds]) => (
-              <li key={road}>
-                {road}：{kinds.length} 筆（{[...new Set(kinds)].join('、')}）
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <ReportsByRoad />
 
       <p className="muted small">
         分數：四項各自正規化到 0–1 後加權平均。遮蔭缺口與公平性依行政區「每公里人行道的行道樹數」（開放資料推算）；
@@ -265,4 +247,51 @@ function useFlip(order: string) {
     prev.current = next
   }, [order])
   return ref
+}
+
+/** 樹況回報依路段彙整：每段幾筆、兩類各幾筆 */
+function ReportsByRoad() {
+  const reports = useReports()
+  const groups = new Map<string, TreeReport[]>()
+  for (const r of reports) {
+    const k = `${r.district} ${r.road}`
+    groups.set(k, [...(groups.get(k) ?? []), r])
+  }
+  const rows = [...groups.entries()].sort((a, b) => b[1].length - a[1].length)
+  return (
+    <section>
+      <h2 className="section-title">
+        樹況回報（依路段） <MockTag title="含模擬的示範回報" />
+      </h2>
+      {rows.length === 0 && <p className="muted">目前沒有回報。</p>}
+      <div className="report-list">
+        {rows.map(([road, list]) => {
+          const count = (k: TreeReport['kind']) => list.filter((r) => r.kind === k).length
+          return (
+            <div key={road} className="report-road">
+              <div className="row between center-v">
+                <strong>{road}</strong>
+                <span className="small">
+                  共 {list.length} 筆・{REPORT_KINDS.pruning.label} {count('pruning')}・{REPORT_KINDS.sick.label}{' '}
+                  {count('sick')}
+                </span>
+              </div>
+              <ul>
+                {list.map((r) => (
+                  <li key={r.id} className="small">
+                    <span className={`kind-tag ${r.kind}`}>{REPORT_KINDS[r.kind].label}</span>
+                    {r.species}（<span className="mono">{r.treeId}</span>）{r.details.join('、')}
+                    {r.note && `：${r.note}`}
+                    {r.hasPhoto && ' 📷'}
+                    <span className="muted">・{relativeDays(r.at)}</span>
+                    {!r.mock && <span className="new-tag">市民新回報</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
 }

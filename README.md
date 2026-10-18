@@ -16,17 +16,23 @@
 |---|---|---|
 | 1 | 全市樹木地圖、候選空樹穴、行政區樹蔭差距 | [02-map](docs/specs/02-map.md) |
 | 2 | 掃樹牌 QR Code + GPS 打卡 | [03-checkin](docs/specs/03-checkin.md) |
-| 3 | 樹的頁面、樹洞（私密留言、微光人數、時空膠囊） | [04-tree-page](docs/specs/04-tree-page.md) |
+| 3 | 樹的頁面、樹洞（私密留言、微光人數、時空膠囊）、樹況回報（修剪有問題／樹木生病） | [04-tree-page](docs/specs/04-tree-page.md) |
 | 4 | 見縫插樹：空樹穴許願、澆水、進度追蹤 | [05-wish](docs/specs/05-wish.md) |
 | 5 | 政府端：需求熱點、補種優先分數（權重滑桿）、改案件狀態 | [06-gov-console](docs/specs/06-gov-console.md) |
 
 完整流程與優先順序見 [docs/specs/00-overview.md](docs/specs/00-overview.md)。
 
-### 這次不做（放在「未來展望」）
+### 延伸功能（主線之後的示意）
+
+主線之外的畫面，從「更多」進入；全部是前端示意、模擬資料。見 [08-extensions](docs/specs/08-extensions.md)。
 
 - 光點經濟、商店、圖鑑、成長徽章、角色養成
+- 遊戲營運後台（GM）、對外開放 API（靜態 JSON）、發包商後台
+
+### 這次不做（放在「未來展望」）
+
 - Apple Watch 冥想、AI 初審照片
-- 遊戲營運後台（GM）、對外開放 API
+- 樹木認養（單人或多人合資）、彩繪石尋寶：見[討論紀錄](docs/discussion-2026-10-17.md)
 - 3D 街廓、樓層窗景
 - NFC 打卡：目前沒有 NFC 樹牌，也沒有驗證過，改用現有的 QR 樹牌 + GPS
 - 真實登入：「以台北通登入」只做畫面
@@ -81,7 +87,7 @@
 | 「本週微光陪伴人數」 | 沒有真實使用者，以固定種子產生 |
 | 許願、澆水數 | 同上 |
 | 補種案件的處理進度（已收件 → 會勘中 → 已排程 → 已種植） | 市府沒有這套流程，由政府端畫面手動切換 |
-| 樹況回報 | 同上 |
+| 樹況回報 | 同上；政府端預先放幾筆示範回報（`src/mock/reports.json`） |
 | 移樹紀錄與原因 | 逐年移除紀錄未完整開放 |
 | 「以台北通登入」 | 只做畫面，不接真的帳號 |
 | Demo 模式的 GPS 位置 | 現場不在樹旁時，用 `?demo=1` 固定位置 |
@@ -100,7 +106,18 @@
 
 ## 使用的開源套件與 AI 工具
 
-> 實作開始後補上套件清單。本專案使用 Claude Code 協助整理資料、撰寫規格與程式。
+| 套件 | 用途 | 授權 |
+|---|---|---|
+| React、React Router | 前端框架、路由 | MIT |
+| Vite、TypeScript、Vitest | 建置、型別、測試 | MIT／Apache-2.0 |
+| MapLibre GL JS | 地圖 | BSD-3-Clause |
+| PMTiles | 樹木點位向量圖磚 | BSD-3-Clause |
+| @zxing/browser、@zxing/library | 掃樹牌 QR Code | Apache-2.0 |
+| SunCalc | 日出日落（夜間模式） | BSD-2-Clause |
+| tippecanoe | 產生 PMTiles | BSD-2-Clause |
+| OpenFreeMap | 底圖圖磚（免金鑰） | 資料 © OpenMapTiles、OpenStreetMap |
+
+本專案使用 Claude Code 協助整理資料、撰寫規格與程式。
 
 ## 重新產生資料
 
@@ -109,6 +126,19 @@
 ```sh
 uv run scripts/merge_treepits.py
 uv run scripts/match_parks_osm.py
+uv run scripts/build_web_data.py   # 需要 tippecanoe（brew install tippecanoe）
 ```
+
+## 開發
+
+```sh
+npm install
+npm run dev      # http://localhost:5173，加 ?demo=1 進 Demo 模式（模擬定位、可掃示範樹牌）
+npm test
+npm run build    # 輸出 dist/，靜態網站
+node scripts/make_placeholders.mjs   # 依 src/assets.ts 重新產生佔位美術與 docs/ui-assets.md
+```
+
+美術目前都是佔位檔，交給設計的清單見 [docs/ui-assets.md](docs/ui-assets.md)。
 
 比對規則（公園範圍、樹穴合併）見 [01-data-pipeline](docs/specs/01-data-pipeline.md)。

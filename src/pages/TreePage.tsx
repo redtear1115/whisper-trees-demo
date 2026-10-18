@@ -6,6 +6,7 @@ import type { CheckinResult } from '../lib/geo'
 import { addWhisper, recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
 import { Art, Card, MockTag, formatDate, relativeDays } from '../components/ui'
 import type { CheckinState } from './ScanPage'
+import { ReportBox } from '../features/report/ReportBox'
 
 export default function TreePage() {
   const { treeId = '' } = useParams()
@@ -94,6 +95,8 @@ export default function TreePage() {
           </Link>
         </Card>
       )}
+
+      <ReportBox tree={tree} onSite={!!onSite} />
 
       <Card>
         <h2>樹籍資料</h2>

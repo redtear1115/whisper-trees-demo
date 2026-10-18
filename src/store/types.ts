@@ -51,14 +51,24 @@ export interface Checkin {
   at: number
 }
 
-export type ReportKind = '修剪問題' | '病蟲害' | '遮蔭過多或修剪過度' | '新長枝芽擋路' | '其他'
+export type ReportKind = 'pruning' | 'sick'
+
+export const REPORT_KINDS: Record<ReportKind, { label: string; details: string[] }> = {
+  pruning: { label: '修剪有問題', details: ['修剪過度', '遮蔭過多', '枝葉擋路'] },
+  sick: { label: '樹木生病', details: ['病蟲害', '枯枝或落枝', '樹幹傾斜或受損'] },
+}
 
 export interface TreeReport {
   id: string
   treeId: string
+  species: string
   road: string
   district: string
   kind: ReportKind
+  details: string[]
   note: string
+  /** 有附照片（照片本身只在本機預覽，不存） */
+  hasPhoto: boolean
   at: number
+  mock?: boolean
 }

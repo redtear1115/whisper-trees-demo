@@ -17,7 +17,7 @@
 - 行道樹：`TreeID, Dist, Region, RegionRemark, TreeType, Diameter, TreeHeight, SurveyDate, TWD97X, TWD97Y, UpdDate`
 - 公園樹：`TreeID, Dist, ParkName, TreeType, Diameter, TreeHeight, TWD97X, TWD97Y, SurveyDate, UpdDate`
 - `Diameter` 是胸徑（cm），`TreeHeight` 是樹高（m）。
-- `RegionRemark` 常見值：空白、`安全島`（6,899 棵）、`東/西/南/北側人行道`。打卡的「遠觀模式」靠 `安全島` 判斷。
+- `RegionRemark` 常見值：空白、`無`、`東/西/南/北側人行道`，也有 `信義路二段北側安全島` 這類完整描述。打卡的「遠觀模式」以**包含** `安全島` 判斷；`無` 視為空白。
 
 ### 樹籍編號 `TreeID`
 
@@ -49,7 +49,7 @@
 }
 ```
 
-陣列欄位依序：經度、緯度（WGS84，小數 6 位）、樹種索引、胸徑、樹高、路名或公園名、位置備註、類別（`street` 行道樹 / `park` 公園樹）。
+陣列欄位依序：經度、緯度（WGS84，小數 6 位）、樹種索引、胸徑、樹高、路名或公園名、位置備註、類別（`street` 行道樹 / `park` 公園樹）、調查日期、行政區。
 
 ### 2. 地圖用樹木點位
 
@@ -59,11 +59,14 @@
 
 兩種做法擇一，在本檔記下最後採用哪個。
 
+**採用 PMTiles**（2026-10-19）：`public/data/trees.pmtiles`，圖層 `trees`，屬性 `id`（TreeID）、`k`（`s` 行道樹／`p` 公園樹），z10–16，約 7.9 MB，前端用 HTTP Range 讀取。
+
 ### 3. 空樹穴 `public/data/pits-empty.geojson`
 
 - 只取 `kind == "樹穴"` 且 `has_tree == false`，共 16,781 個。
 - 幾何轉成點（多邊形取中心點），座標小數 6 位。
 - 屬性保留：`pit_id`、`district`、`road`、`area_m2`、`source`。
+- 新工處樹穴沒有路名：取 50 m 內最近行道樹的路名，並標 `road_inferred: true`（16,781 個中 12,302 個有路名）。
 
 ## 輸出（P1）
 

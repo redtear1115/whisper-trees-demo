@@ -36,3 +36,15 @@ describe('whispers', () => {
     expect(whispersOf('AA0000000002')).toEqual([])
   })
 })
+
+describe('reports', () => {
+  it('adds a report on top of the seeded ones', async () => {
+    const { addReport, allReports } = await import('..')
+    const before = allReports().length
+    addReport({ treeId: 'DA0030211045', species: '茄苳', road: '信義路二段', district: '大安區', kind: 'sick', details: ['病蟲害'], note: ' x '.repeat(100), hasPhoto: false })
+    const list = allReports()
+    expect(list.length).toBe(before + 1)
+    expect(list[0].kind).toBe('sick')
+    expect(list[0].note.length).toBeLessThanOrEqual(140)
+  })
+})

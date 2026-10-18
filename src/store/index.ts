@@ -4,6 +4,7 @@
 import { useSyncExternalStore } from 'react'
 import seedWishes from '../mock/wishes.json'
 import capsules from '../mock/capsules.json'
+import seedReports from '../mock/reports.json'
 import { CHECKIN } from '../config'
 import { dayKey } from '../lib/seed'
 import type { Checkin, ReportKind, StatusEvent, TreeReport, Whisper, Wish, WishStatus } from './types'
@@ -250,9 +251,28 @@ export function visitedThisWeek(treeId: string, s: State = state): boolean {
 
 // ---------- 樹況回報 ----------
 
-export function addReport(r: { treeId: string; road: string; district: string; kind: ReportKind; note: string }) {
-  const report: TreeReport = { ...r, id: `r-${Date.now().toString(36)}`, at: Date.now() }
+const SEED_REPORTS: TreeReport[] = (seedReports as (Omit<TreeReport, 'at'> & { daysAgo: number })[]).map(
+  ({ daysAgo, ...r }) => ({ ...r, at: seedNow - daysAgo * DAY, mock: true }),
+)
+
+let reportsCache: { src: TreeReport[]; list: TreeReport[] } | null = null
+
+/** 示範回報 + 這台裝置的回報（新到舊） */
+export function allReports(s: State = state): TreeReport[] {
+  if (reportsCache?.src === s.reports) return reportsCache.list
+  const list = [...SEED_REPORTS, ...s.reports].sort((a, b) => b.at - a.at)
+  reportsCache = { src: s.reports, list }
+  return list
+}
+
+export function useReports() {
+  return useStore(allReports)
+}
+
+export function addReport(r: Omit<TreeReport, 'id' | 'at' | 'note'> & { note: string; kind: ReportKind }): TreeReport {
+  const report: TreeReport = { ...r, note: r.note.trim().slice(0, 140), id: `r-${Date.now().toString(36)}`, at: Date.now() }
   update((s) => ({ ...s, reports: [...s.reports, report] }))
+  return report
 }
 
 // ---------- 延伸功能共用的擴充欄位 ----------

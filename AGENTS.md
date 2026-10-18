@@ -19,6 +19,7 @@
 | 許願、澆水、進度 | `docs/specs/05-wish.md` |
 | 政府端、優先分數 | `docs/specs/06-gov-console.md` |
 | 垃圾桶、路燈預告 | `docs/specs/07-dlc-preview.md` |
+| 光點、商店、圖鑑、徽章、角色、GM、開放 API、發包商 | `docs/specs/08-extensions.md` |
 
 規格和程式不一致時，先停下來問，不要自己挑一邊改。範圍或決定有變時，同一次修改要一起更新規格和 README。
 
@@ -50,10 +51,20 @@ Python 腳本用 uv 執行：
 ```sh
 uv run scripts/merge_treepits.py
 uv run scripts/match_parks_osm.py
-uv run scripts/build_web_data.py   # 尚未建立，見 01-data-pipeline
+uv run scripts/build_web_data.py   # 產生 public/data/，需要 tippecanoe
 ```
 
-前端指令（`npm run dev` / `build` / `test`）等專案骨架建立後補上。
+前端：
+
+```sh
+npm run dev     # 加 ?demo=1 進 Demo 模式
+npm test        # vitest
+npm run build   # tsc + vite build
+node scripts/make_placeholders.mjs   # 佔位美術，清單在 src/assets.ts
+```
+
+- 美術一律先用佔位檔：在 `src/assets.ts` 加一筆，跑上面的腳本，畫面用 `<Art id="…">`。
+- 延伸功能（光點、商店、GM 等）見 `docs/specs/08-extensions.md`；討論紀錄見 `docs/discussion-2026-10-17.md`。
 
 ## 驗證
 
