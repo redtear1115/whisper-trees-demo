@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui'
-import { resetAll } from '../store'
+import { exitDemoMode, isDemoMode, resetAll } from '../store'
 import { IconBack } from '../components/icons'
 
 export default function MorePage() {
@@ -47,9 +47,22 @@ export default function MorePage() {
 
       <h2 className="section-title">Demo 工具</h2>
       <Card>
-        <Link className="menu-link" to="/?demo=1">
-          開啟 Demo 模式（模擬定位）
-        </Link>
+        {isDemoMode() ? (
+          <button
+            className="menu-link"
+            onClick={() => {
+              if (!confirm('離開 Demo 模式？之後會用你真實的 GPS 位置。')) return
+              exitDemoMode()
+              location.href = import.meta.env.BASE_URL
+            }}
+          >
+            離開 Demo 模式（目前：模擬定位）
+          </button>
+        ) : (
+          <Link className="menu-link" to="/?demo=1">
+            開啟 Demo 模式（模擬定位）
+          </Link>
+        )}
         <button
           className="menu-link danger"
           onClick={() => {

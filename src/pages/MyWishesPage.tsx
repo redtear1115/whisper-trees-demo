@@ -61,6 +61,9 @@ function SeenCard({ wish, changed }: { wish: Wish; changed: boolean }) {
     <Card className={changed ? 'changed' : ''}>
       {changed && <p className="new-badge">進度更新了</p>}
       <WishCard wish={wish} />
+      <Link className="btn small map-link" to="/" state={{ focus: wish.lngLat }}>
+        在地圖上看
+      </Link>
     </Card>
   )
 }

@@ -119,8 +119,8 @@ export function Scanner({ onResult, onClose }: Props) {
               輸入編號
             </button>
             {demo && (
-              <button className="btn light" onClick={() => finish(DEMO.qrText)}>
-                掃示範樹牌
+              <button className="btn primary demo-scan" onClick={() => finish(DEMO.qrText)}>
+                掃示範樹牌（Demo）
               </button>
             )}
           </div>

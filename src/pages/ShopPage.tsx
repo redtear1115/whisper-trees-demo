@@ -26,6 +26,10 @@ export default function ShopPage() {
   const inv = useInventory()
   const [msg, setMsg] = useState<string | null>(null)
   const items = cfg.shop.filter((i) => i.active)
+  // 只在「最接近換得到」的那一個商品下面說還差多少，不在每個商品下面列欠額
+  const nearest = items
+    .filter((i) => i.price > balance && !(i.kind !== 'civic' && inv.owned.includes(i.id)))
+    .sort((a, b) => a.price - b.price)[0]
 
   return (
     <div className="page">
@@ -69,8 +73,8 @@ export default function ShopPage() {
                     >
                       {owned ? '已擁有' : `${item.price} 光點`}
                     </button>
-                    {!owned && balance < item.price && (
-                      <span className="small muted">還差 {item.price - balance} 光點</span>
+                    {nearest?.id === item.id && (
+                      <span className="small muted">再 {item.price - balance} 光點就能換</span>
                     )}
                   </div>
                 )

@@ -27,7 +27,8 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
     return (
       <Card>
         <h2>樹況回報</h2>
-        <p className="banner ok">已送出，謝謝你。公園處會依路段彙整處理。</p>
+        <p className="banner ok">已送出，謝謝你。</p>
+        <p className="muted small">示範：回報存在這台裝置，開「政府端」分頁就會看到它依路段彙整。</p>
         <button
           className="btn small"
           onClick={() => {

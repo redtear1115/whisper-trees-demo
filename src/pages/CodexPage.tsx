@@ -33,9 +33,10 @@ export default function CodexPage() {
   }, [checkins])
 
   const query = q.trim()
-  const top = query ? rows.filter((r) => r.species.includes(query)) : rows.slice(0, SHOWN)
-  // 前 40 名以外但遇見過的樹種也要列出來
-  const extra = query ? [] : rows.slice(SHOWN).filter((r) => met.has(r.species))
+  // 預設只列遇見過的樹；還沒遇見的收成一句話，不排成一整面灰色格子
+  const top = query ? rows.filter((r) => r.species.includes(query)) : rows.filter((r) => met.has(r.species))
+  const extra: SpeciesRow[] = []
+  const common = rows.slice(0, SHOWN).filter((r) => !met.has(r.species))
   const total = rows.reduce((n, r) => n + r.count, 0)
 
   return (
@@ -58,7 +59,9 @@ export default function CodexPage() {
         placeholder={`搜尋 ${rows.length} 種樹，例如：茄苳`}
         aria-label="搜尋樹種"
       />
-      {!query && <p className="muted small">先列出台北最常見的 {SHOWN} 種。</p>}
+      {!query && met.size === 0 && (
+        <p className="muted">還沒有遇見任何一種。到樹旁掃樹牌，第一種樹就會出現在這裡。</p>
+      )}
       {query && top.length === 0 && <p className="muted">台北的登錄資料裡沒有「{query}」。</p>}
       <div className="grid-cards">
         {[...top, ...extra].map((r) => {
@@ -83,6 +86,16 @@ export default function CodexPage() {
           )
         })}
       </div>
+      {!query && (
+        <details className="about">
+          <summary>
+            還有 {rows.length - met.size} 種等你遇見 <span className="muted small">台北最常見的幾種</span>
+          </summary>
+          <p className="small">
+            {common.slice(0, 20).map((r) => `${r.species}（${r.count.toLocaleString()}）`).join('、')}…
+          </p>
+        </details>
+      )}
     </div>
   )
 }

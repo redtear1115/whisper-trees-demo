@@ -38,7 +38,7 @@ export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
           status !== 'rejected' &&
           (watered ? (
             <span className="watered-done" role="status">
-              <IconCheck /> 今天澆過了，明天再來
+              <IconCheck /> 今天的水已經澆好了
             </span>
           ) : (
             <button

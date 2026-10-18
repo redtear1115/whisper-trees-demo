@@ -6,6 +6,7 @@ import { setWishStatus, totalWater, useReports, useWishes, wishStatus } from '..
 import { REPORT_KINDS, STATUS_LABEL, type TreeReport, type WishStatus } from '../store/types'
 import { FEASIBILITY_TEXT } from '../features/wish/feasibility'
 import { MockTag, relativeDays } from '../components/ui'
+import { IconCamera } from '../components/icons'
 import { reportResolved, useOrders } from '../features/vendor/orders'
 import { NOTICES, useMyOpinions } from '../features/notice/notices'
 
@@ -28,6 +29,8 @@ export default function GovPage() {
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS)
   const [open, setOpen] = useState<string | null>(null)
   const [showMap, setShowMap] = useState(false)
+  const [onlyNew, setOnlyNew] = useState(false)
+  const [toast, setToast] = useState<{ text: string; undo?: () => void } | null>(null)
 
   useEffect(() => {
     loadDistricts().then(setDistricts)
@@ -110,14 +113,38 @@ export default function GovPage() {
         </button>
       </section>
 
-      <div className="row gap" style={{ marginBottom: 8 }}>
-        <button className={`chip ${!showMap ? 'on' : ''}`} onClick={() => setShowMap(false)}>
+      <div className="row gap wrap" style={{ marginBottom: 8 }}>
+        <button className={`chip ${!showMap ? 'on' : ''}`} aria-pressed={!showMap} onClick={() => setShowMap(false)}>
           清單
         </button>
-        <button className={`chip ${showMap ? 'on' : ''}`} onClick={() => setShowMap(true)}>
+        <button className={`chip ${showMap ? 'on' : ''}`} aria-pressed={showMap} onClick={() => setShowMap(true)}>
           清單＋地圖
         </button>
+        <button className={`chip ${onlyNew ? 'on' : ''}`} aria-pressed={onlyNew} onClick={() => setOnlyNew((v) => !v)}>
+          只看市民新許願（{rows.filter((r) => !r.wish.mock).length}）
+        </button>
       </div>
+      <p className="muted small">
+        列表含示範資料 <MockTag />；黃色標籤是這台裝置上市民剛送出的許願。點位置可以看分數怎麼算。
+      </p>
+      <p className="toast" role="status" aria-live="polite">
+        {toast && (
+          <>
+            {toast.text}
+            {toast.undo && (
+              <button
+                className="link"
+                onClick={() => {
+                  toast.undo?.()
+                  setToast({ text: '已復原。' })
+                }}
+              >
+                復原
+              </button>
+            )}
+          </>
+        )}
+      </p>
       {showMap && (
         <Suspense fallback={<div className="gov-map muted">地圖載入中…</div>}>
           <GovMap
@@ -136,19 +163,17 @@ export default function GovPage() {
             <th>#</th>
             <th>位置</th>
             <th>原因</th>
-            <th>
-              澆水 <MockTag title="含模擬的既有澆水數" />
-            </th>
+            <th>澆水</th>
             <th>可行性</th>
             <th>分數</th>
             <th>狀態</th>
           </tr>
         </thead>
         <tbody ref={listRef}>
-          {rows.map(({ wish, score }, i) => (
+          {(onlyNew ? rows.filter((r) => !r.wish.mock) : rows).map(({ wish, score }, i, list) => (
             <Fragment key={wish.id}>
               {['planted', 'rejected'].includes(wishStatus(wish)) &&
-                !['planted', 'rejected'].includes(wishStatus(rows[i - 1]?.wish ?? wish)) && (
+                !['planted', 'rejected'].includes(wishStatus(list[i - 1]?.wish ?? wish)) && (
                   <tr className="divider-row">
                     <td colSpan={7}>已結案（已種植、不可種）</td>
                   </tr>
@@ -156,19 +181,34 @@ export default function GovPage() {
               <tr data-flip={wish.id} className={open === wish.id ? 'open' : ''}>
                 <td>{i + 1}</td>
                 <td>
-                  <button className="link" onClick={() => setOpen(open === wish.id ? null : wish.id)}>
+                  <button
+                    className="link"
+                    onClick={() => setOpen(open === wish.id ? null : wish.id)}
+                    aria-expanded={open === wish.id}
+                  >
                     {wish.district} {wish.road}
                   </button>
-                  {wish.mock ? <MockTag /> : <span className="new-tag">市民新許願</span>}
+                  {!wish.mock && <span className="new-tag">市民新許願</span>}
+                  <span className="pit-id num">{wish.pitId ? `樹穴 ${wish.pitId}` : '非樹穴，需會勘'}</span>
                 </td>
                 <td>{wish.reasons.join('、')}</td>
                 <td>{totalWater(wish)}</td>
                 <td>{FEASIBILITY_TEXT[wish.feasibility]}</td>
-                <td>
-                  <strong>{Math.round(score.total * 100)}</strong>
+                <td className={['planted', 'rejected'].includes(wishStatus(wish)) ? 'score closed' : 'score'}>
+                  <strong className="num">{Math.round(score.total * 100)}</strong>
                 </td>
                 <td>
-                  <StatusPicker wishId={wish.id} current={wishStatus(wish)} />
+                  <StatusPicker
+                    wishId={wish.id}
+                    place={`${wish.district} ${wish.road}`}
+                    current={wishStatus(wish)}
+                    onChanged={(next, prev) =>
+                      setToast({
+                        text: `${wish.district} ${wish.road} 改為「${STATUS_LABEL[next]}」，市民端會即時看到。`,
+                        undo: () => setWishStatus(wish.id, prev),
+                      })
+                    }
+                  />
                 </td>
               </tr>
               {open === wish.id && (
@@ -207,7 +247,17 @@ function share(w: Weights, k: keyof Weights): number {
   return sum ? Math.round((w[k] / sum) * 100) : 0
 }
 
-function StatusPicker({ wishId, current }: { wishId: string; current: WishStatus }) {
+function StatusPicker({
+  wishId,
+  place,
+  current,
+  onChanged,
+}: {
+  wishId: string
+  place: string
+  current: WishStatus
+  onChanged: (next: WishStatus, prev: WishStatus) => void
+}) {
   const [pending, setPending] = useState<WishStatus | null>(null)
   const [reason, setReason] = useState('')
   const [error, setError] = useState(false)
@@ -219,6 +269,7 @@ function StatusPicker({ wishId, current }: { wishId: string; current: WishStatus
         onSubmit={(e) => {
           e.preventDefault()
           if (!setWishStatus(wishId, 'rejected', reason)) return setError(true)
+          onChanged('rejected', current)
           setPending(null)
           setReason('')
         }}
@@ -227,6 +278,7 @@ function StatusPicker({ wishId, current }: { wishId: string; current: WishStatus
           className="input"
           autoFocus
           value={reason}
+          aria-label={`${place} 不可種的原因`}
           placeholder="不可種的原因（必填）"
           onChange={(e) => {
             setReason(e.target.value)
@@ -252,10 +304,10 @@ function StatusPicker({ wishId, current }: { wishId: string; current: WishStatus
       value={current}
       onChange={(e) => {
         const next = e.target.value as WishStatus
-        if (next === 'rejected') setPending('rejected')
-        else setWishStatus(wishId, next)
+        if (next === 'rejected') return setPending('rejected')
+        if (setWishStatus(wishId, next)) onChanged(next, current)
       }}
-      aria-label="案件狀態"
+      aria-label={`${place} 的案件狀態`}
     >
       {STATUSES.map((s) => (
         <option key={s} value={s}>
@@ -331,7 +383,12 @@ function ReportsByRoad() {
                     <span className={`kind-tag ${r.kind}`}>{REPORT_KINDS[r.kind].label}</span>
                     {r.species}（<span className="mono">{r.treeId}</span>）{r.details.join('、')}
                     {r.note && `：${r.note}`}
-                    {r.hasPhoto && ' 📷'}
+                    {r.hasPhoto && (
+                      <span className="has-photo" aria-label="附照片">
+                        {' '}
+                        <IconCamera />
+                      </span>
+                    )}
                     <span className="muted">・{relativeDays(r.at)}</span>
                     {!r.mock && <span className="new-tag">市民新回報</span>}
                     {reportResolved(r.id, orders) && <span className="status-pill s-planted">廠商已處理</span>}

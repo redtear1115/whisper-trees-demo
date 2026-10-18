@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
-import { maplibregl } from '../lib/maplibre'
+import { Link, useLocation } from 'react-router-dom'
+import { MAP_LOCALE, maplibregl } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
@@ -23,7 +23,7 @@ type Sheet =
   | { kind: 'tree'; tree: Tree }
   | { kind: 'pit'; pit: PitInfo; justWished?: boolean }
   | { kind: 'spot'; pit: PitInfo }
-  | { kind: 'wish'; wishId: string }
+  | { kind: 'wish'; wishId: string; glow?: number }
   | { kind: 'dlc'; which: 'trash' | 'light' }
   | null
 
@@ -55,6 +55,7 @@ export default function MapPage() {
     setModeState(m)
   }
   const [ready, setReady] = useState(false)
+  const focus = (useLocation().state as { focus?: LngLat } | null)?.focus
   const anchor = useAnchor(mode === 'near')
   const [follow, setFollow] = useState(false)
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
@@ -84,6 +85,7 @@ export default function MapPage() {
       bearing: lastMode === 'near' ? NEAR.bearing : 0,
       maxPitch: 60,
       attributionControl: false,
+      locale: MAP_LOCALE,
     })
     map.current = m
     ;(window as unknown as { __map: MLMap }).__map = m // 給自動化測試用
@@ -272,6 +274,16 @@ export default function MapPage() {
     }
   }, [])
 
+  // 從「我的許願」點「在地圖上看」：切到全市，飛到那個許願
+  useEffect(() => {
+    if (!focus || !ready || !map.current) return
+    setMode('city')
+    const m = map.current
+    const t = setTimeout(() => m.flyTo({ center: focus, zoom: 17.5, duration: 1200 }), 950)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus, ready])
+
   // 開抽屜時收起圖層面板，避免疊在一起
   useEffect(() => {
     if (sheet) setPanel(false)
@@ -293,7 +305,8 @@ export default function MapPage() {
       m.setMinZoom(10)
       nearby?.setData({ type: 'FeatureCollection', features: [] })
       me?.setData({ type: 'FeatureCollection', features: [] })
-      m.easeTo({ pitch: 0, bearing: 0, zoom: Math.min(m.getZoom(), 15), duration: 600 })
+      // 全市：拉遠看整個台北，看得出哪裡缺樹
+      m.easeTo({ pitch: 0, bearing: 0, zoom: 12.2, center: [121.555, 25.06], duration: 900 })
       return
     }
     const key = `${anchor.source}:${anchor.lngLat.join()}`
@@ -383,7 +396,7 @@ export default function MapPage() {
   const sheetWish: Wish | undefined = sheet?.kind === 'wish' ? wishes.find((w) => w.id === sheet.wishId) : undefined
 
   return (
-    <div className="map-page">
+    <div className={`map-page ${mode}`}>
       <div ref={el} className="map" />
 
       <header className="map-top">
@@ -458,7 +471,7 @@ export default function MapPage() {
       )}
 
       {sheet && (
-        <Sheet onClose={() => setSheet(null)}>
+        <Sheet onClose={() => setSheet(null)} label={sheetLabel(sheet, sheetWish)}>
           {sheet.kind === 'tree' && <TreeSheet tree={sheet.tree} />}
           {sheet.kind === 'pit' && (
             <div>
@@ -473,7 +486,7 @@ export default function MapPage() {
               </div>
               <p className="small">在這裡許願種樹。之後你和路過的人，每天都可以幫它澆水。</p>
               <p className="muted small">其他位置想要一棵樹？在地圖上長按就能許願。</p>
-              <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id })} />
+              <WishForm pit={sheet.pit} onDone={(w, glow) => setSheet({ kind: 'wish', wishId: w.id, glow })} />
             </div>
           )}
           {sheet.kind === 'spot' && (
@@ -482,14 +495,12 @@ export default function MapPage() {
               <p className="muted small">
                 {sheet.pit.district || '這個位置'} {sheet.pit.road}・不是既有樹穴，市府要先會勘
               </p>
-              <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id })} />
+              <WishForm pit={sheet.pit} onDone={(w, glow) => setSheet({ kind: 'wish', wishId: w.id, glow })} />
             </div>
           )}
           {sheet.kind === 'wish' && sheetWish && (
             <div>
-              {!sheetWish.mock && sheetWish.history.length === 1 && Date.now() - sheetWish.createdAt < 60_000 && (
-                <FeasibilityResult wish={sheetWish} />
-              )}
+              {sheet.glow !== undefined && <FeasibilityResult wish={sheetWish} glow={sheet.glow} />}
               <WishCard wish={sheetWish} />
             </div>
           )}
@@ -522,6 +533,7 @@ export default function MapPage() {
             </button>
           )}
           {headingMsg && <span className="mode-note">{headingMsg}</span>}
+          {follow && <span className="mode-note">畫面上方就是你面向的方向</span>}
           {mode === 'near' && (
             <span className="mode-note">
               {anchor.source === 'gps'
@@ -587,7 +599,22 @@ function DlcCard({ which }: { which: 'trash' | 'light' }) {
 
 
 /** 底部抽屜：開啟時焦點移進來，Esc 或「關閉」收起，關閉後焦點回到原處 */
-function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+function sheetLabel(sheet: NonNullable<Sheet>, wish?: Wish): string {
+  switch (sheet.kind) {
+    case 'tree':
+      return `${sheet.tree.species}・${sheet.tree.place}`
+    case 'pit':
+      return `候選空樹穴・${sheet.pit.road || sheet.pit.district}`
+    case 'spot':
+      return '在這裡許願種樹'
+    case 'wish':
+      return wish ? `許願・${wish.district} ${wish.road}` : '許願'
+    case 'dlc':
+      return sheet.which === 'trash' ? '垃圾桶（即將推出）' : '路燈（即將推出）'
+  }
+}
+
+function Sheet({ onClose, children, label }: { onClose: () => void; children: ReactNode; label: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const close = useRef(onClose)
   close.current = onClose
@@ -602,7 +629,7 @@ function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode
     }
   }, [])
   return (
-    <div className="sheet" role="dialog" aria-label="詳細資料" tabIndex={-1} ref={ref}>
+    <div className="sheet" role="dialog" aria-label={label} tabIndex={-1} ref={ref}>
       <div className="sheet-grip" aria-hidden />
       <button className="sheet-close" onClick={onClose}>
         關閉

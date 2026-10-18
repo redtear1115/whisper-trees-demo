@@ -79,7 +79,7 @@ export default function TreePage() {
         <GlowHelp />
       </div>
 
-      {capsule && (
+      {capsule && !capsule.mock && (
         <section className="capsule" aria-label="時空膠囊">
           <Art id="capsule" alt="" className="icon" />
           <div>
@@ -100,6 +100,19 @@ export default function TreePage() {
           <Link className="btn primary block" to="/scan">
             掃樹牌
           </Link>
+        </section>
+      )}
+
+      {capsule && capsule.mock && (
+        <section className="capsule" aria-label="時空膠囊">
+          <Art id="capsule" alt="" className="icon" />
+          <div>
+            <p className="capsule-when">
+              {capsule.mock ? '示範：一年後回到這棵樹，會看到當時說的話' : `上次你在這裡說了…… ${relativeDays(capsule.at)}`}
+              <span className="muted">（{formatDate(capsule.at)}）</span>
+            </p>
+            <p className="capsule-text">「{capsule.text}」</p>
+          </div>
         </section>
       )}
 
@@ -201,7 +214,7 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
         <p className="whisper-ack">樹收到了。</p>
         <p className="muted small">只有你看得到，不會上傳。下次回來，它會記得。</p>
         <button
-          className="link"
+          className="btn ghost again"
           onClick={() => {
             setJustSaid(null)
             setWriting(true)

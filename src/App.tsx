@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { exitDemoMode, isDemoMode } from './store'
+import { isDemoMode } from './store'
 import MorePage from './pages/MorePage'
 
 const MapPage = lazy(() => import('./pages/MapPage'))
@@ -22,17 +22,11 @@ function DemoBadge() {
     document.body.classList.toggle('is-demo', demo)
   }, [demo])
   if (!demo) return null
+  // 只是標示，不可點：避免 Demo 時誤觸離開。離開請到「更多 → Demo 工具」
   return (
-    <button
-      className="demo-badge"
-      title="點一下離開 Demo 模式"
-      onClick={() => {
-        exitDemoMode()
-        location.href = location.pathname
-      }}
-    >
-      Demo・模擬定位（點此離開）
-    </button>
+    <p className="demo-badge" role="note">
+      Demo・模擬定位
+    </p>
   )
 }
 

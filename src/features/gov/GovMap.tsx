@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FeatureCollection } from 'geojson'
 import type { Map as MLMap } from 'maplibre-gl'
-import { maplibregl } from '../../lib/maplibre'
+import { MAP_LOCALE, maplibregl } from '../../lib/maplibre'
 import { MAP_STYLE } from '../../config'
 import type { Wish, WishStatus } from '../../store/types'
 import { wishStatus } from '../../store'
@@ -37,13 +37,15 @@ export function GovMap({ rows, onPick }: { rows: MapRow[]; onPick: (id: string) 
   const pick = useRef(onPick)
   pick.current = onPick
   const data = useMemo(() => toGeoJSON(rows), [rows])
+  const [loaded, setLoaded] = useState(false)
   const latest = useRef(data)
   latest.current = data
 
   useEffect(() => {
-    const m = new maplibregl.Map({ container: el.current!, style: MAP_STYLE, center: [121.55, 25.04], zoom: 10.8 })
+    const m = new maplibregl.Map({ container: el.current!, style: MAP_STYLE, center: [121.55, 25.04], zoom: 10.8, locale: MAP_LOCALE })
     map.current = m
     m.on('load', () => {
+      setLoaded(true)
       m.addSource('wishes', { type: 'geojson', data: latest.current })
       m.addLayer({
         id: 'wishes',
@@ -77,7 +79,10 @@ export function GovMap({ rows, onPick }: { rows: MapRow[]; onPick: (id: string) 
 
   return (
     <div>
-      <div ref={el} className="gov-map" />
+      <div className="gov-map-wrap">
+        <div ref={el} className="gov-map" />
+        {!loaded && <p className="gov-map-loading">地圖載入中…</p>}
+      </div>
       <p className="muted small">
         {(Object.keys(COLOR) as WishStatus[]).map((s) => (
           <span key={s} style={{ marginRight: 12 }}>
