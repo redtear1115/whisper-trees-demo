@@ -93,7 +93,8 @@ export default function GovPage() {
         {(Object.keys(WEIGHT_LABEL) as (keyof Weights)[]).map((k) => (
           <label key={k}>
             <span>
-              {WEIGHT_LABEL[k]} <strong>{weights[k]}%</strong>
+              {WEIGHT_LABEL[k]}{' '}
+              <strong className="num">{share(weights, k)}%</strong>
             </span>
             <input
               type="range"
@@ -146,6 +147,12 @@ export default function GovPage() {
         <tbody ref={listRef}>
           {rows.map(({ wish, score }, i) => (
             <Fragment key={wish.id}>
+              {['planted', 'rejected'].includes(wishStatus(wish)) &&
+                !['planted', 'rejected'].includes(wishStatus(rows[i - 1]?.wish ?? wish)) && (
+                  <tr className="divider-row">
+                    <td colSpan={7}>已結案（已種植、不可種）</td>
+                  </tr>
+                )}
               <tr data-flip={wish.id} className={open === wish.id ? 'open' : ''}>
                 <td>{i + 1}</td>
                 <td>
@@ -170,7 +177,7 @@ export default function GovPage() {
                   <td colSpan={6}>
                     {(Object.keys(WEIGHT_LABEL) as (keyof Weights)[]).map((k) => (
                       <span key={k} className="part">
-                        {WEIGHT_LABEL[k]} {score[k].toFixed(2)} × {weights[k]}%
+                        {WEIGHT_LABEL[k]} {score[k].toFixed(2)} × {share(weights, k)}%
                       </span>
                     ))}
                   </td>
@@ -192,6 +199,12 @@ export default function GovPage() {
       </p>
     </div>
   )
+}
+
+/** 權重佔四項總和的百分比，四項加起來是 100 */
+function share(w: Weights, k: keyof Weights): number {
+  const sum = w.demand + w.shade + w.feasibility + w.fairness
+  return sum ? Math.round((w[k] / sum) * 100) : 0
 }
 
 function StatusPicker({ wishId, current }: { wishId: string; current: WishStatus }) {
@@ -268,10 +281,15 @@ function useFlip(order: string) {
       next.set(id, top)
       const before = prev.current.get(id)
       if (before !== undefined && before !== top) {
-        r.animate([{ transform: `translateY(${before - top}px)` }, { transform: 'none' }], {
-          duration: 300,
-          easing: 'ease-out',
-        })
+        // 名次有變的列滑到新位置，並短暫標亮，讓人看得出誰動了
+        r.animate(
+          [
+            { transform: `translateY(${before - top}px)`, backgroundColor: '#fbefc8' },
+            { transform: 'none', backgroundColor: '#fbefc8', offset: 0.5 },
+            { transform: 'none', backgroundColor: 'transparent' },
+          ],
+          { duration: 900, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+        )
       }
     }
     prev.current = next

@@ -121,7 +121,7 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
               type="file"
               accept="image/*"
               capture="environment"
-              hidden
+              className="visually-hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 if (f) setPhoto(URL.createObjectURL(f))

@@ -45,6 +45,7 @@ export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => v
       <button className="btn primary block" disabled={reasons.length === 0}>
         許願種樹
       </button>
+      {reasons.length === 0 && <p className="muted small hint">先選一個原因，再許願。</p>}
     </form>
   )
 }

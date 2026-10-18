@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { maplibregl } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
@@ -11,6 +11,7 @@ import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
+import { IconLamp, IconLayers, IconTrash } from '../components/icons'
 import { assetUrl } from '../assets'
 import { useBalance } from '../features/game/ledger'
 import { EventBar } from '../features/game/EventBar'
@@ -47,7 +48,7 @@ export default function MapPage() {
   })
   const [panel, setPanel] = useState(false)
   const [gap, setGap] = useState<{ high: District; low: District } | null>(null)
-  const [gapOpen, setGapOpen] = useState(true)
+  const [gapOpen, setGapOpen] = useState(false)
   const [mode, setModeState] = useState<Mode>(lastMode)
   const setMode = (m: Mode) => {
     lastMode = m
@@ -134,10 +135,11 @@ export default function MapPage() {
         'source-layer': 'building',
         minzoom: 15,
         paint: {
-          'fill-extrusion-color': '#e7e2d6',
-          'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8],
+          // 淡、暖、矮一點：建物只是舞台，樹才是主角
+          'fill-extrusion-color': '#f3ecdc',
+          'fill-extrusion-height': ['*', 0.6, ['coalesce', ['get', 'render_height'], 8]],
           'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-          'fill-extrusion-opacity': 0.8,
+          'fill-extrusion-opacity': 0.5,
         },
       })
       // 附近模式的可探索範圍
@@ -156,8 +158,12 @@ export default function MapPage() {
         'source-layer': 'trees',
         paint: {
           'circle-color': ['match', ['get', 'k'], 'p', '#5f9e6e', '#3f7d4e'],
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 14, 2, 17, 5, 19, 9],
-          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 15, 0.85],
+          // 放大時畫成樹冠大小，平貼在地面上
+          'circle-radius': ['interpolate', ['exponential', 1.6], ['zoom'], 10, 0.9, 14, 2.4, 16, 6, 18, 15, 20, 40],
+          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.55, 15, 0.82],
+          'circle-stroke-color': '#d8ead5',
+          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 15, 0, 17, 1.5],
+          'circle-pitch-alignment': 'map',
         },
       })
       m.addLayer({
@@ -177,16 +183,36 @@ export default function MapPage() {
         type: 'circle',
         source: 'me',
         paint: {
-          'circle-color': '#2f7de1',
-          'circle-radius': 7,
+          'circle-color': ['match', ['get', 'source'], 'gps', '#2f7de1', '#b36b2c'],
+          'circle-radius': 8,
           'circle-stroke-color': '#fff',
           'circle-stroke-width': 3,
           'circle-pitch-alignment': 'map',
         },
       })
+      m.addLayer({
+        id: 'me-label',
+        type: 'symbol',
+        source: 'me',
+        layout: {
+          'text-field': ['match', ['get', 'source'], 'gps', '你在這裡', '示範位置'],
+          'text-size': 13,
+          'text-offset': [0, 1.4],
+          'text-anchor': 'top',
+          'text-font': ['Noto Sans Bold'],
+        },
+        paint: { 'text-color': '#2c3a2e', 'text-halo-color': '#fffdf8', 'text-halo-width': 2 },
+      })
+      // 地名用中文
+      for (const layer of m.getStyle().layers) {
+        if (layer.type !== 'symbol' || !m.getLayoutProperty(layer.id, 'text-field')) continue
+        if (layer.id === 'me-label') continue
+        m.setLayoutProperty(layer.id, 'text-field', ['coalesce', ['get', 'name:zh-Hant'], ['get', 'name:zh'], ['get', 'name']])
+      }
       setReady(true)
     })
     m.on('click', (e) => {
+      setPanel(false)
       const pad = 10
       const box: [PointLike, PointLike] = [
         [e.point.x - pad, e.point.y - pad],
@@ -246,6 +272,11 @@ export default function MapPage() {
     }
   }, [])
 
+  // 開抽屜時收起圖層面板，避免疊在一起
+  useEffect(() => {
+    if (sheet) setPanel(false)
+  }, [sheet])
+
   // 附近／全市模式：鏡頭角度與可移動範圍
   const centeredOn = useRef<string | null>(null)
   const anchorRef = useRef(anchor)
@@ -267,11 +298,11 @@ export default function MapPage() {
     }
     const key = `${anchor.source}:${anchor.lngLat.join()}`
     nearby?.setData({ type: 'Polygon', coordinates: [circleRing(anchor.lngLat, NEAR.radiusMeters)] })
-    me?.setData(
-      anchor.source === 'gps'
-        ? { type: 'Point', coordinates: anchor.lngLat }
-        : { type: 'FeatureCollection', features: [] },
-    )
+    me?.setData({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: anchor.lngLat },
+      properties: { source: anchor.source },
+    })
     m.setMaxBounds(null)
     m.setMinZoom(NEAR.minZoom)
     if (centeredOn.current !== key) {
@@ -326,6 +357,8 @@ export default function MapPage() {
       node.style.width = node.style.height = `${size}px`
       node.style.backgroundImage = `url(${assetUrl('sapling')})`
       node.setAttribute('aria-label', `${w.road} 的許願`)
+      // 地圖外的標記不進 Tab 順序；鍵盤使用者從「我的許願」進入
+      node.tabIndex = -1
       node.onclick = (ev) => {
         ev.stopPropagation()
         setSheet({ kind: 'wish', wishId: w.id })
@@ -356,9 +389,8 @@ export default function MapPage() {
       <header className="map-top">
         <Art id="logo" alt="曦語 Whisper Trees" className="logo" />
         <nav className="row gap">
-          <Link className="btn small light balance-chip" to="/me" aria-label={`我的小芽，${balance} 光點`}>
-            <Art id="glow" alt="" className="icon sm" />
-            {balance}
+          <Link className="btn small light balance-chip" to="/me" aria-label={`我的小芽：${balance} 光點`}>
+            光點 <span className="num">{balance}</span>
           </Link>
           <Link className="btn small light" to="/wishes">
             我的許願{unseen && <span className="dot-badge" aria-label="有新進度" />}
@@ -366,8 +398,13 @@ export default function MapPage() {
           <Link className="btn small light" to="/more">
             更多
           </Link>
-          <button className="btn small light" onClick={() => setPanel((p) => !p)} aria-expanded={panel}>
-            圖層
+          <button
+            className="btn small light"
+            onClick={() => setPanel((p) => !p)}
+            aria-expanded={panel}
+            aria-controls="layer-panel"
+          >
+            <IconLayers /> 圖層
           </button>
         </nav>
       </header>
@@ -375,23 +412,23 @@ export default function MapPage() {
         <EventBar />
       </div>
 
-      {gap && gapOpen && (
-        <div className="gap-card">
-          <p>
-            <strong>{gap.high.district}</strong>每公里人行道的行道樹，是<strong>{gap.low.district}</strong>的{' '}
-            <strong>{(gap.high.trees_per_km / gap.low.trees_per_km).toFixed(1)}</strong> 倍
-          </p>
-          <p className="muted small">
-            全市 162,406 棵樹・16,781 個候選空樹穴（{gap.high.trees_per_km} vs {gap.low.trees_per_km} 棵/公里）
-          </p>
-          <button className="close" onClick={() => setGapOpen(false)} aria-label="關閉">
-            ×
+      {gap && (
+        <div className={`gap-card ${gapOpen ? 'open' : ''}`}>
+          <button className="gap-toggle" onClick={() => setGapOpen((o) => !o)} aria-expanded={gapOpen}>
+            <strong>{gap.high.district}</strong>的行道樹密度是<strong>{gap.low.district}</strong>的{' '}
+            <strong className="num">{(gap.high.trees_per_km / gap.low.trees_per_km).toFixed(1)}</strong> 倍
           </button>
+          {gapOpen && (
+            <p className="muted small">
+              每公里人行道的行道樹：{gap.high.trees_per_km} vs {gap.low.trees_per_km} 棵。全市 162,406 棵樹、16,781
+              個候選空樹穴（臺北市政府開放資料推算）。
+            </p>
+          )}
         </div>
       )}
 
       {panel && (
-        <div className="layer-panel">
+        <div className="layer-panel" id="layer-panel">
           {(
             [
               ['trees', '樹木', 'legend-tree'],
@@ -412,19 +449,16 @@ export default function MapPage() {
           ))}
           <hr />
           <button className="dlc-option" onClick={() => setSheet({ kind: 'dlc', which: 'trash' })}>
-            🗑️ 垃圾桶 <span className="dlc-tag">DLC 即將推出</span>
+            <IconTrash /> 垃圾桶 <span className="dlc-tag">DLC 即將推出</span>
           </button>
           <button className="dlc-option" onClick={() => setSheet({ kind: 'dlc', which: 'light' })}>
-            💡 路燈 <span className="dlc-tag">DLC 即將推出</span>
+            <IconLamp /> 路燈 <span className="dlc-tag">DLC 即將推出</span>
           </button>
         </div>
       )}
 
       {sheet && (
-        <div className="sheet" role="dialog">
-          <button className="close" onClick={() => setSheet(null)} aria-label="關閉">
-            ×
-          </button>
+        <Sheet onClose={() => setSheet(null)}>
           {sheet.kind === 'tree' && <TreeSheet tree={sheet.tree} />}
           {sheet.kind === 'pit' && (
             <div>
@@ -437,7 +471,7 @@ export default function MapPage() {
                   </p>
                 </div>
               </div>
-              <p className="small">在這裡許願種樹，之後別人來可以幫你澆水。</p>
+              <p className="small">在這裡許願種樹。之後你和路過的人，每天都可以幫它澆水。</p>
               <p className="muted small">其他位置想要一棵樹？在地圖上長按就能許願。</p>
               <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id })} />
             </div>
@@ -460,7 +494,7 @@ export default function MapPage() {
             </div>
           )}
           {sheet.kind === 'dlc' && <DlcCard which={sheet.which} />}
-        </div>
+        </Sheet>
       )}
 
       {!sheet && (
@@ -535,7 +569,7 @@ function DlcCard({ which }: { which: 'trash' | 'light' }) {
   return which === 'trash' ? (
     <div>
       <h2>
-        🗑️ 垃圾桶 <span className="dlc-tag">DLC 即將推出</span>
+        <IconTrash /> 垃圾桶 <span className="dlc-tag">DLC 即將推出</span>
       </h2>
       <p>回報滿溢、依行人流量與通報熱點建議佈點（對應 debug 松題目 #2）。</p>
       <p className="muted small">沿用同一套「市民回報 × 後台營運 × 政府資料」。目前只是預告，還沒有圖層。</p>
@@ -543,7 +577,7 @@ function DlcCard({ which }: { which: 'trash' | 'light' }) {
   ) : (
     <div>
       <h2>
-        💡 路燈 <span className="dlc-tag">DLC 即將推出</span>
+        <IconLamp /> 路燈 <span className="dlc-tag">DLC 即將推出</span>
       </h2>
       <p>回報路燈故障。公園處的「行道樹路燈資訊網」本來就把行道樹和路燈放在同一個系統。</p>
       <p className="muted small">目前只是預告，還沒有圖層。</p>
@@ -551,3 +585,29 @@ function DlcCard({ which }: { which: 'trash' | 'light' }) {
   )
 }
 
+
+/** 底部抽屜：開啟時焦點移進來，Esc 或「關閉」收起，關閉後焦點回到原處 */
+function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const close = useRef(onClose)
+  close.current = onClose
+  useEffect(() => {
+    const before = document.activeElement as HTMLElement | null
+    ref.current?.focus()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current()
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      before?.focus?.()
+    }
+  }, [])
+  return (
+    <div className="sheet" role="dialog" aria-label="詳細資料" tabIndex={-1} ref={ref}>
+      <div className="sheet-grip" aria-hidden />
+      <button className="sheet-close" onClick={onClose}>
+        關閉
+      </button>
+      {children}
+    </div>
+  )
+}

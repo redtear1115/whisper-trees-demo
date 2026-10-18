@@ -137,7 +137,7 @@ function Order({
             <input
               type="file"
               accept="image/*"
-              hidden
+              className="visually-hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 if (f) setPhoto(URL.createObjectURL(f))

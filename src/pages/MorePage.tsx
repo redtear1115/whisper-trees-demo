@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui'
 import { resetAll } from '../store'
+import { IconBack } from '../components/icons'
 
 export default function MorePage() {
   return (
     <div className="page">
       <header className="topbar">
-        <Link className="btn ghost" to="/">
-          ← 地圖
+        <Link className="btn ghost back" to="/">
+          <IconBack /> 地圖
         </Link>
         <span className="topbar-title">更多</span>
       </header>

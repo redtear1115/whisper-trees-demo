@@ -4,6 +4,7 @@ import { hasWateredToday, totalWater, useStore, waterWish, wishStatus } from '..
 import { Art, MockTag, formatDate } from '../../components/ui'
 import { FEASIBILITY_TEXT } from './feasibility'
 import { award } from '../game/ledger'
+import { IconCheck } from '../../components/icons'
 
 /** 許願的進度時間軸與澆水 */
 export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
@@ -23,7 +24,7 @@ export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
             {wish.mock && <MockTag title="Demo 預先放的示範許願" />}
           </p>
         </div>
-        <span className={`status-pill s-${status}`}>{STATUS_LABEL[status]}</span>
+        {compact && <span className={`status-pill s-${status}`}>{STATUS_LABEL[status]}</span>}
       </div>
 
       {!compact && <Timeline wish={wish} />}
@@ -33,19 +34,24 @@ export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
           <Art id="watering" alt="" className="icon sm" /> 已澆水 <strong>{totalWater(wish)}</strong> 次
           {wish.seedWater > 0 && <MockTag title="含模擬的既有澆水數" />}
         </span>
-        {status !== 'planted' && status !== 'rejected' && (
-          <button
-            className="btn primary"
-            disabled={watered}
-            onClick={() => {
-              if (!waterWish(wish.id)) return setMsg('今天已經澆過了。')
-              const glow = award('water', wish.id)
-              setMsg(glow ? `澆水 +1，謝謝你。光點 +${glow}` : '澆水 +1，謝謝你。')
-            }}
-          >
-            {watered ? '今天已經澆過了' : '澆水 +1'}
-          </button>
-        )}
+        {status !== 'planted' &&
+          status !== 'rejected' &&
+          (watered ? (
+            <span className="watered-done" role="status">
+              <IconCheck /> 今天澆過了，明天再來
+            </span>
+          ) : (
+            <button
+              className="btn primary"
+              onClick={() => {
+                if (!waterWish(wish.id)) return setMsg('今天已經澆過了。')
+                const glow = award('water', wish.id)
+                setMsg(glow ? `謝謝你。光點 +${glow}` : '謝謝你。')
+              }}
+            >
+              澆水 +1
+            </button>
+          ))}
       </div>
       {msg && (
         <p className="muted small" role="status">

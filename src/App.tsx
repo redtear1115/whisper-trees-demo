@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { exitDemoMode, isDemoMode } from './store'
 import MorePage from './pages/MorePage'
@@ -16,7 +16,12 @@ const VendorPage = lazy(() => import('./pages/VendorPage'))
 const DevelopersPage = lazy(() => import('./pages/DevelopersPage'))
 
 function DemoBadge() {
-  if (!isDemoMode()) return null
+  const demo = isDemoMode()
+  // 頂端細條：讓出位置給它，不蓋住任何內容
+  useEffect(() => {
+    document.body.classList.toggle('is-demo', demo)
+  }, [demo])
+  if (!demo) return null
   return (
     <button
       className="demo-badge"
@@ -26,7 +31,7 @@ function DemoBadge() {
         location.href = location.pathname
       }}
     >
-      Demo 模式：模擬定位
+      Demo・模擬定位（點此離開）
     </button>
   )
 }

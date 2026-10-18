@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { IconBack } from '../components/icons'
 import { Art, Card, MockTag, formatDate } from '../components/ui'
 import { useStore } from '../store'
 import { useBalance, useEarned, useLedger } from '../features/game/ledger'
@@ -24,8 +25,8 @@ export default function MePage() {
   return (
     <div className="page">
       <header className="topbar">
-        <Link className="btn ghost" to="/">
-          ← 地圖
+        <Link className="btn ghost back" to="/">
+          <IconBack /> 地圖
         </Link>
         <span className="topbar-title">我的小芽</span>
         <MockTag title="光點、角色、徽章都存在你的裝置上，是示意功能" />
@@ -105,17 +106,6 @@ export default function MePage() {
         </Card>
       )}
 
-      <h2 className="section-title">成長徽章</h2>
-      <div className="grid-cards">
-        {list.map((b) => (
-          <div key={b.id} className={`tile ${b.earned ? '' : 'locked'}`}>
-            <Art id={b.art} alt="" />
-            <strong>{b.name}</strong>
-            <span className="small muted">{b.hint}</span>
-          </div>
-        ))}
-      </div>
-
       <h2 className="section-title">光點紀錄</h2>
       <Card>
         {ledger.length === 0 ? (
@@ -137,6 +127,21 @@ export default function MePage() {
           </ul>
         )}
       </Card>
+      <details className="about badges">
+        <summary>
+          成長徽章 <span className="muted small">已得到 {list.filter((b) => b.earned).length} / {list.length}，不用急</span>
+        </summary>
+        <div className="grid-cards">
+          {list.map((b) => (
+            <div key={b.id} className={`tile ${b.earned ? '' : 'locked'}`}>
+              <Art id={b.art} alt="" />
+              <strong>{b.name}</strong>
+              <span className="small muted">{b.hint}</span>
+            </div>
+          ))}
+        </div>
+      </details>
+
       <p className="muted small">光點只能在樹旁或幫城市得到，不能用錢買。沒有排行榜，也不用每天來。</p>
     </div>
   )

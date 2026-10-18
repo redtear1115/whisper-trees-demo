@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { IconBack } from '../components/icons'
 import { Link } from 'react-router-dom'
 import { Art, MockTag } from '../components/ui'
 import { useBalance } from '../features/game/ledger'
@@ -29,8 +30,8 @@ export default function ShopPage() {
   return (
     <div className="page">
       <header className="topbar">
-        <Link className="btn ghost" to="/me">
-          ← 小芽
+        <Link className="btn ghost back" to="/me">
+          <IconBack /> 小芽
         </Link>
         <span className="topbar-title">商店</span>
         <MockTag />
@@ -68,6 +69,9 @@ export default function ShopPage() {
                     >
                       {owned ? '已擁有' : `${item.price} 光點`}
                     </button>
+                    {!owned && balance < item.price && (
+                      <span className="small muted">還差 {item.price - balance} 光點</span>
+                    )}
                   </div>
                 )
               })}

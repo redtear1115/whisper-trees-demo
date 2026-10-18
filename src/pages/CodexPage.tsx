@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { IconBack } from '../components/icons'
 import { Link } from 'react-router-dom'
 import { Art, formatDate } from '../components/ui'
 import { useStore } from '../store'
@@ -15,6 +16,7 @@ const SHOWN = 40
 
 export default function CodexPage() {
   const [rows, setRows] = useState<SpeciesRow[]>([])
+  const [q, setQ] = useState('')
   const checkins = useStore((s) => s.checkins)
 
   useEffect(() => {
@@ -30,16 +32,17 @@ export default function CodexPage() {
     return m
   }, [checkins])
 
-  const top = rows.slice(0, SHOWN)
+  const query = q.trim()
+  const top = query ? rows.filter((r) => r.species.includes(query)) : rows.slice(0, SHOWN)
   // 前 40 名以外但遇見過的樹種也要列出來
-  const extra = rows.slice(SHOWN).filter((r) => met.has(r.species))
+  const extra = query ? [] : rows.slice(SHOWN).filter((r) => met.has(r.species))
   const total = rows.reduce((n, r) => n + r.count, 0)
 
   return (
     <div className="page">
       <header className="topbar">
-        <Link className="btn ghost" to="/me">
-          ← 小芽
+        <Link className="btn ghost back" to="/me">
+          <IconBack /> 小芽
         </Link>
         <span className="topbar-title">樹的圖鑑</span>
       </header>
@@ -47,6 +50,16 @@ export default function CodexPage() {
         你遇見了 <strong>{met.size}</strong> 種樹。台北共有 {rows.length} 種、{total.toLocaleString()} 棵登錄的樹。
       </p>
       <p className="muted small">在那種樹旁掃樹牌，就會收進圖鑑。棵數為臺北市公園處 2026-10-16 開放資料。</p>
+      <input
+        className="input"
+        type="search"
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder={`搜尋 ${rows.length} 種樹，例如：茄苳`}
+        aria-label="搜尋樹種"
+      />
+      {!query && <p className="muted small">先列出台北最常見的 {SHOWN} 種。</p>}
+      {query && top.length === 0 && <p className="muted">台北的登錄資料裡沒有「{query}」。</p>}
       <div className="grid-cards">
         {[...top, ...extra].map((r) => {
           const c = met.get(r.species)
