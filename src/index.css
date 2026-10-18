@@ -441,6 +441,12 @@ textarea.input {
   border: 2px solid var(--amber);
 }
 
+.legend-park {
+  background: #bfdcb6;
+  border: 1px solid #8fbf86;
+  border-radius: 3px;
+}
+
 .legend-wish {
   background: url('/assets/ph/sapling.svg') center / contain no-repeat;
   border-radius: 0;

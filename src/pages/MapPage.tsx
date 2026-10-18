@@ -26,11 +26,12 @@ function ensureProtocol() {
 type Sheet =
   | { kind: 'tree'; tree: Tree }
   | { kind: 'pit'; pit: PitInfo; justWished?: boolean }
+  | { kind: 'spot'; pit: PitInfo }
   | { kind: 'wish'; wishId: string }
   | { kind: 'dlc'; which: 'trash' | 'light' }
   | null
 
-type LayerKey = 'trees' | 'pits' | 'wishes'
+type LayerKey = 'trees' | 'pits' | 'wishes' | 'parks'
 
 /** 地圖上次的位置，從樹的頁面回來時接著看 */
 let lastView: { center: LngLat; zoom: number } | null = null
@@ -39,7 +40,12 @@ export default function MapPage() {
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<MLMap | null>(null)
   const [sheet, setSheet] = useState<Sheet>(null)
-  const [layers, setLayers] = useState<Record<LayerKey, boolean>>({ trees: true, pits: true, wishes: true })
+  const [layers, setLayers] = useState<Record<LayerKey, boolean>>({
+    trees: true,
+    pits: true,
+    wishes: true,
+    parks: true,
+  })
   const [panel, setPanel] = useState(false)
   const [gap, setGap] = useState<{ high: District; low: District } | null>(null)
   const [gapOpen, setGapOpen] = useState(true)
@@ -89,6 +95,13 @@ export default function MapPage() {
       el.current?.querySelector('.maplibregl-compact-show')?.classList.remove('maplibregl-compact-show')
       m.addSource('trees', { type: 'vector', url: `pmtiles://${base}data/trees.pmtiles` })
       m.addSource('pits', { type: 'geojson', data: `${base}data/pits-empty.geojson` })
+      m.addSource('parks', { type: 'geojson', data: `${base}data/parks.geojson` })
+      m.addLayer({
+        id: 'parks',
+        type: 'fill',
+        source: 'parks',
+        paint: { 'fill-color': '#bfdcb6', 'fill-opacity': 0.45, 'fill-outline-color': '#8fbf86' },
+      })
       m.addLayer({
         id: 'trees',
         type: 'circle',
@@ -135,6 +148,34 @@ export default function MapPage() {
         })
       }
     })
+    // 長按（或右鍵）任意位置許願：不是樹穴，初審為「需會勘」
+    const wishAt = (point: maplibregl.Point, lngLat: maplibregl.LngLat) => {
+      const near = m
+        .queryRenderedFeatures(
+          [
+            [point.x - 80, point.y - 80],
+            [point.x + 80, point.y + 80],
+          ],
+          { layers: m.getLayer('pits') ? ['pits'] : [] },
+        )
+        .map((f) => f.properties)[0]
+      setSheet({
+        kind: 'spot',
+        pit: {
+          pitId: null,
+          lngLat: [lngLat.lng, lngLat.lat],
+          road: (near?.road as string) || '',
+          district: (near?.district as string) || '',
+        },
+      })
+    }
+    m.on('contextmenu', (e) => wishAt(e.point, e.lngLat))
+    let press: ReturnType<typeof setTimeout> | undefined
+    m.on('touchstart', (e) => {
+      if (e.points.length !== 1) return
+      press = setTimeout(() => wishAt(e.point, e.lngLat), 650)
+    })
+    for (const ev of ['touchend', 'touchmove', 'touchcancel', 'movestart'] as const) m.on(ev, () => clearTimeout(press))
     for (const l of ['trees', 'pits']) {
       m.on('mouseenter', l, () => (m.getCanvas().style.cursor = 'pointer'))
       m.on('mouseleave', l, () => (m.getCanvas().style.cursor = ''))
@@ -169,7 +210,7 @@ export default function MapPage() {
     const m = map.current
     if (!m) return
     const apply = () => {
-      for (const l of ['trees', 'pits'] as const) {
+      for (const l of ['trees', 'pits', 'parks'] as const) {
         if (m.getLayer(l)) m.setLayoutProperty(l, 'visibility', layers[l] ? 'visible' : 'none')
       }
     }
@@ -227,6 +268,7 @@ export default function MapPage() {
               ['trees', '樹木', 'legend-tree'],
               ['pits', '候選空樹穴', 'legend-pit'],
               ['wishes', '許願', 'legend-wish'],
+              ['parks', '公園範圍（OSM）', 'legend-park'],
             ] as const
           ).map(([k, label, cls]) => (
             <label key={k} className="row gap center-v">
@@ -267,13 +309,23 @@ export default function MapPage() {
                 </div>
               </div>
               <p className="small">在這裡許願種樹，之後別人來可以幫你澆水。</p>
+              <p className="muted small">其他位置想要一棵樹？在地圖上長按就能許願。</p>
+              <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id })} />
+            </div>
+          )}
+          {sheet.kind === 'spot' && (
+            <div>
+              <h2>在這裡許願種樹</h2>
+              <p className="muted small">
+                {sheet.pit.district || '這個位置'} {sheet.pit.road}・不是既有樹穴，市府要先會勘
+              </p>
               <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id })} />
             </div>
           )}
           {sheet.kind === 'wish' && sheetWish && (
             <div>
               {!sheetWish.mock && sheetWish.history.length === 1 && Date.now() - sheetWish.createdAt < 60_000 && (
-                <FeasibilityResult />
+                <FeasibilityResult wish={sheetWish} />
               )}
               <WishCard wish={sheetWish} />
             </div>

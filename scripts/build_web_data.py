@@ -15,13 +15,15 @@ Outputs (public/data/):
   pits-empty.geojson    candidate empty pits (kind 樹穴, has_tree false)
   districts.json        street trees per km of sidewalk, per district
   species.json          tree count per species (for the codex)
+  parks.geojson         OSM park outlines (ODbL), simplified
   ../api/v1/            static open API: index, districts, species, and a
                         mock wishes snapshot (from src/mock/, marked mock)
 
-Run: uv run scripts/build_web_data.py
+Run: uv run scripts/build_web_data.py [--force-tiles]
 """
 import json
 import shutil
+import sys
 import subprocess
 import tempfile
 from pathlib import Path
@@ -97,6 +99,12 @@ def build_lookup(df):
 
 def build_tiles(df):
     target = OUT / "trees.pmtiles"
+    sources = [RAW / "TaipeiTree.csv", RAW / "TaipeiParkTree.csv"]
+    if (target.exists() and "--force-tiles" not in sys.argv
+            and target.stat().st_mtime > max(p.stat().st_mtime for p in sources)):
+        # tippecanoe 每次輸出的位元組略有不同；資料沒變就不重做，避免 8 MB 檔案在版控裡空轉
+        print("tiles: up to date (--force-tiles to rebuild)")
+        return
     if not shutil.which("tippecanoe"):
         raise SystemExit("tippecanoe not found: brew install tippecanoe")
     with tempfile.TemporaryDirectory() as tmp:
@@ -180,6 +188,17 @@ def build_districts(df, pits):
         print(f"  {r['district']} {r['trees_per_km']}/km  pits {r['empty_pits']}")
 
 
+def build_parks():
+    """OSM park outlines (ODbL), for the map's park layer."""
+    src = json.loads((PROCESSED / "parks_boundary.geojson").read_text())
+    for f in src["features"]:
+        g = shape(f["geometry"]).simplify(0.00002)
+        f["geometry"] = shapely.geometry.mapping(g)
+        f["properties"] = {k: f["properties"].get(k) for k in ("pm_name", "method", "ratio") if k in f["properties"]}
+    (OUT / "parks.geojson").write_text(json.dumps(src, ensure_ascii=False, separators=(",", ":")))
+    print(f"parks: {len(src['features'])} outlines")
+
+
 def build_species(df):
     g = df.groupby("TreeType")
     rows = [
@@ -240,6 +259,7 @@ def main():
     pits = build_pits(df)
     build_districts(df, pits)
     build_species(df)
+    build_parks()
     build_api()
     build_tiles(df)
 

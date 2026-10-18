@@ -6,7 +6,8 @@ import { FEASIBILITY_TEXT } from './feasibility'
 import { award } from '../game/ledger'
 
 export interface PitInfo {
-  pitId: string
+  /** null：不是樹穴，在地圖任意位置長按許願 */
+  pitId: string | null
   lngLat: LngLat
   road: string
   district: string
@@ -22,7 +23,7 @@ export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => v
       className="wish-form"
       onSubmit={(e) => {
         e.preventDefault()
-        const wish = createWish({ ...pit, reasons, feasibility: 'emptyPit' })
+        const wish = createWish({ ...pit, reasons, feasibility: pit.pitId ? 'emptyPit' : 'needsSurvey' })
         award('wish', wish.id)
         onDone(wish)
       }}
@@ -48,11 +49,18 @@ export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => v
   )
 }
 
-export function FeasibilityResult() {
+export function FeasibilityResult({ wish }: { wish: Wish }) {
+  if (wish.feasibility === 'emptyPit')
+    return (
+      <div className="feasibility">
+        <p className="banner ok">初審：{FEASIBILITY_TEXT.emptyPit}</p>
+        <p className="muted small">資料顯示這裡沒有登錄的樹，市府會先到現場確認。</p>
+      </div>
+    )
   return (
     <div className="feasibility">
-      <p className="banner ok">初審：{FEASIBILITY_TEXT.emptyPit}</p>
-      <p className="muted small">資料顯示這裡沒有登錄的樹，市府會先到現場確認。</p>
+      <p className="banner warn">初審：{FEASIBILITY_TEXT[wish.feasibility]}</p>
+      <p className="muted small">這裡不是既有樹穴，要先確認人行道寬度與地下管線，排序會比空樹穴後面。</p>
     </div>
   )
 }
