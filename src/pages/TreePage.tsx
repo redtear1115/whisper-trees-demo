@@ -9,6 +9,8 @@ import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
 import { award, isDaytime } from '../features/game/ledger'
 import { useInventory } from '../features/game/inventory'
+import { NoticeCard } from '../features/notice/NoticeCard'
+import { noticeFor } from '../features/notice/notices'
 
 export default function TreePage() {
   const { treeId = '' } = useParams()
@@ -75,6 +77,7 @@ export default function TreePage() {
       )}
 
       <CheckinBanner fresh={fresh} onSite={onSite} treeId={treeId} />
+      {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}
 
       <Card className="glow-card">
         <div className="row gap center-v">

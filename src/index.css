@@ -1215,3 +1215,28 @@ pre.code {
     padding: 0 10px;
   }
 }
+
+.gov-map {
+  height: 380px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-bottom: 6px;
+  display: grid;
+  place-items: center;
+}
+
+.notice {
+  border-color: var(--amber);
+  background: #fffaf2;
+}
+
+.notice-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.notice-form .btn {
+  justify-self: start;
+}

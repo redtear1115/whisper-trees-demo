@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { loadDistricts, type District } from '../lib/trees'
 import { DEFAULT_WEIGHTS, scoreAll, type Weights } from '../lib/score'
@@ -7,6 +7,9 @@ import { REPORT_KINDS, STATUS_LABEL, type TreeReport, type WishStatus } from '..
 import { FEASIBILITY_TEXT } from '../features/wish/feasibility'
 import { MockTag, relativeDays } from '../components/ui'
 import { reportResolved, useOrders } from '../features/vendor/orders'
+import { NOTICES, useMyOpinions } from '../features/notice/notices'
+
+const GovMap = lazy(() => import('../features/gov/GovMap').then((m) => ({ default: m.GovMap })))
 
 const WEIGHT_LABEL: Record<keyof Weights, string> = {
   demand: '市民需求',
@@ -24,6 +27,7 @@ export default function GovPage() {
   const [districts, setDistricts] = useState<District[]>([])
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS)
   const [open, setOpen] = useState<string | null>(null)
+  const [showMap, setShowMap] = useState(false)
 
   useEffect(() => {
     loadDistricts().then(setDistricts)
@@ -49,6 +53,7 @@ export default function GovPage() {
       .sort((a, b) => Number(closed(a.wish)) - Number(closed(b.wish)) || b.score.total - a.score.total)
   }, [wishes, weights, districts])
 
+  const mapRows = useMemo(() => rows.map((r) => ({ wish: r.wish, score: r.score.total })), [rows])
   const planted = wishes.filter((w) => wishStatus(w) === 'planted').length + PLANTED_BASE
   const listRef = useFlip(rows.map((r) => r.wish.id).join())
 
@@ -104,6 +109,25 @@ export default function GovPage() {
         </button>
       </section>
 
+      <div className="row gap" style={{ marginBottom: 8 }}>
+        <button className={`chip ${!showMap ? 'on' : ''}`} onClick={() => setShowMap(false)}>
+          清單
+        </button>
+        <button className={`chip ${showMap ? 'on' : ''}`} onClick={() => setShowMap(true)}>
+          清單＋地圖
+        </button>
+      </div>
+      {showMap && (
+        <Suspense fallback={<div className="gov-map muted">地圖載入中…</div>}>
+          <GovMap
+            rows={mapRows}
+            onPick={(id) => {
+              setOpen(id)
+              document.querySelector(`[data-flip="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }}
+          />
+        </Suspense>
+      )}
       <div className="table-wrap">
       <table className="hot-table">
         <thead>
@@ -159,6 +183,8 @@ export default function GovPage() {
       </div>
 
       <ReportsByRoad />
+
+      <Notices />
 
       <p className="muted small">
         分數：四項各自正規化到 0–1 後加權平均。遮蔭缺口與公平性依行政區「每公里人行道的行道樹數」（開放資料推算）；
@@ -297,6 +323,39 @@ function ReportsByRoad() {
             </div>
           )
         })}
+      </div>
+    </section>
+  )
+}
+
+/** 移樹前公告（模擬）與市民意見 */
+function Notices() {
+  const mine = useMyOpinions()
+  return (
+    <section>
+      <h2 className="section-title">
+        移樹前公告 <MockTag />
+      </h2>
+      <p className="muted small">動一棵樹之前先公告，附近的人掃樹牌時會看到，並可以留一句意見。</p>
+      <div className="report-list">
+        {NOTICES.map((n) => (
+          <div key={n.id} className="report-road">
+            <div className="row between center-v" style={{ gap: 8, flexWrap: 'wrap' }}>
+              <strong>
+                {n.place}・{n.species}（<span className="mono">{n.treeId}</span>）
+              </strong>
+              <span className="small">
+                {n.date} {n.action}・意見 {n.opinions + (mine[n.id] ? 1 : 0)} 則
+              </span>
+            </div>
+            <p className="small">原因：{n.reason}</p>
+            {mine[n.id] && (
+              <p className="small">
+                <span className="new-tag">市民新意見</span> 「{mine[n.id]}」
+              </p>
+            )}
+          </div>
+        ))}
       </div>
     </section>
   )
