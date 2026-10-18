@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { maplibregl } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { Protocol } from 'pmtiles'
 import { DEMO, MAP_STYLE } from '../config'
 import { findTree, loadDistricts, type District, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
@@ -15,13 +14,6 @@ import { Art } from '../components/ui'
 import { assetUrl } from '../assets'
 import { useBalance } from '../features/game/ledger'
 import { EventBar } from '../features/game/EventBar'
-
-let protocolAdded = false
-function ensureProtocol() {
-  if (protocolAdded) return
-  maplibregl.addProtocol('pmtiles', new Protocol().tile)
-  protocolAdded = true
-}
 
 type Sheet =
   | { kind: 'tree'; tree: Tree }
@@ -65,7 +57,6 @@ export default function MapPage() {
   }, [])
 
   useEffect(() => {
-    ensureProtocol()
     const base = new URL(import.meta.env.BASE_URL, location.origin).href
     const m = new maplibregl.Map({
       container: el.current!,
@@ -93,7 +84,14 @@ export default function MapPage() {
     m.on('load', () => {
       // 小螢幕上署名預設展開會擋住按鈕，先收起來（點 i 可展開）
       el.current?.querySelector('.maplibregl-compact-show')?.classList.remove('maplibregl-compact-show')
-      m.addSource('trees', { type: 'vector', url: `pmtiles://${base}data/trees.pmtiles` })
+      // 靜態圖磚：Cloudflare Pages 不支援 HTTP Range，不能用單一 PMTiles 檔
+      m.addSource('trees', {
+        type: 'vector',
+        tiles: [`${base}data/tree-tiles/{z}/{x}/{y}.pbf`],
+        minzoom: 10,
+        maxzoom: 16,
+        bounds: [121.4619, 24.9771, 121.6268, 25.1652],
+      })
       m.addSource('pits', { type: 'geojson', data: `${base}data/pits-empty.geojson` })
       m.addSource('parks', { type: 'geojson', data: `${base}data/parks.geojson` })
       m.addLayer({

@@ -81,7 +81,7 @@ export default function DevelopersPage() {
           <li>
             許願與補種進度目前是<strong>模擬</strong>資料（Demo 用的固定快照）。
           </li>
-          <li>地圖用的樹木點位是 PMTiles 向量圖磚：<code>/data/trees.pmtiles</code>（圖層 trees，屬性 id、k）。</li>
+          <li>地圖用的樹木點位是向量圖磚：<code>/data/tree-tiles/{'{z}/{x}/{y}'}.pbf</code>（z10–16，圖層 trees，屬性 id、k）。</li>
           <li>
             政府端日後可用同一份格式接回補種案件狀態，市民端與第三方 App 就能直接讀。
           </li>

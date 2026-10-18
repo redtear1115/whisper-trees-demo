@@ -60,11 +60,14 @@ uv run scripts/build_web_data.py   # 產生 public/data/，需要 tippecanoe
 npm run dev     # 加 ?demo=1 進 Demo 模式
 npm test        # vitest
 npm run build   # tsc + vite build
+npm run deploy  # 部署到 Cloudflare Pages：https://whisper-trees.pages.dev（部署前先問）
 node scripts/make_placeholders.mjs   # 佔位美術，清單在 src/assets.ts
 ```
 
 - 美術一律先用佔位檔：在 `src/assets.ts` 加一筆，跑上面的腳本，畫面用 `<Art id="…">`。
 - 延伸功能（光點、商店、GM 等）見 `docs/specs/08-extensions.md`；討論紀錄見 `docs/discussion-2026-10-17.md`。
+
+- Cloudflare Pages 不支援 HTTP Range，所以樹木點位用靜態圖磚目錄，不用 PMTiles；`public/data/404.html` 讓缺的資料檔回 404，而不是回網頁。
 
 ## 驗證
 

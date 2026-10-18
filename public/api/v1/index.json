@@ -5,7 +5,7 @@
  "license": "政府資料開放授權條款第 1 版；OSM 衍生資料 ODbL 1.0",
  "endpoints": {
   "trees": "/data/trees/{prefix}.json",
-  "tree_tiles": "/data/trees.pmtiles",
+  "tree_tiles": "/data/tree-tiles/{z}/{x}/{y}.pbf",
   "pits_empty": "/data/pits-empty.geojson",
   "districts": "/api/v1/districts.json",
   "species": "/api/v1/species.json",

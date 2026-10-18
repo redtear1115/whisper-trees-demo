@@ -2,6 +2,8 @@
 
 [台北市政 debug 松](https://puma.taipei/hackathon) 題目 #1「把三千棵樹種回來」的參賽作品 Demo。
 
+**網址：https://whisper-trees.pages.dev**（加 `?demo=1` 進 Demo 模式：模擬定位、可掃示範樹牌）
+
 台北每年移除約 3,164 棵樹。曦語把 16 萬棵行道樹與公園樹變成市民可以停下來、對它說話的「樹洞」；同時讓市民在空樹穴許願、澆水，政府依市民需求與樹蔭缺口排出補種順序，並公開進度。
 
 - 掃公園處樹牌上**現有的 QR Code**，加上 **GPS** 確認人在樹旁，就能打卡。不需要新增任何設施。
@@ -69,7 +71,7 @@
 |---|---|---|
 | `material/processed/treepits_merged.geojson` | 兩份樹穴合併，57,548 個；`has_tree: false` 為候選空樹穴 | `scripts/merge_treepits.py` |
 | `material/processed/parks_osm_match.csv`、`parks_boundary.geojson` | 公園處 813 座公園對上 OSM 範圍，622 座有範圍 | `scripts/match_parks_osm.py` |
-| `public/data/` | 網頁用的樹木點位（PMTiles）、樹籍查詢表、空樹穴、行政區與樹種統計 | `scripts/build_web_data.py`，見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
+| `public/data/` | 網頁用的樹木點位（向量圖磚）、樹籍查詢表、空樹穴、行政區與樹種統計 | `scripts/build_web_data.py`，見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
 | `public/api/v1/` | 開放 API 的靜態 JSON（行政區、樹種、端點清單；許願為模擬） | 同上 |
 
 推算的限制：
@@ -117,10 +119,9 @@
 | React、React Router | 前端框架、路由 | MIT |
 | Vite、TypeScript、Vitest | 建置、型別、測試 | MIT／Apache-2.0 |
 | MapLibre GL JS | 地圖 | BSD-3-Clause |
-| PMTiles | 樹木點位向量圖磚 | BSD-3-Clause |
 | @zxing/browser、@zxing/library | 掃樹牌 QR Code | Apache-2.0 |
 | SunCalc | 日出日落（夜間模式） | BSD-2-Clause |
-| tippecanoe | 產生 PMTiles | BSD-2-Clause |
+| tippecanoe | 產生樹木點位向量圖磚 | BSD-2-Clause |
 | OpenFreeMap | 底圖圖磚（免金鑰） | 資料 © OpenMapTiles、OpenStreetMap |
 
 本專案使用 Claude Code 協助整理資料、撰寫規格與程式。
@@ -142,6 +143,7 @@ npm install
 npm run dev      # http://localhost:5173，加 ?demo=1 進 Demo 模式（模擬定位、可掃示範樹牌）
 npm test
 npm run build    # 輸出 dist/，靜態網站
+npm run deploy   # 建置並部署到 Cloudflare Pages（專案 whisper-trees，Ray Personal Account）
 node scripts/make_placeholders.mjs   # 依 src/assets.ts 重新產生佔位美術與 docs/ui-assets.md
 ```
 

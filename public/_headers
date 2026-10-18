@@ -1,0 +1,13 @@
+# Cloudflare Pages 回應標頭
+# 開放資料可跨網域讀取（開放 API，見 /developers）
+/data/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=3600
+
+/api/*
+  Access-Control-Allow-Origin: *
+  Cache-Control: public, max-age=600
+
+# 樹木向量圖磚（未壓縮的 pbf，讓 Cloudflare 依 content-type 壓縮）
+/data/tree-tiles/*
+  Content-Type: application/x-protobuf

@@ -11,7 +11,7 @@ Inputs:
 
 Outputs (public/data/):
   trees/<prefix>.json   TreeID lookup, split by the first 2 letters
-  trees.pmtiles         tree points for the map (needs tippecanoe)
+  tree-tiles/           tree points for the map, {z}/{x}/{y}.pbf (needs tippecanoe)
   pits-empty.geojson    candidate empty pits (kind 樹穴, has_tree false)
   districts.json        street trees per km of sidewalk, per district
   species.json          tree count per species (for the codex)
@@ -98,15 +98,19 @@ def build_lookup(df):
 
 
 def build_tiles(df):
-    target = OUT / "trees.pmtiles"
+    """Static vector tiles ({z}/{x}/{y}.pbf). Cloudflare Pages does not serve
+    HTTP Range requests, so a single PMTiles file cannot be read from it."""
+    target = OUT / "tree-tiles"
+    stamp = target / "metadata.json"
     sources = [RAW / "TaipeiTree.csv", RAW / "TaipeiParkTree.csv"]
-    if (target.exists() and "--force-tiles" not in sys.argv
-            and target.stat().st_mtime > max(p.stat().st_mtime for p in sources)):
-        # tippecanoe 每次輸出的位元組略有不同；資料沒變就不重做，避免 8 MB 檔案在版控裡空轉
+    if (stamp.exists() and "--force-tiles" not in sys.argv
+            and stamp.stat().st_mtime > max(p.stat().st_mtime for p in sources)):
+        # tippecanoe 每次輸出的位元組略有不同；資料沒變就不重做，避免版控裡空轉
         print("tiles: up to date (--force-tiles to rebuild)")
         return
     if not shutil.which("tippecanoe"):
         raise SystemExit("tippecanoe not found: brew install tippecanoe")
+    shutil.rmtree(target, ignore_errors=True)
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / "trees.geojsonl"
         with src.open("w") as f:
@@ -117,13 +121,16 @@ def build_tiles(df):
                     "properties": {"id": r.TreeID, "k": r.kind[0]},
                 }, ensure_ascii=False) + "\n")
         subprocess.run([
-            "tippecanoe", "-o", str(target), "--force", "-l", "trees",
+            "tippecanoe", "-e", str(target), "--force", "-l", "trees",
+            "--name=trees", "--description=臺北市行道樹與公園樹木（臺北市政府開放資料 2026-10-16）",
             "-Z10", "-z16", "--drop-densest-as-needed",
             "--extend-zooms-if-still-dropping", "-r1",
-            "--maximum-tile-bytes=400000",
+            "--no-tile-compression", "--maximum-tile-bytes=500000",
             str(src),
         ], check=True, capture_output=True)
-    print(f"tiles: {target.stat().st_size / 1e6:.1f} MB")
+    tiles = list(target.rglob("*.pbf"))
+    size = sum(t.stat().st_size for t in tiles)
+    print(f"tiles: {len(tiles)} files, {size / 1e6:.1f} MB")
 
 
 def build_pits(df):
@@ -239,7 +246,7 @@ def build_api():
         "license": "政府資料開放授權條款第 1 版；OSM 衍生資料 ODbL 1.0",
         "endpoints": {
             "trees": "/data/trees/{prefix}.json",
-            "tree_tiles": "/data/trees.pmtiles",
+            "tree_tiles": "/data/tree-tiles/{z}/{x}/{y}.pbf",
             "pits_empty": "/data/pits-empty.geojson",
             "districts": "/api/v1/districts.json",
             "species": "/api/v1/species.json",

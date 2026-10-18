@@ -53,13 +53,13 @@
 
 ### 2. 地圖用樹木點位
 
-優先用 **PMTiles**（`tippecanoe` 產生；目前機器上沒有安裝，要裝 `brew install tippecanoe`，安裝前先問使用者）。
+用 `tippecanoe` 產生向量圖磚（`brew install tippecanoe`）。
 
 裝不了就退而求其次：輸出 `public/data/tree-points/<前綴>.json`，每檔只放 `[經度, 緯度, 樹種索引]`，前端依畫面範圍載入。
 
 兩種做法擇一，在本檔記下最後採用哪個。
 
-**採用 PMTiles**（2026-10-19）：`public/data/trees.pmtiles`，圖層 `trees`，屬性 `id`（TreeID）、`k`（`s` 行道樹／`p` 公園樹），z10–16，約 7.9 MB，前端用 HTTP Range 讀取。
+**採用 tippecanoe 向量圖磚，輸出成靜態目錄**（2026-10-19）：`public/data/tree-tiles/{z}/{x}/{y}.pbf`，圖層 `trees`，屬性 `id`（TreeID）、`k`（`s` 行道樹／`p` 公園樹），z10–16，740 個檔、約 20 MB（未壓縮，由 Cloudflare 壓縮傳輸）。原本用單一 PMTiles 檔，但 Cloudflare Pages 不支援 HTTP Range，讀不到，所以改成目錄。
 
 ### 3. 空樹穴 `public/data/pits-empty.geojson`
 
