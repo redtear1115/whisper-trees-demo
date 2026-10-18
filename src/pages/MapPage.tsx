@@ -16,6 +16,7 @@ import { useBalance } from '../features/game/ledger'
 import { EventBar } from '../features/game/EventBar'
 import { useAnchor } from '../features/map/useAnchor'
 import { boundsAround, circleRing } from '../lib/nearby'
+import { angleDiff, requestHeadingPermission, watchHeading } from '../features/map/heading'
 
 type Sheet =
   | { kind: 'tree'; tree: Tree }
@@ -54,6 +55,8 @@ export default function MapPage() {
   }
   const [ready, setReady] = useState(false)
   const anchor = useAnchor(mode === 'near')
+  const [follow, setFollow] = useState(false)
+  const [headingMsg, setHeadingMsg] = useState<string | null>(null)
   const wishes = useWishes()
   const balance = useBalance()
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
@@ -89,6 +92,12 @@ export default function MapPage() {
         customAttribution: '樹木與樹穴：臺北市政府開放資料｜公園範圍：© OpenStreetMap contributors',
       }),
     )
+    // 指北針：顯示目前方向，點一下轉回北方（保留 45° 俯角）
+    m.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: false }), 'bottom-right')
+    // 手動轉動地圖就停止「跟著方向」
+    m.on('rotatestart', (e) => {
+      if ((e as { originalEvent?: Event }).originalEvent) setFollow(false)
+    })
     m.addControl(
       new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }),
       'bottom-right',
@@ -248,6 +257,7 @@ export default function MapPage() {
     const me = m.getSource('me') as maplibregl.GeoJSONSource | undefined
     if (mode === 'city') {
       centeredOn.current = null
+      setFollow(false)
       m.setMaxBounds(null)
       m.setMinZoom(10)
       nearby?.setData({ type: 'FeatureCollection', features: [] })
@@ -282,6 +292,28 @@ export default function MapPage() {
       m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
     }
   }, [mode, anchor, ready])
+
+  // 跟著方向：地圖隨手機指南針轉動，讓畫面的上方就是你面向的方向
+  useEffect(() => {
+    const m = map.current
+    if (!follow || !m) return
+    let got = false
+    const noSensor = setTimeout(() => {
+      if (got) return
+      setFollow(false)
+      setHeadingMsg('這台裝置沒有指南針，可以用兩指旋轉地圖。')
+    }, 2500)
+    const stop = watchHeading((deg) => {
+      got = true
+      if (angleDiff(deg, m.getBearing() < 0 ? m.getBearing() + 360 : m.getBearing()) > 3) {
+        m.rotateTo(deg, { duration: 200 })
+      }
+    })
+    return () => {
+      clearTimeout(noSensor)
+      stop()
+    }
+  }, [follow])
 
   // 許願圖層：小樹苗，大小對應澆水數
   useEffect(() => {
@@ -439,6 +471,23 @@ export default function MapPage() {
           <button className={mode === 'city' ? 'on' : ''} aria-pressed={mode === 'city'} onClick={() => setMode('city')}>
             全市
           </button>
+          {mode === 'near' && (
+            <button
+              className={follow ? 'on' : ''}
+              aria-pressed={follow}
+              onClick={async () => {
+                setHeadingMsg(null)
+                if (follow) return setFollow(false)
+                if (!(await requestHeadingPermission())) {
+                  return setHeadingMsg('沒有方向權限。可以在瀏覽器設定開啟，或用兩指旋轉地圖。')
+                }
+                setFollow(true)
+              }}
+            >
+              跟著方向
+            </button>
+          )}
+          {headingMsg && <span className="mode-note">{headingMsg}</span>}
           {mode === 'near' && (
             <span className="mode-note">
               {anchor.source === 'gps'

@@ -525,6 +525,12 @@ textarea.input {
   bottom: 90px;
 }
 
+/* 指北針放大到好按的尺寸 */
+.maplibregl-ctrl-group .maplibregl-ctrl-compass {
+  width: 44px;
+  height: 44px;
+}
+
 /* ---------- facts ---------- */
 
 .facts {
