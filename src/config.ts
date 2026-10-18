@@ -1,0 +1,28 @@
+// 門檻值與 Demo 設定集中在這裡，Demo 前依現場測試調整。
+
+export const CHECKIN = {
+  /** 打卡成功：d ≤ nearMeters + min(accuracy, maxAccuracyBonus) */
+  nearMeters: 30,
+  maxAccuracyBonus: 30,
+  /** 遠觀模式（安全島樹）的距離上限 */
+  farViewMeters: 80,
+  /** 定位逾時 */
+  geoTimeoutMs: 10_000,
+  /** Demo 模式假裝站在樹旁幾公尺 */
+  demoOffsetMeters: 10,
+  /** 打卡後多久內重新整理樹的頁面仍算在現場 */
+  sessionMinutes: 30,
+}
+
+/** 東門市場周邊，「誤砍茄苳」事件的街廓 */
+export const DEMO = {
+  center: [121.5287, 25.0335] as [number, number],
+  zoom: 16.5,
+  /** 信義路二段的真實茄苳行道樹（開放資料樹籍編號） */
+  treeId: 'DA0030211045',
+  qrText: 'http://trees.gov.taipei/show/?treeid=DA0030211045',
+}
+
+export const DATA_VERSION = '2026-10-16'
+
+export const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron'

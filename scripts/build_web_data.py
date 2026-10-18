@@ -1,0 +1,192 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pandas", "pyproj", "shapely>=2"]
+# ///
+"""Build the static data the web app reads (public/data/).
+
+Inputs:
+  material/raw/TaipeiTree.csv, TaipeiParkTree.csv   trees, TWD97
+  material/processed/treepits_merged.geojson         pits, WGS84
+  material/raw/sidewalk.json                         sidewalks, EPSG:3826
+
+Outputs (public/data/):
+  trees/<prefix>.json   TreeID lookup, split by the first 2 letters
+  trees.pmtiles         tree points for the map (needs tippecanoe)
+  pits-empty.geojson    candidate empty pits (kind 樹穴, has_tree false)
+  districts.json        street trees per km of sidewalk, per district
+
+Run: uv run scripts/build_web_data.py
+"""
+import json
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import shapely
+from pyproj import Transformer
+from shapely.geometry import shape
+
+ROOT = Path(__file__).resolve().parent.parent
+RAW = ROOT / "material" / "raw"
+PROCESSED = ROOT / "material" / "processed"
+OUT = ROOT / "public" / "data"
+
+# 內政部鄉鎮市區代碼 → 行政區 (sidewalk.json Town_N)
+TOWN = {
+    "63000010": "松山區", "63000020": "信義區", "63000030": "大安區",
+    "63000040": "中山區", "63000050": "中正區", "63000060": "大同區",
+    "63000070": "萬華區", "63000080": "文山區", "63000090": "南港區",
+    "63000100": "內湖區", "63000110": "士林區", "63000120": "北投區",
+}
+
+
+def num(v):
+    return None if pd.isna(v) else round(float(v), 1)
+
+
+def text(v):
+    return "" if pd.isna(v) else str(v).strip()
+
+
+def load_trees():
+    street = pd.read_csv(RAW / "TaipeiTree.csv", dtype={"TreeID": str})
+    street["kind"] = "street"
+    street["place"] = street["Region"]
+    park = pd.read_csv(RAW / "TaipeiParkTree.csv", dtype={"TreeID": str})
+    park["kind"] = "park"
+    park["place"] = park["ParkName"]
+    park["RegionRemark"] = ""
+    cols = ["TreeID", "Dist", "place", "RegionRemark", "TreeType", "Diameter",
+            "TreeHeight", "SurveyDate", "TWD97X", "TWD97Y", "kind"]
+    df = pd.concat([street[cols], park[cols]], ignore_index=True)
+    df["TreeID"] = df["TreeID"].str.strip()
+    assert df["TreeID"].is_unique, "TreeID must be unique"
+    tf = Transformer.from_crs(3826, 4326, always_xy=True)
+    df["lon"], df["lat"] = tf.transform(df["TWD97X"].values, df["TWD97Y"].values)
+    df["lon"] = df["lon"].round(6)
+    df["lat"] = df["lat"].round(6)
+    df["TreeType"] = df["TreeType"].fillna("未知").str.strip()
+    return df
+
+
+def build_lookup(df):
+    out = OUT / "trees"
+    out.mkdir(parents=True, exist_ok=True)
+    for old in out.glob("*.json"):
+        old.unlink()
+    df = df.assign(prefix=df["TreeID"].str[:2])
+    for prefix, g in df.groupby("prefix"):
+        species = sorted(g["TreeType"].unique())
+        index = {s: i for i, s in enumerate(species)}
+        trees = {
+            r.TreeID: [r.lon, r.lat, index[r.TreeType], num(r.Diameter),
+                       num(r.TreeHeight), text(r.place), text(r.RegionRemark),
+                       r.kind, text(r.SurveyDate), text(r.Dist)]
+            for r in g.itertuples()
+        }
+        data = {"species": species, "trees": trees}
+        (out / f"{prefix}.json").write_text(
+            json.dumps(data, ensure_ascii=False, separators=(",", ":")))
+    print(f"lookup: {len(df)} trees in {df['prefix'].nunique()} files")
+
+
+def build_tiles(df):
+    target = OUT / "trees.pmtiles"
+    if not shutil.which("tippecanoe"):
+        raise SystemExit("tippecanoe not found: brew install tippecanoe")
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "trees.geojsonl"
+        with src.open("w") as f:
+            for r in df.itertuples():
+                f.write(json.dumps({
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [r.lon, r.lat]},
+                    "properties": {"id": r.TreeID, "k": r.kind[0]},
+                }, ensure_ascii=False) + "\n")
+        subprocess.run([
+            "tippecanoe", "-o", str(target), "--force", "-l", "trees",
+            "-Z10", "-z16", "--drop-densest-as-needed",
+            "--extend-zooms-if-still-dropping", "-r1",
+            "--maximum-tile-bytes=400000",
+            str(src),
+        ], check=True, capture_output=True)
+    print(f"tiles: {target.stat().st_size / 1e6:.1f} MB")
+
+
+def build_pits(df):
+    street = df[df["kind"] == "street"]
+    # Rough local metres; good enough for a nearest-road lookup within 50 m.
+    tree_pts = shapely.points(street["lon"].values * 101000, street["lat"].values * 111000)
+    tree_index = shapely.STRtree(tree_pts)
+    feats = json.loads((PROCESSED / "treepits_merged.geojson").read_text())["features"]
+    out = []
+    for f in feats:
+        p = f["properties"]
+        if p["kind"] != "樹穴" or p["has_tree"]:
+            continue
+        g = shape(f["geometry"])
+        pt = g if g.geom_type == "Point" else g.centroid
+        props = {k: p.get(k) for k in ("pit_id", "district", "road", "area_m2", "source")}
+        if not props["road"]:
+            near = tree_index.query_nearest(
+                shapely.Point(pt.x * 101000, pt.y * 111000), max_distance=50)
+            if len(near):
+                props["road"] = text(street["place"].iloc[near[0]])
+                props["road_inferred"] = True
+        out.append({
+            "type": "Feature",
+            "geometry": {"type": "Point",
+                         "coordinates": [round(pt.x, 6), round(pt.y, 6)]},
+            "properties": props,
+        })
+    (OUT / "pits-empty.geojson").write_text(json.dumps(
+        {"type": "FeatureCollection", "features": out},
+        ensure_ascii=False, separators=(",", ":")))
+    named = sum(1 for f in out if f["properties"]["road"])
+    print(f"pits: {len(out)} empty, {named} with a road name")
+    return out
+
+
+def build_districts(df, pits):
+    sw = json.loads((RAW / "sidewalk.json").read_text())["features"]
+    length = {}
+    for f in sw:
+        p = f["properties"]
+        d = TOWN.get(str(p.get("Town_N")))
+        if d and p.get("SW_LENG_ItemValue"):
+            length[d] = length.get(d, 0) + float(p["SW_LENG_ItemValue"])
+    street = df[df["kind"] == "street"].groupby("Dist").size()
+    allt = df.groupby("Dist").size()
+    pit_count = pd.Series([p["properties"]["district"] for p in pits]).value_counts()
+    rows = []
+    for d in TOWN.values():
+        km = length.get(d, 0) / 1000
+        rows.append({
+            "district": d,
+            "street_trees": int(street.get(d, 0)),
+            "all_trees": int(allt.get(d, 0)),
+            "sidewalk_km": round(km, 1),
+            "trees_per_km": round(street.get(d, 0) / km, 1) if km else None,
+            "empty_pits": int(pit_count.get(d, 0)),
+        })
+    rows.sort(key=lambda r: -(r["trees_per_km"] or 0))
+    (OUT / "districts.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1))
+    for r in rows:
+        print(f"  {r['district']} {r['trees_per_km']}/km  pits {r['empty_pits']}")
+
+
+def main():
+    OUT.mkdir(parents=True, exist_ok=True)
+    df = load_trees()
+    check = df.set_index("TreeID").loc["SL0560111023"]
+    print(f"check SL0560111023: {check['place']} {check['lon']},{check['lat']}")
+    build_lookup(df)
+    pits = build_pits(df)
+    build_districts(df, pits)
+    build_tiles(df)
+
+
+if __name__ == "__main__":
+    main()
