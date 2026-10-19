@@ -120,17 +120,18 @@
 
 ### 資料與新手禮的規則
 
-- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）、`firstLightCelebratedAt`（A1 慶祝過）。
+- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`animal`（陪你的動物，`'blue-magpie' | 'night-heron' | 'squirrel' | 'pangolin'`，沒有或不認得就當 `blue-magpie`；2026-10-19 加，同樣逐欄合併、不需改 `cloud.ts` 與 `firestore.rules`）、`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）、`firstLightCelebratedAt`（A1 慶祝過）。
 - 只能用 `patchOnboarding(partial)` 寫：以目前的值為底合併，雲端以 map 逐欄合併，所以不會蓋掉另一台裝置或舊快取寫的欄位。
 - 新手禮**只記 `onboarding.giftAt`**。擁有權由 `inventory()` 推算（`giftAt` 有值就把 `hat-straw` 算進 `owned`，不重複）；`buy('hat-straw')` 回傳「已擁有」。換上草帽走原本的 `equip`，由使用者操作。**不會自動寫入 `ext.inventory` 或 `ext.ledger`**，光點與餘額都不動。
 - 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式與退回本機時一律 ready。`grantStarterGift()` 在 ready 之前什麼都不做。
 
 ### 引導一「收集光點」的畫面（S2）
 
-地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具、掃樹牌浮鈕與「附近／全市」切換，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`：
+地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具與掃樹牌浮鈕，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`。**動物步驟編號是 0，其餘維持 1–4、5 = 走完**（不搬資料）：已存的 `tourStep` 1–5 意思不變；沒存過步驟的新使用者從 0 開始（開著時補存 0）；已經在第 1 步以後的人不會被拉回選動物（得到預設藍鵲，可在 `/me` 換）；「新手引導」重看、或走完後重看，從 0 開始。進度點 5 個（`aria-label`「第 n 步，共 5 步」）：
 
 | 步驟 | 內容 |
 |---|---|
+| 0 | **選一隻陪你的動物**（2026-10-19 加）：4 選 1（臺灣藍鵲〔預設〕、黑冠麻鷺、赤腹松鼠、穿山甲），佔位美術，點了立刻存、地圖上的人物立刻換（`AnimalPicker`，`data-testid="animal-picker"`、`animal-option-<id>`）。「就牠了」把目前的選擇存成 `onboarding.animal` 並到第 1 步；沒點過就是預設藍鵲。之後可在 `/me` 換 |
 | 1 | 光點是什麼、怎麼得到：表格數值讀 GM 設定的 `gameConfig().points`（打卡、遠觀、樹洞、許願、澆水）。「下一步」 |
 | 2 | 去掃樹牌 → `/scan`。「附近沒有樹牌？」說明 Demo 模式（`?demo=1`，已在 Demo 模式就改說明模擬定位） |
 | 3 | 第一次拿到光點：慶祝徽章「第一道光」＋新手禮草帽（連到 `/me` 換上、`/shop`）。拿到第一道光就直接跳到這一步 |
@@ -149,7 +150,7 @@
 
 - **/explore 任務卡**（`TasksCard`；2026-10-19 起從 `/me` 搬到 `/explore`，`/me` 不再放，避免重複）（，清單 `tasks-list`、每項 `task-<id>` 帶 `data-done`、`tasks-count`、`tasks-toggle`）：拿到第一道光後出現，4 項依 `tasks()` 推算打勾，順序不拘、可收合（`tasksCollapsed` 存在 `onboarding`）。「在樹洞留一句話」說明「到地圖點一棵樹，進樹的頁面」，「在空樹穴許願」說明「到地圖點一個空樹穴」，連結都回地圖。4 項做完卡片換成一行小字（`tasks-card-done`），不再有按鈕。
 - **看過旗標**（`useViewedFlag`）：`/explore` 的圖鑑區（`data-testid="codex-section"`）真的出現在畫面上時記 `viewedCodexAt`（IntersectionObserver）；`/me` 的徽章區（`data-testid="badges-section"`）真的出現在畫面上時記 `viewedBadgesAt`（IntersectionObserver，不支援就在載入時記）。只在使用者文件載入完成、旗標還沒有時寫一次。
-- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在左下「附近／全市」切換上方（整組浮動元件都排在底部導覽上面），不和右側地圖工具重疊。判斷是純函式 `showTasksChip`。
+- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在左下、掃樹牌浮鈕上方（整組浮動元件都排在底部導覽上面），不和右側地圖工具重疊。判斷是純函式 `showTasksChip`。
 - **A3**：`OnboardingEffects` 在使用者文件載入後、4 項都完成、沒有 `newcomerCelebratedAt` 時記下時間並跳出「城市的新朋友」慶祝，只一次（`shouldCelebrateNewcomer`）。早就完成過的舊使用者會在下次開啟時看到一次。
 - 雲端不用改：`onboarding` 本來就是 `users/{uid}` 的一個 map 欄位，新旗標照逐欄合併。
 
@@ -178,6 +179,12 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 - [x] 任務卡（當時在 `/me`，現在在 `/explore`）：4 項各自在真實操作後打勾（換上草帽用 /me 的按鈕；樹洞與許願用 store 函式觸發），重新整理後仍在；看圖鑑區與 `/me` 徽章區會記下看過；地圖「新手任務 n/4」不和其他按鈕重疊，完成後消失。**收合按鈕沒有在瀏覽器裡驗。**
 - [x] 完成 4 項只慶祝「城市的新朋友」一次（重新整理後不再出現）。
+
+陪你的動物（2026-10-19，在 §9 引導第 0 步與 `/me` 選；地圖上的人物與點樹行動圈見 [02](02-map.md)）
+
+- [x] 單元測試：`tourView` 新使用者從第 0 步開始（`needsInit`）、已存的 1–5 意思不變、已過第 0 步的人不被拉回、拿到第一道光從第 0 步直接跳第 3 步、`reopenPatch` 從第 0 步重來；`animalOf` 對沒有／不認得的值回傳藍鵲；每隻動物都有佔位素材。
+- [x] 瀏覽器（Playwright 360 px，本機後端）：新使用者的引導停在第 0 步（`data-step="0"`、進度「第 1 步，共 5 步」）、預設藍鵲；選穿山甲地圖上的人物立刻換、重新整理仍在；「就牠了」到第 1 步、「上一步」回第 0 步；「之後再說」後到 `/me` 換松鼠，地圖也換；沒有水平捲動。
+- [ ] 雲端（Firestore）下的動物同步：沿用 `onboarding` 的逐欄合併，**沒有另外在模擬器跑過 `animal` 欄位**。
 
 ## 10. 集章冊 `/stamps`
 
@@ -221,7 +228,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - 只顯示在這 5 個**分頁根頁面**（`TabLayout`）；`/tree/:id`、`/shop`、`/scan`、`/wishes` 是子頁面，沒有導覽、用返回連結；`/gov`、`/vendor`、`/gm`、`/developers`、`/demo-control` 也沒有。桌機閘門（`MobileOnly`）不變。
 - 每個分頁 ≥ 44 px 高（56 px + 底部安全區 `safe-area-inset-bottom`），目前的分頁 `aria-current="page"`、字加粗、圖示加粗；沒有紅點或數字。360 px 寬 5 等分（各 72 px）。`data-testid`：`bottom-nav`、`tab-stamps`、`tab-explore`、`tab-home`、`tab-journal`、`tab-me`。
 - 右上角光點餘額（`BalanceChip`，`data-testid="balance-chip"`，「✦ N 光點」，`aria-label`「光點 N，前往商店」）連到 `/shop`；每個分頁頁首（`TabHeader`）與地圖右上都有。
-- 地圖頁的浮動元件（掃樹牌浮鈕、附近／全市、任務小入口、右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
+- 地圖頁的浮動元件（掃樹牌浮鈕、任務小入口、右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
 - 從樹洞點進樹的頁面，返回回到樹洞（路由 state `from`）；其他來源回地圖。
 
 ### 探索 `/explore`
@@ -236,7 +243,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ### 我的 `/me`
 
-小芽、光點紀錄、徽章、換裝，加上「設定與其他」：新手引導（`reopen-tour`）、帳號（雲端模式：Google 保留紀錄、登出）、Demo 工具（開／離開 Demo 模式、清除本機資料或刪除雲端資料）、資料來源說明，最下方小連結「示範後台」（`demo-control-link`）。商店、圖鑑、集章冊的按鈕已移除（餘額晶片、探索、集章冊分頁取代）。
+小芽、光點紀錄、徽章、換裝，加上「設定與其他」：陪你的動物（`me-animal`，同一個 `AnimalPicker`，4 選 1，點了立刻換，2026-10-19 加）、新手引導（`reopen-tour`）、帳號（雲端模式：Google 保留紀錄、登出）、Demo 工具（開／離開 Demo 模式、清除本機資料或刪除雲端資料）、資料來源說明，最下方小連結「示範後台」（`demo-control-link`）。商店、圖鑑、集章冊的按鈕已移除（餘額晶片、探索、集章冊分頁取代）。
 
 ### 示範後台 `/demo-control`
 

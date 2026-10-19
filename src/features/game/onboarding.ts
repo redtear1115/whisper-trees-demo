@@ -6,7 +6,9 @@ import { inventory } from './inventory'
 import { baseLedger } from './ledger'
 
 export interface Onboarding {
-  /** 「收集光點」引導目前停在第幾步，從「我的」接著看 */
+  /** 陪你的動物（地圖上代表你）：'blue-magpie' | 'night-heron' | 'squirrel' | 'pangolin'；沒選過就是臺灣藍鵲，見 features/avatar/animals.ts */
+  animal?: string
+  /** 「收集光點」引導目前停在第幾步，從「我的」接著看。0 = 選動物、1–4 = 其餘步驟、5 = 走完 */
   tourStep?: number
   /** 按了「之後再說」 */
   tourDismissedAt?: number

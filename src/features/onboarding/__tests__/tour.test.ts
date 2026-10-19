@@ -6,6 +6,7 @@ import {
   isStandalone,
   reopenPatch,
   shouldRecordHomeScreen,
+  STEP_ANIMAL,
   STEP_CELEBRATE,
   STEP_DONE,
   STEP_HOME,
@@ -15,8 +16,21 @@ import {
 } from '../tour'
 
 describe('tourView', () => {
-  it('shows step 1 for a new user once the user doc is ready, and asks to persist the step', () => {
-    expect(tourView({ ob: {}, firstLight: false, ready: true })).toEqual({ open: true, step: STEP_INTRO, needsInit: true })
+  it('shows step 0 (pick an animal) for a new user once the user doc is ready, and asks to persist the step', () => {
+    expect(STEP_ANIMAL).toBe(0)
+    expect(tourView({ ob: {}, firstLight: false, ready: true })).toEqual({ open: true, step: STEP_ANIMAL, needsInit: true })
+  })
+  it('keeps the old step numbers: a stored 1..5 means what it meant before the animal step was added', () => {
+    expect(tourView({ ob: { tourStep: 1 }, firstLight: false, ready: true })).toEqual({ open: true, step: STEP_INTRO, needsInit: false })
+    expect(tourView({ ob: { tourStep: 0 }, firstLight: false, ready: true })).toEqual({ open: true, step: STEP_ANIMAL, needsInit: false })
+    expect(tourView({ ob: { tourStep: 3 }, firstLight: true, ready: true }).step).toBe(STEP_CELEBRATE)
+    expect(tourView({ ob: { tourStep: STEP_DONE }, firstLight: false, ready: true }).open).toBe(false)
+  })
+  it('does not pull someone already past step 0 back to pick an animal (they get 臺灣藍鵲 and can change it in 我的)', () => {
+    expect(tourView({ ob: { tourStep: 1 }, firstLight: false, ready: true }).step).toBe(STEP_INTRO)
+  })
+  it('first light jumps from the animal step to the celebration too', () => {
+    expect(tourView({ ob: { tourStep: 0 }, firstLight: true, ready: true }).step).toBe(STEP_CELEBRATE)
   })
   it('stays closed until the user doc is ready (avoid flashing for someone who already dismissed)', () => {
     expect(tourView({ ob: {}, firstLight: false, ready: false }).open).toBe(false)
@@ -75,8 +89,8 @@ describe('reopenPatch', () => {
     expect(reopenPatch({ tourStep: 2, tourDismissedAt: 99 })).toEqual({ tourDismissedAt: 0, tourStep: 2 })
   })
   it('starts over when the tour was finished or never started', () => {
-    expect(reopenPatch({ tourStep: STEP_DONE })).toEqual({ tourDismissedAt: 0, tourStep: STEP_INTRO })
-    expect(reopenPatch({})).toEqual({ tourDismissedAt: 0, tourStep: STEP_INTRO })
+    expect(reopenPatch({ tourStep: STEP_DONE })).toEqual({ tourDismissedAt: 0, tourStep: STEP_ANIMAL })
+    expect(reopenPatch({})).toEqual({ tourDismissedAt: 0, tourStep: STEP_ANIMAL })
   })
   it('makes a dismissed tour visible again at the saved step', () => {
     const ob = { tourStep: 2, tourDismissedAt: 99 }

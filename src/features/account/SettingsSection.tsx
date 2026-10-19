@@ -5,6 +5,7 @@ import { externalBrowserUrl, inAppBrowser, useAuth } from '../../lib/firebase'
 import { onboarding, patchOnboarding } from '../game/onboarding'
 import { reopenPatch } from '../onboarding/tour'
 import { useGoogleLink } from '../onboarding/useGoogleLink'
+import { AnimalPicker } from '../avatar/AnimalPicker'
 
 /** 帳號：訪客 / 已用 Google 保留。Google 綁定要在 click 事件裡同步呼叫（見 linkGoogle）。 */
 function AccountCard() {
@@ -66,6 +67,13 @@ export function SettingsSection() {
     <>
       <h2 className="section-title">設定與其他</h2>
       <Card>
+        <div className="me-animal" data-testid="me-animal">
+          <p className="me-animal-title">
+            <strong>陪你的動物</strong>
+            <span className="muted small">在地圖上代表你</span>
+          </p>
+          <AnimalPicker name="me-animal" />
+        </div>
         <button
           className="menu-link"
           data-testid="reopen-tour"

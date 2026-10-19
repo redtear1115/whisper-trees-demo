@@ -2,15 +2,18 @@ import { useEffect, useRef, useState } from 'react'
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser'
 import { DEMO } from '../../config'
 import { isDemoMode } from '../../store'
+import type { Tree } from '../../lib/trees'
 import { IconBack, IconCamera } from '../../components/icons'
 
 interface Props {
   onResult: (text: string) => void
   onClose: () => void
+  /** 從地圖上某棵樹的行動圈過來：提示要掃的樹；Demo 的示範按鈕也掃這一棵 */
+  hint?: Tree | null
 }
 
 /** 在網頁裡開後鏡頭掃樹牌 QR Code；也可以從相簿選照片。 */
-export function Scanner({ onResult, onClose }: Props) {
+export function Scanner({ onResult, onClose, hint }: Props) {
   const video = useRef<HTMLVideoElement>(null)
   const done = useRef(false)
   const [error, setError] = useState<string | null>(null)
@@ -74,6 +77,12 @@ export function Scanner({ onResult, onClose }: Props) {
         </button>
       </div>
       <div className="scanner-bottom">
+        {hint && (
+          <p className="scanner-hint" data-testid="scan-hint">
+            要打卡的是：{hint.species}
+            {hint.place && `・${hint.place}`}。找到它樹幹上的樹牌，對準 QR Code。
+          </p>
+        )}
         <figure className="tag-guide">
           <img src={`${import.meta.env.BASE_URL}assets/photo/tree-tag.jpg`} alt="公園處樹牌：白色金屬牌，右邊是 QR Code" />
           <figcaption>找樹幹上這塊白色金屬牌，對準右邊的 QR Code，不用按快門。</figcaption>
@@ -119,8 +128,8 @@ export function Scanner({ onResult, onClose }: Props) {
               輸入編號
             </button>
             {demo && (
-              <button className="btn primary demo-scan" onClick={() => finish(DEMO.qrText)}>
-                掃示範樹牌（Demo）
+              <button className="btn primary demo-scan" onClick={() => finish(hint ? `http://trees.gov.taipei/show/?treeid=${hint.id}` : DEMO.qrText)}>
+                {hint ? '掃這棵樹的樹牌（Demo）' : '掃示範樹牌（Demo）'}
               </button>
             )}
           </div>

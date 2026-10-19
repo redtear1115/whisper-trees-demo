@@ -411,37 +411,14 @@ textarea.input {
   pointer-events: auto;
 }
 
+/* 左上角不放標誌：光點餘額靠右 */
+.map-top {
+  justify-content: flex-end;
+}
+
 .logo {
   width: 96px;
   height: 29px;
-}
-
-.gap-card {
-  position: absolute;
-  top: calc(max(10px, env(safe-area-inset-top)) + 58px);
-  left: 12px;
-  max-width: min(420px, calc(100% - 24px));
-  background: rgba(255, 253, 248, 0.96);
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(44, 58, 46, 0.12);
-}
-
-.gap-toggle {
-  display: block;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 14px;
-  border: 0;
-  background: none;
-  text-align: left;
-  font-family: var(--font-voice);
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.gap-card.open p {
-  padding: 0 14px 12px;
-  margin: 0;
 }
 
 .close {
@@ -1527,10 +1504,6 @@ body.is-demo .map-top {
   padding-top: max(26px, env(safe-area-inset-top));
 }
 
-body.is-demo .gap-card {
-  top: calc(max(26px, env(safe-area-inset-top)) + 58px);
-}
-
 body.is-demo .page,
 body.is-demo .console,
 body.is-demo .gov {
@@ -1722,32 +1695,6 @@ label.btn:focus-within {
   margin-top: 10px;
 }
 
-/* ---------- map home ---------- */
-
-.brand {
-  margin: 0;
-  padding: 2px 12px;
-  border-radius: 999px;
-  background: rgba(255, 253, 248, 0.92);
-  font-family: var(--font-voice);
-  font-size: 1.35rem;
-  color: var(--green-ink);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-@media (max-width: 440px) {
-  .map-top .brand {
-    display: block;
-  }
-}
-
-.gap-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-right: 44px;
-}
-
 .chev {
   display: inline-flex;
   transform: rotate(90deg);
@@ -1757,19 +1704,6 @@ label.btn:focus-within {
 
 .chev.up {
   transform: rotate(-90deg);
-}
-
-.gap-dismiss {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  background: none;
-  font-size: 1.3rem;
-  color: var(--muted);
-  cursor: pointer;
 }
 
 .map-tools {
@@ -1832,22 +1766,6 @@ label.btn:focus-within {
 
 .mode-toggle .segmented button {
   min-height: 40px;
-}
-
-.legend-row {
-  flex-basis: 100%;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  padding: 4px 10px;
-  border-radius: 10px;
-  background: rgba(255, 253, 248, 0.92);
-  font-size: 0.8rem;
-}
-
-.legend-row .legend {
-  margin-left: 6px;
 }
 
 .scan-hint {
@@ -1919,7 +1837,6 @@ label.btn:focus-within {
   max-width: 1100px;
 }
 
-.gap-card,
 .map-tools,
 .mode-toggle,
 .scan-hint,
@@ -2294,7 +2211,7 @@ body.has-offline .gov {
   position: absolute;
   z-index: 2;
   left: 12px;
-  bottom: calc(var(--map-base) + 196px);
+  bottom: calc(var(--map-base) + 150px);
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -2816,4 +2733,289 @@ body.has-offline .gov {
     /* 像手機一樣不顯示捲軸，免得捲軸吃掉寬度；滾輪與觸控板照樣能捲 */
     scrollbar-width: none;
   }
+}
+
+/* ---------- 陪你的動物（地圖上的人物與選擇器） ---------- */
+
+/* 地圖上代表你：maplibre 標記，腳底在定位點。maplibre 自己用 transform 擺位置，所以這層不能設 transform */
+.me-avatar {
+  width: 56px;
+  height: 56px;
+  pointer-events: none;
+}
+
+.me-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 3px rgba(44, 58, 46, 0.35));
+}
+
+.me-avatar-tag {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 2px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  color: var(--ink);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .me-avatar img {
+    animation: avatar-bob 2.6s ease-in-out infinite alternate;
+  }
+  @keyframes avatar-bob {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-3px);
+    }
+  }
+}
+
+.animal-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.animal-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 6px 2px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+}
+
+.animal-option.on {
+  border-color: var(--green);
+  background: var(--green-soft);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.animal-option:has(input:focus-visible) {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+}
+
+.animal-art {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.animal-name {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.me-animal {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.me-animal-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+}
+
+/* ---------- 點樹：樹旁的行動圈 ---------- */
+
+/* 蓋在地圖上的一層；位置由 TreeRingLayer 依樹在畫面上的位置設定。這層不吃點擊，只有圈本身吃，點地圖其他地方還是會到地圖 */
+.tree-rings-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tree-rings {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+}
+
+.tree-rings-title {
+  position: absolute;
+  left: 0;
+  top: -112px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: max-content;
+  max-width: min(300px, calc(100vw - 24px));
+  padding: 2px 2px 2px 14px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.95);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+}
+
+.tree-rings.shown .tree-rings-title {
+  opacity: 1;
+}
+
+.tree-rings-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.tree-rings-close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.tree-ring {
+  position: absolute;
+  left: -36px;
+  top: -28px;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  color: var(--ink);
+  transform: translate(var(--x), var(--y)) scale(var(--s, 1));
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.25s ease-out;
+}
+
+.tree-rings:not(.shown) .tree-ring {
+  --s: 0.5;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tree-ring-disc {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fffbe8, #f8dd8f 58%, #ecbf4f);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.75), 0 0 18px 6px rgba(242, 193, 78, 0.6);
+}
+
+.tree-ring-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.tree-ring-label {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* 離太遠：灰色、沒有發光，但還是可以點（會說還差多遠） */
+.tree-ring.off .tree-ring-disc {
+  background: #dcdcd4;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
+}
+
+.tree-ring.off .tree-ring-icon {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.tree-ring.off .tree-ring-label {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.tree-ring:focus-visible .tree-ring-disc,
+.tree-rings-close:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 3px;
+}
+
+.tree-rings-note {
+  position: absolute;
+  left: 0;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.tree-rings-note:empty {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-ring,
+  .tree-rings-title {
+    transition: none;
+  }
+}
+
+.scanner-hint {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 253, 248, 0.95);
+  color: var(--ink);
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.anchor-target {
+  scroll-margin-top: 12px;
 }

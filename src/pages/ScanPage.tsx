@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Scanner } from '../features/checkin/Scanner'
 import { parseTreeId } from '../lib/treeId'
-import { findTree } from '../lib/trees'
+import { findTree, type Tree } from '../lib/trees'
 import { judgeCheckin, offsetNorth, type CheckinResult } from '../lib/geo'
 import { locate } from '../lib/locate'
 import { CHECKIN, DATA_VERSION } from '../config'
@@ -20,6 +20,16 @@ export interface CheckinState {
 export default function ScanPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState<Step>({ kind: 'scan' })
+  // 從地圖上樹旁的「掃樹牌」圈過來：提示要掃哪一棵（只是提示，掃到別棵照常處理）
+  const hintTreeId = (useLocation().state as { hintTreeId?: string } | null)?.hintTreeId
+  const [hint, setHint] = useState<Tree | null>(null)
+  useEffect(() => {
+    let alive = true
+    if (hintTreeId) findTree(hintTreeId).then((t) => alive && setHint(t))
+    return () => {
+      alive = false
+    }
+  }, [hintTreeId])
 
   const handle = async (raw: string) => {
     const id = parseTreeId(raw)
@@ -45,7 +55,7 @@ export default function ScanPage() {
     navigate(`/tree/${id}`, { replace: true, state: { checkin, glow } satisfies CheckinState })
   }
 
-  if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(-1)} />
+  if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(-1)} hint={hint} />
 
   return (
     <div className="scan-status">

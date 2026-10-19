@@ -22,6 +22,8 @@ export default function TreePage() {
   // 從樹洞或圖鑑點進來，返回就回到那一頁；其他（掃碼、地圖）回地圖
   const fromTab = (location.state as { from?: string } | null)?.from
   const back = fromTab === '/journal' ? { to: '/journal', label: '樹洞' } : { to: '/', label: '地圖' }
+  // 從地圖行動圈來、人在感應圈內：還沒打卡就提醒「掃一下樹牌就好」，不要再叫人走過去
+  const nearTree = (location.state as { nearTree?: boolean } | null)?.nearTree === true
   const night = !isDaytime()
   const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
@@ -33,6 +35,17 @@ export default function TreePage() {
       alive = false
     }
   }, [treeId])
+
+  // 從地圖的行動圈來：/tree/:id#whisper、#report 捲到對應的區塊（樹資料載入後才有區塊）
+  const hash = location.hash.slice(1)
+  const loaded = !!tree
+  useEffect(() => {
+    if (!hash || !loaded) return
+    const target = document.getElementById(hash)
+    if (!target) return
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+  }, [hash, loaded])
 
   const checkins = useStore((s) => s.checkins)
   const myWhispers = useStore((s) => s.whispers[treeId])
@@ -97,16 +110,18 @@ export default function TreePage() {
         </section>
       )}
 
-      {onSite ? (
-        <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} />
-      ) : (
-        <section className="card">
-          <p>想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。</p>
-          <Link className="btn primary block" to="/scan">
-            掃樹牌
-          </Link>
-        </section>
-      )}
+      <div id="whisper" className="anchor-target">
+        {onSite ? (
+          <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} />
+        ) : (
+          <section className="card">
+            <p>{nearTree ? '你已經在樹旁邊了。掃一下樹幹上的樹牌，就能對它說句話。' : '想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。'}</p>
+            <Link className="btn primary block" to="/scan" state={{ hintTreeId: treeId }}>
+              掃樹牌
+            </Link>
+          </section>
+        )}
+      </div>
 
       {capsule && capsule.mock && (
         <section className="capsule" aria-label="時空膠囊">
@@ -145,7 +160,9 @@ export default function TreePage() {
         <p className="muted small">資料來源：臺北市政府工務局公園路燈工程管理處開放資料</p>
       </details>
 
-      <ReportBox tree={tree} onSite={!!onSite} />
+      <div id="report" className="anchor-target">
+        <ReportBox tree={tree} onSite={!!onSite} />
+      </div>
     </div>
   )
 }

@@ -1,8 +1,11 @@
 // 「收集光點」引導的步驟邏輯與裝置判斷。全是純函式，元件只負責畫。
-// 步驟：1 光點是什麼 → 2 去掃樹牌 → 3 第一道光慶祝（含新手禮）→ 4 加到主畫面。tourStep 存目前停的步驟，5 = 走完。
+// 步驟：0 選一隻陪你的動物 → 1 光點是什麼 → 2 去掃樹牌 → 3 第一道光慶祝（含新手禮）→ 4 加到主畫面。tourStep 存目前停的步驟，5 = 走完。
+// 動物步驟（2026-10-19 加）用 0，其餘編號不變：已存的 tourStep 1–5 意思不變、不用搬資料。
+// 已經在第 1 步以後的人不會被拉回選動物（預設臺灣藍鵲，之後可以在「我的」換）；沒存過步驟的新使用者從 0 開始。
 
 import type { Onboarding } from '../game/onboarding'
 
+export const STEP_ANIMAL = 0
 export const STEP_INTRO = 1
 export const STEP_SCAN = 2
 export const STEP_CELEBRATE = 3
@@ -21,15 +24,15 @@ export interface TourInput {
 
 export interface TourView {
   open: boolean
-  /** 目前該畫哪一步（1–4） */
+  /** 目前該畫哪一步（0–4） */
   step: number
-  /** 開著、但 tourStep 還沒存過：呼叫端要補存 tourStep: 1，之後才算「開始過」 */
+  /** 開著、但 tourStep 還沒存過：呼叫端要補存 tourStep: 0（STEP_ANIMAL），之後才算「開始過」 */
   needsInit: boolean
 }
 
 /**
  * 引導要不要開、停在哪一步。
- * - 還沒拿到第一道光：沒按過「之後再說」就開（只會在第 1、2 步）。
+ * - 還沒拿到第一道光：沒按過「之後再說」就開（只會在第 0、1、2 步）。
  * - 已拿到第一道光：只有「開始過」（tourStep 有存）的人才接著看，直接到第 3 步慶祝；
  *   舊使用者（早就有光點、沒看過引導）不會被打擾，要看可以從「我的」進。
  * - 走完（tourStep = 5）或按過「之後再說」就收起。
@@ -37,11 +40,11 @@ export interface TourView {
  */
 export function tourView({ ob, firstLight, ready, demo }: TourInput): TourView {
   const stored = ob.tourStep
-  const closed: TourView = { open: false, step: STEP_INTRO, needsInit: false }
+  const closed: TourView = { open: false, step: STEP_ANIMAL, needsInit: false }
   if (!ready || ob.tourDismissedAt || (stored !== undefined && stored >= STEP_DONE)) return closed
   if (demo && ob.tourDismissedAt === undefined) return closed
   if (firstLight && stored === undefined) return closed
-  let step = Math.min(Math.max(stored ?? STEP_INTRO, STEP_INTRO), STEP_HOME)
+  let step = Math.min(Math.max(stored ?? STEP_ANIMAL, STEP_ANIMAL), STEP_HOME)
   if (firstLight && step < STEP_CELEBRATE) step = STEP_CELEBRATE
   if (!firstLight && step > STEP_SCAN) step = STEP_SCAN
   return { open: true, step, needsInit: stored === undefined }
@@ -49,11 +52,11 @@ export function tourView({ ob, firstLight, ready, demo }: TourInput): TourView {
 
 /**
  * 從「我的」的「新手引導」重新打開要寫的欄位。
- * 「之後再說」用 0 表示沒收起（雲端是逐欄合併，欄位寫 undefined 不會清掉）；已走完就從第 1 步重看。
+ * 「之後再說」用 0 表示沒收起（雲端是逐欄合併，欄位寫 undefined 不會清掉）；已走完就從頭（選動物）重看。
  */
 export function reopenPatch(ob: Onboarding): Pick<Onboarding, 'tourDismissedAt' | 'tourStep'> {
   const stored = ob.tourStep
-  return { tourDismissedAt: 0, tourStep: stored === undefined || stored >= STEP_DONE ? STEP_INTRO : stored }
+  return { tourDismissedAt: 0, tourStep: stored === undefined || stored >= STEP_DONE ? STEP_ANIMAL : stored }
 }
 
 /**

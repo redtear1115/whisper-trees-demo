@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
-import { findTree, loadDistricts, type District, type Tree } from '../lib/trees'
+import { findTree, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
 import { totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
-import { IconChevron, IconHeading, IconLamp, IconLayers, IconNorth, IconTrash } from '../components/icons'
+import { IconHeading, IconLamp, IconLayers, IconNorth, IconTrash } from '../components/icons'
 import { distanceMeters } from '../lib/geo'
 import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
@@ -25,9 +25,11 @@ import { ringRadius, treesInRing } from '../features/map/ring'
 import { hasFinePointer } from '../features/map/rotation'
 import { RotationControl } from '../features/map/RotationControl'
 import { BalanceChip } from '../features/nav/BalanceChip'
+import { useAnimal } from '../features/avatar/useAnimal'
+import { TreeRingLayer } from '../features/map/TreeRingLayer'
+import { rangeInfo, TREE_FOCUS } from '../features/map/treeRings'
 
 type Sheet =
-  | { kind: 'tree'; tree: Tree }
   | { kind: 'pit'; pit: PitInfo; justWished?: boolean }
   | { kind: 'spot'; pit: PitInfo }
   | { kind: 'wish'; wishId: string; fresh?: boolean }
@@ -37,14 +39,18 @@ type Sheet =
 
 type LayerKey = 'trees' | 'pits' | 'wishes' | 'parks'
 
-/** 地圖上次的位置，從樹的頁面回來時接著看（全市模式） */
-let lastView: { center: LngLat; zoom: number } | null = null
+/** 點樹後鏡頭飛進去前的視角，關掉行動圈時飛回來 */
+interface View {
+  center: LngLat
+  zoom: number
+  pitch: number
+  bearing: number
+}
 
-/** 附近：45° 俯視、只能在目前位置半徑內移動；全市：平面、可看整個台北 */
-type Mode = 'near' | 'city'
-let lastMode: Mode = 'near'
-/** 這次瀏覽收起過差距卡就不再出現 */
-let gapDismissed = false
+/** 使用者設了「減少動態」就不要動畫 */
+const motionMs = (ms: number) => (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : ms)
+
+// 市民端地圖只有「附近」：45° 俯視、街景、只能在目前位置半徑內移動（2026-10-19 決定，全市模式已移除）
 
 export default function MapPage() {
   const el = useRef<HTMLDivElement>(null)
@@ -57,22 +63,10 @@ export default function MapPage() {
     parks: true,
   })
   const [panel, setPanel] = useState(false)
-  const [gap, setGap] = useState<{ high: District; low: District } | null>(null)
-  const [gapOpen, setGapOpen] = useState(false)
-  const [gapHidden, setGapHiddenState] = useState(gapDismissed)
-  const setGapHidden = (v: boolean) => {
-    gapDismissed = v
-    setGapHiddenState(v)
-  }
-  const [mode, setModeState] = useState<Mode>(lastMode)
-  const setMode = (m: Mode) => {
-    lastMode = m
-    setModeState(m)
-  }
   const [ready, setReady] = useState(false)
   const navState = useLocation().state as { focus?: LngLat; wishId?: string } | null
   const focus = navState?.focus
-  const anchor = useAnchor(mode === 'near')
+  const anchor = useAnchor(true)
   const [follow, setFollow] = useState(false)
   const [bearing, setBearing] = useState(0)
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
@@ -80,6 +74,13 @@ export default function MapPage() {
   const [finePointer] = useState(hasFinePointer)
   const [rotateOpen, setRotateOpen] = useState(false)
   const [nearCount, setNearCount] = useState(0)
+  // 點樹：鏡頭飛到樹旁，樹旁浮出行動圈。shown = 鏡頭到位了才顯示行動圈
+  const [treeFocus, setTreeFocus] = useState<{ tree: Tree; shown: boolean } | null>(null)
+  const focusRef = useRef(treeFocus)
+  focusRef.current = treeFocus
+  const prevView = useRef<View | null>(null)
+  const navigate = useNavigate()
+  const animal = useAnimal()
   const wishes = useWishes()
   const tour = useTourView()
   const userReady = useUserReady()
@@ -88,22 +89,14 @@ export default function MapPage() {
   const allTasksDone = useStore((s) => newcomerDone(s))
 
   useEffect(() => {
-    loadDistricts().then((ds) => {
-      const high = ds.find((d) => d.district === '大安區')
-      const low = ds.find((d) => d.district === '文山區')
-      if (high && low) setGap({ high, low })
-    })
-  }, [])
-
-  useEffect(() => {
     const base = new URL(import.meta.env.BASE_URL, location.origin).href
     const m = new maplibregl.Map({
       container: el.current!,
       style: MAP_STYLE,
-      center: lastMode === 'near' ? DEMO.center : (lastView?.center ?? DEMO.center),
-      zoom: lastMode === 'near' ? NEAR.zoom : (lastView?.zoom ?? DEMO.zoom),
-      pitch: lastMode === 'near' ? NEAR.pitch : 0,
-      bearing: lastMode === 'near' ? NEAR.bearing : 0,
+      center: DEMO.center,
+      zoom: NEAR.zoom,
+      pitch: NEAR.pitch,
+      bearing: NEAR.bearing,
       maxPitch: 60,
       attributionControl: false,
       locale: MAP_LOCALE,
@@ -127,11 +120,6 @@ export default function MapPage() {
       new maplibregl.GeolocateControl({ positionOptions: { enableHighAccuracy: true }, trackUserLocation: false }),
       'bottom-right',
     )
-    m.on('moveend', () => {
-      if (lastMode !== 'city') return
-      const c = m.getCenter()
-      lastView = { center: [c.lng, c.lat], zoom: m.getZoom() }
-    })
     m.on('load', () => {
       // 小螢幕上署名預設展開會擋住按鈕，先收起來（點 i 可展開）
       el.current?.querySelector('.maplibregl-compact-show')?.classList.remove('maplibregl-compact-show')
@@ -194,7 +182,6 @@ export default function MapPage() {
         source: 'ring',
         paint: { 'line-color': '#d9a935', 'line-width': 1.5, 'line-opacity': 0.8 },
       })
-      m.addSource('me', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addLayer({
         id: 'trees',
         type: 'circle',
@@ -241,31 +228,6 @@ export default function MapPage() {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3.5, 17, 6, 19, 10],
         },
       })
-      m.addLayer({
-        id: 'me',
-        type: 'circle',
-        source: 'me',
-        paint: {
-          'circle-color': ['match', ['get', 'source'], 'gps', '#2f7de1', '#b36b2c'],
-          'circle-radius': 8,
-          'circle-stroke-color': '#fff',
-          'circle-stroke-width': 3,
-          'circle-pitch-alignment': 'map',
-        },
-      })
-      m.addLayer({
-        id: 'me-label',
-        type: 'symbol',
-        source: 'me',
-        layout: {
-          'text-field': ['match', ['get', 'source'], 'gps', '你在這裡', '示範位置'],
-          'text-size': 13,
-          'text-offset': [0, 1.4],
-          'text-anchor': 'top',
-          'text-font': ['Noto Sans Bold'],
-        },
-        paint: { 'text-color': '#2c3a2e', 'text-halo-color': '#fffdf8', 'text-halo-width': 2 },
-      })
       // 選到的樹或樹穴：一圈光暈
       m.addSource('selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addLayer(
@@ -274,7 +236,7 @@ export default function MapPage() {
           type: 'circle',
           source: 'selected',
           paint: {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 8, 17, 18, 19, 30],
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 8, 17, 18, 19, 30, 21, 64],
             'circle-color': 'rgba(242, 193, 78, 0.35)',
             'circle-stroke-color': '#c98a00',
             'circle-stroke-width': 2.5,
@@ -283,7 +245,7 @@ export default function MapPage() {
         },
         'trees',
       )
-      applyChineseLabels(m, ['me-label'])
+      applyChineseLabels(m)
       setReady(true)
     })
     m.on('click', (e) => {
@@ -295,11 +257,20 @@ export default function MapPage() {
       ]
       const layersNow = ['pits', 'trees'].filter((l) => m.getLayer(l) && m.getLayoutProperty(l, 'visibility') !== 'none')
       const hit = m.queryRenderedFeatures(box, { layers: layersNow })[0]
+      const focused = focusRef.current
+      if (hit?.layer.id === 'trees') {
+        // 點樹：鏡頭飛進去，樹旁浮出行動圈（不開抽屜）。已在看的那棵再點一次不動作；點別棵就換過去
+        const id = hit.properties.id as string
+        if (focused?.tree.id === id) return
+        setSheet(null)
+        findTree(id).then((tree) => tree && focusTree.current(tree))
+        return
+      }
+      // 點別處：收起行動圈、鏡頭飛回原來的街景
+      if (focused) return unfocusTree.current()
       if (!hit) return setSheet(null)
       select(m, (hit.geometry as unknown as { coordinates: LngLat }).coordinates)
-      if (hit.layer.id === 'trees') {
-        findTree(hit.properties.id as string).then((tree) => tree && setSheet({ kind: 'tree', tree }))
-      } else {
+      {
         const p = hit.properties
         const coords = (hit.geometry as unknown as { coordinates: LngLat }).coordinates
         const existing = wishByPit(p.pit_id as string)
@@ -312,6 +283,7 @@ export default function MapPage() {
     })
     // 長按（或右鍵）任意位置許願：不是樹穴，初步判斷為「需會勘」
     const wishAt = (point: maplibregl.Point, lngLat: maplibregl.LngLat) => {
+      if (focusRef.current) return // 行動圈開著時不開許願
       select(m, [lngLat.lng, lngLat.lat])
       const near = m
         .queryRenderedFeatures(
@@ -349,16 +321,15 @@ export default function MapPage() {
     }
   }, [])
 
-  // 從「樹洞」的我的許願點「在地圖上看」：切到全市，飛到那個許願
+  // 從「樹洞」的我的許願點「在地圖上看」：飛到那個許願（只有附近模式，許願在可移動範圍之外時鏡頭停在範圍邊緣，抽屜照開）
   useEffect(() => {
     if (!focus || !ready || !map.current) return
-    setMode('city')
     const m = map.current
     const t = setTimeout(() => {
       m.flyTo({ center: focus, zoom: 17.5, duration: 1200, offset: [0, -window.innerHeight * 0.2] })
       select(m, focus, false)
       if (navState?.wishId) setSheet({ kind: 'wish', wishId: navState.wishId })
-    }, 950)
+    }, 300)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus, ready])
@@ -380,7 +351,7 @@ export default function MapPage() {
     })
   }, [sheet])
 
-  // 附近／全市模式：鏡頭角度與可移動範圍
+  // 附近模式：鏡頭角度與可移動範圍
   const centeredOn = useRef<string | null>(null)
   const anchorRef = useRef(anchor)
   anchorRef.current = anchor
@@ -388,48 +359,105 @@ export default function MapPage() {
     const m = map.current
     if (!m || !ready) return
     const nearby = m.getSource('nearby') as maplibregl.GeoJSONSource | undefined
-    const me = m.getSource('me') as maplibregl.GeoJSONSource | undefined
-    if (mode === 'city') {
-      centeredOn.current = null
-      setFollow(false)
-      m.setMaxBounds(null)
-      m.setMinZoom(10)
-      nearby?.setData({ type: 'FeatureCollection', features: [] })
-      me?.setData({ type: 'FeatureCollection', features: [] })
-      // 全市：拉遠看整個台北，看得出哪裡缺樹
-      m.easeTo({ pitch: 0, bearing: 0, zoom: 12.2, center: [121.555, 25.06], duration: 900 })
-      return
-    }
     const key = `${anchor.source}:${anchor.lngLat.join()}`
     nearby?.setData({ type: 'Polygon', coordinates: [circleRing(anchor.lngLat, NEAR.radiusMeters)] })
-    me?.setData({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: anchor.lngLat },
-      properties: { source: anchor.source },
-    })
     m.setMaxBounds(null)
     m.setMinZoom(NEAR.minZoom)
-    if (centeredOn.current !== key) {
-      // 進附近模式、或人移動了：鏡頭移到新的中心。上一段動畫可能被打斷，所以角度與縮放用「至少」而不是沿用目前值
+    if (focusRef.current) {
+      // 正在看一棵樹：不把鏡頭拉回人身上，只更新可移動範圍
+      m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
+    } else if (centeredOn.current !== key) {
+      // 進附近模式、或人移動了：鏡頭移到新的中心。進附近模式用預設街景縮放；人走動時保留使用者目前的縮放（至少 minZoom）。
+      // 上一段動畫可能被打斷，所以角度用「至少」而不是沿用目前值
+      const entering = centeredOn.current === null
       centeredOn.current = key
       m.easeTo({
         center: anchor.lngLat,
-        zoom: Math.max(m.getZoom(), NEAR.minZoom),
+        zoom: entering ? NEAR.zoom : Math.max(m.getZoom(), NEAR.minZoom),
         pitch: m.getPitch() < 30 ? NEAR.pitch : m.getPitch(),
         bearing: m.getPitch() < 30 ? NEAR.bearing : m.getBearing(),
         duration: 700,
       })
       // 動畫結束才鎖範圍，並用最新的中心（避免被打斷的動畫拿到舊位置）
       m.once('moveend', () => {
-        if (lastMode === 'near') m.setMaxBounds(boundsAround(anchorRef.current.lngLat, NEAR.radiusMeters))
+        m.setMaxBounds(boundsAround(anchorRef.current.lngLat, NEAR.radiusMeters))
       })
     } else {
       m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
     }
-  }, [mode, anchor, ready])
+  }, [anchor, ready])
+
+  // 人物：使用者選的動物站在目前位置（Demo 示範位置或 GPS）。HTML 標記，永遠面向畫面。附近模式才顯示
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    const node = document.createElement('div')
+    node.className = 'me-avatar'
+    node.dataset.testid = 'avatar-marker'
+    node.dataset.animal = animal.id
+    node.dataset.source = anchor.source
+    node.setAttribute('role', 'img')
+    node.setAttribute('aria-label', `你在這裡：${animal.name}`)
+    const img = document.createElement('img')
+    img.src = assetUrl(animal.art)
+    img.alt = ''
+    img.draggable = false
+    node.append(img)
+    if (anchor.source !== 'gps') {
+      // Demo／沒有定位：小字標示這是示範位置
+      const tag = document.createElement('span')
+      tag.className = 'me-avatar-tag'
+      tag.textContent = '示範位置'
+      node.append(tag)
+    }
+    const marker = new maplibregl.Marker({ element: node, anchor: 'bottom' }).setLngLat(anchor.lngLat).addTo(m)
+    return () => {
+      marker.remove()
+    }
+  }, [ready, anchor.lngLat, anchor.source, animal])
+
+  // 點樹：鏡頭飛到樹旁（約 20.5 級、60° 俯角、樹在畫面中心偏上），到位後浮出行動圈
+  const focusTree = useRef<(tree: Tree) => void>(() => {})
+  focusTree.current = (tree) => {
+    const m = map.current
+    if (!m) return
+    if (!prevView.current) {
+      const c = m.getCenter()
+      prevView.current = { center: [c.lng, c.lat], zoom: m.getZoom(), pitch: m.getPitch(), bearing: m.getBearing() }
+    }
+    select(m, tree.lngLat, false)
+    setPanel(false)
+    setTreeFocus({ tree, shown: false })
+    const duration = motionMs(TREE_FOCUS.durationMs)
+    m.easeTo({
+      center: tree.lngLat,
+      zoom: TREE_FOCUS.zoom,
+      pitch: TREE_FOCUS.pitch,
+      offset: [0, -m.getCanvas().clientHeight * TREE_FOCUS.offsetY],
+      duration,
+    })
+    const show = () => setTreeFocus((f) => (f && f.tree.id === tree.id ? { ...f, shown: true } : f))
+    // 減少動態：鏡頭直接到位，沒有 moveend 可等
+    if (duration === 0) show()
+    else m.once('moveend', show)
+  }
+  // 收起行動圈並飛回原來的街景
+  const unfocusTree = useRef<() => void>(() => {})
+  unfocusTree.current = () => {
+    const m = map.current
+    const prev = prevView.current
+    leaveFocus()
+    if (m && prev) m.easeTo({ ...prev, duration: motionMs(TREE_FOCUS.durationMs) })
+  }
+  // 不飛回去，只是離開（要開別的抽屜時）
+  function leaveFocus() {
+    prevView.current = null
+    setTreeFocus(null)
+    ;(map.current?.getSource('selected') as maplibregl.GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: [] })
+  }
 
   // 人物感應圈與圈內的樹（只在附近模式、有定位或 Demo 時）
-  const radius = mode === 'near' ? ringRadius(anchor) : null
+  const radius = ringRadius(anchor)
   useEffect(() => {
     const m = map.current
     if (!m || !ready) return
@@ -500,6 +528,7 @@ export default function MapPage() {
       node.tabIndex = -1
       node.onclick = (ev) => {
         ev.stopPropagation()
+        leaveFocus()
         select(m, w.lngLat)
         setSheet({ kind: 'wish', wishId: w.id })
       }
@@ -520,13 +549,17 @@ export default function MapPage() {
     else m.once('idle', apply)
   }, [layers])
 
+  // 點樹看行動圈時，其他浮動元件先收起，畫面只留地圖與行動圈
+  const idle = !sheet && !tour.open && !treeFocus
+  const focusRange = treeFocus ? rangeInfo(anchor, treeFocus.tree.lngLat) : null
+
   const sheetWish: Wish | undefined = sheet?.kind === 'wish' ? wishes.find((w) => w.id === sheet.wishId) : undefined
 
   return (
-    <div className={`map-page ${mode}`}>
+    <div className="map-page near">
       {/* 頁首放在地圖前面：鍵盤 Tab 先到導覽，再到地圖 */}
       <header className="map-top">
-        <h1 className="brand">曦語</h1>
+        <h1 className="sr-only">曦語地圖</h1>
         <BalanceChip />
       </header>
       <div ref={el} className="map" aria-label="樹木地圖" role="region" />
@@ -534,29 +567,6 @@ export default function MapPage() {
       <div className="map-event">
         <EventBar />
       </div>
-
-      {gap && !gapHidden && mode === 'city' && (
-        <div className={`gap-card ${gapOpen ? 'open' : ''}`}>
-          <button className="gap-toggle" onClick={() => setGapOpen((o) => !o)} aria-expanded={gapOpen}>
-            <span>
-              <strong>{gap.high.district}</strong>的行道樹密度是<strong>{gap.low.district}</strong>的{' '}
-              <strong className="num">{(gap.high.trees_per_km / gap.low.trees_per_km).toFixed(1)}</strong> 倍
-            </span>
-            <span className={`chev ${gapOpen ? 'up' : ''}`} aria-hidden>
-              <IconChevron />
-            </span>
-          </button>
-          <button className="gap-dismiss" onClick={() => setGapHidden(true)} aria-label="收起這張卡">
-            ×
-          </button>
-          {gapOpen && (
-            <p className="muted small">
-              每公里人行道的行道樹：{gap.high.trees_per_km} vs {gap.low.trees_per_km} 棵。全市 162,406 棵樹、16,781
-              個候選空樹穴（臺北市政府開放資料推算）。
-            </p>
-          )}
-        </div>
-      )}
 
       {panel && (
         <div className="layer-panel" id="layer-panel">
@@ -593,7 +603,6 @@ export default function MapPage() {
 
       {sheet && (
         <Sheet onClose={() => setSheet(null)} label={sheetLabel(sheet, sheetWish)}>
-          {sheet.kind === 'tree' && <TreeSheet tree={sheet.tree} />}
           {sheet.kind === 'pit' && (
             <div>
               <div className="row gap center-v">
@@ -639,15 +648,30 @@ export default function MapPage() {
         </Sheet>
       )}
 
-      {tour.open && !sheet && <TourSheet step={tour.step} />}
+      {treeFocus && focusRange && (
+        <TreeRingLayer
+          map={map.current}
+          tree={treeFocus.tree}
+          shown={treeFocus.shown}
+          range={focusRange}
+          onClose={() => unfocusTree.current()}
+          onGo={(a) => {
+            // nearTree：從行動圈來而且在感應圈內，樹的頁面可以說「你已經在樹旁邊了」；打卡仍然要掃樹牌
+            const state = { ...(a.hintTreeId && { hintTreeId: a.hintTreeId }), nearTree: focusRange.inRange }
+            navigate({ pathname: a.to, hash: a.hash ? `#${a.hash}` : undefined }, { state })
+          }}
+        />
+      )}
 
-      {!sheet && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
+      {tour.open && !sheet && !treeFocus && <TourSheet step={tour.step} />}
+
+      {!sheet && !treeFocus && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
         <Link className="tasks-chip" to="/explore" data-testid="tasks-chip">
           新手任務 {tasksDone}/4
         </Link>
       )}
 
-      {!sheet && !tour.open && (
+      {idle && (
         <div className="map-tools" role="group" aria-label="地圖工具">
           <button
             className="tool"
@@ -672,96 +696,55 @@ export default function MapPage() {
             </span>
             <span>北</span>
           </button>
-          {(mode === 'near' || finePointer) && (
-            <button
-              className={`tool ${follow || rotateOpen ? 'on' : ''}`}
-              data-testid="heading-button"
-              aria-pressed={finePointer ? undefined : follow}
-              aria-expanded={finePointer ? rotateOpen : undefined}
-              aria-label={finePointer ? '旋轉地圖' : '跟著手機方向轉動地圖'}
-              onClick={async () => {
-                setHeadingMsg(null)
-                if (rotateOpen) return setRotateOpen(false)
-                if (follow) return setFollow(false)
-                // 桌機沒有指南針：直接開旋轉控制
-                if (finePointer) {
-                  setPanel(false)
-                  return setRotateOpen(true)
-                }
-                if (!(await requestHeadingPermission())) {
-                  return setHeadingMsg('沒有方向權限。可以在瀏覽器設定開啟，或用兩指旋轉地圖。')
-                }
-                setFollow(true)
-              }}
-            >
-              <IconHeading />
-              <span>方向</span>
-            </button>
-          )}
+          <button
+            className={`tool ${follow || rotateOpen ? 'on' : ''}`}
+            data-testid="heading-button"
+            aria-pressed={finePointer ? undefined : follow}
+            aria-expanded={finePointer ? rotateOpen : undefined}
+            aria-label={finePointer ? '旋轉地圖' : '跟著手機方向轉動地圖'}
+            onClick={async () => {
+              setHeadingMsg(null)
+              if (rotateOpen) return setRotateOpen(false)
+              if (follow) return setFollow(false)
+              // 桌機沒有指南針：直接開旋轉控制
+              if (finePointer) {
+                setPanel(false)
+                return setRotateOpen(true)
+              }
+              if (!(await requestHeadingPermission())) {
+                return setHeadingMsg('沒有方向權限。可以在瀏覽器設定開啟，或用兩指旋轉地圖。')
+              }
+              setFollow(true)
+            }}
+          >
+            <IconHeading />
+            <span>方向</span>
+          </button>
         </div>
       )}
 
-      {!sheet && !tour.open && rotateOpen && (
+      {idle && rotateOpen && (
         <RotationControl map={map.current} bearing={bearing} onClose={() => setRotateOpen(false)} />
       )}
 
-      {!sheet && !tour.open && (
+      {idle && (headingMsg || follow || anchor.source === 'fallback') && (
         <div className="mode-toggle">
-          {mode === 'city' && (
-            <p className="legend-row" aria-label="圖例">
-              <span className="legend legend-tree" aria-hidden /> 樹
-              <span className="legend legend-pit" aria-hidden /> 空樹穴
-              <span className="legend legend-wish" aria-hidden /> 許願
-            </p>
-          )}
-          <div className="segmented" role="group" aria-label="地圖範圍">
-            <button className={mode === 'near' ? 'on' : ''} aria-pressed={mode === 'near'} onClick={() => setMode('near')}>
-              附近
-            </button>
-            <button className={mode === 'city' ? 'on' : ''} aria-pressed={mode === 'city'} onClick={() => setMode('city')}>
-              全市
-            </button>
-          </div>
           {headingMsg && <span className="mode-note">{headingMsg}</span>}
           {follow && <span className="mode-note">畫面上方就是你面向的方向</span>}
-          {mode === 'near' && anchor.source === 'fallback' && !follow && !headingMsg && (
-            <span className="mode-note">沒有定位：先看示範樹周圍</span>
-          )}
+          {anchor.source === 'fallback' && !follow && !headingMsg && <span className="mode-note">沒有定位：先看示範樹周圍</span>}
         </div>
       )}
 
-      {!sheet && !tour.open && (
-        <p className="scan-hint" data-testid={mode === 'near' && nearCount > 0 ? 'near-hint' : undefined} data-count={nearCount || undefined}>
-          {mode === 'near' && nearCount > 0 ? `附近有 ${nearCount} 棵樹可以掃` : '找一棵樹，掃它樹幹上的樹牌'}
+      {idle && (
+        <p className="scan-hint" data-testid={nearCount > 0 ? 'near-hint' : undefined} data-count={nearCount || undefined}>
+          {nearCount > 0 ? `附近有 ${nearCount} 棵樹可以掃` : '找一棵樹，掃它樹幹上的樹牌'}
         </p>
       )}
-      {!sheet && !tour.open && (
+      {idle && (
         <Link className="scan-fab" to="/scan">
           掃樹牌
         </Link>
       )}
-    </div>
-  )
-}
-
-function TreeSheet({ tree }: { tree: Tree }) {
-  return (
-    <div>
-      <h2>{tree.species}</h2>
-      <p className="muted small">
-        {tree.district} {tree.place}
-        {tree.remark && `（${tree.remark}）`}
-      </p>
-      <dl className="facts inline">
-        <dt>樹高</dt>
-        <dd>{tree.height ?? '—'} m</dd>
-        <dt>胸徑</dt>
-        <dd>{tree.diameter ?? '—'} cm</dd>
-      </dl>
-      <Link className="btn primary block" to={`/tree/${tree.id}`}>
-        看這棵樹
-      </Link>
-      <p className="muted small">從地圖點進去只能看，要打卡請掃樹牌。</p>
     </div>
   )
 }
@@ -800,8 +783,6 @@ function select(m: MLMap, at: LngLat, pan = true) {
 
 function sheetLabel(sheet: NonNullable<Sheet>, wish?: Wish): string {
   switch (sheet.kind) {
-    case 'tree':
-      return `${sheet.tree.species}・${sheet.tree.place}`
     case 'pit':
       return `空樹穴・${sheet.pit.road || sheet.pit.district}`
     case 'spot':

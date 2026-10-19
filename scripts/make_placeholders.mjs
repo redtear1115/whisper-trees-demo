@@ -20,12 +20,31 @@ const icons = [...src.matchAll(/\{ file: '([^']+)', size: (\d+), brief: '([^']+)
 const hue = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7)
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
+// 地圖人物與行動圈圖示：佔位檔多放一個 emoji 讓畫面看得出是什麼（正式美術取代後就不需要了）
+const GLYPH = {
+  'avatar-blue-magpie': '🐦',
+  'avatar-night-heron': '🐦‍⬛',
+  'avatar-squirrel': '🐿️',
+  'avatar-pangolin': '🦔',
+  'action-scan': '📷',
+  'action-whisper': '💬',
+  'action-info': '🌳',
+  'action-report': '✂️',
+}
+
 const outDir = join(root, 'public/assets/ph')
 mkdirSync(outDir, { recursive: true })
 for (const a of assets) {
   const small = Math.min(a.w, a.h) <= 120
   const fs = Math.max(8, Math.min(small ? Math.round(a.w / 7) : 18, Math.floor((a.w * 1.6) / a.id.length)))
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">
+  const glyph = GLYPH[a.id]
+  const svg = glyph
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">
+<text x="50%" y="${Math.round(a.h * 0.62)}" text-anchor="middle" font-size="${Math.round(a.h * 0.62)}">${glyph}</text>
+<text x="50%" y="${a.h - 3}" text-anchor="middle" font-family="sans-serif" font-size="7" fill="hsl(${hue(a.id)} 30% 30%)">${esc(a.id)} 佔位</text>
+</svg>
+`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">
 <rect x="1" y="1" width="${a.w - 2}" height="${a.h - 2}" rx="${small ? 14 : 12}" fill="hsl(${hue(a.id)} 45% 90%)" stroke="hsl(${hue(a.id)} 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
 <text x="50%" y="${small ? '50%' : '46%'}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="${fs}" fill="hsl(${hue(a.id)} 30% 30%)">${esc(a.id)}</text>
 ${small ? '' : `<text x="50%" y="58%" text-anchor="middle" font-family="sans-serif" font-size="13" fill="hsl(${hue(a.id)} 20% 40%)">${a.w}×${a.h} 佔位</text>`}

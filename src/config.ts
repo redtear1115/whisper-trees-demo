@@ -30,7 +30,8 @@ export const NEAR = {
   radiusMeters: 300,
   pitch: 45,
   bearing: -20,
-  zoom: 17,
+  /** 街景：只看得到你所在的那條街（2026-10-19 決定） */
+  zoom: 18.5,
   minZoom: 16,
 }
 

@@ -17,20 +17,20 @@
 | ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
 |---|---|---|---|---|---|---|
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
-| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:71` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
-| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:71` | 同上夜間版，「樹木休息中」的氣氛 |
-| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/MePage.tsx:48`<br>`src/pages/ShopPage.tsx:47`<br>`src/pages/TreePage.tsx:79` | 一道微光／光點的圖示，柔和發光 |
-| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:89`<br>`src/pages/TreePage.tsx:113` | 時空膠囊（信封或種子膠囊） |
-| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:510`<br>`src/pages/MapPage.tsx:497` | 小樹苗；地圖上依澆水數放大 |
+| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:84` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
+| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:84` | 同上夜間版，「樹木休息中」的氣氛 |
+| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/MePage.tsx:48`<br>`src/pages/ShopPage.tsx:47`<br>`src/pages/TreePage.tsx:92` | 一道微光／光點的圖示，柔和發光 |
+| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:102`<br>`src/pages/TreePage.tsx:128` | 時空膠囊（信封或種子膠囊） |
+| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:487`<br>`src/pages/MapPage.tsx:525` | 小樹苗；地圖上依澆水數放大 |
 | `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
-| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:600` | 空的樹穴（方形土坑） |
+| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:609` | 空的樹穴（方形土坑） |
 | `scan-tag` | 240×160 | 480×320 | `public/assets/ph/scan-tag.svg` | 掃樹牌說明 | （尚未使用） | 公園處樹牌與 QR Code 的位置示意 |
 | `sprout-0` | 240×240 | 480×480 | `public/assets/ph/sprout-0.svg` | 我的小芽 | `src/features/game/character.ts:11` | 角色「小芽」第 1 階：種子 |
 | `sprout-1` | 240×240 | 480×480 | `public/assets/ph/sprout-1.svg` | 我的小芽 | `src/features/game/character.ts:12` | 角色「小芽」第 2 階：發芽 |
 | `sprout-2` | 240×240 | 480×480 | `public/assets/ph/sprout-2.svg` | 我的小芽 | `src/features/game/character.ts:13` | 角色「小芽」第 3 階：小樹苗 |
 | `sprout-3` | 240×240 | 480×480 | `public/assets/ph/sprout-3.svg` | 我的小芽 | `src/features/game/character.ts:14` | 角色「小芽」第 4 階：小樹 |
 | `sprout-4` | 240×240 | 480×480 | `public/assets/ph/sprout-4.svg` | 我的小芽 | `src/features/game/character.ts:15` | 角色「小芽」第 5 階：大樹 |
-| `item-hat-straw` | 160×160 | 320×320 | `public/assets/ph/item-hat-straw.svg` | 商店、小芽換裝 | `src/features/game/config.ts:46`<br>`src/features/onboarding/OnboardingEffects.tsx:62`<br>`src/features/onboarding/TourSheet.tsx:139` | 造型：草帽（疊在角色上，透明背景） |
+| `item-hat-straw` | 160×160 | 320×320 | `public/assets/ph/item-hat-straw.svg` | 商店、小芽換裝 | `src/features/game/config.ts:46`<br>`src/features/onboarding/OnboardingEffects.tsx:62`<br>`src/features/onboarding/TourSheet.tsx:163` | 造型：草帽（疊在角色上，透明背景） |
 | `item-scarf-leaf` | 160×160 | 320×320 | `public/assets/ph/item-scarf-leaf.svg` | 商店、小芽換裝 | `src/features/game/config.ts:47` | 造型：落葉圍巾（疊在角色上，透明背景） |
 | `item-lantern` | 160×160 | 320×320 | `public/assets/ph/item-lantern.svg` | 商店、小芽換裝 | `src/features/game/config.ts:48` | 造型：螢火提燈（疊在角色上，透明背景） |
 | `item-frame-spring` | 160×160 | 320×320 | `public/assets/ph/item-frame-spring.svg` | 商店 | `src/features/game/config.ts:49` | 樹的頁面相框：春櫻（商品縮圖；實際相框另需 720×400 外框） |
@@ -50,12 +50,20 @@
 | `badge-first-light` | 120×120 | 240×240 | `public/assets/ph/badge-first-light.svg` | 成長徽章 | `src/features/game/badges.ts:38（動態）` | 第一道光（第一次收集光點） |
 | `badge-home-screen` | 120×120 | 240×240 | `public/assets/ph/badge-home-screen.svg` | 成長徽章 | `src/features/game/badges.ts:38（動態）` | 回家的路（從手機桌面圖示打開） |
 | `badge-newcomer` | 120×120 | 240×240 | `public/assets/ph/badge-newcomer.svg` | 成長徽章 | `src/features/game/badges.ts:38（動態）` | 城市的新朋友（完成新手任務） |
-| `stamp-iron` | 120×120 | 240×240 | `public/assets/ph/stamp-iron.svg` | 集章冊 | `src/features/game/districts.ts:52`<br>`src/pages/StampsPage.tsx:112` | 行政區集章：鐵章（打卡 1 棵不同的樹）。圓形印章，中間留空放行政區名 |
+| `stamp-iron` | 120×120 | 240×240 | `public/assets/ph/stamp-iron.svg` | 集章冊 | `src/features/game/districts.ts:52`<br>`src/pages/StampsPage.tsx:122` | 行政區集章：鐵章（打卡 1 棵不同的樹）。圓形印章，中間留空放行政區名 |
 | `stamp-bronze` | 120×120 | 240×240 | `public/assets/ph/stamp-bronze.svg` | 集章冊 | `src/features/game/districts.ts:53` | 行政區集章：銅章（10 棵）。同一組造型，材質不同 |
 | `stamp-silver` | 120×120 | 240×240 | `public/assets/ph/stamp-silver.svg` | 集章冊 | `src/features/game/districts.ts:54` | 行政區集章：銀章（50 棵） |
 | `stamp-gold` | 120×120 | 240×240 | `public/assets/ph/stamp-gold.svg` | 集章冊 | `src/features/game/districts.ts:55` | 行政區集章：金章（200 棵） |
+| `avatar-blue-magpie` | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:16` | 地圖人物：臺灣藍鵲（預設）。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點） |
+| `avatar-night-heron` | 96×96 | 192×192 | `public/assets/ph/avatar-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:17` | 地圖人物：黑冠麻鷺。規格同上（2.5D 繪本風、站著、正面、透明背景、腳底在下緣中央） |
+| `avatar-squirrel` | 96×96 | 192×192 | `public/assets/ph/avatar-squirrel.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:18` | 地圖人物：赤腹松鼠。規格同上 |
+| `avatar-pangolin` | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：穿山甲。規格同上 |
+| `action-scan` | 64×64 | 128×128 | `public/assets/ph/action-scan.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:70` | 圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理 |
+| `action-whisper` | 64×64 | 128×128 | `public/assets/ph/action-whisper.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:71` | 圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上 |
+| `action-info` | 64×64 | 128×128 | `public/assets/ph/action-info.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:72` | 圖示：樹的資料（樹牌或葉子加一個 i）。規格同上 |
+| `action-report` | 64×64 | 128×128 | `public/assets/ph/action-report.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:73` | 圖示：樹況回報（剪刀或旗標）。規格同上 |
 
-共 38 項。
+共 46 項。
 
 ## PWA 圖示（加到手機主畫面）
 
@@ -71,4 +79,4 @@
 
 | 檔案位置 | 程式參照 |
 |---|---|
-| `public/assets/photo/tree-tag.jpg` | `src/features/checkin/Scanner.tsx:78` |
+| `public/assets/photo/tree-tag.jpg` | `src/features/checkin/Scanner.tsx:87` |

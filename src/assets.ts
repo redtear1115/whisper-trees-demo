@@ -51,6 +51,14 @@ export const ASSETS: AssetSpec[] = [
   { id: 'stamp-bronze', w: 120, h: 120, where: '集章冊', brief: '行政區集章：銅章（10 棵）。同一組造型，材質不同' },
   { id: 'stamp-silver', w: 120, h: 120, where: '集章冊', brief: '行政區集章：銀章（50 棵）' },
   { id: 'stamp-gold', w: 120, h: 120, where: '集章冊', brief: '行政區集章：金章（200 棵）' },
+  { id: 'avatar-blue-magpie', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：臺灣藍鵲（預設）。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點）' },
+  { id: 'avatar-night-heron', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：黑冠麻鷺。規格同上（2.5D 繪本風、站著、正面、透明背景、腳底在下緣中央）' },
+  { id: 'avatar-squirrel', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：赤腹松鼠。規格同上' },
+  { id: 'avatar-pangolin', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：穿山甲。規格同上' },
+  { id: 'action-scan', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理' },
+  { id: 'action-whisper', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上' },
+  { id: 'action-info', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹的資料（樹牌或葉子加一個 i）。規格同上' },
+  { id: 'action-report', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹況回報（剪刀或旗標）。規格同上' },
 ]
 
 export function assetUrl(id: string): string {

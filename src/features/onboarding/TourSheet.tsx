@@ -8,10 +8,12 @@ import { useGameConfig } from '../game/config'
 import { firstLightEarned, patchOnboarding, useOnboarding } from '../game/onboarding'
 import { Celebration } from './Celebration'
 import { promptInstall, useCanInstall } from './install'
-import { installPlatform, isStandalone, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, tourView } from './tour'
+import { installPlatform, isStandalone, STEP_ANIMAL, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, tourView } from './tour'
 import { useGoogleLink } from './useGoogleLink'
+import { AnimalPicker } from '../avatar/AnimalPicker'
+import { useAnimal } from '../avatar/useAnimal'
 
-/** 地圖頁用：引導要不要開、在哪一步（開著但還沒存過步驟時，補存第 1 步） */
+/** 地圖頁用：引導要不要開、在哪一步（開著但還沒存過步驟時，補存第 0 步「選動物」） */
 export function useTourView() {
   const ob = useOnboarding()
   const firstLight = useStore((s) => firstLightEarned(s))
@@ -19,7 +21,7 @@ export function useTourView() {
   const view = tourView({ ob, firstLight, ready, demo: isDemoMode() })
   const init = view.open && view.needsInit
   useEffect(() => {
-    if (init) patchOnboarding({ tourStep: STEP_INTRO })
+    if (init) patchOnboarding({ tourStep: STEP_ANIMAL })
   }, [init])
   return view
 }
@@ -39,11 +41,12 @@ export function TourSheet({ step }: { step: number }) {
       data-testid="tour-sheet"
       data-step={step}
     >
-      <p className="tour-progress" aria-label={`第 ${step} 步，共 4 步`}>
-        {[1, 2, 3, 4].map((n) => (
+      <p className="tour-progress" aria-label={`第 ${step + 1} 步，共 5 步`}>
+        {[0, 1, 2, 3, 4].map((n) => (
           <span key={n} className={n === step ? 'on' : n < step ? 'past' : ''} aria-hidden />
         ))}
       </p>
+      {step === STEP_ANIMAL && <StepAnimal />}
       {step === STEP_INTRO && <StepIntro />}
       {step === STEP_SCAN && <StepScan />}
       {step === STEP_CELEBRATE && <StepCelebrate />}
@@ -57,6 +60,24 @@ function Later() {
     <button className="btn ghost" onClick={dismiss}>
       之後再說
     </button>
+  )
+}
+
+function StepAnimal() {
+  const animal = useAnimal()
+  return (
+    <>
+      <h2>選一隻陪你的動物</h2>
+      <p>牠會在地圖上代表你，走到哪裡都跟著。之後可以在「我的」換。</p>
+      <AnimalPicker name="tour-animal" />
+      <div className="tour-actions">
+        {/* 沒點過也把目前的（預設臺灣藍鵲）存下來，下一步起 tourStep 才算開始過 */}
+        <button className="btn primary" onClick={() => patchOnboarding({ animal: animal.id, tourStep: STEP_INTRO })}>
+          就牠了
+        </button>
+        <Later />
+      </div>
+    </>
   )
 }
 
@@ -89,6 +110,9 @@ function StepIntro() {
       <div className="tour-actions">
         <button className="btn primary" onClick={() => go(STEP_SCAN)}>
           下一步
+        </button>
+        <button className="btn" onClick={() => go(STEP_ANIMAL)}>
+          上一步
         </button>
         <Later />
       </div>
