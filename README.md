@@ -29,6 +29,7 @@
 主線之外的畫面，從「更多」進入；全部是前端示意、模擬資料。見 [08-extensions](docs/specs/08-extensions.md)。
 
 - 光點經濟、商店、圖鑑、成長徽章、角色養成
+- 新手引導：收集第一道光（送草帽新手禮，不送光點）、加入手機主畫面、4 項新手任務，共 3 枚徽章（資料與徽章已做，畫面規劃中，見 [08 §9](docs/specs/08-extensions.md)）
 - 遊戲營運後台（GM）、發包商後台
 - 政府端 API（讓公園處既有系統用 API key 讀寫）與 MCP：只做文件＋前端模擬（規劃中）；另有開放資料下載（靜態 JSON）
 
@@ -167,7 +168,7 @@ uv run scripts/build_web_data.py   # 需要 tippecanoe（brew install tippecanoe
 npm install
 npm run dev      # http://localhost:5173，加 ?demo=1 進 Demo 模式（模擬定位、可掃示範樹牌）
 npm test
-npm run test:rules   # 本機 Firestore emulator 跑規則測試（brew install openjdk）
+npm run test:rules   # 本機 Firestore + Auth emulator 跑規則測試與雲端 store 測試（tests/rules、tests/cloud；brew install openjdk）
 cp .env.example .env.local   # 填入 6 個 VITE_FIREBASE_* 值；沒有這個檔就用 localStorage
 npm run build    # 輸出 dist/，靜態網站
 npm run deploy   # 建置並部署到 Cloudflare Pages（專案 whisper-trees，Ray Personal Account）

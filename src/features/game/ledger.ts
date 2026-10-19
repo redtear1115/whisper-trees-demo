@@ -17,7 +17,7 @@ export interface Entry {
 const NONE: Entry[] = []
 
 /** 真正存下來的流水帳（寫入時以它為底，不能把本機覆寫的補發混進去） */
-function baseLedger(s?: State): Entry[] {
+export function baseLedger(s?: State): Entry[] {
   return getExt<Entry[]>('ledger', NONE, s)
 }
 

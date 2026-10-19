@@ -44,6 +44,9 @@ export const ASSETS: AssetSpec[] = [
   { id: 'badge-waterer', w: 120, h: 120, where: '成長徽章', brief: '澆水十次' },
   { id: 'badge-night', w: 120, h: 120, where: '成長徽章', brief: '夜行者（夜間打卡）' },
   { id: 'badge-reporter', w: 120, h: 120, where: '成長徽章', brief: '樹的守望者（樹況回報）' },
+  { id: 'badge-first-light', w: 120, h: 120, where: '成長徽章', brief: '第一道光（第一次收集光點）' },
+  { id: 'badge-home-screen', w: 120, h: 120, where: '成長徽章', brief: '回家的路（從手機桌面圖示打開）' },
+  { id: 'badge-newcomer', w: 120, h: 120, where: '成長徽章', brief: '城市的新朋友（完成新手任務）' },
 ]
 
 export function assetUrl(id: string): string {

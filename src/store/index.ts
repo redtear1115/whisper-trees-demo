@@ -15,10 +15,10 @@ import * as cloud from './cloud'
 import { OVERLAY_KEY } from './overlay'
 import { LOCAL_KEY, pruneBackup } from './migrate'
 import { capsuleSeed, DAY, SEED, seedNow, SEED_REPORTS } from './seedData'
-import { setSession } from './session'
+import { setSession, useSession } from './session'
 import type { Checkin, ReportKind, StatusEvent, TreeReport, Whisper, Wish, WishStatus } from './types'
 
-export { useSession, canWriteAdmin, inDemoOverlay } from './session'
+export { useSession, canWriteAdmin, inDemoOverlay, userReady } from './session'
 
 const KEY = LOCAL_KEY
 const SEEN_KEY = 'whisper-trees:seen'
@@ -117,7 +117,7 @@ function startCloud() {
   cloudOn = true
   seen = loadSeen()
   state = { ...emptyState(), seen }
-  setSession({ backend: 'cloud', fallback: false })
+  setSession({ backend: 'cloud', fallback: false, userReady: false })
   cloud.startCloud({
     onState(s) {
       state = { ...s, seen }
@@ -126,7 +126,7 @@ function startCloud() {
     onFallback() {
       cloudOn = false
       state = read()
-      setSession({ backend: 'local', fallback: true, admin: 'no', migration: null })
+      setSession({ backend: 'local', fallback: true, admin: 'no', migration: null, userReady: true })
       emit()
     },
   })
@@ -135,6 +135,11 @@ function startCloud() {
 if (firebaseEnabled && typeof window !== 'undefined') {
   pruneBackup()
   startCloud()
+}
+
+/** 目前這個 uid 的使用者文件載入了沒（本機模式一律 true）；React 元件用這個 hook */
+export function useUserReady(): boolean {
+  return useSession().userReady
 }
 
 export function subscribe(l: () => void) {
