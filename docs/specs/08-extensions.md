@@ -97,7 +97,7 @@
 
 ## 9. 新手引導 `/` 與 `/me`
 
-2026-10-19 使用者決定，屬 P1 延伸功能（不擋主線）。分三個切片：S1 資料與徽章（已做）、S2 引導一的畫面與加入主畫面（待做）、S3 新手任務卡（待做）。
+2026-10-19 使用者決定，屬 P1 延伸功能（不擋主線）。分三個切片：S1 資料與徽章（已做）、S2 引導一的畫面與加入主畫面（已做，實機待測）、S3 新手任務卡（待做）。
 
 ### 決定
 
@@ -125,6 +125,25 @@
 - 新手禮**只記 `onboarding.giftAt`**。擁有權由 `inventory()` 推算（`giftAt` 有值就把 `hat-straw` 算進 `owned`，不重複）；`buy('hat-straw')` 回傳「已擁有」。換上草帽走原本的 `equip`，由使用者操作。**不會自動寫入 `ext.inventory` 或 `ext.ledger`**，光點與餘額都不動。
 - 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式與退回本機時一律 ready。`grantStarterGift()` 在 ready 之前什麼都不做。
 
+### 引導一「收集光點」的畫面（S2）
+
+地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具、掃樹牌浮鈕與「附近／全市」切換，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`：
+
+| 步驟 | 內容 |
+|---|---|
+| 1 | 光點是什麼、怎麼得到：表格數值讀 GM 設定的 `gameConfig().points`（打卡、遠觀、樹洞、許願、澆水）。「下一步」 |
+| 2 | 去掃樹牌 → `/scan`。「附近沒有樹牌？」說明 Demo 模式（`?demo=1`，已在 Demo 模式就改說明模擬定位） |
+| 3 | 第一次拿到光點：慶祝徽章「第一道光」＋新手禮草帽（連到 `/me` 換上、`/shop`）。拿到第一道光就直接跳到這一步 |
+| 4 | 加到主畫面：沒綁 Google 的先建議「用 Google 保留紀錄」（說明 iOS 主畫面 App 的儲存空間和 Safari 分開），再依瀏覽器給說明：iOS Safari 用「分享 → 加入主畫面」、Android Chrome 有 `beforeinstallprompt` 就給「安裝到主畫面」按鈕（`main.tsx` 一開始就接住事件）否則給選單說明、LINE／Facebook／Instagram 內建瀏覽器請先用 Safari／Chrome 開啟。「我加好了」走完 |
+
+- **什麼時候開**：使用者文件已載入（`useUserReady()`，不然看不到有沒有按過「之後再說」）、沒按過「之後再說」、`tourStep` 未走完。還沒拿到第一道光的新使用者一開地圖就看到；**已拿到第一道光的人，只有「開始過」引導（`tourStep` 有存）才會接著看到第 3、4 步**，早就有光點、沒看過引導的人不會被打擾（要看可以從選單進）。開著時若 `tourStep` 還沒存，補存 1，讓「開始過」成立。
+- **之後再說**：記 `tourDismissedAt`，之後不再自動出現。慶祝只在引導裡出現一次（走到第 4 步就不會回頭），所以按過「之後再說」才拿到第一道光的人看不到慶祝，新手禮仍會送，徽章在 `/me`。
+- **選單「新手引導」**：把 `tourDismissedAt` 改成 `0`（雲端是逐欄合併，欄位寫 `undefined` 清不掉，所以用 0 表示沒收起），`tourStep` 維持原本停的步驟；已走完或沒開始過就從第 1 步。
+- **新手禮**：`OnboardingEffects`（App 層級，不論在哪一頁）在 `userReady` 且有第一道光時呼叫 `grantStarterGift()`，所以在樹的頁面打卡完就送了，不必回地圖。
+- **回家的路**：同一個 `OnboardingEffects` 偵測從桌面圖示打開（`matchMedia('(display-mode: standalone)')` 或 `navigator.standalone`），使用者文件載入後若沒有 `homeScreenAt` 就記下並跳出慶祝；換 uid（例如 standalone 內用 Google 登入）會重新檢查，所以 Google 帳號也會記到。`patchOnboarding` 合併寫，不洗掉其他旗標。
+- **慶祝元件**（`Celebration`／`CelebrationDialog`）：徽章圖（`<Art id="badge-…">`）、名稱、一句話，輕輕發光（尊重減少動態），可按「好」或 Esc 收起；不加紅點、不計時。
+- **PWA**：`public/manifest.webmanifest`（名稱「曦語 Whisper Trees」、短名「曦語」、`display: standalone`、主題色 `#3f7d4e`）、`index.html` 的 manifest／`apple-touch-icon`／`apple-mobile-web-app-capable`／`mobile-web-app-capable`／`apple-mobile-web-app-title`；`public/_headers` 讓 manifest 以 `application/manifest+json` 提供。圖示是 PNG 佔位檔（192、512、180），由 `node scripts/make_placeholders.mjs` 依 `src/assets.ts` 的 `PWA_ICONS` 產生，清單在 [docs/ui-assets.md](../ui-assets.md)。沒有 service worker，不做離線。
+
 ### 驗收
 
 S1 資料與徽章
@@ -136,13 +155,14 @@ S1 資料與徽章
 - [x] 雲端（模擬器）：旗標寫入後重啟雲端 store，`getExt('onboarding')` 一樣；伺服器已有 `tourDismissedAt` 時，再寫 `homeScreenAt` 兩個欄位都在。
 - [x] `npm test`、`npm run test:rules`（含 `tests/cloud/`）、`npm run build` 通過。
 
-S2 引導一與加入主畫面（待做）
+S2 引導一與加入主畫面（已做；桌機 360 px 與單元測試驗過，實機項目待測）
 
-- [ ] 新使用者在地圖看到引導；「之後再說」重新整理後仍收起；選單「新手引導」從存下的步驟接著看；已有第一道光的人看不到。
-- [ ] Demo 模式打卡觸發「第一道光」慶祝，新手禮出現在小芽的背包。
-- [ ] 模擬 standalone 啟動只記一次「回家的路」，不洗掉其他旗標；`manifest.webmanifest` 內容類型正確。
-- [ ] 360 px 沒有水平捲動、輸入框字級至少 16 px、全部繁體中文。
+- [x] 新使用者在地圖看到引導；「之後再說」重新整理後仍收起；選單「新手引導」從存下的步驟接著看；已有第一道光（沒開始過引導）的人看不到。
+- [x] 第一次拿到光點（`award()`，與 Demo 打卡同一條路徑）出現「第一道光」慶祝，新手禮記入 `giftAt`，草帽出現在小芽的背包。**Demo 模式實際走掃描頁需要相機，只用呼叫 `award()` 驗過。**
+- [x] 模擬 standalone 啟動只記一次「回家的路」，不洗掉其他旗標；`manifest.webmanifest` 內容類型正確（dev server 驗過；Cloudflare 靠 `_headers`，部署後要再確認）。
+- [x] 360 px 沒有水平捲動、輸入框字級至少 16 px（引導裡沒有輸入框）、全部繁體中文。
 - [ ] 實機 iPhone（需使用者同意部署後）：加入主畫面、「回家的路」亮起、standalone 內 Google 登入視窗可用；只在桌機測過的項目要註明。
+- [ ] 雲端（Firestore 模擬器）下的瀏覽器流程：單元／整合測試涵蓋旗標寫入與合併，還沒用 Playwright 在模擬器模式走一遍。
 
 S3 新手任務（待做）
 

@@ -2128,3 +2128,177 @@ body.has-offline .gov {
   color: #fff;
   box-shadow: var(--shadow);
 }
+
+/* ---------- 新手引導（地圖下方的小抽屜）與徽章慶祝 ---------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tour-sheet {
+  max-height: 62vh;
+  padding-top: 14px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 11;
+}
+
+.tour-sheet h2 {
+  margin: 4px 0 6px;
+  font-family: var(--font-voice);
+}
+
+.tour-sheet p {
+  margin: 6px 0;
+}
+
+.tour-progress {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 4px;
+}
+
+.tour-progress span {
+  width: 18px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line);
+}
+
+.tour-progress span.past {
+  background: var(--green-soft);
+}
+
+.tour-progress span.on {
+  background: var(--green);
+}
+
+.tour-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.tour-table th,
+.tour-table td {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-weight: normal;
+}
+
+.tour-table td {
+  text-align: right;
+  font-weight: 700;
+  color: var(--green-ink);
+}
+
+.tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tour-details {
+  margin: 8px 0;
+}
+
+.tour-details summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--green-ink);
+}
+
+.tour-note {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--green-soft);
+}
+
+.tour-note .btn {
+  margin-top: 4px;
+}
+
+.tour-steps {
+  margin: 8px 0;
+  padding-left: 1.3em;
+}
+
+.tour-steps li {
+  margin: 4px 0;
+}
+
+.tour-gift {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--amber-soft);
+  text-align: left;
+}
+
+.tour-gift .art {
+  width: 56px;
+  height: 56px;
+  flex: none;
+}
+
+.tour-gift p {
+  margin: 0;
+}
+
+.celebrate {
+  text-align: center;
+}
+
+.celebrate-kicker {
+  margin: 0;
+  color: var(--amber-ink);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+
+.celebrate-art {
+  width: 96px;
+  height: 96px;
+  margin: 6px auto 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px var(--amber-soft), 0 0 28px rgba(242, 193, 78, 0.55);
+}
+
+.celebrate-name {
+  margin: 8px 0 0;
+  font-family: var(--font-voice);
+  font-size: 1.3rem;
+}
+
+.celebrate-hint {
+  margin: 2px 0 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .celebrate-art {
+    animation: celebrate-glow 2.4s ease-in-out infinite alternate;
+  }
+  @keyframes celebrate-glow {
+    from {
+      box-shadow: 0 0 0 6px var(--amber-soft), 0 0 12px rgba(242, 193, 78, 0.3);
+    }
+    to {
+      box-shadow: 0 0 0 6px var(--amber-soft), 0 0 30px rgba(242, 193, 78, 0.7);
+    }
+  }
+}

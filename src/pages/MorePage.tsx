@@ -1,25 +1,17 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card } from '../components/ui'
 import { exitDemoMode, isDemoMode, resetAll, signOutAccount, useSession } from '../store'
-import { externalBrowserUrl, inAppBrowser, linkGoogle, useAuth } from '../lib/firebase'
+import { externalBrowserUrl, inAppBrowser, useAuth } from '../lib/firebase'
+import { onboarding, patchOnboarding } from '../features/game/onboarding'
+import { reopenPatch } from '../features/onboarding/tour'
+import { useGoogleLink } from '../features/onboarding/useGoogleLink'
 import { IconBack } from '../components/icons'
 
 /** 帳號：訪客 / 已用 Google 保留。Google 綁定要在 click 事件裡同步呼叫（見 linkGoogle）。 */
 function AccountCard() {
   const auth = useAuth()
-  const [msg, setMsg] = useState<string | null>(null)
+  const { msg, link } = useGoogleLink()
   const app = inAppBrowser()
-
-  const link = () => {
-    setMsg(null)
-    linkGoogle().then((r) => {
-      if (r === 'linked') setMsg('已用 Google 保留。換瀏覽器或換手機，用同一個 Google 登入就找得回來。')
-      else if (r === 'switched')
-        setMsg('這個 Google 帳號已經有紀錄，已切換過去。這台裝置原本的訪客紀錄不會合併，會留在這台裝置的訪客帳號裡。')
-      else if (r === 'error') setMsg('沒有連上 Google，請稍後再試。')
-    })
-  }
 
   return (
     <>
@@ -69,6 +61,7 @@ function AccountCard() {
 
 export default function MorePage() {
   const cloud = useSession().backend === 'cloud'
+  const navigate = useNavigate()
   return (
     <div className="page">
       <header className="topbar">
@@ -92,6 +85,15 @@ export default function MorePage() {
         <Link className="menu-link" to="/codex">
           樹的圖鑑
         </Link>
+        <button
+          className="menu-link"
+          onClick={() => {
+            patchOnboarding(reopenPatch(onboarding()))
+            navigate('/')
+          }}
+        >
+          新手引導：收集光點、加到主畫面
+        </button>
       </Card>
 
       {cloud && <AccountCard />}

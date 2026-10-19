@@ -123,4 +123,14 @@ describe('onboarding in the cloud store', () => {
     a.ob.patchOnboarding({ homeScreenAt: 9 })
     await vi.waitFor(async () => expect((await serverDoc(a.uid))?.onboarding).toEqual({ tourDismissedAt: 5, homeScreenAt: 9 }), { timeout: 10000 })
   })
+
+  it('reopening the tour from the menu clears the dismissal on the server (0, since a merge ignores undefined) and keeps the step', async () => {
+    const a = await boot()
+    const { reopenPatch, tourView } = await import('../../src/features/onboarding/tour')
+    await seedDoc(a.uid, { onboarding: { tourStep: 2, tourDismissedAt: 5 } })
+    await vi.waitFor(() => expect(a.ob.onboarding().tourDismissedAt).toBe(5), { timeout: 10000 })
+    a.ob.patchOnboarding(reopenPatch(a.ob.onboarding()))
+    await vi.waitFor(async () => expect((await serverDoc(a.uid))?.onboarding).toEqual({ tourStep: 2, tourDismissedAt: 0 }), { timeout: 10000 })
+    expect(tourView({ ob: a.ob.onboarding(), firstLight: false, ready: true })).toMatchObject({ open: true, step: 2 })
+  })
 })

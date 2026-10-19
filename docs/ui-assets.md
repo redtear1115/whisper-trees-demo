@@ -44,3 +44,14 @@
 | `badge-newcomer` | 120×120 | 成長徽章 | 城市的新朋友（完成新手任務） |
 
 共 34 項。建議另交 @2x。
+
+## PWA 圖示（加到手機主畫面）
+
+佔位檔是 PNG（`public/assets/pwa/<file>`，由同一支腳本產生）；交件時用同名檔案取代。`public/manifest.webmanifest` 與 `index.html` 的 `apple-touch-icon` 指向這些檔案。
+
+| 檔名 | 尺寸（px） | 說明 |
+|---|---|---|
+| `icon-192.png` | 192×192 | Android 主畫面與 manifest 圖示。滿版底色，主體放在中間 80%（也當遮罩圖示用） |
+| `icon-512.png` | 512×512 | manifest 大圖示、啟動畫面。規格同上 |
+| `apple-touch-icon.png` | 180×180 | iOS 加入主畫面的圖示。不透明、不要自己切圓角（系統會切） |
+

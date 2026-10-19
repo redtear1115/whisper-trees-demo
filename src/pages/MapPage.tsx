@@ -16,6 +16,7 @@ import { distanceMeters } from '../lib/geo'
 import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
 import { EventBar } from '../features/game/EventBar'
+import { TourSheet, useTourView } from '../features/onboarding/TourSheet'
 import { useAnchor } from '../features/map/useAnchor'
 import { boundsAround, circleRing } from '../lib/nearby'
 import { angleDiff, requestHeadingPermission, watchHeading } from '../features/map/heading'
@@ -71,6 +72,7 @@ export default function MapPage() {
   const [bearing, setBearing] = useState(0)
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
   const wishes = useWishes()
+  const tour = useTourView()
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
     const w = allWishes(s).find((x) => x.id === id)
     return w && s.seen[id] !== undefined && s.seen[id] < w.history.length
@@ -564,7 +566,9 @@ export default function MapPage() {
         </Sheet>
       )}
 
-      {!sheet && (
+      {tour.open && !sheet && <TourSheet step={tour.step} />}
+
+      {!sheet && !tour.open && (
         <div className="map-tools" role="group" aria-label="地圖工具">
           <button
             className="tool"
@@ -610,7 +614,7 @@ export default function MapPage() {
         </div>
       )}
 
-      {!sheet && (
+      {!sheet && !tour.open && (
         <div className="mode-toggle">
           {mode === 'city' && (
             <p className="legend-row" aria-label="圖例">
@@ -635,8 +639,8 @@ export default function MapPage() {
         </div>
       )}
 
-      {!sheet && <p className="scan-hint">找一棵樹，掃它樹幹上的樹牌</p>}
-      {!sheet && (
+      {!sheet && !tour.open && <p className="scan-hint">找一棵樹，掃它樹幹上的樹牌</p>}
+      {!sheet && !tour.open && (
         <Link className="scan-fab" to="/scan">
           掃樹牌
         </Link>

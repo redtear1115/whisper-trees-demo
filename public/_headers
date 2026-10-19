@@ -11,3 +11,8 @@
 # 樹木向量圖磚（未壓縮的 pbf，讓 Cloudflare 依 content-type 壓縮）
 /data/tree-tiles/*
   Content-Type: application/x-protobuf
+
+# PWA manifest（加到手機主畫面）
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=3600

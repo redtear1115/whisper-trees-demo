@@ -52,3 +52,16 @@ export const ASSETS: AssetSpec[] = [
 export function assetUrl(id: string): string {
   return `${import.meta.env.BASE_URL}assets/ph/${id}.svg`
 }
+
+/** PWA 圖示（加到手機主畫面用）。佔位檔是 PNG，由 make_placeholders 產生到 public/assets/pwa/；設計交件後用同名檔案取代。 */
+export interface PwaIconSpec {
+  file: string
+  size: number
+  brief: string
+}
+
+export const PWA_ICONS: PwaIconSpec[] = [
+  { file: 'icon-192.png', size: 192, brief: 'Android 主畫面與 manifest 圖示。滿版底色，主體放在中間 80%（也當遮罩圖示用）' },
+  { file: 'icon-512.png', size: 512, brief: 'manifest 大圖示、啟動畫面。規格同上' },
+  { file: 'apple-touch-icon.png', size: 180, brief: 'iOS 加入主畫面的圖示。不透明、不要自己切圓角（系統會切）' },
+]
