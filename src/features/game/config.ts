@@ -3,7 +3,7 @@
 import { getExt, setExt, useStore, type State } from '../../store'
 
 /** `sun` 是舊版的獨立日照加成（2026-10-20 前的流水帳還有），現在日照是倍率，不再單獨發 */
-export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'report' | 'wish' | 'water'
+export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'report' | 'wish' | 'water' | 'insect'
 
 export const ACTION_LABEL: Record<Action, string> = {
   checkin: '打卡成功',
@@ -13,6 +13,7 @@ export const ACTION_LABEL: Record<Action, string> = {
   report: '樹況回報',
   wish: '許願',
   water: '澆水',
+  insect: '樹上住戶',
 }
 
 /** 有固定點數、GM 可以直接改的行為。樹洞與同一棵樹的後續互動看 `ladder2`／`ladder3`。 */
@@ -60,6 +61,10 @@ export interface GameConfig {
   protectedBase: number
   /** 一天裡從第幾棵不同的樹起，打卡光點減半 */
   halveFrom: number
+  /** 樹上住戶（昆蟲彩蛋，模擬）：打卡成功時出現的機率，0～1 */
+  insectChance: number
+  /** 樹上住戶出現時的額外光點 */
+  insectBonus: number
   multiplier: number
   events: GameEvent[]
   shop: ShopItem[]
@@ -75,6 +80,19 @@ export const DEFAULT_SHOP: ShopItem[] = [
   { id: 'water-bag', name: '認養一個澆水袋', kind: 'civic', price: 150, active: true, art: 'item-water-bag', brief: '新植樹苗的緩釋澆水袋（示意）' },
 ]
 
+/**
+ * 稀有配件：不在商店賣、不能用光點買，只能掉落（目前只有古木紋理頭飾，在受保護樹木第一次打卡成功時拿到，見 drops.ts）。
+ * 它不受 GM 的商店設定影響，所以另外放；穿戴與顯示時用 allItems 一起找。
+ */
+export const RARE_ITEMS: ShopItem[] = [
+  { id: 'hat-ancient', name: '古木紋理頭飾', kind: 'outfit', price: 0, active: false, art: 'item-hat-ancient', brief: '稀有・受保護樹木' },
+]
+
+/** 商店商品加稀有配件（用 id 找擁有的造型時用） */
+export function allItems(cfg: GameConfig): ShopItem[] {
+  return [...cfg.shop, ...RARE_ITEMS]
+}
+
 export const DEFAULT_CONFIG: GameConfig = {
   points: { checkin: 10, farView: 5, report: 15, wish: 5, water: 3 },
   ladder2: 2,
@@ -86,6 +104,8 @@ export const DEFAULT_CONFIG: GameConfig = {
   lonelyStepDays: 20,
   protectedBase: 20,
   halveFrom: 11,
+  insectChance: 0.15,
+  insectBonus: 3,
   multiplier: 1,
   events: [{ id: 'ev-arbor', name: '植樹節雙倍光點', start: '2027-03-12', end: '2027-03-14', multiplier: 2 }],
   shop: DEFAULT_SHOP,

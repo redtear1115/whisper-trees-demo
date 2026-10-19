@@ -17,10 +17,10 @@
 | ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
 |---|---|---|---|---|---|---|
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
-| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:95` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
-| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:95` | 同上夜間版，「樹木休息中」的氣氛 |
-| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/ShopPage.tsx:47`<br>`src/pages/TreePage.tsx:104` | 一道微光／光點的圖示，柔和發光 |
-| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:114`<br>`src/pages/TreePage.tsx:140` | 時空膠囊（信封或種子膠囊） |
+| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:99` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
+| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:99` | 同上夜間版，「樹木休息中」的氣氛 |
+| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/ShopPage.tsx:47`<br>`src/pages/TreePage.tsx:114` | 一道微光／光點的圖示，柔和發光 |
+| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:124`<br>`src/pages/TreePage.tsx:150` | 時空膠囊（信封或種子膠囊） |
 | `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:505`<br>`src/pages/MapPage.tsx:818` | 小樹苗；地圖上依澆水數放大 |
 | `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
 | `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:912` | 空的樹穴（方形土坑） |
@@ -30,14 +30,18 @@
 | `sprout-2` | 240×240 | 480×480 | `public/assets/ph/sprout-2.svg` | 我的小芽 | `src/features/game/character.ts:13` | 角色「小芽」第 3 階：小樹苗 |
 | `sprout-3` | 240×240 | 480×480 | `public/assets/ph/sprout-3.svg` | 我的小芽 | `src/features/game/character.ts:14` | 角色「小芽」第 4 階：小樹 |
 | `sprout-4` | 240×240 | 480×480 | `public/assets/ph/sprout-4.svg` | 我的小芽 | `src/features/game/character.ts:15` | 角色「小芽」第 5 階：大樹 |
-| `item-hat-straw` | 160×160 | 320×320 | `public/assets/ph/item-hat-straw.svg` | 商店、小芽換裝 | `src/features/game/config.ts:69`<br>`src/features/onboarding/OnboardingEffects.tsx:62`<br>`src/features/onboarding/TourSheet.tsx:161` | 造型：草帽（疊在角色上，透明背景） |
-| `item-scarf-leaf` | 160×160 | 320×320 | `public/assets/ph/item-scarf-leaf.svg` | 商店、小芽換裝 | `src/features/game/config.ts:70` | 造型：落葉圍巾（疊在角色上，透明背景） |
-| `item-lantern` | 160×160 | 320×320 | `public/assets/ph/item-lantern.svg` | 商店、小芽換裝 | `src/features/game/config.ts:71` | 造型：螢火提燈（疊在角色上，透明背景） |
-| `item-frame-spring` | 160×160 | 320×320 | `public/assets/ph/item-frame-spring.svg` | 商店 | `src/features/game/config.ts:72` | 樹的頁面相框：春櫻（商品縮圖；實際相框另需 720×400 外框） |
-| `item-frame-autumn` | 160×160 | 320×320 | `public/assets/ph/item-frame-autumn.svg` | 商店 | `src/features/game/config.ts:73` | 樹的頁面相框：秋楓（同上） |
-| `item-fund` | 160×160 | 320×320 | `public/assets/ph/item-fund.svg` | 商店 | `src/features/game/config.ts:74` | 回到城市：捐給補種基金 |
-| `item-water-bag` | 160×160 | 320×320 | `public/assets/ph/item-water-bag.svg` | 商店 | `src/features/game/config.ts:75` | 回到城市：認養新植樹苗的澆水袋 |
-| `species-card` | 160×160 | 320×320 | `public/assets/ph/species-card.svg` | 圖鑑 | `src/features/codex/CodexSection.tsx:101` | 樹種卡通用底圖；正式版每個樹種一張（先做前 40 名，清單見 public/data/species.json） |
+| `item-hat-straw` | 160×160 | 320×320 | `public/assets/ph/item-hat-straw.svg` | 商店、小芽換裝 | `src/features/game/config.ts:74`<br>`src/features/onboarding/OnboardingEffects.tsx:62`<br>`src/features/onboarding/TourSheet.tsx:182` | 造型：草帽（疊在角色上，透明背景） |
+| `item-scarf-leaf` | 160×160 | 320×320 | `public/assets/ph/item-scarf-leaf.svg` | 商店、小芽換裝 | `src/features/game/config.ts:75` | 造型：落葉圍巾（疊在角色上，透明背景） |
+| `item-lantern` | 160×160 | 320×320 | `public/assets/ph/item-lantern.svg` | 商店、小芽換裝 | `src/features/game/config.ts:76` | 造型：螢火提燈（疊在角色上，透明背景） |
+| `item-hat-ancient` | 160×160 | 320×320 | `public/assets/ph/item-hat-ancient.svg` | 小芽換裝、打卡後的稀有配件卡 | `src/features/game/DropCards.tsx:12`<br>`src/features/game/config.ts:88` | 稀有配件：古木紋理頭飾，木紋年輪，疊在角色上，透明背景（只能在受保護樹木掉落，不在商店賣） |
+| `item-frame-spring` | 160×160 | 320×320 | `public/assets/ph/item-frame-spring.svg` | 商店 | `src/features/game/config.ts:77` | 樹的頁面相框：春櫻（商品縮圖；實際相框另需 720×400 外框） |
+| `item-frame-autumn` | 160×160 | 320×320 | `public/assets/ph/item-frame-autumn.svg` | 商店 | `src/features/game/config.ts:78` | 樹的頁面相框：秋楓（同上） |
+| `item-fund` | 160×160 | 320×320 | `public/assets/ph/item-fund.svg` | 商店 | `src/features/game/config.ts:79` | 回到城市：捐給補種基金 |
+| `item-water-bag` | 160×160 | 320×320 | `public/assets/ph/item-water-bag.svg` | 商店 | `src/features/game/config.ts:80` | 回到城市：認養新植樹苗的澆水袋 |
+| `insect-ladybug` | 120×120 | 240×240 | `public/assets/ph/insect-ladybug.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:28` | 樹上住戶：瓢蟲，蠟筆繪本風，小、透明背景 |
+| `insect-beetle` | 120×120 | 240×240 | `public/assets/ph/insect-beetle.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:29` | 樹上住戶：獨角仙，蠟筆繪本風，小、透明背景 |
+| `insect-cicada` | 120×120 | 240×240 | `public/assets/ph/insect-cicada.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:30` | 樹上住戶：蟬（只在 5～9 月出現），蠟筆繪本風，小、透明背景 |
+| `species-card` | 160×160 | 320×320 | `public/assets/ph/species-card.svg` | 圖鑑 | `src/features/codex/CodexSection.tsx:108` | 樹種卡通用底圖；正式版每個樹種一張（先做前 40 名，清單見 public/data/species.json） |
 | `badge-first` | 120×120 | 240×240 | `public/assets/ph/badge-first.svg` | 成長徽章 | `src/features/game/badges.ts:67（動態）` | 第一次相遇 |
 | `badge-species-3` | 120×120 | 240×240 | `public/assets/ph/badge-species-3.svg` | 成長徽章 | `src/features/game/badges.ts:67（動態）` | 認識三種樹 |
 | `badge-species-10` | 120×120 | 240×240 | `public/assets/ph/badge-species-10.svg` | 成長徽章 | `src/features/game/badges.ts:67（動態）` | 樹的朋友（10 種） |
@@ -66,7 +70,7 @@
 | `action-walk` | 64×64 | 128×128 | `public/assets/ph/action-walk.svg` | 點樹後的行動圈（只有 Demo 模式） | `src/features/map/treeRings.ts:88` | 圖示：走過去（腳印）。規格同上 |
 | `fog-empty` | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:81` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 
-共 49 項。
+共 53 項。
 
 ## PWA 圖示（加到手機主畫面）
 

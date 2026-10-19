@@ -6,7 +6,7 @@ import { growthCopy, shouldReassureSpend, stageOf } from '../game/character'
 import { homeDistrictOf, useOnboarding } from '../game/onboarding'
 import { DistrictPicker } from '../onboarding/DistrictPicker'
 import { useInventory } from '../game/inventory'
-import { useGameConfig } from '../game/config'
+import { allItems, useGameConfig } from '../game/config'
 import { AnimalPicker } from '../avatar/AnimalPicker'
 import { useAnimal } from '../avatar/useAnimal'
 
@@ -34,7 +34,7 @@ export function MeHero() {
   }, [pickingDistrict])
   const { stage } = stageOf(earned)
   const grow = growthCopy(earned, reassure)
-  const outfit = cfg.shop.find((i) => i.id === inv.equipped.outfit)
+  const outfit = allItems(cfg).find((i) => i.id === inv.equipped.outfit)
 
   return (
     <section className="me-hero" aria-labelledby="me-hero-title" data-testid="me-hero">

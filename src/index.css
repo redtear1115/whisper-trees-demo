@@ -915,6 +915,131 @@ textarea.input {
   }
 }
 
+/* 打卡的小驚喜：稀有配件、樹上住戶 */
+.drop-cards {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.drop-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 6px 18px -10px rgba(44, 58, 46, 0.35);
+}
+
+.drop-card.rare {
+  background: var(--green-soft);
+  border-color: #bcd6bc;
+}
+
+.drop-card p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.drop-art {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.drop-line {
+  font-family: var(--font-voice);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.drop-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--green-ink);
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drop-card {
+    animation: drop-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .drop-card + .drop-card {
+    animation-delay: 0.25s;
+  }
+  @keyframes drop-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* 圖鑑的「樹上住戶」 */
+.insects {
+  margin-top: 24px;
+  scroll-margin-top: 12px;
+}
+
+.insect-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.insect-tile {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  text-align: center;
+  min-width: 0;
+}
+
+.insect-tile .art {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.insect-tile.unseen {
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted);
+}
+
+.insect-tile.unseen .art {
+  filter: brightness(0) opacity(0.28);
+}
+
+.insect-tile a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--green-ink);
+  font-weight: 600;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.item-note {
+  margin: 8px 0 0;
+}
+
 .protected-tag {
   display: inline-block;
   margin: 8px 2px 0;

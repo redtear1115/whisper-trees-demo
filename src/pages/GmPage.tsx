@@ -203,6 +203,18 @@ function Rules() {
             value={cfg.protectedBase}
             onChange={(n) => saveGameConfig({ protectedBase: n })}
           />
+          <NumRow
+            label="樹上住戶（昆蟲彩蛋，模擬）：出現機率 %"
+            note="打卡成功時，這棵樹今天第一次打卡可能有瓢蟲、獨角仙或蟬探出頭；由樹籍編號、日期與使用者固定算出，重新整理不會重抽。蟬只在 5～9 月出現"
+            value={Math.round(cfg.insectChance * 100)}
+            onChange={(n) => saveGameConfig({ insectChance: n / 100 })}
+          />
+          <NumRow
+            label="樹上住戶：額外光點"
+            note="獨立一筆光點紀錄「樹上住戶：獨角仙（模擬）」，乘全域與活動倍率；0 = 只進圖鑑、不發光點"
+            value={cfg.insectBonus}
+            onChange={(n) => saveGameConfig({ insectBonus: n })}
+          />
           <tr>
             <td>
               <strong>全域倍率</strong>

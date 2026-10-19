@@ -14,6 +14,7 @@ import { useIsProtectedTree } from '../features/game/protectedTrees'
 import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
+import { DropCards } from '../features/game/DropCards'
 import { PhotoCarousel } from '../features/species/PhotoCarousel'
 import { photoIndexForTree } from '../features/species/carousel'
 import { useSpeciesPhotos } from '../lib/speciesPhotos'
@@ -23,6 +24,7 @@ export default function TreePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
+  const drops = (location.state as CheckinState | null)?.drops
   // 從某個分頁點進來（樹洞、我的光點紀錄、探索、集章冊），返回就回到那一頁；其他（掃碼、地圖）回地圖
   const fromTab = (location.state as { from?: string } | null)?.from
   const back = backTarget(fromTab)
@@ -98,6 +100,7 @@ export default function TreePage() {
         )}
         <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
+      <DropCards drops={drops} />
       {isProtected && (
         <p className="protected-tag" data-testid="protected-tag">
           受保護樹木

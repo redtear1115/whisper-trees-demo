@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Art, formatDate } from '../../components/ui'
 import { useStore } from '../../store'
 import { useViewedFlag } from '../onboarding/viewed'
+import { InsectSection } from './InsectSection'
 import { PhotoCarousel } from '../species/PhotoCarousel'
 import { loadSpeciesPhotos, photoUrl, type SpeciesPhoto } from '../../lib/speciesPhotos'
 import type { Checkin } from '../../store/types'
@@ -32,6 +33,12 @@ export function CodexSection() {
       .then(setRows)
       .catch(() => setRows([]))
   }, [])
+
+  // 打卡後的「看圖鑑」連到 #insects：樹種清單載入、版面定下來之後再捲過去
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (hash === '#insects' && rows.length) document.getElementById('insects')?.scrollIntoView({ block: 'start' })
+  }, [hash, rows.length, photos])
 
   useEffect(() => {
     let alive = true
@@ -128,6 +135,7 @@ export function CodexSection() {
           </div>
         </div>
       )}
+      {!query && <InsectSection />}
       {!query && (
         <details className="about">
           <summary>台北最常見的樹</summary>

@@ -140,6 +140,23 @@ export function awardCheckin(treeId: string, kind: 'success' | 'farView', now = 
   return award(kind === 'success' ? 'checkin' : 'farView', treeId, now)
 }
 
+/**
+ * 樹上住戶（昆蟲彩蛋，模擬）的額外光點：固定 insectBonus，乘全域與活動倍率，不乘日照與寂寞樹。
+ * 同一棵樹同一天只記一次（key 重複回 0）；GM 把 insectBonus 設成 0 就不記。回傳實際發出的點數。
+ */
+export function awardInsect(treeId: string, insectName: string, now = new Date()): number {
+  const day = dayKey(now)
+  const fullKey = `insect:${treeId}:${day}`
+  if (ledger().some((e) => e.key === fullKey)) return 0
+  const cfg = gameConfig()
+  const event = activeEvent(cfg, day)
+  const delta = Math.round(cfg.insectBonus * cfg.multiplier * (event?.multiplier ?? 1))
+  if (delta <= 0) return 0
+  const reason = `${ACTION_LABEL.insect}：${insectName}（模擬）${event ? `・${event.name}` : ''}`
+  setExt('ledger', [...baseLedger(), { at: now.getTime(), delta, reason, key: fullKey }])
+  return delta
+}
+
 export function spend(amount: number, reason: string): boolean {
   if (amount <= 0 || balance() < amount) return false
   setExt('ledger', [...baseLedger(), { at: Date.now(), delta: -amount, reason }])

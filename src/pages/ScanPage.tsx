@@ -7,9 +7,11 @@ import { judgeCheckin, type CheckinResult } from '../lib/geo'
 import { currentDemoPosition } from '../lib/demoPosition'
 import { locate } from '../lib/locate'
 import { DATA_VERSION } from '../config'
-import { isDemoMode, recordCheckin } from '../store'
+import { getState, isDemoMode, recordCheckin } from '../store'
+import { dayKey } from '../lib/seed'
 import { awardCheckin, isDaytime } from '../features/game/ledger'
 import { loadProtectedTrees } from '../features/game/protectedTrees'
+import { checkinDrops, type CheckinDrops } from '../features/game/drops'
 import { SCAN_CLOSE_TO } from '../features/nav/tabs'
 
 type Step = { kind: 'scan' } | { kind: 'working'; text: string } | { kind: 'error'; text: string }
@@ -18,6 +20,8 @@ export interface CheckinState {
   checkin: CheckinResult
   /** 這次打卡拿到的光點（0 代表今天已經拿過） */
   glow?: number
+  /** 這次打卡掉落的稀有配件與樹上住戶（模擬），樹的頁面顯示一次 */
+  drops?: CheckinDrops
 }
 
 export default function ScanPage() {
@@ -51,12 +55,16 @@ export default function ScanPage() {
     // Demo：用模擬位置判斷（可以在地圖上拖曳人物移動），離太遠就是「太遠」，和真實使用一樣
     const checkin = judgeCheckin(tree.lngLat, tree.remark, position)
     let glow: number | undefined
+    let drops: CheckinDrops | undefined
     if (checkin.kind === 'success' || checkin.kind === 'farView') {
+      const today = dayKey()
+      const firstToday = !getState().checkins.some((c) => c.treeId === id && c.result === 'success' && dayKey(new Date(c.at)) === today)
       recordCheckin(id, checkin.kind, { species: tree.species, night: !isDaytime() })
       await loadProtectedTrees() // 名冊還沒讀完就掃的話，等它，受保護的樹才會拿到 20
       glow = awardCheckin(id, checkin.kind)
+      drops = checkinDrops(id, checkin.kind, firstToday)
     }
-    navigate(`/tree/${id}`, { replace: true, state: { checkin, glow } satisfies CheckinState })
+    navigate(`/tree/${id}`, { replace: true, state: { checkin, glow, drops } satisfies CheckinState })
   }
 
   if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(SCAN_CLOSE_TO, { replace: true })} hint={hint} hintId={hintTreeId} />

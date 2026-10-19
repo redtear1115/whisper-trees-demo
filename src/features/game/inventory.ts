@@ -12,6 +12,8 @@ export interface Inventory {
   equipped: { outfit?: string; frame?: string }
   /** 「回到城市」類商品的累計次數 */
   civic: Record<string, number>
+  /** 樹上住戶（昆蟲彩蛋，模擬）第一次遇見：昆蟲 id → 哪棵樹、什麼時候。存在這裡是因為雲端的 users/{uid}.inventory 本來就是整個 map，不用動規則與寫入形狀。 */
+  insects?: Record<string, { treeId: string; at: number }>
 }
 
 const EMPTY: Inventory = { owned: [], equipped: {}, civic: {} }

@@ -1,6 +1,6 @@
 import { Art, Card } from '../components/ui'
 import { equip, useInventory } from '../features/game/inventory'
-import { useGameConfig } from '../features/game/config'
+import { allItems, RARE_ITEMS, useGameConfig } from '../features/game/config'
 import { TabHeader } from '../features/nav/TabLayout'
 import { SettingsSection } from '../features/account/SettingsSection'
 import { MeHero } from '../features/account/MeHero'
@@ -13,7 +13,8 @@ import { EventBar } from '../features/game/EventBar'
 function OutfitCard() {
   const inv = useInventory()
   const cfg = useGameConfig()
-  const ownedOutfits = cfg.shop.filter((i) => i.kind === 'outfit' && inv.owned.includes(i.id))
+  const ownedOutfits = allItems(cfg).filter((i) => i.kind === 'outfit' && inv.owned.includes(i.id))
+  const ownedRare = RARE_ITEMS.filter((i) => inv.owned.includes(i.id))
   const ownedFrames = cfg.shop.filter((i) => i.kind === 'frame' && inv.owned.includes(i.id))
   if (ownedOutfits.length === 0 && ownedFrames.length === 0) return null
   const pick = (kind: 'outfit' | 'frame', current: string | undefined, id: string | undefined, label: string) => (
@@ -34,6 +35,11 @@ function OutfitCard() {
         {pick('outfit', inv.equipped.outfit, undefined, '不穿戴')}
         {ownedOutfits.map((i) => pick('outfit', inv.equipped.outfit, i.id, i.name))}
       </div>
+      {ownedRare.map((i) => (
+        <p key={i.id} className="muted small item-note" data-testid="rare-note">
+          {i.name}：{i.brief}。在受保護的老樹旁第一次打卡得到，不能買。
+        </p>
+      ))}
       {ownedFrames.length > 0 && (
         <div className="chips me-chips" role="group" aria-label="樹的頁面相框">
           {pick('frame', inv.equipped.frame, undefined, '無相框')}

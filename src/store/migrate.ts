@@ -40,6 +40,13 @@ interface Inventory {
   owned: string[]
   equipped: { outfit?: string; frame?: string }
   civic: Record<string, number>
+  insects?: Record<string, { treeId: string; at: number }>
+}
+
+function mergeInsects(a: Inventory['insects'], b: Inventory['insects']): NonNullable<Inventory['insects']> {
+  const out = { ...b }
+  for (const [id, v] of Object.entries(a ?? {})) if (!out[id] || v.at < out[id].at) out[id] = v
+  return out
 }
 
 const get = (k: string) => {
@@ -177,7 +184,7 @@ export async function runMigration(db: Firestore, uid: string, withWhispers: boo
       patch.ledger = JSON.parse(JSON.stringify([...(cloud.ledger ?? []), ...add]))
     }
     const inv = l.ext?.inventory
-    if (inv?.owned?.length || Object.keys(inv?.civic ?? {}).length) {
+    if (inv?.owned?.length || Object.keys(inv?.civic ?? {}).length || Object.keys(inv?.insects ?? {}).length) {
       const c = (cloud.inventory ?? { owned: [], equipped: {}, civic: {} }) as Inventory
       const civic = { ...c.civic }
       for (const [k, n] of Object.entries(inv?.civic ?? {})) civic[k] = Math.max(civic[k] ?? 0, n)
@@ -186,6 +193,8 @@ export async function runMigration(db: Firestore, uid: string, withWhispers: boo
           owned: [...new Set([...(c.owned ?? []), ...(inv?.owned ?? [])])],
           equipped: { ...inv?.equipped, ...c.equipped },
           civic,
+          // 樹上住戶：同一種昆蟲留比較早遇見的那一次
+          insects: mergeInsects(inv?.insects, c.insects),
         }),
       )
     }
