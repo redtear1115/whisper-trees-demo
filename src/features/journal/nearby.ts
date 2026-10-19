@@ -61,6 +61,29 @@ export function formatDistance(m: number): string {
   return `約 ${Math.max(1, Math.round(m))} 公尺`
 }
 
+/** 從 from 看 to 的方位角（0 = 北，順時針度數，0–360） */
+export function bearingTo([lon1, lat1]: LngLat, [lon2, lat2]: LngLat): number {
+  const r = Math.PI / 180
+  const dLon = (lon2 - lon1) * r
+  const y = Math.sin(dLon) * Math.cos(lat2 * r)
+  const x = Math.cos(lat1 * r) * Math.sin(lat2 * r) - Math.sin(lat1 * r) * Math.cos(lat2 * r) * Math.cos(dLon)
+  return ((Math.atan2(y, x) / r) + 360) % 360
+}
+
+const COMPASS = ['北', '東北', '東', '東南', '南', '西南', '西', '西北']
+
+/** 八方位文字。手機沒有可靠的朝向，所以不用「左前方」，只說「往東北」 */
+export function compassLabel(deg: number): string {
+  return `往${COMPASS[Math.round((((deg % 360) + 360) % 360) / 45) % 8]}`
+}
+
+/** 樹牌編號尾碼，用來分辨同一條路上同樹種的樹：DA0030211045 → #211045；帶 -001 後綴的保留後綴 */
+export function treeNumberTail(id: string): string {
+  const [base, ...rest] = id.split('-')
+  const digits = base.replace(/^[A-Za-z]+/, '')
+  return `#${digits.slice(-6)}${rest.length ? `-${rest.join('-')}` : ''}`
+}
+
 // ---------- 圖磚（與地圖同一份 public/data/tree-tiles，z16，圖層 trees，屬性 id） ----------
 
 function tileXY([lon, lat]: LngLat, z: number): [number, number] {

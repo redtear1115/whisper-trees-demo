@@ -265,11 +265,12 @@ textarea.input {
   white-space: nowrap;
 }
 
-/* 細條本身 34 px，可點範圍往下多 10 px 到 44 px（透明）；頁面內容從 44 px 以下開始，不會被它蓋到 */
+/* 細條本身 34 px（含 1 px 下邊線，內框 33 px），可點範圍往下多 11 px 到剛好 44 px（透明）；
+   頁面內容從 44 px 以下開始，不會被它蓋到 */
 .demo-badge::after {
   content: '';
   position: absolute;
-  inset: 0 0 -10px;
+  inset: 0 0 -11px;
 }
 
 .demo-badge:focus-visible {
@@ -4654,4 +4655,61 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   .migrate-banner {
     animation: none;
   }
+}
+
+/* ---------- 地圖與樹洞（第三輪 D） ---------- */
+
+/* 許願小樹苗：按鈕是 44 px 以上的透明可點範圍，圖案（.wish-marker-art）保持原本的視覺大小 */
+.wish-marker {
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  background: none;
+  filter: none;
+}
+.wish-marker-art {
+  display: block;
+  pointer-events: none;
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
+}
+
+/* 資料出處 ⓘ 放左下：離開底部中央的主按鈕和右側工具列（仍一直看得到，點開是完整出處） */
+.map-page .maplibregl-ctrl-bottom-left {
+  bottom: calc(var(--nav-h) + 6px);
+  left: 6px;
+}
+.map-page .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact {
+  padding: 2px 0 2px 44px;
+}
+.map-page .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib-button {
+  left: 0;
+  right: auto;
+}
+.map-page .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact-show {
+  padding: 2px 12px 2px 44px;
+  max-width: min(calc(100vw - 92px), 320px);
+}
+/* 展開時抬高到主按鈕上方，不蓋住它 */
+.map-page .maplibregl-ctrl-bottom-left:has(.maplibregl-compact-show) {
+  bottom: calc(var(--nav-h) + 84px);
+}
+
+/* 右側工具列：貼右邊緣、按鈕之間留 12 px，點樹時比較不會誤按到 */
+.map-tools {
+  right: 4px;
+  gap: 12px;
+}
+.map-tools .tool {
+  width: 48px;
+  min-height: 48px;
+}
+
+/* 樹洞附近的樹：方位與樹牌編號讓每一列分得出來 */
+.nearby-tag {
+  font-variant-numeric: tabular-nums;
+}
+.nearby-dist {
+  white-space: nowrap;
 }

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { DEMO } from '../../../config'
 import { offsetNorth } from '../../../lib/geo'
-import { leaveTarget, nearbyAction, nearbyLabel, parseTreeTile, pickNearby, tilesCovering } from '../nearby'
+import { bearingTo, compassLabel, leaveTarget, treeNumberTail, nearbyAction, nearbyLabel, parseTreeTile, pickNearby, tilesCovering } from '../nearby'
 
 const c = DEMO.center
 describe('pickNearby', () => {
@@ -63,5 +63,23 @@ describe('nearbyLabel', () => {
   it('walk and route keep their labels', () => {
     expect(nearbyLabel('walk')).toBe('走過去')
     expect(nearbyLabel('route', true)).toBe('怎麼走')
+  })
+})
+
+describe('distinguishing details', () => {
+  it('bearing and compass label', () => {
+    const north = offsetNorth(c, 50)
+    expect(bearingTo(c, north)).toBeCloseTo(0, 0)
+    expect(compassLabel(bearingTo(c, north))).toBe('往北')
+    const east: [number, number] = [c[0] + 0.001, c[1]]
+    expect(compassLabel(bearingTo(c, east))).toBe('往東')
+    expect(compassLabel(bearingTo(c, [c[0] - 0.001, c[1] - 0.001]))).toBe('往西南')
+    expect(compassLabel(359)).toBe('往北')
+    expect(compassLabel(-90)).toBe('往西')
+  })
+  it('tree number tail', () => {
+    expect(treeNumberTail('DA0030211045')).toBe('#211045')
+    expect(treeNumberTail('SL0560111023-001')).toBe('#111023-001')
+    expect(treeNumberTail('X12')).toBe('#12')
   })
 })

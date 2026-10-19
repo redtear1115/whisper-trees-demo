@@ -5,7 +5,7 @@ import { walkTarget } from '../../lib/geo'
 import { isDemoMode, recentCheckin, setDemoPosition, useStore } from '../../store'
 import { ringRadius } from '../map/ring'
 import { useAnchor } from '../map/useAnchor'
-import { formatDistance, leaveTarget, loadNearbyTrees, nearbyAction, nearbyLabel, type NearbyTree } from './nearby'
+import { bearingTo, compassLabel, formatDistance, leaveTarget, loadNearbyTrees, nearbyAction, nearbyLabel, treeNumberTail, type NearbyTree } from './nearby'
 
 /** 先列幾棵，其餘按「看更多」才展開，讓下面的日記與許願不被擠到很下面 */
 export const NEARBY_FIRST = 3
@@ -56,7 +56,10 @@ export function NearbyTrees() {
                   <span className="nearby-name">{r.tree?.species ?? '一棵樹'}</span>
                   <span className="muted small nearby-meta">
                     {r.tree?.place ? `${r.tree.place}・` : ''}
-                    {formatDistance(r.distance)}
+                    {compassLabel(bearingTo(anchor.lngLat, r.lngLat))}・<span className="nearby-dist">{formatDistance(r.distance)}</span>
+                  </span>
+                  <span className="muted small nearby-tag" data-testid="journal-nearby-number">
+                    樹牌 {treeNumberTail(r.id)}
                   </span>
                 </div>
                 {(() => {

@@ -9,6 +9,7 @@ import type { LngLat } from '../lib/geo'
 import { clearActiveTour, demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useActiveTour, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { ActiveTour } from '../store'
 import type { Wish } from '../store/types'
+import { wishHitSize, wishMarkerLabel, wishMarkerSize } from '../features/map/wishMarker'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
@@ -137,6 +138,7 @@ export default function MapPage() {
         compact: true,
         customAttribution: '樹木與樹穴：臺北市政府開放資料｜公園範圍：© OpenStreetMap contributors',
       }),
+      'bottom-left', // 離開底部中央的主按鈕和右側工具列，避免誤點
     )
     // 指北針是右側工具列自己的按鈕（和圖層、跟著方向放在一起）
     m.on('rotate', () => setBearing(m.getBearing()))
@@ -805,12 +807,17 @@ export default function MapPage() {
     const m = map.current
     if (!m || !layers.wishes) return
     const markers: Marker[] = wishes.map((w) => {
-      const size = Math.min(44, 22 + Math.sqrt(totalWater(w)) * 2.5)
+      const size = wishMarkerSize(totalWater(w))
+      // 按鈕是 44 px 以上的透明可點範圍，圖案是裡面的 span（視覺大小不變）
       const node = document.createElement('button')
       node.className = 'wish-marker'
-      node.style.width = node.style.height = `${size}px`
-      node.style.backgroundImage = `url(${assetUrl('sapling')})`
-      node.setAttribute('aria-label', `${w.road} 的許願`)
+      node.style.width = node.style.height = `${wishHitSize(size)}px`
+      const art = document.createElement('span')
+      art.className = 'wish-marker-art'
+      art.style.width = art.style.height = `${size}px`
+      art.style.backgroundImage = `url(${assetUrl('sapling')})`
+      node.appendChild(art)
+      node.setAttribute('aria-label', wishMarkerLabel(w.road))
       // 地圖外的標記不進 Tab 順序；鍵盤使用者從「樹洞」的我的許願進入
       node.tabIndex = -1
       node.onclick = (ev) => {
