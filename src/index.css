@@ -3143,3 +3143,226 @@ body.has-offline .gov {
 .journal-item .btn {
   justify-self: start;
 }
+
+/* ---------- 集章冊地圖（C） ---------- */
+
+.atlas {
+  margin-top: 12px;
+}
+
+.atlas-crumbs {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.atlas-crumbs button {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--green-ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.atlas-crumbs [aria-current='page'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.atlas-panel {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: #26332b;
+}
+
+.atlas-panel svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.atlas-region {
+  outline: none;
+  stroke: #1a241e;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.atlas-region:hover {
+  filter: brightness(1.12);
+}
+
+.atlas-region.on {
+  stroke: #fff6c8;
+  stroke-width: 3;
+  filter: brightness(1.15);
+}
+
+.atlas-region:focus-visible {
+  outline: none;
+  stroke: #fff6c8;
+  stroke-width: 3.5;
+  box-shadow: none;
+}
+
+.atlas-city-edge {
+  fill: none;
+  stroke: #9cb59a;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.atlas-label {
+  font-family: var(--font-voice);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke-opacity: 0.55;
+  stroke-linejoin: round;
+  pointer-events: none;
+  user-select: none;
+}
+
+.atlas-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 8px 10px 10px;
+  list-style: none;
+  color: #d5e0d1;
+  font-size: 0.8rem;
+}
+
+.atlas-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.atlas-legend li i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.atlas-ramp i {
+  flex: 0 1 120px;
+  height: 10px;
+  border-radius: 5px;
+}
+
+.atlas-card {
+  margin: 12px 0 8px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.atlas-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+}
+
+.atlas-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.atlas-tier {
+  margin-left: auto;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.atlas-big {
+  margin: 4px 0;
+  font-size: 1.05rem;
+}
+
+.atlas-card .btn.block {
+  margin: 10px 0 6px;
+}
+
+.atlas-note {
+  margin: 14px 0;
+  color: var(--muted);
+}
+
+.atlas-summary {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--green-ink);
+}
+
+.route-map {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--green-soft);
+}
+
+.route-stops {
+  margin: 10px 0 4px;
+  padding-left: 1.6em;
+  columns: 2;
+  column-gap: 16px;
+  font-size: 0.9rem;
+}
+
+.route-pin {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--green-ink);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+
+.route-pin.start {
+  background: var(--amber-ink);
+}
+
+.route-pin.finish {
+  background: #17251b;
+}
+
+.route-pin-tag {
+  position: absolute;
+  top: 100%;
+  margin-top: 2px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.95);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-region {
+    transition: none;
+  }
+}
