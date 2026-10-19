@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { inAppBrowser } from '../../../lib/firebase'
 import {
+  firstLightCelebration,
   installPlatform,
   isStandalone,
   reopenPatch,
@@ -40,6 +41,32 @@ describe('tourView', () => {
   })
   it('does not show the post-earn steps before first light', () => {
     expect(tourView({ ob: { tourStep: 4 }, firstLight: false, ready: true }).step).toBe(STEP_SCAN)
+  })
+})
+
+describe('tourView in Demo mode', () => {
+  it('does not open by itself in Demo mode', () => {
+    expect(tourView({ ob: {}, firstLight: false, ready: true, demo: true }).open).toBe(false)
+    expect(tourView({ ob: { tourStep: 2 }, firstLight: false, ready: true, demo: true }).open).toBe(false)
+  })
+  it('opens in Demo mode after 選單「新手引導」(tourDismissedAt = 0)', () => {
+    expect(tourView({ ob: { tourStep: 2, tourDismissedAt: 0 }, firstLight: false, ready: true, demo: true })).toEqual({ open: true, step: STEP_SCAN, needsInit: false })
+    expect(tourView({ ob: reopenPatch({}), firstLight: false, ready: true, demo: true }).open).toBe(true)
+  })
+})
+
+describe('firstLightCelebration', () => {
+  const base = { ready: true, firstLight: true, tourOnCelebrate: false }
+  it('shows a dialog once when the tour is not on the celebration step (dismissed, Demo mode)', () => {
+    expect(firstLightCelebration(base)).toBe('dialog')
+    expect(firstLightCelebration({ ...base, celebratedAt: 1 })).toBe('none')
+  })
+  it('only marks it when the tour sheet is drawing the celebration', () => {
+    expect(firstLightCelebration({ ...base, tourOnCelebrate: true })).toBe('mark')
+  })
+  it('waits for first light and for the user doc', () => {
+    expect(firstLightCelebration({ ...base, firstLight: false })).toBe('none')
+    expect(firstLightCelebration({ ...base, ready: false })).toBe('none')
   })
 })
 

@@ -20,6 +20,8 @@ export interface Onboarding {
   tasksCollapsed?: boolean
   /** 「城市的新朋友」慶祝過的時間，只慶祝一次 */
   newcomerCelebratedAt?: number
+  /** 「第一道光」慶祝過了（引導第 3 步或略過引導後的慶祝視窗，只跳一次） */
+  firstLightCelebratedAt?: number
 }
 
 const EMPTY: Onboarding = {}

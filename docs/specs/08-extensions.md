@@ -120,7 +120,7 @@
 
 ### 資料與新手禮的規則
 
-- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）。
+- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）、`firstLightCelebratedAt`（A1 慶祝過）。
 - 只能用 `patchOnboarding(partial)` 寫：以目前的值為底合併，雲端以 map 逐欄合併，所以不會蓋掉另一台裝置或舊快取寫的欄位。
 - 新手禮**只記 `onboarding.giftAt`**。擁有權由 `inventory()` 推算（`giftAt` 有值就把 `hat-straw` 算進 `owned`，不重複）；`buy('hat-straw')` 回傳「已擁有」。換上草帽走原本的 `equip`，由使用者操作。**不會自動寫入 `ext.inventory` 或 `ext.ledger`**，光點與餘額都不動。
 - 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式與退回本機時一律 ready。`grantStarterGift()` 在 ready 之前什麼都不做。
@@ -136,8 +136,9 @@
 | 3 | 第一次拿到光點：慶祝徽章「第一道光」＋新手禮草帽（連到 `/me` 換上、`/shop`）。拿到第一道光就直接跳到這一步 |
 | 4 | 加到主畫面：沒綁 Google 的先建議「用 Google 保留紀錄」（說明 iOS 主畫面 App 的儲存空間和 Safari 分開），再依瀏覽器給說明：iOS Safari 用「分享 → 加入主畫面」、Android Chrome 有 `beforeinstallprompt` 就給「安裝到主畫面」按鈕（`main.tsx` 一開始就接住事件）否則給選單說明、LINE／Facebook／Instagram 內建瀏覽器請先用 Safari／Chrome 開啟。「我加好了」走完 |
 
-- **什麼時候開**：使用者文件已載入（`useUserReady()`，不然看不到有沒有按過「之後再說」）、沒按過「之後再說」、`tourStep` 未走完。還沒拿到第一道光的新使用者一開地圖就看到；**已拿到第一道光的人，只有「開始過」引導（`tourStep` 有存）才會接著看到第 3、4 步**，早就有光點、沒看過引導的人不會被打擾（要看可以從選單進）。開著時若 `tourStep` 還沒存，補存 1，讓「開始過」成立。
-- **之後再說**：記 `tourDismissedAt`，之後不再自動出現。慶祝只在引導裡出現一次（走到第 4 步就不會回頭），所以按過「之後再說」才拿到第一道光的人看不到慶祝，新手禮仍會送，徽章在 `/me`。
+- **什麼時候開**：使用者文件已載入（`useUserReady()`，不然看不到有沒有按過「之後再說」）、沒按過「之後再說」、`tourStep` 未走完。還沒拿到第一道光的新使用者一開地圖就看到；**已拿到第一道光的人，只有「開始過」引導（`tourStep` 有存）才會接著看到第 3、4 步**，早就有光點、沒看過引導的人不會被打擾（要看可以從選單進）。開著時若 `tourStep` 還沒存，補存 1，讓「開始過」成立。**Demo 模式（`?demo=1`）不自動打開**（2026-10-19 決定：現場展示不多按），從選單「新手引導」打開過才顯示。
+- **之後再說**：記 `tourDismissedAt`，之後不再自動出現。
+- **第一道光的慶祝只一次**（2026-10-19 決定）：引導停在第 3 步時由引導畫；否則（按過「之後再說」、Demo 模式、早就有光點的舊使用者）由 `OnboardingEffects` 跳一次慶祝視窗，含新手禮與「到小芽換上」連結。兩種都記 `firstLightCelebratedAt`，不會重複（`firstLightCelebration`）。
 - **選單「新手引導」**：把 `tourDismissedAt` 改成 `0`（雲端是逐欄合併，欄位寫 `undefined` 清不掉，所以用 0 表示沒收起），`tourStep` 維持原本停的步驟；已走完或沒開始過就從第 1 步。
 - **新手禮**：`OnboardingEffects`（App 層級，不論在哪一頁）在 `userReady` 且有第一道光時呼叫 `grantStarterGift()`，所以在樹的頁面打卡完就送了，不必回地圖。
 - **回家的路**：同一個 `OnboardingEffects` 偵測從桌面圖示打開（`matchMedia('(display-mode: standalone)')` 或 `navigator.standalone`），使用者文件載入後若沒有 `homeScreenAt` 就記下並跳出慶祝；換 uid（例如 standalone 內用 Google 登入）會重新檢查，所以 Google 帳號也會記到。`patchOnboarding` 合併寫，不洗掉其他旗標。
@@ -170,6 +171,7 @@ S2 引導一與加入主畫面（已做；桌機 360 px 與單元測試驗過，
 - [x] 模擬 standalone 啟動只記一次「回家的路」，不洗掉其他旗標；`manifest.webmanifest` 內容類型正確（dev server 驗過；Cloudflare 靠 `_headers`，部署後要再確認）。
 - [x] 360 px 沒有水平捲動、輸入框字級至少 16 px（引導裡沒有輸入框）、全部繁體中文。
 - [ ] 實機 iPhone（需使用者同意部署後）：加入主畫面、「回家的路」亮起、standalone 內 Google 登入視窗可用；只在桌機測過的項目要註明。
+- [x] Demo 模式不自動跳引導、「掃樹牌」按鈕在；拿到第一道光跳一次慶祝視窗，重新整理不再跳；從選單打開引導後拿到第一道光，由引導第 3 步慶祝、不另跳視窗（2026-10-19 Playwright 360 px，本機後端）。
 - [x] 雲端（Firestore 模擬器）下的瀏覽器流程：2026-10-19 用 Playwright（360 px）在模擬器模式走過新使用者、之後再說＋重新整理、從選單接著看、第一道光慶祝與新手禮；重新整理後旗標仍在，模擬器的 `users/{uid}.onboarding` 是 map 欄位。standalone 在雲端模式只有整合測試涵蓋。
 
 S3 新手任務（已做；本機後端 360 px Playwright 驗過）

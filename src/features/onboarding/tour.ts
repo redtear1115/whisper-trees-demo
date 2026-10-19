@@ -15,6 +15,8 @@ export interface TourInput {
   firstLight: boolean
   /** 這個 uid 的使用者文件已載入；沒載入前不知道有沒有按過「之後再說」，所以先不顯示 */
   ready: boolean
+  /** Demo 模式（?demo=1）：現場展示不自動跳引導，要看從選單打開 */
+  demo?: boolean
 }
 
 export interface TourView {
@@ -31,11 +33,13 @@ export interface TourView {
  * - 已拿到第一道光：只有「開始過」（tourStep 有存）的人才接著看，直接到第 3 步慶祝；
  *   舊使用者（早就有光點、沒看過引導）不會被打擾，要看可以從選單進。
  * - 走完（tourStep = 5）或按過「之後再說」就收起。
+ * - Demo 模式不自動打開；從選單打開過（tourDismissedAt 被設成 0）才顯示。
  */
-export function tourView({ ob, firstLight, ready }: TourInput): TourView {
+export function tourView({ ob, firstLight, ready, demo }: TourInput): TourView {
   const stored = ob.tourStep
   const closed: TourView = { open: false, step: STEP_INTRO, needsInit: false }
   if (!ready || ob.tourDismissedAt || (stored !== undefined && stored >= STEP_DONE)) return closed
+  if (demo && ob.tourDismissedAt === undefined) return closed
   if (firstLight && stored === undefined) return closed
   let step = Math.min(Math.max(stored ?? STEP_INTRO, STEP_INTRO), STEP_HOME)
   if (firstLight && step < STEP_CELEBRATE) step = STEP_CELEBRATE
@@ -50,6 +54,20 @@ export function tourView({ ob, firstLight, ready }: TourInput): TourView {
 export function reopenPatch(ob: Onboarding): Pick<Onboarding, 'tourDismissedAt' | 'tourStep'> {
   const stored = ob.tourStep
   return { tourDismissedAt: 0, tourStep: stored === undefined || stored >= STEP_DONE ? STEP_INTRO : stored }
+}
+
+/**
+ * 「第一道光」要怎麼慶祝：引導正停在第 3 步就由引導畫（只記下慶祝過）；
+ * 否則（略過了引導、Demo 模式、舊使用者）跳一次慶祝視窗。
+ */
+export function firstLightCelebration(a: {
+  ready: boolean
+  firstLight: boolean
+  celebratedAt?: number
+  tourOnCelebrate: boolean
+}): 'none' | 'mark' | 'dialog' {
+  if (!a.ready || !a.firstLight || a.celebratedAt) return 'none'
+  return a.tourOnCelebrate ? 'mark' : 'dialog'
 }
 
 // ---------- 桌面圖示（standalone） ----------

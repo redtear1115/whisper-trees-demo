@@ -16,7 +16,7 @@ export function useTourView() {
   const ob = useOnboarding()
   const firstLight = useStore((s) => firstLightEarned(s))
   const ready = useUserReady()
-  const view = tourView({ ob, firstLight, ready })
+  const view = tourView({ ob, firstLight, ready, demo: isDemoMode() })
   const init = view.open && view.needsInit
   useEffect(() => {
     if (init) patchOnboarding({ tourStep: STEP_INTRO })
