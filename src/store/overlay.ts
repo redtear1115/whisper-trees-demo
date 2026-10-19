@@ -13,6 +13,8 @@ export interface Overlay {
   /** undefined：沒改過，用雲端的；{}：恢復預設 */
   gm?: unknown
   ledger: unknown[]
+  /** 模擬用的 ext（API 用戶端、呼叫紀錄、回報處理）：雲端模式只存這裡，不進 Firestore */
+  ext?: Record<string, unknown>
 }
 
 export const emptyOverlay = (): Overlay => ({ wishEvents: {}, vendor: {}, ledger: [] })

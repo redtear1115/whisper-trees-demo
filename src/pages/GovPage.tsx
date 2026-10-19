@@ -10,6 +10,8 @@ import { IconCamera } from '../components/icons'
 import { reportResolved, useOrders } from '../features/vendor/orders'
 import { NOTICES, useMyOpinions } from '../features/notice/notices'
 import { AdminMode, useCanSeeNotes } from '../features/cloud/AdminMode'
+import { GovApiClients } from '../features/api/ClientSections'
+import { useReportReviews } from '../features/api/clientStore'
 
 const GovMap = lazy(() => import('../features/gov/GovMap').then((m) => ({ default: m.GovMap })))
 
@@ -242,6 +244,8 @@ export default function GovPage() {
 
       <Notices />
 
+      <GovApiClients />
+
       <p className="muted small">
         分數：四項各自正規化到 0–1 後加權平均。遮蔭缺口與公平性依行政區「每公里人行道的行道樹數」（開放資料推算）；
         市民需求為澆水數取對數。
@@ -370,6 +374,7 @@ function useFlip(order: string) {
 function ReportsByRoad() {
   const reports = useReports()
   const orders = useOrders()
+  const reviews = useReportReviews()
   const canSeeNotes = useCanSeeNotes()
   const groups = new Map<string, TreeReport[]>()
   for (const r of reports) {
@@ -411,6 +416,11 @@ function ReportsByRoad() {
                     <span className="muted">・{relativeDays(r.at)}</span>
                     {!r.mock && <span className="new-tag">市民新回報</span>}
                     {reportResolved(r.id, orders) && <span className="status-pill s-planted">廠商已處理</span>}
+                    {reviews[r.id] && reviews[r.id].status !== 'open' && (
+                      <span className={`status-pill ${reviews[r.id].status === 'dismissed' ? 's-rejected' : 's-scheduled'}`} title="由 API 標示（模擬）">
+                        {reviews[r.id].status === 'dismissed' ? `已駁回：${reviews[r.id].reason}` : '已受理'}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

@@ -194,6 +194,7 @@ function rebuildExt() {
     onboarding: userDoc.onboarding,
     opinions,
     ledgerOverlay: overlay.ledger,
+    ...overlay.ext,
   }
   S = { ...S, ext }
 }
@@ -750,6 +751,13 @@ export function setExt(key: string, value: unknown) {
       rebuildExt()
       commit()
       queueUser({ replace: { [key]: value } })
+      return
+    // 對外 API 的模擬（用戶端、呼叫紀錄、回報處理）：不管是不是承辦人都只存本機覆寫層，沒有 Firestore 規則
+    case 'apiClients':
+    case 'apiLog':
+    case 'reportReviews':
+      overlay = { ...overlay, ext: { ...overlay.ext, [key]: value } }
+      saveOverlayAndRebuild()
       return
     case 'ledgerOverlay':
       overlay = { ...overlay, ledger: value as unknown[] }

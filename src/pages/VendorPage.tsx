@@ -4,6 +4,8 @@ import { MockTag, formatDate, relativeDays } from '../components/ui'
 import { useReports, useWishes, wishStatus } from '../store'
 import { REPORT_KINDS } from '../store/types'
 import { AdminMode, useCanSeeNotes } from '../features/cloud/AdminMode'
+import { VendorApiClients } from '../features/api/ClientSections'
+import { vendorOfDistrict } from '../features/api/vendors'
 import { advance, STAGE_LABEL, stageOf, useOrders, type OrderStage } from '../features/vendor/orders'
 
 const NEXT: Partial<Record<OrderStage, { to: OrderStage; label: string }>> = {
@@ -55,7 +57,7 @@ export default function VendorPage() {
               id={`wish:${w.id}`}
               wishId={w.id}
               title={`${w.district} ${w.road}`}
-              detail={`候選空樹穴 ${w.pitId ?? '（需會勘）'}・市民原因：${w.reasons.join('、')}`}
+              detail={`候選空樹穴 ${w.pitId ?? '（需會勘）'}・市民原因：${w.reasons.join('、')}・承包：${vendorOfDistrict(w.district).name}`}
               stage={stageOf(`wish:${w.id}`, orders)}
               at={orders[`wish:${w.id}`]?.at}
               doneNote={orders[`wish:${w.id}`]?.note}
@@ -75,7 +77,7 @@ export default function VendorPage() {
               key={r.id}
               id={`report:${r.id}`}
               title={`${r.district} ${r.road}・${r.species}（${r.treeId}）`}
-              detail={`${REPORT_KINDS[r.kind].label}：${r.details.join('、') || '未選細項'}${r.note && (canSeeNotes || r.mock || r.mine) ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報`}
+              detail={`${REPORT_KINDS[r.kind].label}：${r.details.join('、') || '未選細項'}${r.note && (canSeeNotes || r.mock || r.mine) ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報・承包：${vendorOfDistrict(r.district).name}`}
               stage={stageOf(`report:${r.id}`, orders)}
               at={orders[`report:${r.id}`]?.at}
               doneNote={orders[`report:${r.id}`]?.note}
@@ -83,6 +85,8 @@ export default function VendorPage() {
           ))}
         </section>
       )}
+
+      <VendorApiClients />
     </div>
   )
 }

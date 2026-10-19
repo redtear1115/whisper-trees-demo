@@ -68,15 +68,68 @@
 - 玩家查詢與客服：模擬玩家與客訴（GPS 漂移、樹牌被遮住、異常速度），可以補發光點給這台裝置，原因必填並寫進玩家的光點紀錄。
 - 頁首標「示範：營運人員視角」。改動寫回 store，市民端分頁即時更新。
 
-## 7. 對外開放 API `/developers`
+## 7. 對外開放 API 與 MCP `/developers`
 
-2026-10-19 決定：API 的目的是**讓政府端（公園處既有系統）不用進我們的網站，直接呼叫 API 讀寫**，不是給大眾下載資料。做法：
+2026-10-19 決定做法，2026-10-20 改成 OAuth 2.0 並補上角色、用戶端管理與 MCP。目的：**政府端（公園處既有系統）與承包廠商不用進我們的網站，直接呼叫 API 讀寫**，不是給大眾下載資料。
 
-- **層級：文件＋示意**。不做伺服器端 API；試打的回應由前端模擬，畫面標「模擬」。
-- **範圍：讀寫全部**：政府端畫面能做的事（熱點、優先分數、案件與狀態、樹況回報、工單）都有對應的讀寫端點。
-- **API key 授權**：承辦人在政府端建立 key（名稱、權限）、只顯示一次、可撤銷；試打時檢查 key 是否有效、權限是否足夠，回 401／403。key 存在 store，標「模擬」。
-- **MCP**：文件頁列出 MCP 工具（對應每個端點）與 client 設定範例，讓政府的 AI 助理可以接；示意，不真的跑 MCP server。
-- 順序：先部署 Firebase 版並在 iPhone 實測，再做這一節；端點與畫面細節另寫計畫，核准後才實作。
+- **層級：文件＋前端模擬**。沒有伺服器；`https://whisper-trees.pages.dev/api/v1/…`、`/oauth/token`、`/mcp` 都只是示意網址。`/developers` 的試打與 MCP 試用由瀏覽器裡的模擬閘道處理（`src/features/api/`），畫面標「模擬」。`/developers` 是桌機工具，不在 `MobileOnly` 裡，360 px 仍可讀。
+- **範圍：讀寫全部**。寫入走和畫面同一組 store 函式（`setWishStatus`、`saveOrder` 經 `advance`、回報處理），所以 `/gov`、`/vendor`、市民端「我的許願」即時更新。
+- **授權：OAuth 2.0 client credentials**（取代原本的 API key）。
+
+### 驗證流程
+
+1. `POST /oauth/token`，`grant_type=client_credentials`，用戶端用 HTTP Basic 或表單欄位 `client_id`／`client_secret` 驗證，`scope` 選填（空白分隔，不填 = 該用戶端的全部）。回 `{ access_token, token_type: "Bearer", expires_in: 3600, scope }`。
+2. 呼叫 API：`Authorization: Bearer <access_token>`。token 1 小時過期，沒有 refresh token。
+3. 錯誤依 RFC 6749／6750，格式 `{ error, error_description }`：token 端點 `invalid_request`／`unsupported_grant_type`／`invalid_scope`（400）、`invalid_client`（401，client 錯或已撤銷）；API `invalid_token`（401，附 `WWW-Authenticate: Bearer error="invalid_token"`，含過期、不存在、用戶端已撤銷）、沒帶 token 的 401（`WWW-Authenticate` 不含 error）、`insufficient_scope`（403，`WWW-Authenticate` 的 `scope` 列出需要的 scope）。另有 404 `not_found`、405、409 `invalid_state`（工單狀態不能這樣推進）、422 `validation_failed`（有 `field`）。
+
+### 角色與 scope
+
+scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它（有單元測試）。
+
+| 角色 | scope | 能做什麼 |
+|---|---|---|
+| 政府系統 | `hotspots:read` `priorities:read` `cases:read` `cases:write` `reports:read` `reports:write` `workorders:read` `workorders:write` | 讀熱點、優先分數、案件、回報、全部工單；改案件狀態、處理回報、推進任何工單 |
+| 廠商（綁定一家廠商 id） | `workorders:own:read` `workorders:own:write` | 只看得到指派給自己廠商的工單；接單、開始施工、完工回報；其他端點一律 403。別家廠商的工單回 404（不透露存在） |
+
+政府系統用戶端不能持有廠商 scope，反之亦然。工單的廠商由行政區決定（模擬：綠野造園＝中正、大同、中山、松山；蔭涼植栽＝大安、信義、萬華、士林；城市樹醫＝文山、內湖、南港、北投，見 `vendors.ts`）。
+
+### 端點（v1）
+
+列表回 `{ data, meta: { total, limit, offset } }`，支援 `limit`（1–200，預設 50）、`offset`；時間 ISO 8601（UTC）。欄位與範例回應見 `/developers`「端點」，單一來源 `src/features/api/docs.ts`。
+
+| 端點 | scope（擇一） | 說明 |
+|---|---|---|
+| `GET /api/v1/hotspots` | `hotspots:read` | 依路段彙整未結案許願，依澆水數排序；`district` 篩選 |
+| `GET /api/v1/priorities` | `priorities:read` | 優先分數排行；權重用 `demand`、`shade`、`feasibility`、`fairness`（0–100，預設各 25，回應 `meta.weights` 為換算後的比例）、`include_closed`；算法同 [06](06-gov-console.md) |
+| `GET /api/v1/cases`、`GET /api/v1/cases/{id}` | `cases:read` | 案件（許願）；`status`、`district` 篩選；明細含狀態歷程與預設權重的分數 |
+| `PATCH /api/v1/cases/{id}` | `cases:write` | `{ status, reason }`；`rejected` 沒填 `reason` 回 422 |
+| `GET /api/v1/reports` | `reports:read` | 樹況回報（含備註）；`kind`、`district` 篩選 |
+| `PATCH /api/v1/reports/{id}` | `reports:write` | `{ status: open｜acknowledged｜dismissed, reason }`；`dismissed` 必填 `reason`；`/gov` 的回報清單會顯示「已受理／已駁回」 |
+| `GET /api/v1/work-orders` | `workorders:read` 或 `workorders:own:read` | 補種工單（案件「可種・已排程」或已有工單紀錄）與養護工單（每筆樹況回報）；狀態 `pending`／`accepted`／`in_progress`／`done`；`status`、`type` 篩選。id 形如 `wo_wish_<案件id>`、`wo_report_<回報id>` |
+| `POST /api/v1/work-orders/{id}/accept｜progress｜complete` | `workorders:write` 或 `workorders:own:write` | 接單 → 開始施工 → 完工（body 可帶 `note`）；狀態不對回 409；補種工單完工後案件同一次改成「已種植」 |
+
+### 用戶端管理
+
+- **承辦人在 `/gov`「API 用戶端」建立**：名稱、類型（政府系統／廠商，廠商要選哪一家）、scope（依類型預設全勾，可取消勾選，不能超出該類型）。`client_secret` **只顯示一次**（附複製鈕），也在「重新產生」時顯示一次；系統只存 **SHA-256（`crypto.subtle`）與最後 4 碼**。可重新產生（舊 secret 立刻失效）、撤銷（該用戶端的 token 立刻失效）。清單顯示建立時間、最近使用、狀態。
+- **廠商在 `/vendor`「我的 API 用戶端」**：只讀，看發給自己廠商的用戶端：`client_id`、scope、狀態、最近呼叫；沒有 secret（`/vendor` 沒有登入，用頁面上的「目前廠商身分（模擬）」選單切換）。
+- 內建三個**示範用戶端**（`wt-demo-gov`、`wt-demo-vendor-green`、`wt-demo-vendor-cool`），secret 公開寫在 `/developers`，給試打用，不能撤銷。
+- **存放**：store 的 `ext` 三個 key：`apiClients`（用戶端）、`apiLog`（最近 100 筆呼叫紀錄與各用戶端最近使用時間，模擬的使用紀錄）、`reportReviews`（回報處理狀態）。本機模式存在 localStorage；**雲端模式這三個 key 只寫本機覆寫層（`overlay.ext`），不管是不是承辦人都不進 Firestore，沒有改 `firestore.rules`**（模擬用，其他裝置看不到）。API 呼叫造成的案件／工單改動仍照原本規則：承辦人（白名單）寫雲端，其他人只寫本機覆寫層。
+- access token 只存在記憶體（`TokenStore`），重新整理頁面就失效。
+
+### `/developers` 頁
+
+概覽（流程：用戶端 → token → API）、驗證（token 請求 curl、示範用戶端、錯誤表）、端點（每個端點的 scope、參數、curl、範例回應）、**試打 console**（輸入或挑示範用戶端 → 取得 token → 選端點或自己改方法與路徑 → 送出，顯示 curl 等價式、狀態碼、標頭與 JSON；「快轉 1 小時」可以看 token 過期）、MCP、開放資料下載。全部標「模擬」。
+
+### MCP（文件＋模擬）
+
+- MCP server 的網址是 `https://whisper-trees.pages.dev/mcp`（Streamable HTTP）。**示意，並沒有真的服務**；`/developers` 的「MCP 試用」用同一個模擬閘道跑 JSON-RPC（`initialize`、`notifications/initialized`、`ping`、`tools/list`、`tools/call`）。
+- 授權與 REST 相同：`Authorization: Bearer <access_token>`。`tools/list` 只列出 token 的 scope 用得到的工具（政府 token 8 個，廠商 token 只有 `list_work_orders`、`update_work_order`）；呼叫沒權限的工具回「Unknown tool」（-32602），不透露它存在。`tools/call` 轉成對應的 REST 請求，權限與廠商篩選的邏輯因此完全一致；錯誤回 `isError: true`。
+- 工具（各附 JSON Schema，見 `src/features/api/mcp.ts`）：`list_hotspots`、`get_priorities`、`list_cases`、`update_case_status`、`list_reports`、`update_report`、`list_work_orders`、`update_work_order`（`action`: accept｜progress｜complete）。
+- 文件頁附 Claude Code（`.mcp.json`，`type: http`＋`headers`）、Claude Desktop（`mcp-remote`）與一般 HTTP MCP 用戶端的設定範例。
+
+### 程式結構（`src/features/api/`）
+
+`scopes.ts`（scope 與角色）、`secret.ts`／`clients.ts`（secret 產生與雜湊、用戶端生命週期、內建示範用戶端）、`tokens.ts`（簽發與過期）、`gateway.ts`（token 端點、Bearer 驗證、路由、錯誤）、`resources.ts`（資料轉成 API 形狀、優先分數、熱點、工單）、`mcp.ts`（工具與 JSON-RPC）、`clientStore.ts`／`runtime.ts`（接 store 的單例）、`docs.ts`、`Playground.tsx`、`ClientSections.tsx`。純邏輯都在不碰 store 的模組裡，用 `DataSource` 介面注入資料，`__tests__/` 有單元測試（含錯誤 secret、過期 token、缺 scope、廠商動別家工單、已撤銷用戶端）。
 
 以下靜態 JSON 保留為「開放資料下載」：
 
@@ -87,7 +140,7 @@
   - `/api/v1/districts.json`：行政區統計
   - `/api/v1/species.json`：樹種統計
   - `/api/v1/wishes.json`：許願與補種進度（**模擬**快照，檔內 `"mock": true`）
-- 文件頁列出端點、欄位、範例，可以在頁面上直接試打。
+- `/developers`「開放資料下載」列出這些檔案、欄位與範例，可以在頁面上直接試打（免授權）。
 - 授權：真實資料沿用政府資料開放授權條款；OSM 衍生資料 ODbL。
 
 ## 8. 發包商後台 `/vendor`
@@ -95,6 +148,8 @@
 - 給植栽／養護廠商。政府端把案件改成「可種・已排程」，就出現在工單列表。
 - 工單：接單 → 施工中 → 完工回報（可附照片，只在本機預覽、不上傳）。完工後案件狀態變「已種植」，市民端即時更新。
 - 樹況回報（04 的 P1）也會變成養護工單。
+- 工單依行政區對應到承包廠商（模擬，見 §7），工單上標「承包：○○」。
+- 「我的 API 用戶端」：看承辦人發給這家廠商的 OAuth 用戶端（client_id、scope、狀態、最近呼叫），**沒有 secret**；用戶端用 API 接單、施工、完工的規則見 §7。以「目前廠商身分（模擬）」選單切換廠商。
 - 頁首標「示範：廠商視角」；寫入限白名單帳號（同 [06](06-gov-console.md)）。
 
 ## 9. 新手引導 `/`、`/explore` 與 `/me`
@@ -290,7 +345,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ## 不做
 
-- 真實金流、伺服器端 API（政府端 API 與 MCP 只做文件＋前端模擬，見 §7）。帳號已做匿名＋Google 登入；GM 與發包商後台的寫入同樣限白名單帳號，其他人是本機示範。
+- 真實金流、伺服器端 API（政府端 API、OAuth 與 MCP 只做文件＋前端模擬，見 §7）。帳號已做匿名＋Google 登入；GM 與發包商後台的寫入同樣限白名單帳號，其他人是本機示範。
 - 光點帳本存在使用者自己的 `users/{uid}`，不防竄改（已知限制，見 README）。
 - 排行榜、好友、聊天。
 
@@ -302,5 +357,8 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - [ ] 圖鑑（探索頁）在打卡後出現該樹種，棵數與 `species.json` 一致。
 - [x] 圖鑑：收集到有照片的樹種顯示照片縮圖與署名，點開有輪播與完整署名、Esc 可關；沒收集到的仍是剪影、不顯示照片；360 px 沒有水平捲動（2026-10-20 Playwright，本機後端）。
 - [ ] 發包商完工回報後，市民端「我的許願」顯示已種植。
-- [ ] `/api/v1/` 的每個端點都能從文件頁試打成功。
+- [ ] `/developers` 的每個端點都能從試打 console 試打成功（用示範用戶端取得 token）；錯誤 secret 得 401 `invalid_client`、過期或撤銷的 token 得 401 `invalid_token`、scope 不足得 403 `insufficient_scope`。
+- [ ] 在 `/gov` 建立用戶端：secret 只顯示一次（關閉或重新整理後看不到）、localStorage 裡沒有明文；撤銷後該用戶端的 token 立刻失效。
+- [ ] 用 API 的 `PATCH /cases/{id}` 改狀態後，`/gov` 與市民端「我的許願」跟著變；廠商 token 呼叫 `/cases` 得 403，`/work-orders` 只看得到自己廠商的；廠商 token 的 MCP `tools/list` 只有 2 個工具、政府 token 有 8 個。
+- [ ] `/vendor`「我的 API 用戶端」看得到發給該廠商的用戶端與最近呼叫，沒有 secret。
 - [ ] 所有新畫面寬 360 px 沒有水平捲動，並標示「模擬」。

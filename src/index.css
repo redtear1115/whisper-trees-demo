@@ -3638,3 +3638,243 @@ body.has-offline .gov {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* ---------- 開放 API（/developers）與 API 用戶端（/gov、/vendor） ---------- */
+
+.dev-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.dev-toc .chip {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.dev section {
+  scroll-margin-top: 12px;
+}
+
+.dev h3 {
+  margin: 16px 0 6px;
+  font-size: 1.05rem;
+}
+
+.dev pre.code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dev .table-wrap {
+  margin: 8px 0;
+}
+
+.dev code,
+.client-table code {
+  font-size: 0.85em;
+}
+
+.endpoint {
+  border-top: 1px solid var(--line);
+  padding: 10px 0;
+}
+
+.endpoint h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.endpoint .ep-title {
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.endpoint summary {
+  cursor: pointer;
+  min-height: 32px;
+  color: var(--green-ink);
+}
+
+.method {
+  display: inline-block;
+  min-width: 56px;
+  text-align: center;
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--green);
+}
+
+.method.m-PATCH {
+  background: var(--amber);
+}
+
+.method.m-POST {
+  background: #3b6ea8;
+}
+
+.scope-chip {
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--green-soft);
+  color: var(--green-ink);
+  overflow-wrap: anywhere;
+}
+
+.scope-list {
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+
+.req {
+  color: var(--red);
+  margin-left: 2px;
+}
+
+.params td {
+  vertical-align: top;
+}
+
+.play-box {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px 14px;
+  margin: 12px 0;
+  display: grid;
+  gap: 10px;
+}
+
+.play-box h3 {
+  margin: 0;
+}
+
+.play-box label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.play-box label.check {
+  display: inline-flex;
+}
+
+.play-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.play-box .input,
+.client-form .input {
+  font-size: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.play-box .row .input,
+.client-form .form-row .input {
+  width: auto;
+}
+
+.client-table td .row {
+  flex-wrap: wrap;
+}
+
+.play-box .grow {
+  flex: 1;
+  min-width: 200px;
+}
+
+.method-select {
+  width: 110px;
+}
+
+.http-status {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.http-status.ok {
+  color: var(--green-ink);
+}
+
+.http-status.bad {
+  color: var(--red);
+}
+
+.wrap-anywhere {
+  overflow-wrap: anywhere;
+}
+
+.secret-box {
+  border: 2px solid var(--glow);
+  background: #fff8e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 10px 0;
+}
+
+.secret-box p {
+  margin: 4px 0;
+}
+
+.client-form {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.scope-pick {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 6px 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.scope-pick .check {
+  min-height: 36px;
+}
+
+.client-table tr.revoked td {
+  opacity: 0.55;
+}
+
+.order.revoked {
+  opacity: 0.65;
+}
+
+.call-log {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.ok-text {
+  color: var(--green-ink);
+}
+
+@media (max-width: 480px) {
+  .dev .play-box,
+  .dev section {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .method-select {
+    width: 100%;
+  }
+}
