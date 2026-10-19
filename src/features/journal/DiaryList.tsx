@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { IconChevron } from '../../components/icons'
 import { formatDayTime } from '../../lib/datetime'
 import { findTree } from '../../lib/trees'
 import { useStore } from '../../store'
@@ -45,8 +46,9 @@ export function DiaryList() {
               {formatAt(r.at)}・{labels[r.treeId] ?? <span className="mono">{r.treeId}</span>}
             </span>
             <span className="journal-text">{r.text}</span>
-            <Link className="btn ghost" to={`/tree/${r.treeId}`} state={{ from: '/journal' }} data-testid="journal-view-tree">
+            <Link className="journal-more" to={`/tree/${r.treeId}`} state={{ from: '/journal' }} data-testid="journal-view-tree">
               查看樹木
+              <IconChevron />
             </Link>
           </section>
         </li>

@@ -10,6 +10,10 @@ import {
   exploredTreeIds,
   formatArea,
   fogStat,
+  fogView,
+  FOG_CLUSTER_M,
+  FOG_FIT_MAX_ZOOM,
+  FOG_FIT_SPAN_M,
   unionAreaKm2,
 } from '../fog'
 
@@ -113,5 +117,50 @@ describe('fogStat / format', () => {
   it('keeps a visible radius when zoomed out', () => {
     expect(clearPixelRadius(50, 70)).toBe(MIN_CLEAR_PX)
     expect(clearPixelRadius(50, 1)).toBe(50)
+  })
+})
+
+describe('fogView', () => {
+  const inside = (b: [number, number, number, number], p: LngLat) => p[0] >= b[0] && p[0] <= b[2] && p[1] >= b[1] && p[1] <= b[3]
+
+  it('nothing explored: no view (city)', () => {
+    expect(fogView([])).toBeNull()
+  })
+
+  it('one tree: frames its 50 m circle, close enough to see the halo', () => {
+    const v = fogView([A])!
+    expect(v.focused).toBe(false)
+    expect(v.maxZoom).toBe(FOG_FIT_MAX_ZOOM)
+    expect(v.bounds).toEqual(clearedBounds([A]))
+  })
+
+  it('everything within the span: frames all of it', () => {
+    const pts = [A, east(A, 800), offsetNorth(A, 900)]
+    expect(FOG_FIT_SPAN_M).toBeGreaterThan(900)
+    const v = fogView(pts)!
+    expect(v.focused).toBe(false)
+    expect(v.bounds).toEqual(clearedBounds(pts))
+  })
+
+  it('scattered across the city: frames the densest neighbourhood, not the whole city', () => {
+    const cluster = [A, east(A, 100), east(A, 200), offsetNorth(A, 150)]
+    const far1 = east(A, 9000)
+    const far2 = offsetNorth(A, 8000)
+    const v = fogView([far1, ...cluster, far2])!
+    expect(v.focused).toBe(true)
+    for (const p of cluster) expect(inside(v.bounds, p)).toBe(true)
+    expect(inside(v.bounds, far1)).toBe(false)
+    expect(inside(v.bounds, far2)).toBe(false)
+    const widthM = distanceMeters([v.bounds[0], A[1]], [v.bounds[2], A[1]])
+    expect(widthM).toBeLessThan(2 * FOG_CLUSTER_M + 2 * FOG_RADIUS_M)
+  })
+
+  it('ties go to the most recent check-in (later in the list)', () => {
+    const a = A
+    const b = east(A, 9000)
+    const v = fogView([a, b])!
+    expect(v.focused).toBe(true)
+    expect(inside(v.bounds, b)).toBe(true)
+    expect(inside(v.bounds, a)).toBe(false)
   })
 })

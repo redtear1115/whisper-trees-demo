@@ -1,7 +1,7 @@
 // 迷霧的純邏輯：哪些樹算探索過、清出多大的範圍。畫面見 FogMap.tsx，規格見 docs/specs/09-fog.md。
 // 只從「打卡過的樹」推算，不記錄任何 GPS 軌跡。
 
-import type { LngLat } from '../../lib/geo'
+import { distanceMeters, type LngLat } from '../../lib/geo'
 import type { Checkin } from '../../store/types'
 
 export { circleRing } from '../../lib/nearby'
@@ -80,6 +80,43 @@ export function clearedBounds(
     n = Math.max(n, lat + dLat)
   }
   return [w, s, e, n]
+}
+
+/** 全部的圓都在這個範圍（公尺）內，就整片一起看 */
+export const FOG_FIT_SPAN_M = 3000
+/** 圓散得很開時，只看「最密的一帶」：以某一棵樹為中心、這個半徑內的圓 */
+export const FOG_CLUSTER_M = 1500
+/** 打開時最近可以放大到幾級：單一棵樹的 50 m 圈在手機上要看得出光暈 */
+export const FOG_FIT_MAX_ZOOM = 16.5
+
+export interface FogView {
+  /** [西, 南, 東, 北] */
+  bounds: [number, number, number, number]
+  maxZoom: number
+  /** true：圓散得很開，只框了最密的一帶（畫面上提供「看全市」） */
+  focused: boolean
+}
+
+/**
+ * 打開探索地圖時看哪裡（沒有圓回傳 null，呼叫端看全市）。
+ * 全部的圓在 3 km 內就整片框起來；散得更開時，框「1.5 km 內圓最多的一帶」
+ * （並列時取比較晚打卡的，centers 依打卡先後排列），
+ * 否則整座城市縮到看不見 50 m 的光暈。
+ */
+export function fogView(centers: readonly LngLat[]): FogView | null {
+  const all = clearedBounds(centers, 0)
+  if (!all) return null
+  const midLat = (all[1] + all[3]) / 2
+  const span = Math.max((all[2] - all[0]) * mPerDegLon(midLat), (all[3] - all[1]) * M_PER_DEG_LAT)
+  if (span <= FOG_FIT_SPAN_M) {
+    return { bounds: clearedBounds(centers)!, maxZoom: FOG_FIT_MAX_ZOOM, focused: false }
+  }
+  let best: LngLat[] = []
+  for (const a of centers) {
+    const group = centers.filter((b) => distanceMeters(a, b) <= FOG_CLUSTER_M)
+    if (group.length >= best.length) best = group
+  }
+  return { bounds: clearedBounds(best)!, maxZoom: FOG_FIT_MAX_ZOOM, focused: true }
 }
 
 export interface FogStat {

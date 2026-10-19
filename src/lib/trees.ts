@@ -30,6 +30,10 @@ function loadPrefix(prefix: string): Promise<LookupFile | null> {
       .then((r) => (r.ok ? (r.json() as Promise<LookupFile>) : null))
       .catch(() => null)
     cache.set(prefix, p)
+    // 失敗不要記住，這樣畫面上的「再試一次」才會真的重抓
+    p.then((v) => {
+      if (!v && cache.get(prefix) === p) cache.delete(prefix)
+    })
   }
   return p
 }

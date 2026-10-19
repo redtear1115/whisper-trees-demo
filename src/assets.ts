@@ -61,6 +61,7 @@ export const ASSETS: AssetSpec[] = [
   { id: 'action-report', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹況回報（剪刀或旗標）。規格同上' },
   { id: 'action-route', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：怎麼走（彎彎的路線加一個終點標記）。規格同上' },
   { id: 'action-walk', w: 64, h: 64, where: '點樹後的行動圈（只有 Demo 模式）', brief: '圖示：走過去（腳印）。規格同上' },
+  { id: 'fog-empty', w: 240, h: 160, where: '探索頁空狀態（還沒打卡）', brief: '繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白' },
 ]
 
 export function assetUrl(id: string): string {

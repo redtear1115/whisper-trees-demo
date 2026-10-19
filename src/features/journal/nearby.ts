@@ -48,7 +48,14 @@ export function nearbyAction(distance: number, radius: number, demo: boolean): N
   return demo ? 'walk' : 'route'
 }
 
-export const NEARBY_ACTION_LABEL: Record<NearbyAction, string> = { leave: '留言', walk: '走過去', route: '怎麼走' }
+/**
+ * 按鈕上的字要說實話：沒有現場打卡時，「留言」其實是去掃樹牌，所以寫「掃樹牌留言」；
+ * 30 分鐘內已在這棵樹打卡過（onSite），才是直接「留言」。
+ */
+export function nearbyLabel(action: NearbyAction, onSite = false): string {
+  if (action === 'leave') return onSite ? '留言' : '掃樹牌留言'
+  return action === 'walk' ? '走過去' : '怎麼走'
+}
 
 export function formatDistance(m: number): string {
   return `約 ${Math.max(1, Math.round(m))} 公尺`

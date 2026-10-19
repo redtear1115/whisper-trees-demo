@@ -5,7 +5,7 @@ import { walkTarget } from '../../lib/geo'
 import { isDemoMode, recentCheckin, setDemoPosition, useStore } from '../../store'
 import { ringRadius } from '../map/ring'
 import { useAnchor } from '../map/useAnchor'
-import { formatDistance, leaveTarget, loadNearbyTrees, nearbyAction, NEARBY_ACTION_LABEL, type NearbyTree } from './nearby'
+import { formatDistance, leaveTarget, loadNearbyTrees, nearbyAction, nearbyLabel, type NearbyTree } from './nearby'
 
 /** 先列幾棵，其餘按「看更多」才展開，讓下面的日記與許願不被擠到很下面 */
 export const NEARBY_FIRST = 3
@@ -49,7 +49,7 @@ export function NearbyTrees() {
         <p className="muted">這附近 150 公尺內沒有樹的資料。</p>
       ) : (
         <ul className="nearby-list" id="journal-nearby-list">
-          {(showAll ? rows : rows.slice(0, NEARBY_FIRST)).map((r) => (
+          {(showAll ? rows : rows.slice(0, NEARBY_FIRST)).map((r, i) => (
             <li key={r.id}>
               <section className="card nearby-item" data-testid="journal-nearby-item">
                 <div className="nearby-info">
@@ -69,11 +69,13 @@ export function NearbyTrees() {
                   }
                   return (
                     <button
-                      className={action === 'leave' ? 'btn primary' : 'btn'}
+                      // 只有最近的一棵是主要按鈕，其餘是外框按鈕，免得三顆一樣重
+                      className={i === 0 ? 'btn primary' : 'btn'}
                       data-testid={action === 'leave' ? 'journal-nearby-leave' : `journal-nearby-${action}`}
+                      aria-label={`${nearbyLabel(action, onSite.has(r.id))}：${r.tree?.species ?? '一棵樹'}`}
                       onClick={go}
                     >
-                      {NEARBY_ACTION_LABEL[action]}
+                      {nearbyLabel(action, onSite.has(r.id))}
                     </button>
                   )
                 })()}

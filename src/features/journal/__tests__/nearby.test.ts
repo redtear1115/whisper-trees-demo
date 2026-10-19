@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { DEMO } from '../../../config'
 import { offsetNorth } from '../../../lib/geo'
-import { leaveTarget, nearbyAction, parseTreeTile, pickNearby, tilesCovering } from '../nearby'
+import { leaveTarget, nearbyAction, nearbyLabel, parseTreeTile, pickNearby, tilesCovering } from '../nearby'
 
 const c = DEMO.center
 describe('pickNearby', () => {
@@ -51,5 +51,17 @@ describe('nearbyAction', () => {
   it('too far: Demo walks over, real GPS shows the route', () => {
     expect(nearbyAction(60, 35, true)).toBe('walk')
     expect(nearbyAction(60, 35, false)).toBe('route')
+  })
+})
+
+describe('nearbyLabel', () => {
+  it('留言 only promises what it does: without an on-site check-in it is 掃樹牌留言', () => {
+    expect(nearbyLabel('leave')).toBe('掃樹牌留言')
+    expect(nearbyLabel('leave', false)).toBe('掃樹牌留言')
+    expect(nearbyLabel('leave', true)).toBe('留言')
+  })
+  it('walk and route keep their labels', () => {
+    expect(nearbyLabel('walk')).toBe('走過去')
+    expect(nearbyLabel('route', true)).toBe('怎麼走')
   })
 })

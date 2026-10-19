@@ -8,6 +8,9 @@ export interface FogState extends FogStat {
   centers: LngLat[]
   /** 座標還在查的時候是 true */
   loading: boolean
+  /** 有打卡過的樹，但一棵座標都查不到（多半是網路）；retry() 重查 */
+  failed: boolean
+  retry: () => void
 }
 
 const EMPTY: LngLat[] = []
@@ -18,10 +21,12 @@ export function useFog(): FogState {
   const ids = useMemo(() => exploredTreeIds(checkins), [checkins])
   const key = ids.join('|')
   const [resolved, setResolved] = useState<{ key: string; centers: LngLat[] }>({ key: '', centers: EMPTY })
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     if (!key) return
     let live = true
+    setResolved((r) => (r.key === key ? { key: '', centers: EMPTY } : r)) // 重試時回到「正在整理」
     Promise.all(ids.map((id) => findTree(id))).then((trees) => {
       if (!live) return
       const coords = new Map<string, LngLat>()
@@ -33,9 +38,11 @@ export function useFog(): FogState {
     }
     // ids 完全由 key 決定
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key])
+  }, [key, attempt])
 
   const centers = key && resolved.key === key ? resolved.centers : EMPTY
   const stat = useMemo(() => fogStat(centers), [centers])
-  return { ...stat, centers, loading: !!key && resolved.key !== key }
+  const loading = !!key && resolved.key !== key
+  const failed = !!key && !loading && centers.length === 0
+  return { ...stat, centers, loading, failed, retry: () => setAttempt((n) => n + 1) }
 }

@@ -64,8 +64,9 @@
 | `action-report` | 64×64 | 128×128 | `public/assets/ph/action-report.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:76` | 圖示：樹況回報（剪刀或旗標）。規格同上 |
 | `action-route` | 64×64 | 128×128 | `public/assets/ph/action-route.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:82` | 圖示：怎麼走（彎彎的路線加一個終點標記）。規格同上 |
 | `action-walk` | 64×64 | 128×128 | `public/assets/ph/action-walk.svg` | 點樹後的行動圈（只有 Demo 模式） | `src/features/map/treeRings.ts:88` | 圖示：走過去（腳印）。規格同上 |
+| `fog-empty` | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:80` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 
-共 48 項。
+共 49 項。
 
 ## PWA 圖示（加到手機主畫面）
 
