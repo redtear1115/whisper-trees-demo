@@ -2695,4 +2695,58 @@ body.has-offline .gov {
   .map-page .sheet {
     bottom: calc(var(--nav-h) + 16px);
   }
+
+/* ---------- 迷霧 ---------- */
+
+.fog {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--green-soft);
+}
+
+.fog-map,
+.fog-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fog-canvas {
+  pointer-events: none;
+}
+
+.fog-stat {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: fit-content;
+  max-width: calc(100% - 20px);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 0.875rem;
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+
+.fog-empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: calc(100% - 48px);
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-voice);
+  text-align: center;
+  box-shadow: var(--shadow);
+  pointer-events: none;
 }
