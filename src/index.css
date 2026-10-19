@@ -2647,13 +2647,7 @@ body.has-offline .gov {
 }
 
 .fog-slot {
-  display: grid;
-  place-items: center;
   min-height: 160px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  background: var(--card);
-  text-align: center;
 }
 
 .journal-list {
@@ -2695,6 +2689,7 @@ body.has-offline .gov {
   .map-page .sheet {
     bottom: calc(var(--nav-h) + 16px);
   }
+}
 
 /* ---------- 迷霧 ---------- */
 

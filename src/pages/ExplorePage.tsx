@@ -1,8 +1,9 @@
 import { TabHeader } from '../features/nav/TabLayout'
 import { TasksCard } from '../features/onboarding/TasksCard'
 import { CodexSection } from '../features/codex/CodexSection'
+import { FogMap } from '../features/fog/FogMap'
 
-/** 探索：上面留給迷霧地圖，下面是新手任務與樹的圖鑑 */
+/** 探索：上面是迷霧地圖（打卡過的樹周圍散開），下面是新手任務與樹的圖鑑 */
 export default function ExplorePage() {
   return (
     <div className="page">
@@ -13,7 +14,7 @@ export default function ExplorePage() {
           探索地圖
         </h2>
         <div data-testid="fog-slot" className="fog-slot">
-          <p className="muted small">（迷霧地圖即將放在這裡）</p>
+          <FogMap height={320} />
         </div>
       </section>
 

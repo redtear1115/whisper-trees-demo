@@ -19,7 +19,8 @@
 | 許願、澆水、進度 | `docs/specs/05-wish.md` |
 | 政府端、優先分數 | `docs/specs/06-gov-console.md` |
 | 垃圾桶、路燈預告 | `docs/specs/07-dlc-preview.md` |
-| 光點、商店、圖鑑、徽章、角色、GM、開放 API、發包商 | `docs/specs/08-extensions.md` |
+| 光點、商店、圖鑑、徽章、角色、GM、開放 API、發包商、導覽列、集章冊 | `docs/specs/08-extensions.md` |
+| 探索的迷霧地圖 | `docs/specs/09-fog.md` |
 
 規格和程式不一致時，先停下來問，不要自己挑一邊改。範圍或決定有變時，同一次修改要一起更新規格和 README。
 

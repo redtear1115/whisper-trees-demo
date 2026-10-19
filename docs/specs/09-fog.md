@@ -1,6 +1,6 @@
 # 09 迷霧（探索）
 
-2026-10-19 使用者核准。這份規格是獨立檔，之後再併進 [08](08-extensions.md) 與 README。
+2026-10-19 使用者核准。放在「探索」分頁上方（`src/pages/ExplorePage.tsx` 的 `fog-slot`）；導覽列與探索頁見 [08 §11](08-extensions.md)。
 
 ## 目的
 

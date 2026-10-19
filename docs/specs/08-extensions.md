@@ -224,7 +224,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ### 探索 `/explore`
 
-由上到下：「探索地圖」區（`data-testid="fog-slot"`，目前是佔位「（迷霧地圖即將放在這裡）」，之後換成迷霧地圖，見下一個切片）、新手任務卡（`TasksCard`）、樹的圖鑑（`CodexSection`，從原 `CodexPage` 抽出；搜尋、遇見的樹種、`data-testid="codex-section"`）。`/codex` 轉址到 `/explore`。
+由上到下：「探索地圖」區（`data-testid="fog-slot"`，放迷霧地圖 `FogMap`，見 [09 迷霧](09-fog.md)）、新手任務卡（`TasksCard`）、樹的圖鑑（`CodexSection`，從原 `CodexPage` 抽出；搜尋、遇見的樹種、`data-testid="codex-section"`）。`/codex` 轉址到 `/explore`。
 
 ### 樹洞 `/journal`
 
