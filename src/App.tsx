@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { isDemoMode } from './store'
 import { MobileOnly } from './features/device/MobileOnly'
 import { TabLayout } from './features/nav/TabLayout'
@@ -28,11 +28,11 @@ function DemoBadge() {
     document.body.classList.toggle('is-demo', demo)
   }, [demo])
   if (!demo) return null
-  // 只是標示，不可點：避免 Demo 時誤觸離開。離開請到「我的 → 設定與其他 → Demo 工具」
+  // 每個頁面（市民端與各後台）頂端都有；點了到 Demo 切換台，不會離開 Demo。離開請到「我的 → 設定與其他 → Demo 工具」
   return (
-    <p className="demo-badge" role="note">
-      Demo・模擬定位
-    </p>
+    <Link className="demo-badge" to="/demo-control" aria-label="Demo 模式：打開切換台，切換市民端與各後台" data-testid="demo-badge">
+      Demo 模式・切換 ›
+    </Link>
   )
 }
 

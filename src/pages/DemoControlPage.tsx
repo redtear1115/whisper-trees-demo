@@ -1,6 +1,6 @@
 import { Link, Navigate } from 'react-router-dom'
 import { Card } from '../components/ui'
-import { isDemoMode } from '../store'
+import { exitDemoMode, isDemoMode } from '../store'
 
 /** 切換台上的一個去處 */
 interface Stop {
@@ -44,6 +44,18 @@ export default function DemoControlPage() {
 
       <h2 className="section-title">後台</h2>
       <StopList stops={BACK_OFFICE} testid="demo-back-office" />
+
+      <button
+        className="btn block demo-exit"
+        data-testid="demo-exit"
+        onClick={() => {
+          if (!confirm('離開 Demo 模式？之後會用你真實的 GPS 位置。')) return
+          exitDemoMode()
+          location.href = import.meta.env.BASE_URL
+        }}
+      >
+        離開 Demo 模式
+      </button>
     </div>
   )
 }
