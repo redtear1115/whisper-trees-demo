@@ -47,6 +47,10 @@ export const ASSETS: AssetSpec[] = [
   { id: 'badge-first-light', w: 120, h: 120, where: '成長徽章', brief: '第一道光（第一次收集光點）' },
   { id: 'badge-home-screen', w: 120, h: 120, where: '成長徽章', brief: '回家的路（從手機桌面圖示打開）' },
   { id: 'badge-newcomer', w: 120, h: 120, where: '成長徽章', brief: '城市的新朋友（完成新手任務）' },
+  { id: 'stamp-iron', w: 120, h: 120, where: '集章冊', brief: '行政區集章：鐵章（打卡 1 棵不同的樹）。圓形印章，中間留空放行政區名' },
+  { id: 'stamp-bronze', w: 120, h: 120, where: '集章冊', brief: '行政區集章：銅章（10 棵）。同一組造型，材質不同' },
+  { id: 'stamp-silver', w: 120, h: 120, where: '集章冊', brief: '行政區集章：銀章（50 棵）' },
+  { id: 'stamp-gold', w: 120, h: 120, where: '集章冊', brief: '行政區集章：金章（200 棵）' },
 ]
 
 export function assetUrl(id: string): string {

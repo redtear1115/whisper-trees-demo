@@ -14,6 +14,7 @@ const GovPage = lazy(() => import('./pages/GovPage'))
 const MePage = lazy(() => import('./pages/MePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
 const CodexPage = lazy(() => import('./pages/CodexPage'))
+const StampsPage = lazy(() => import('./pages/StampsPage'))
 const GmPage = lazy(() => import('./pages/GmPage'))
 const VendorPage = lazy(() => import('./pages/VendorPage'))
 const DevelopersPage = lazy(() => import('./pages/DevelopersPage'))
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/me" element={<MobileOnly><MePage /></MobileOnly>} />
           <Route path="/shop" element={<MobileOnly><ShopPage /></MobileOnly>} />
           <Route path="/codex" element={<MobileOnly><CodexPage /></MobileOnly>} />
+          <Route path="/stamps" element={<MobileOnly><StampsPage /></MobileOnly>} />
           <Route path="/gm" element={<GmPage />} />
           <Route path="/vendor" element={<VendorPage />} />
           <Route path="/developers" element={<DevelopersPage />} />

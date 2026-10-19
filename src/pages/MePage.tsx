@@ -72,6 +72,9 @@ export default function MePage() {
           <Link className="btn small" to="/codex">
             圖鑑
           </Link>
+          <Link className="btn small" to="/stamps">
+            集章冊
+          </Link>
         </div>
       </Card>
 

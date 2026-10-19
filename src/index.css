@@ -2359,3 +2359,122 @@ body.has-offline .gov {
 .tasks-done {
   text-align: center;
 }
+
+/* ---------- 集章冊 ---------- */
+
+.stamp-map {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-areas:
+    'bt sl nh .'
+    'dt js ss ng'
+    'wh jj da sy'
+    '.  ws ws .';
+  gap: 8px;
+  margin: 14px 0 8px;
+}
+
+.stamp-card {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 8px 2px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+.stamp-card .icon {
+  width: 32px;
+  height: 32px;
+}
+
+.stamp-card.locked .icon {
+  filter: grayscale(1) opacity(0.45);
+}
+
+.stamp-card.locked {
+  color: var(--muted);
+}
+
+.stamp-card.on {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px var(--green-soft);
+}
+
+.stamp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stamp-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.stamp-list li:last-child {
+  border-bottom: 0;
+}
+
+.stamp-list .icon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+.stamp-sheet {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 78vh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 18px 16px max(32px, env(safe-area-inset-bottom));
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.15);
+  animation: sheet-in 0.2s ease-out;
+}
+
+.stamp-sheet:focus {
+  outline: none;
+}
+
+.stamp-sheet .about {
+  padding: 0 12px;
+}
+
+.stamp-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.stamp-tier {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.stamp-tier .icon {
+  width: 44px;
+  height: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-sheet {
+    animation: none;
+  }
+}

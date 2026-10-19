@@ -85,6 +85,9 @@ export default function MorePage() {
         <Link className="menu-link" to="/codex">
           樹的圖鑑
         </Link>
+        <Link className="menu-link" to="/stamps">
+          集章冊：各區的章與光點
+        </Link>
         <button
           className="menu-link"
           onClick={() => {
