@@ -16,4 +16,12 @@ export const MAP_LOCALE = {
   'NavigationControl.ZoomOut': '縮小',
 }
 
+/** 底圖地名改用中文 */
+export function applyChineseLabels(m: maplibregl.Map, skip: string[] = []) {
+  for (const layer of m.getStyle().layers) {
+    if (layer.type !== 'symbol' || skip.includes(layer.id) || !m.getLayoutProperty(layer.id, 'text-field')) continue
+    m.setLayoutProperty(layer.id, 'text-field', ['coalesce', ['get', 'name:zh-Hant'], ['get', 'name:zh'], ['get', 'name']])
+  }
+}
+
 export { maplibregl }

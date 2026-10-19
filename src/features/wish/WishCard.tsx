@@ -49,7 +49,7 @@ export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
                 setMsg(glow ? `謝謝你。光點 +${glow}` : '謝謝你。')
               }}
             >
-              澆水 +1
+              幫它澆水
             </button>
           ))}
       </div>

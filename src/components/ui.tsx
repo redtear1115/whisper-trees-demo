@@ -4,7 +4,7 @@ import { assetUrl } from '../assets'
 /** 模擬資料的小標籤 */
 export function MockTag({ title }: { title?: string }) {
   return (
-    <span className="mock-tag" title={title ?? '這是模擬資料，見 README'}>
+    <span className="mock-tag" title={title ?? '這是示範用的模擬資料'}>
       模擬
     </span>
   )

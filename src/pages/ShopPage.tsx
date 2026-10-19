@@ -7,10 +7,11 @@ import { buy, useInventory, type BuyResult } from '../features/game/inventory'
 import { useGameConfig, type ItemKind } from '../features/game/config'
 import { EventBar } from '../features/game/EventBar'
 
+// 「回到城市」放最前面：光點最有意義的去處
 const KIND_TITLE: Record<ItemKind, string> = {
+  civic: '回到城市',
   outfit: '小芽的造型',
   frame: '樹的頁面相框',
-  civic: '回到城市',
 }
 
 const RESULT_TEXT: Record<BuyResult, string> = {
@@ -67,7 +68,7 @@ export default function ShopPage() {
                     <span className="small muted">{item.brief}</span>
                     {times > 0 && <span className="small">已經做過 {times} 次，謝謝你</span>}
                     <button
-                      className="btn small primary"
+                      className={`btn small ${balance >= item.price && !owned ? 'primary' : 'price'}`}
                       disabled={owned || balance < item.price}
                       onClick={() => setMsg(`${item.name}：${RESULT_TEXT[buy(item)]}`)}
                     >

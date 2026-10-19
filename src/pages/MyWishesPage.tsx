@@ -23,7 +23,7 @@ export default function MyWishesPage() {
         <span className="topbar-title">我的許願</span>
       </header>
       <Section title="我許的願" list={mine} seen={seen} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
-      <Section title="我澆過水的願" list={wateredOnly} seen={seen} empty="還沒有幫別人的願望澆過水。" />
+      <Section title="我澆過水的別人的願" list={wateredOnly} seen={seen} empty="還沒有幫別人的願望澆過水。" />
     </div>
   )
 }
@@ -61,7 +61,7 @@ function SeenCard({ wish, changed }: { wish: Wish; changed: boolean }) {
     <Card className={changed ? 'changed' : ''}>
       {changed && <p className="new-badge">進度更新了</p>}
       <WishCard wish={wish} />
-      <Link className="btn small map-link" to="/" state={{ focus: wish.lngLat }}>
+      <Link className="btn small map-link" to="/" state={{ focus: wish.lngLat, wishId: wish.id }}>
         在地圖上看
       </Link>
     </Card>

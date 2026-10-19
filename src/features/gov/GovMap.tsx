@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FeatureCollection } from 'geojson'
 import type { Map as MLMap } from 'maplibre-gl'
-import { MAP_LOCALE, maplibregl } from '../../lib/maplibre'
+import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../../lib/maplibre'
 import { MAP_STYLE } from '../../config'
 import type { Wish, WishStatus } from '../../store/types'
 import { wishStatus } from '../../store'
@@ -46,6 +46,7 @@ export function GovMap({ rows, onPick }: { rows: MapRow[]; onPick: (id: string) 
     map.current = m
     m.on('load', () => {
       setLoaded(true)
+      applyChineseLabels(m)
       m.addSource('wishes', { type: 'geojson', data: latest.current })
       m.addLayer({
         id: 'wishes',

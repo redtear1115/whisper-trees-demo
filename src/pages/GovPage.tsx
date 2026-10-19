@@ -113,16 +113,19 @@ export default function GovPage() {
         </button>
       </section>
 
-      <div className="row gap wrap" style={{ marginBottom: 8 }}>
-        <button className={`chip ${!showMap ? 'on' : ''}`} aria-pressed={!showMap} onClick={() => setShowMap(false)}>
-          清單
-        </button>
-        <button className={`chip ${showMap ? 'on' : ''}`} aria-pressed={showMap} onClick={() => setShowMap(true)}>
-          清單＋地圖
-        </button>
-        <button className={`chip ${onlyNew ? 'on' : ''}`} aria-pressed={onlyNew} onClick={() => setOnlyNew((v) => !v)}>
+      <div className="row gap wrap center-v" style={{ marginBottom: 8 }}>
+        <div className="segmented" role="group" aria-label="檢視">
+          <button className={!showMap ? 'on' : ''} aria-pressed={!showMap} onClick={() => setShowMap(false)}>
+            清單
+          </button>
+          <button className={showMap ? 'on' : ''} aria-pressed={showMap} onClick={() => setShowMap(true)}>
+            清單＋地圖
+          </button>
+        </div>
+        <label className="check">
+          <input type="checkbox" checked={onlyNew} onChange={(e) => setOnlyNew(e.target.checked)} />
           只看市民新許願（{rows.filter((r) => !r.wish.mock).length}）
-        </button>
+        </label>
       </div>
       <p className="muted small">
         列表含示範資料 <MockTag />；黃色標籤是這台裝置上市民剛送出的許願。點位置可以看分數怎麼算。
@@ -145,6 +148,7 @@ export default function GovPage() {
           </>
         )}
       </p>
+      <div className={showMap ? 'gov-split' : ''}>
       {showMap && (
         <Suspense fallback={<div className="gov-map muted">地圖載入中…</div>}>
           <GovMap
@@ -229,6 +233,8 @@ export default function GovPage() {
       </table>
       </div>
 
+      </div>
+
       <ReportsByRoad />
 
       <Notices />
@@ -241,10 +247,18 @@ export default function GovPage() {
   )
 }
 
-/** 權重佔四項總和的百分比，四項加起來是 100 */
+/** 權重佔四項總和的百分比；用最大餘數法取整，四項加起來一定是 100 */
 function share(w: Weights, k: keyof Weights): number {
-  const sum = w.demand + w.shade + w.feasibility + w.fairness
-  return sum ? Math.round((w[k] / sum) * 100) : 0
+  const keys = Object.keys(w) as (keyof Weights)[]
+  const sum = keys.reduce((n, x) => n + w[x], 0)
+  if (!sum) return 0
+  const raw = keys.map((x) => ({ x, v: (w[x] / sum) * 100 }))
+  const floor = raw.map((r) => ({ ...r, f: Math.floor(r.v) }))
+  let left = 100 - floor.reduce((n, r) => n + r.f, 0)
+  const order = [...floor].sort((a, b) => b.v - b.f - (a.v - a.f))
+  const out = new Map(floor.map((r) => [r.x, r.f]))
+  for (const r of order) if (left-- > 0) out.set(r.x, r.f + 1)
+  return out.get(k) ?? 0
 }
 
 function StatusPicker({

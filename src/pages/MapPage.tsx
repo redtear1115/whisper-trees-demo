@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { MAP_LOCALE, maplibregl } from '../lib/maplibre'
+import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
@@ -11,9 +11,8 @@ import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
-import { IconLamp, IconLayers, IconTrash } from '../components/icons'
+import { IconChevron, IconHeading, IconLamp, IconLayers, IconMore, IconTrash } from '../components/icons'
 import { assetUrl } from '../assets'
-import { useBalance } from '../features/game/ledger'
 import { EventBar } from '../features/game/EventBar'
 import { useAnchor } from '../features/map/useAnchor'
 import { boundsAround, circleRing } from '../lib/nearby'
@@ -35,6 +34,8 @@ let lastView: { center: LngLat; zoom: number } | null = null
 /** 附近：45° 俯視、只能在目前位置半徑內移動；全市：平面、可看整個台北 */
 type Mode = 'near' | 'city'
 let lastMode: Mode = 'near'
+/** 這次瀏覽收起過差距卡就不再出現 */
+let gapDismissed = false
 
 export default function MapPage() {
   const el = useRef<HTMLDivElement>(null)
@@ -49,18 +50,23 @@ export default function MapPage() {
   const [panel, setPanel] = useState(false)
   const [gap, setGap] = useState<{ high: District; low: District } | null>(null)
   const [gapOpen, setGapOpen] = useState(false)
+  const [gapHidden, setGapHiddenState] = useState(gapDismissed)
+  const setGapHidden = (v: boolean) => {
+    gapDismissed = v
+    setGapHiddenState(v)
+  }
   const [mode, setModeState] = useState<Mode>(lastMode)
   const setMode = (m: Mode) => {
     lastMode = m
     setModeState(m)
   }
   const [ready, setReady] = useState(false)
-  const focus = (useLocation().state as { focus?: LngLat } | null)?.focus
+  const navState = useLocation().state as { focus?: LngLat; wishId?: string } | null
+  const focus = navState?.focus
   const anchor = useAnchor(mode === 'near')
   const [follow, setFollow] = useState(false)
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
   const wishes = useWishes()
-  const balance = useBalance()
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
     const w = allWishes(s).find((x) => x.id === id)
     return w && s.seen[id] !== undefined && s.seen[id] < w.history.length
@@ -205,12 +211,24 @@ export default function MapPage() {
         },
         paint: { 'text-color': '#2c3a2e', 'text-halo-color': '#fffdf8', 'text-halo-width': 2 },
       })
-      // 地名用中文
-      for (const layer of m.getStyle().layers) {
-        if (layer.type !== 'symbol' || !m.getLayoutProperty(layer.id, 'text-field')) continue
-        if (layer.id === 'me-label') continue
-        m.setLayoutProperty(layer.id, 'text-field', ['coalesce', ['get', 'name:zh-Hant'], ['get', 'name:zh'], ['get', 'name']])
-      }
+      // 選到的樹或樹穴：一圈光暈
+      m.addSource('selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      m.addLayer(
+        {
+          id: 'selected',
+          type: 'circle',
+          source: 'selected',
+          paint: {
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 8, 17, 18, 19, 30],
+            'circle-color': 'rgba(242, 193, 78, 0.35)',
+            'circle-stroke-color': '#c98a00',
+            'circle-stroke-width': 2.5,
+            'circle-pitch-alignment': 'map',
+          },
+        },
+        'trees',
+      )
+      applyChineseLabels(m, ['me-label'])
       setReady(true)
     })
     m.on('click', (e) => {
@@ -223,6 +241,7 @@ export default function MapPage() {
       const layersNow = ['pits', 'trees'].filter((l) => m.getLayer(l) && m.getLayoutProperty(l, 'visibility') !== 'none')
       const hit = m.queryRenderedFeatures(box, { layers: layersNow })[0]
       if (!hit) return setSheet(null)
+      select(m, (hit.geometry as unknown as { coordinates: LngLat }).coordinates)
       if (hit.layer.id === 'trees') {
         findTree(hit.properties.id as string).then((tree) => tree && setSheet({ kind: 'tree', tree }))
       } else {
@@ -238,6 +257,7 @@ export default function MapPage() {
     })
     // 長按（或右鍵）任意位置許願：不是樹穴，初審為「需會勘」
     const wishAt = (point: maplibregl.Point, lngLat: maplibregl.LngLat) => {
+      select(m, [lngLat.lng, lngLat.lat])
       const near = m
         .queryRenderedFeatures(
           [
@@ -279,14 +299,30 @@ export default function MapPage() {
     if (!focus || !ready || !map.current) return
     setMode('city')
     const m = map.current
-    const t = setTimeout(() => m.flyTo({ center: focus, zoom: 17.5, duration: 1200 }), 950)
+    const t = setTimeout(() => {
+      m.flyTo({ center: focus, zoom: 17.5, duration: 1200, offset: [0, -window.innerHeight * 0.2] })
+      select(m, focus, false)
+      if (navState?.wishId) setSheet({ kind: 'wish', wishId: navState.wishId })
+    }, 950)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus, ready])
 
-  // 開抽屜時收起圖層面板，避免疊在一起
+  // 圖層面板：Esc 關閉
+  useEffect(() => {
+    if (!panel) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setPanel(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [panel])
+
+  // 開抽屜時收起圖層面板；關抽屜時清掉選取光暈
   useEffect(() => {
     if (sheet) setPanel(false)
+    else (map.current?.getSource('selected') as maplibregl.GeoJSONSource | undefined)?.setData({
+      type: 'FeatureCollection',
+      features: [],
+    })
   }, [sheet])
 
   // 附近／全市模式：鏡頭角度與可移動範圍
@@ -374,6 +410,7 @@ export default function MapPage() {
       node.tabIndex = -1
       node.onclick = (ev) => {
         ev.stopPropagation()
+        select(m, w.lngLat)
         setSheet({ kind: 'wish', wishId: w.id })
       }
       return new maplibregl.Marker({ element: node }).setLngLat(w.lngLat).addTo(m)
@@ -397,39 +434,37 @@ export default function MapPage() {
 
   return (
     <div className={`map-page ${mode}`}>
-      <div ref={el} className="map" />
-
+      {/* 頁首放在地圖前面：鍵盤 Tab 先到導覽，再到地圖 */}
       <header className="map-top">
-        <Art id="logo" alt="曦語 Whisper Trees" className="logo" />
-        <nav className="row gap">
-          <Link className="btn small light balance-chip" to="/me" aria-label={`我的小芽：${balance} 光點`}>
-            光點 <span className="num">{balance}</span>
-          </Link>
+        <h1 className="brand">曦語</h1>
+        <nav className="row gap" aria-label="主要">
           <Link className="btn small light" to="/wishes">
             我的許願{unseen && <span className="dot-badge" aria-label="有新進度" />}
           </Link>
-          <Link className="btn small light" to="/more">
-            更多
+          <Link className="btn small light" to="/more" aria-label="選單：小芽、商店、圖鑑、後台">
+            <IconMore /> 選單
           </Link>
-          <button
-            className="btn small light"
-            onClick={() => setPanel((p) => !p)}
-            aria-expanded={panel}
-            aria-controls="layer-panel"
-          >
-            <IconLayers /> 圖層
-          </button>
         </nav>
       </header>
+      <div ref={el} className="map" aria-label="樹木地圖" role="region" />
+
       <div className="map-event">
         <EventBar />
       </div>
 
-      {gap && (
+      {gap && !gapHidden && (
         <div className={`gap-card ${gapOpen ? 'open' : ''}`}>
           <button className="gap-toggle" onClick={() => setGapOpen((o) => !o)} aria-expanded={gapOpen}>
-            <strong>{gap.high.district}</strong>的行道樹密度是<strong>{gap.low.district}</strong>的{' '}
-            <strong className="num">{(gap.high.trees_per_km / gap.low.trees_per_km).toFixed(1)}</strong> 倍
+            <span>
+              <strong>{gap.high.district}</strong>的行道樹密度是<strong>{gap.low.district}</strong>的{' '}
+              <strong className="num">{(gap.high.trees_per_km / gap.low.trees_per_km).toFixed(1)}</strong> 倍
+            </span>
+            <span className={`chev ${gapOpen ? 'up' : ''}`} aria-hidden>
+              <IconChevron />
+            </span>
+          </button>
+          <button className="gap-dismiss" onClick={() => setGapHidden(true)} aria-label="收起這張卡">
+            ×
           </button>
           {gapOpen && (
             <p className="muted small">
@@ -462,10 +497,10 @@ export default function MapPage() {
           ))}
           <hr />
           <button className="dlc-option" onClick={() => setSheet({ kind: 'dlc', which: 'trash' })}>
-            <IconTrash /> 垃圾桶 <span className="dlc-tag">DLC 即將推出</span>
+            <IconTrash /> 垃圾桶 <span className="dlc-tag">即將推出</span>
           </button>
           <button className="dlc-option" onClick={() => setSheet({ kind: 'dlc', which: 'light' })}>
-            <IconLamp /> 路燈 <span className="dlc-tag">DLC 即將推出</span>
+            <IconLamp /> 路燈 <span className="dlc-tag">即將推出</span>
           </button>
         </div>
       )}
@@ -509,17 +544,22 @@ export default function MapPage() {
       )}
 
       {!sheet && (
-        <div className="mode-toggle" role="group" aria-label="地圖模式">
-          <button className={mode === 'near' ? 'on' : ''} aria-pressed={mode === 'near'} onClick={() => setMode('near')}>
-            附近
-          </button>
-          <button className={mode === 'city' ? 'on' : ''} aria-pressed={mode === 'city'} onClick={() => setMode('city')}>
-            全市
+        <div className="map-tools" role="group" aria-label="地圖工具">
+          <button
+            className="tool"
+            onClick={() => setPanel((p) => !p)}
+            aria-expanded={panel}
+            aria-controls="layer-panel"
+            aria-label="圖層"
+          >
+            <IconLayers />
+            <span>圖層</span>
           </button>
           {mode === 'near' && (
             <button
-              className={follow ? 'on' : ''}
+              className={`tool ${follow ? 'on' : ''}`}
               aria-pressed={follow}
+              aria-label="跟著手機方向轉動地圖"
               onClick={async () => {
                 setHeadingMsg(null)
                 if (follow) return setFollow(false)
@@ -529,12 +569,33 @@ export default function MapPage() {
                 setFollow(true)
               }}
             >
-              跟著方向
+              <IconHeading />
+              <span>方向</span>
             </button>
           )}
+        </div>
+      )}
+
+      {!sheet && (
+        <div className="mode-toggle">
+          {mode === 'city' && (
+            <p className="legend-row" aria-label="圖例">
+              <span className="legend legend-tree" aria-hidden /> 樹
+              <span className="legend legend-pit" aria-hidden /> 候選空樹穴
+              <span className="legend legend-wish" aria-hidden /> 許願
+            </p>
+          )}
+          <div className="segmented" role="group" aria-label="地圖範圍">
+            <button className={mode === 'near' ? 'on' : ''} aria-pressed={mode === 'near'} onClick={() => setMode('near')}>
+              附近
+            </button>
+            <button className={mode === 'city' ? 'on' : ''} aria-pressed={mode === 'city'} onClick={() => setMode('city')}>
+              全市
+            </button>
+          </div>
           {headingMsg && <span className="mode-note">{headingMsg}</span>}
           {follow && <span className="mode-note">畫面上方就是你面向的方向</span>}
-          {mode === 'near' && (
+          {mode === 'near' && !follow && !headingMsg && (
             <span className="mode-note">
               {anchor.source === 'gps'
                 ? `你周圍 ${NEAR.radiusMeters} 公尺`
@@ -546,6 +607,7 @@ export default function MapPage() {
         </div>
       )}
 
+      {!sheet && <p className="scan-hint">找一棵樹，掃它樹幹上的樹牌</p>}
       {!sheet && (
         <Link className="scan-fab" to="/scan">
           掃樹牌
@@ -570,7 +632,7 @@ function TreeSheet({ tree }: { tree: Tree }) {
         <dd>{tree.diameter ?? '—'} cm</dd>
       </dl>
       <Link className="btn primary block" to={`/tree/${tree.id}`}>
-        去這棵樹
+        看這棵樹
       </Link>
       <p className="muted small">從地圖點進去只能看，要打卡請掃樹牌。</p>
     </div>
@@ -581,15 +643,15 @@ function DlcCard({ which }: { which: 'trash' | 'light' }) {
   return which === 'trash' ? (
     <div>
       <h2>
-        <IconTrash /> 垃圾桶 <span className="dlc-tag">DLC 即將推出</span>
+        <IconTrash /> 垃圾桶 <span className="dlc-tag">即將推出</span>
       </h2>
-      <p>回報滿溢、依行人流量與通報熱點建議佈點（對應 debug 松題目 #2）。</p>
+      <p>回報滿溢，依行人流量與大家的回報，建議哪裡該多放一個。</p>
       <p className="muted small">沿用同一套「市民回報 × 後台營運 × 政府資料」。目前只是預告，還沒有圖層。</p>
     </div>
   ) : (
     <div>
       <h2>
-        <IconLamp /> 路燈 <span className="dlc-tag">DLC 即將推出</span>
+        <IconLamp /> 路燈 <span className="dlc-tag">即將推出</span>
       </h2>
       <p>回報路燈故障。公園處的「行道樹路燈資訊網」本來就把行道樹和路燈放在同一個系統。</p>
       <p className="muted small">目前只是預告，還沒有圖層。</p>
@@ -599,6 +661,16 @@ function DlcCard({ which }: { which: 'trash' | 'light' }) {
 
 
 /** 底部抽屜：開啟時焦點移進來，Esc 或「關閉」收起，關閉後焦點回到原處 */
+/** 標出選到的點，並把它移到抽屜上方看得到的地方 */
+function select(m: MLMap, at: LngLat, pan = true) {
+  ;(m.getSource('selected') as maplibregl.GeoJSONSource | undefined)?.setData({
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: at },
+    properties: {},
+  })
+  if (pan) m.easeTo({ center: at, offset: [0, -window.innerHeight * 0.22], duration: 500 })
+}
+
 function sheetLabel(sheet: NonNullable<Sheet>, wish?: Wish): string {
   switch (sheet.kind) {
     case 'tree':
@@ -621,7 +693,23 @@ function Sheet({ onClose, children, label }: { onClose: () => void; children: Re
   useEffect(() => {
     const before = document.activeElement as HTMLElement | null
     ref.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return close.current()
+      // Tab 只在抽屜裡循環
+      if (e.key !== 'Tab' || !ref.current) return
+      const items = [...ref.current.querySelectorAll<HTMLElement>('button, a[href], input, textarea, select, [tabindex="0"]')]
+        .filter((el) => !el.hasAttribute('disabled'))
+      if (!items.length) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
     window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('keydown', onKey)
@@ -629,7 +717,7 @@ function Sheet({ onClose, children, label }: { onClose: () => void; children: Re
     }
   }, [])
   return (
-    <div className="sheet" role="dialog" aria-label={label} tabIndex={-1} ref={ref}>
+    <div className="sheet" role="dialog" aria-modal="true" aria-label={label} tabIndex={-1} ref={ref}>
       <div className="sheet-grip" aria-hidden />
       <button className="sheet-close" onClick={onClose}>
         關閉

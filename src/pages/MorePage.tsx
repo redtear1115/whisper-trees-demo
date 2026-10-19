@@ -73,7 +73,7 @@ export default function MorePage() {
         </button>
       </Card>
       <p className="muted small">
-        樹籍資料為臺北市政府 2026-10-16 開放資料；許願、澆水、微光人數、案件進度為模擬資料，見 README。
+        樹籍資料為臺北市政府 2026-10-16 開放資料；許願、澆水、微光人數、案件進度是示範用的模擬資料。
       </p>
     </div>
   )

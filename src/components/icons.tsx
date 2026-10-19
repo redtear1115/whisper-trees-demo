@@ -88,3 +88,10 @@ export const IconSpark = () => (
     <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />
   </Svg>
 )
+
+export const IconHeading = () => (
+  <Svg>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 6.5l2.6 7.5L12 12.6 9.4 14z" fill="currentColor" stroke="none" />
+  </Svg>
+)
