@@ -100,6 +100,16 @@ export function shouldRecordHomeScreen(a: { standalone: boolean; ready: boolean;
 export type InstallPlatform = 'in-app' | 'ios-safari' | 'ios-other' | 'android' | 'other'
 
 /** 依瀏覽器決定要給哪一種說明。inApp 由 firebase.ts 的 inAppBrowser() 判斷後傳進來。 */
+/** 「加到主畫面」說明的分頁：三種手機瀏覽器，誰都能切換來看 */
+export type InstallGuide = 'ios-safari' | 'ios-chrome' | 'android'
+
+/** 預設打開哪一頁說明：偵測到什麼就開什麼；電腦或內建瀏覽器先給 iPhone Safari（最常見） */
+export function defaultInstallGuide(platform: InstallPlatform): InstallGuide {
+  if (platform === 'ios-other') return 'ios-chrome'
+  if (platform === 'android') return 'android'
+  return 'ios-safari'
+}
+
 export function installPlatform(
   ua: string,
   inApp: boolean,

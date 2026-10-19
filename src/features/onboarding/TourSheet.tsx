@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { BrowserQRCodeSvgWriter } from '@zxing/browser'
 import { Link } from 'react-router-dom'
 import { Art } from '../../components/ui'
 import { isDemoMode, useStore, useUserReady } from '../../store'
@@ -8,7 +9,7 @@ import { useGameConfig } from '../game/config'
 import { firstLightEarned, patchOnboarding, useOnboarding } from '../game/onboarding'
 import { Celebration } from './Celebration'
 import { promptInstall, useCanInstall } from './install'
-import { installPlatform, isStandalone, STEP_ANIMAL, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, tourView } from './tour'
+import { defaultInstallGuide, installPlatform, isStandalone, type InstallGuide, STEP_ANIMAL, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, tourView } from './tour'
 import { useGoogleLink } from './useGoogleLink'
 import { AnimalPicker } from '../avatar/AnimalPicker'
 import { useAnimal } from '../avatar/useAnimal'
@@ -235,40 +236,90 @@ function StepHome() {
   )
 }
 
+const GUIDE_TABS: { id: InstallGuide; label: string }[] = [
+  { id: 'ios-safari', label: 'iPhone（Safari）' },
+  { id: 'ios-chrome', label: 'iPhone（Chrome）' },
+  { id: 'android', label: 'Android' },
+]
+
 function InstallHelp({ platform, canInstall, appName }: { platform: ReturnType<typeof installPlatform>; canInstall: boolean; appName: ReturnType<typeof inAppBrowser> }) {
-  if (platform === 'in-app')
-    return (
-      <div className="tour-note" role="note" data-testid="tour-install-in-app">
-        <p className="small">
-          你現在在 LINE／Facebook／Instagram 的內建瀏覽器，這裡加不到主畫面。請先用 Safari（iPhone）或 Chrome（Android）打開這個網址，再回來做這一步。
-        </p>
-        {appName === 'line' && (
-          <a className="btn" href={externalBrowserUrl()}>
-            用瀏覽器開啟
-          </a>
-        )}
+  const [guide, setGuide] = useState<InstallGuide>(() => defaultInstallGuide(platform))
+  return (
+    <>
+      {platform === 'in-app' && (
+        <div className="tour-note" role="note" data-testid="tour-install-in-app">
+          <p className="small">
+            你現在在 LINE／Facebook／Instagram 的內建瀏覽器，這裡加不到主畫面。請先用 Safari（iPhone）或 Chrome（Android）打開這個網址，再照下面做。
+          </p>
+          {appName === 'line' && (
+            <a className="btn" href={externalBrowserUrl()}>
+              用瀏覽器開啟
+            </a>
+          )}
+        </div>
+      )}
+      {platform === 'other' && <PhoneQr />}
+      <div className="install-tabs" role="tablist" aria-label="選擇你的手機" data-testid="tour-install-tabs">
+        {GUIDE_TABS.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={guide === t.id}
+            data-testid={`tour-install-tab-${t.id}`}
+            onClick={() => setGuide(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-    )
-  if (platform === 'ios-safari' || platform === 'ios-other')
-    return (
-      <ol className="tour-steps" data-testid="tour-install-ios">
-        <li>點瀏覽器下方（或右上角）的「分享」按鈕。</li>
-        <li>往下找「加入主畫面」。</li>
-        <li>按右上角「新增」。</li>
-        {platform === 'ios-other' && <li className="muted">找不到的話，請改用 Safari 打開這個網址。</li>}
-      </ol>
-    )
-  if (platform === 'android')
-    return canInstall ? (
-      <button className="btn primary block" onClick={() => void promptInstall()} data-testid="tour-install-button">
-        安裝到主畫面
-      </button>
-    ) : (
-      <ol className="tour-steps" data-testid="tour-install-android">
-        <li>點 Chrome 右上角的選單（⋮）。</li>
-        <li>選「加到主畫面」或「安裝應用程式」。</li>
-        <li>確認「新增」。</li>
-      </ol>
-    )
-  return <p className="small muted">請用手機打開這個網址，再加到主畫面。</p>
+      {guide === 'ios-safari' && (
+        <ol className="tour-steps" role="tabpanel" data-testid="tour-install-ios">
+          <li>
+            點畫面下方的「分享」按鈕（方框加向上的箭頭）。沒看到的話，先點「⋯」，再點「分享」。
+          </li>
+          <li>分享選單出來後往上滑，再往下找到「加入主畫面」。</li>
+          <li>按右上角「新增」，主畫面就會多一個曦語的圖示。</li>
+        </ol>
+      )}
+      {guide === 'ios-chrome' && (
+        <ol className="tour-steps" role="tabpanel" data-testid="tour-install-ios-chrome">
+          <li>點網址列右邊的「分享」按鈕（方框加向上的箭頭）。</li>
+          <li>往下找到「加入主畫面」。</li>
+          <li>按「新增」。找不到的話，改用 Safari 打開這個網址再加。</li>
+        </ol>
+      )}
+      {guide === 'android' &&
+        (platform === 'android' && canInstall ? (
+          <button className="btn primary block" onClick={() => void promptInstall()} data-testid="tour-install-button">
+            安裝到主畫面
+          </button>
+        ) : (
+          <ol className="tour-steps" role="tabpanel" data-testid="tour-install-android">
+            <li>點 Chrome 右上角的選單（⋮）。</li>
+            <li>選「加到主畫面」或「安裝應用程式」。</li>
+            <li>按「安裝」或「新增」。</li>
+            <li className="muted">三星瀏覽器：點下方「≡」→「新增頁面至」→「主畫面」。</li>
+          </ol>
+        ))}
+    </>
+  )
+}
+
+/** 在電腦上看到這一步：給一個 QR Code，用手機相機掃就開到網站，再照下面的步驟加 */
+function PhoneQr() {
+  const box = useRef<HTMLDivElement>(null)
+  const url = new URL(import.meta.env.BASE_URL, location.origin).href
+  useEffect(() => {
+    if (!box.current) return
+    const svg = new BrowserQRCodeSvgWriter().write(url, 140, 140)
+    svg.setAttribute('role', 'img')
+    svg.setAttribute('aria-label', `曦語網址的 QR Code：${url}`)
+    box.current.replaceChildren(svg)
+  }, [url])
+  return (
+    <div className="install-qr" data-testid="tour-install-qr">
+      <div className="qr" ref={box} />
+      <p className="small muted">這一步要在手機上做：用手機相機掃這個 QR Code 打開曦語，再照下面的步驟加到主畫面。</p>
+    </div>
+  )
 }

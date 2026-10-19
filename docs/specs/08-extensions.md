@@ -135,7 +135,7 @@
 | 1 | 光點是什麼、怎麼得到：表格數值讀 GM 設定的 `gameConfig().points`（打卡、遠觀、樹洞、許願、澆水）。「下一步」 |
 | 2 | 去掃樹牌 → `/scan`。「附近沒有樹牌？」說明 Demo 模式（`?demo=1`，已在 Demo 模式就改說明模擬定位） |
 | 3 | 第一次拿到光點：慶祝徽章「第一道光」＋新手禮草帽（連到 `/me` 換上、`/shop`）。拿到第一道光就直接跳到這一步 |
-| 4 | 加到主畫面：沒綁 Google 的先建議「用 Google 保留紀錄」（說明 iOS 主畫面 App 的儲存空間和 Safari 分開），再依瀏覽器給說明：iOS Safari 用「分享 → 加入主畫面」、Android Chrome 有 `beforeinstallprompt` 就給「安裝到主畫面」按鈕（`main.tsx` 一開始就接住事件）否則給選單說明、LINE／Facebook／Instagram 內建瀏覽器請先用 Safari／Chrome 開啟。「我加好了」走完 |
+| 4 | 加到主畫面：沒綁 Google 的先建議「用 Google 保留紀錄」（說明 iOS 主畫面 App 的儲存空間和 Safari 分開），再給說明。2026-10-20 改成三個可切換的分頁（`tour-install-tabs`）：「iPhone（Safari）」「iPhone（Chrome）」「Android」，預設打開偵測到的那一個（`defaultInstallGuide`；電腦與內建瀏覽器先開 iPhone Safari）。iPhone Safari：點下方「分享」（沒看到就先點「⋯」再點「分享」，iOS 26）→ 分享選單往上滑、往下找「加入主畫面」→ 右上角「新增」；iPhone Chrome：網址列右邊「分享」→「加入主畫面」→「新增」；Android Chrome 有 `beforeinstallprompt` 就給「安裝到主畫面」按鈕（`main.tsx` 一開始就接住事件），否則「⋮」→「加到主畫面／安裝應用程式」，另附三星瀏覽器一行。電腦上多一個網站的 QR Code（`tour-install-qr`），用手機掃了再照做。LINE／Facebook／Instagram 內建瀏覽器先提示改用 Safari／Chrome 開啟。「我加好了」走完 |
 
 - **什麼時候開**：使用者文件已載入（`useUserReady()`，不然看不到有沒有按過「之後再說」）、沒按過「之後再說」、`tourStep` 未走完。還沒拿到第一道光的新使用者一開地圖就看到；**已拿到第一道光的人，只有「開始過」引導（`tourStep` 有存）才會接著看到第 3、4 步**，早就有光點、沒看過引導的人不會被打擾（要看可以從「我的」進）。開著時若 `tourStep` 還沒存，補存 1，讓「開始過」成立。**Demo 模式（`?demo=1`）不自動打開**（2026-10-19 決定：現場展示不多按），從「我的 → 設定與其他 →新手引導」打開過才顯示。
 - **之後再說**：記 `tourDismissedAt`，之後不再自動出現。

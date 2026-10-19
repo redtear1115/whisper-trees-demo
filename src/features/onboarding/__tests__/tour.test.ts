@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { inAppBrowser } from '../../../lib/firebase'
 import {
+  defaultInstallGuide,
   firstLightCelebration,
   installPlatform,
   isStandalone,
@@ -140,5 +141,15 @@ describe('installPlatform', () => {
     expect(p(androidChrome)).toBe('android')
     expect(p(ipadSafari, 5)).toBe('ios-safari')
     expect(p(desktop)).toBe('other')
+  })
+})
+
+describe('defaultInstallGuide', () => {
+  it('opens the guide for the detected browser; desktop and in-app start on iPhone Safari', () => {
+    expect(defaultInstallGuide('ios-safari')).toBe('ios-safari')
+    expect(defaultInstallGuide('ios-other')).toBe('ios-chrome')
+    expect(defaultInstallGuide('android')).toBe('android')
+    expect(defaultInstallGuide('other')).toBe('ios-safari')
+    expect(defaultInstallGuide('in-app')).toBe('ios-safari')
   })
 })
