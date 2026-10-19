@@ -20,6 +20,8 @@ import { setSession, useSession } from './session'
 import type { Checkin, ReportKind, StatusEvent, TreeReport, Whisper, Wish, WishStatus } from './types'
 
 export { useSession, canWriteAdmin, inDemoOverlay, userReady } from './session'
+export { clearActiveTour, getActiveTour, parseActiveTour, setActiveTour, useActiveTour } from './activeTour'
+export type { ActiveTour, ActiveTourStop } from './activeTour'
 
 const KEY = LOCAL_KEY
 const SEEN_KEY = 'whisper-trees:seen'

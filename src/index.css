@@ -3878,3 +3878,75 @@ body.has-offline .gov {
     width: 100%;
   }
 }
+
+/* ---------- 大地圖上的里路線（集章冊「開始」，2026-10-20） ---------- */
+
+/* 頂端列放在光點餘額下面：頁首換行，列佔滿一行 */
+.map-top.has-tour {
+  flex-wrap: wrap;
+}
+
+.tour-bar {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 6px 8px 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 2px 8px rgba(44, 58, 46, 0.12);
+}
+
+.tour-bar-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--green-ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.tour-bar-actions {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+
+.tour-bar-actions .btn {
+  padding: 0 12px;
+}
+
+.tour-bar-actions .btn.ghost {
+  border-color: var(--line);
+}
+
+/* 停靠樹是按鈕：重設預設樣式、放大點擊範圍（圓本身 28 px，點擊範圍 40 px） */
+.route-pin.tour-pin {
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.route-pin.tour-pin::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.route-pin.tour-pin.next {
+  box-shadow: 0 0 0 4px rgba(242, 193, 78, 0.85), 0 1px 5px rgba(0, 0, 0, 0.35);
+}
+
+.route-pin.tour-pin.done {
+  background: #8fae96;
+  opacity: 0.85;
+}
+
+.route-pin.tour-pin:focus-visible {
+  outline: 3px solid #f2c14e;
+  outline-offset: 2px;
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../lib/maplibre'
 import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
@@ -6,7 +6,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
-import { demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
+import { clearActiveTour, demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useActiveTour, useStore, useUserReady, useWishes, wishByPit } from '../store'
+import type { ActiveTour } from '../store'
 import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
@@ -19,7 +20,7 @@ import { EventBar } from '../features/game/EventBar'
 import { firstLightEarned, newcomerDone, showTasksChip, tasks } from '../features/game/onboarding'
 import { TourSheet, useTourView } from '../features/onboarding/TourSheet'
 import { useAnchor } from '../features/map/useAnchor'
-import { boundsAround, circleRing } from '../lib/nearby'
+import { circleRing } from '../lib/nearby'
 import { angleDiff, requestHeadingPermission, watchHeading } from '../features/map/heading'
 import { ringRadius, treesInRing } from '../features/map/ring'
 import { hasFinePointer } from '../features/map/rotation'
@@ -30,6 +31,8 @@ import { TreeRingLayer } from '../features/map/TreeRingLayer'
 import { rangeInfo, TREE_FOCUS } from '../features/map/treeRings'
 import { loadRoadGraph, prefixAtAsync, routeBetween, routeLabel, routeMidpoint, type Route } from '../lib/route'
 import { treePrefix } from '../lib/treeId'
+import { TourBar } from '../features/map/TourBar'
+import { doneStopIds, EMPTY_LINE, movableBounds, TOUR_MIN_ZOOM, tourBounds, tourLine, unionBounds } from '../features/map/tour'
 
 type Sheet =
   | { kind: 'pit'; pit: PitInfo; justWished?: boolean }
@@ -89,6 +92,13 @@ export default function MapPage() {
   const routeFitted = useRef(false) // 這一次點「怎麼走」鏡頭是否已經拉過去（人走動重算路線時不再動鏡頭）
   const boundsLifted = useRef(false) // 為了看整條路線，暫時拿掉「只能在附近移動」的限制
   const prevView = useRef<View | null>(null)
+  // 里路線（集章冊按「開始」）：畫在大地圖上，結束前一直都在
+  const activeTour = useActiveTour()
+  const tourRef = useRef(activeTour)
+  tourRef.current = activeTour
+  const tourFitted = useRef<number | null>(null) // 已經把鏡頭拉到整條路線的那一次（startedAt）
+  const checkins = useStore((s) => s.checkins)
+  const tourDone = useMemo(() => (activeTour ? doneStopIds(activeTour, checkins) : new Set<string>()), [activeTour, checkins])
   const navigate = useNavigate()
   const animal = useAnimal()
   const wishes = useWishes()
@@ -237,6 +247,22 @@ export default function MapPage() {
           'circle-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, 1],
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3.5, 17, 6, 19, 10],
         },
+      })
+      // 里路線（集章冊「開始」）：白色描邊加深綠色線，畫在樹的上面、「怎麼走」的路線下面
+      m.addSource('tour', { type: 'geojson', data: EMPTY_LINE })
+      m.addLayer({
+        id: 'tour-casing',
+        type: 'line',
+        source: 'tour',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-opacity': 0.9, 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 7, 18, 11, 20, 15] },
+      })
+      m.addLayer({
+        id: 'tour-line',
+        type: 'line',
+        source: 'tour',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#2b5e38', 'line-opacity': 0.95, 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 4, 18, 6, 20, 9] },
       })
       // 「怎麼走」的步行路線：白色描邊加一條平靜的深綠色線，畫在樹的上面
       m.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
@@ -410,10 +436,14 @@ export default function MapPage() {
     const key = `${anchor.source}:${anchor.lngLat.join()}`
     nearby?.setData({ type: 'Polygon', coordinates: [circleRing(anchor.lngLat, NEAR.radiusMeters)] })
     m.setMaxBounds(null)
-    if (!boundsLifted.current) m.setMinZoom(NEAR.minZoom)
+    if (!boundsLifted.current) m.setMinZoom(nearMinZoom())
     if (focusRef.current) {
       // 正在看一棵樹：不把鏡頭拉回人身上，只更新可移動範圍（正在看整條路線時先不限制）
-      if (!boundsLifted.current) m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
+      if (!boundsLifted.current) m.setMaxBounds(nearBounds())
+    } else if (centeredOn.current === null && tourRef.current) {
+      // 帶著里路線進地圖：鏡頭由下面的路線 effect 拉到整條路線，不先飛去人身上
+      centeredOn.current = key
+      m.setMaxBounds(nearBounds())
     } else if (centeredOn.current !== key) {
       // 進附近模式、或人移動了：鏡頭移到新的中心。進附近模式用預設街景縮放；人走動時保留使用者目前的縮放（至少 minZoom）。
       // 上一段動畫可能被打斷，所以角度用「至少」而不是沿用目前值
@@ -428,12 +458,20 @@ export default function MapPage() {
       })
       // 動畫結束才鎖範圍，並用最新的中心（避免被打斷的動畫拿到舊位置）
       m.once('moveend', () => {
-        m.setMaxBounds(boundsAround(anchorRef.current.lngLat, NEAR.radiusMeters))
+        m.setMaxBounds(nearBounds())
       })
     } else {
-      m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
+      m.setMaxBounds(nearBounds())
     }
   }, [anchor, ready])
+
+  // 鏡頭可以移動的範圍：人所在處半徑 300 m；有里路線時再把整條路線（外擴 300 m）併進來
+  function nearBounds() {
+    return movableBounds(anchorRef.current.lngLat, NEAR.radiusMeters, tourRef.current)
+  }
+  function nearMinZoom() {
+    return tourRef.current ? TOUR_MIN_ZOOM : NEAR.minZoom
+  }
 
   // 人物：使用者選的動物站在目前位置（Demo 示範位置或 GPS）。HTML 標記，永遠面向畫面。附近模式才顯示
   // Demo：可以拖曳（滑鼠與觸控都行，拖曳人物不會平移地圖），放開時模擬位置移到那裡，感應圈、範圍、提示都跟著重算
@@ -529,8 +567,8 @@ export default function MapPage() {
   function restoreBounds() {
     if (!boundsLifted.current) return
     boundsLifted.current = false
-    map.current?.setMinZoom(NEAR.minZoom)
-    map.current?.setMaxBounds(boundsAround(anchorRef.current.lngLat, NEAR.radiusMeters))
+    map.current?.setMinZoom(nearMinZoom())
+    map.current?.setMaxBounds(nearBounds())
   }
   // 收起行動圈並飛回原來的街景
   const unfocusTree = useRef<() => void>(() => {})
@@ -611,6 +649,90 @@ export default function MapPage() {
       marker.remove()
     }
   }, [route, ready])
+
+  // 里路線：畫線、放寬可移動範圍；第一次出現（按「開始」進來）時鏡頭拉到整條路線；結束後飛回人身上、裝回範圍
+  const hadTour = useRef(false)
+  function fitTour(t: ActiveTour) {
+    const m = map.current
+    if (!m) return
+    const b = unionBounds(tourBounds(t), [anchorRef.current.lngLat, anchorRef.current.lngLat])
+    // 上面有光點餘額與頂端列，下面有掃樹牌按鈕與導覽，右邊有地圖工具
+    m.fitBounds(b, { padding: { top: 150, bottom: 200, left: 36, right: 84 }, maxZoom: 18.5, pitch: 0, duration: motionMs(900) })
+  }
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    const source = m.getSource('tour') as maplibregl.GeoJSONSource | undefined
+    if (!activeTour) {
+      source?.setData(EMPTY_LINE)
+      tourFitted.current = null
+      if (!hadTour.current) return
+      hadTour.current = false
+      if (boundsLifted.current || focusRef.current) return // 看「怎麼走」整條路線或正在看樹：範圍等他們收起時再裝回
+      m.easeTo({ center: anchorRef.current.lngLat, zoom: NEAR.zoom, pitch: NEAR.pitch, bearing: NEAR.bearing, duration: motionMs(700) })
+      m.once('moveend', () => {
+        // 動畫結束才把範圍縮回人身上（先縮的話鏡頭會被硬拉回來）
+        if (boundsLifted.current || focusRef.current) return
+        m.setMinZoom(nearMinZoom())
+        m.setMaxBounds(nearBounds())
+      })
+      return
+    }
+    hadTour.current = true
+    source?.setData(tourLine(activeTour))
+    if (!boundsLifted.current) {
+      m.setMinZoom(nearMinZoom())
+      m.setMaxBounds(nearBounds())
+    }
+    if (tourFitted.current !== activeTour.startedAt && !focusRef.current) {
+      tourFitted.current = activeTour.startedAt
+      fitTour(activeTour)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTour, ready])
+
+  // 里路線的標記：起點、依序編號的停靠樹（走過的打 ✓、變淡）、終點。停靠樹可以點：鏡頭飛到那棵樹，浮出行動圈
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready || !activeTour) return
+    const markers: Marker[] = []
+    const pin = <K extends 'div' | 'button'>(el: K, cls: string, text: string, tag?: string) => {
+      const node = document.createElement(el)
+      node.className = `route-pin ${cls}`
+      node.textContent = text
+      if (tag) {
+        const t = document.createElement('span')
+        t.className = 'route-pin-tag'
+        t.textContent = tag
+        node.append(t)
+      }
+      return node
+    }
+    const start = pin('div', 'start', '起', '起點')
+    start.dataset.testid = 'tour-start'
+    markers.push(new maplibregl.Marker({ element: start }).setLngLat(activeTour.start).addTo(m))
+    const next = activeTour.stops.findIndex((s) => !tourDone.has(s.id)) // 下一站：疊在別的圈上面、加一圈金色
+    activeTour.stops.forEach((s, i) => {
+      const last = i === activeTour.stops.length - 1
+      const done = tourDone.has(s.id)
+      const btn = pin('button', `stop tour-pin${last ? ' finish' : ''}${done ? ' done' : ''}${i === next ? ' next' : ''}`, done ? '✓' : String(i + 1), last ? '終點' : undefined)
+      btn.type = 'button'
+      btn.style.zIndex = i === next ? '3' : done ? '1' : '2'
+      btn.dataset.testid = 'tour-stop'
+      btn.dataset.index = String(i + 1)
+      btn.dataset.treeId = s.id
+      btn.dataset.done = String(done)
+      btn.setAttribute('aria-label', `第 ${i + 1} 站${last ? '（終點）' : ''}：${s.id}${done ? '，已點亮' : ''}`)
+      btn.onclick = (ev) => {
+        ev.stopPropagation()
+        if (focusRef.current?.tree.id === s.id) return
+        setSheet(null)
+        findTree(s.id).then((tree) => tree && focusTree.current(tree))
+      }
+      markers.push(new maplibregl.Marker({ element: btn }).setLngLat(s.lngLat).addTo(m))
+    })
+    return () => markers.forEach((k) => k.remove())
+  }, [activeTour, tourDone, ready])
 
   // 人物感應圈與圈內的樹（只在附近模式、有定位或 Demo 時）
   const radius = ringRadius(anchor)
@@ -714,9 +836,12 @@ export default function MapPage() {
   return (
     <div className="map-page near">
       {/* 頁首放在地圖前面：鍵盤 Tab 先到導覽，再到地圖 */}
-      <header className="map-top">
+      <header className={`map-top${activeTour && !treeFocus ? ' has-tour' : ''}`}>
         <h1 className="sr-only">曦語地圖</h1>
         <BalanceChip />
+        {activeTour && !treeFocus && (
+          <TourBar tour={activeTour} done={tourDone.size} onFit={() => fitTour(activeTour)} onEnd={clearActiveTour} />
+        )}
       </header>
       <div ref={el} className="map" aria-label="樹木地圖" role="region" />
 

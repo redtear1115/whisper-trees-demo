@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAnchor } from '../map/useAnchor'
+import { PREFIX_DISTRICT } from '../game/districts'
+import { setActiveTour } from '../../store'
 import { loadRoadGraph, planTreeTour, type RoadGraph } from '../../lib/route'
 import type { Village } from '../../lib/villages'
 import { loadTreePoints, routeCandidates, tourSummary, type TreePoint } from './villageTrees'
@@ -14,6 +16,7 @@ type Loaded = { trees: TreePoint[]; graph: RoadGraph } | 'failed' | null
 /** 第 3 層：從你的位置出發，走訪這一里最近、還沒點亮的樹（最多 8 棵）。 */
 export function RouteView({ prefix, village, lit }: { prefix: string; village: Village; lit: ReadonlySet<string> }) {
   const anchor = useAnchor(true)
+  const navigate = useNavigate()
   const [data, setData] = useState<Loaded>(null)
 
   useEffect(() => {
@@ -56,6 +59,27 @@ export function RouteView({ prefix, village, lit }: { prefix: string; village: V
       <p className="atlas-summary" data-testid="route-summary" aria-live="polite">
         {tourSummary(tour.meters, tour.minutes, tour.stops.length)}
       </p>
+      <button
+        type="button"
+        className="btn primary block"
+        data-testid="route-start"
+        onClick={() => {
+          // 開始：路線存起來，回大地圖畫出來（結束前一直都在）
+          setActiveTour({
+            village: village.name,
+            district: PREFIX_DISTRICT[prefix] ?? '',
+            start: tour.start,
+            stops: tour.stops.map((s) => ({ id: s.id, lngLat: s.lngLat })),
+            path: tour.path,
+            meters: tour.meters,
+            minutes: tour.minutes,
+            startedAt: Date.now(),
+          })
+          navigate('/')
+        }}
+      >
+        開始
+      </button>
       <Suspense fallback={<div className="route-map" aria-hidden="true" />}>
         <RouteMap tour={tour} />
       </Suspense>

@@ -72,8 +72,12 @@ export function routeCandidates(
     .map((x) => x.t)
 }
 
+/** 「1.2 公里」「340 公尺」：不到 1 公里用公尺（四捨五入到 10） */
+export function distanceLabel(meters: number): string {
+  return meters >= 1000 ? `${(meters / 1000).toFixed(1)} 公里` : `${Math.round(meters / 10) * 10} 公尺`
+}
+
 /** 「約 1.2 公里・步行 16 分鐘・8 棵」；不到 1 公里用公尺 */
 export function tourSummary(meters: number, minutes: number, trees: number): string {
-  const dist = meters >= 1000 ? `${(meters / 1000).toFixed(1)} 公里` : `${Math.round(meters / 10) * 10} 公尺`
-  return `約 ${dist}・步行 ${Math.max(1, Math.round(minutes))} 分鐘・${trees} 棵`
+  return `約 ${distanceLabel(meters)}・步行 ${Math.max(1, Math.round(minutes))} 分鐘・${trees} 棵`
 }
