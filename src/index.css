@@ -2786,3 +2786,34 @@ body.has-offline .gov {
   box-shadow: var(--shadow);
   pointer-events: none;
 }
+
+/* ---------- 桌機也用手機寬度（市民端） ---------- */
+
+/* 手機上 .phone-shell／.phone-scroll 不做任何事。寬螢幕（桌機 Demo）把市民端框成手機寬、置中：
+   .phone-shell 用 transform 讓裡面 position: fixed 的元件（地圖、底部導覽、抽屜、慶祝視窗）以這個框為準，
+   不貼到整個螢幕邊；它自己不捲動，捲動交給裡面的 .phone-scroll，fixed 的元件才不會跟著內容捲走。 */
+@media (min-width: 600px) {
+  body:has(.phone-shell) {
+    background: #e4e0d4;
+  }
+
+  .phone-shell {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    height: 100dvh;
+    margin: 0 auto;
+    overflow: hidden;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--line), 0 12px 48px rgb(0 0 0 / 0.12);
+    transform: translateZ(0);
+  }
+
+  .phone-scroll {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* 像手機一樣不顯示捲軸，免得捲軸吃掉寬度；滾輪與觸控板照樣能捲 */
+    scrollbar-width: none;
+  }
+}

@@ -24,10 +24,17 @@ function useTouchDevice() {
 /**
  * 市民端只在手機上用：要走到樹旁、開後鏡頭、用 GPS。
  * 桌機看到「請用手機開啟」與 QR Code；加 ?demo=1 才能在桌機試玩。
+ * 寬螢幕（桌機 Demo）一律維持手機寬度、置中顯示（.phone-shell）；手機上不影響。
  */
 export function MobileOnly({ children }: { children: ReactNode }) {
   const touch = useTouchDevice()
-  if (touch || isDemoMode()) return <>{children}</>
+  if (touch || isDemoMode()) {
+    return (
+      <div className="phone-shell">
+        <div className="phone-scroll">{children}</div>
+      </div>
+    )
+  }
   return <DesktopNotice />
 }
 
