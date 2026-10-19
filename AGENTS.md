@@ -44,6 +44,7 @@
 
 - `material/raw/`：2026-10-16 下載的政府開放資料與 OSM（來源與授權見 README）。
 - `material/processed/`：`scripts/merge_treepits.py`、`scripts/match_parks_osm.py` 的輸出。
+- `material/raw/inat/`：iNaturalist 樹種照片（2026-10-20，只收 CC0 與 CC BY，逐張記在 `manifest.json`）。不要手動增減照片；要換就改 `scripts/fetch_inat_photos.py` 再重跑。授權規則不可放寬（不收 NC / SA / ND）。
 - `material/samples/tree-tag-SL0560111023.jpg`：真實樹牌照片，掃碼的測試素材。
 - 樹籍編號 `TreeID` 要整串比對，有 4,219 筆帶 `-001` 這類後綴。
 
@@ -55,6 +56,8 @@ Python 腳本用 uv 執行：
 uv run scripts/merge_treepits.py
 uv run scripts/match_parks_osm.py
 uv run scripts/build_web_data.py   # 產生 public/data/，需要 tippecanoe
+uv run scripts/fetch_inat_photos.py    # 樹種照片：iNaturalist，只收 CC0 / CC BY，下載到 material/raw/inat/（--check 驗授權與張數）
+uv run scripts/build_species_photos.py # 縮圖、去 EXIF，產生 public/data/species-photos/（--check）
 uv run scripts/fetch_admin_osm.py  # 下載 OSM 行政區界到 material/raw/osm/admin_boundaries_osm.json（只在要更新時跑）
 uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json（集章冊背景）；加 --check 只檢查
 uv run scripts/fetch_villages.py   # 下載內政部村里界到 material/raw/village/village.zip（只在要更新時跑）

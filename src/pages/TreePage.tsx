@@ -13,6 +13,8 @@ import { award, isDaytime } from '../features/game/ledger'
 import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
+import { PhotoCarousel } from '../features/species/PhotoCarousel'
+import { useSpeciesPhotos } from '../lib/speciesPhotos'
 
 export default function TreePage() {
   const { treeId = '' } = useParams()
@@ -27,6 +29,7 @@ export default function TreePage() {
   const night = !isDaytime()
   const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
+  const photos = useSpeciesPhotos(tree?.species)
 
   useEffect(() => {
     let alive = true
@@ -80,8 +83,12 @@ export default function TreePage() {
       </header>
 
       {/* 打卡的結果和樹放在一起，是這一頁唯一的主角 */}
-      <section className={`hero-wrap ${frame ? `frame ${frame}` : ''} ${onSite ? 'met' : ''}`} aria-label="這棵樹">
-        <Art id={night ? 'tree-hero-night' : 'tree-hero'} alt={`${tree.species}的插畫`} className="hero" />
+      <section className={`hero-wrap ${frame ? `frame ${frame}` : ''} ${onSite ? 'met' : ''} ${photos.length ? 'photos' : ''}`} aria-label="這棵樹">
+        {photos.length ? (
+          <PhotoCarousel species={tree.species} photos={photos} note="這個樹種的照片，不是這一棵樹。" />
+        ) : (
+          <Art id={night ? 'tree-hero-night' : 'tree-hero'} alt={`${tree.species}的插畫`} className="hero" />
+        )}
         <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}

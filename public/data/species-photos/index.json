@@ -1,0 +1,1669 @@
+{
+ "attribution": "照片來自 iNaturalist（https://www.inaturalist.org）的觀察紀錄，只收 CC0 與 CC BY 授權的照片；每張都標示攝影者、授權與原始觀察連結。照片版權屬各攝影者。",
+ "species": {
+  "榕樹": [
+   {
+    "src": "ficus_microcarpa/369146317.jpg",
+    "by": "Kiwi Shen",
+    "credit": "© Kiwi Shen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/208629062"
+   },
+   {
+    "src": "ficus_microcarpa/380972716.jpg",
+    "by": "S Brian Treelife",
+    "credit": "CC0 S Brian Treelife",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/215479768"
+   },
+   {
+    "src": "ficus_microcarpa/612721230.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/337096973"
+   },
+   {
+    "src": "ficus_microcarpa/59896122.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/37743203"
+   },
+   {
+    "src": "ficus_microcarpa/251312576.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/146205050"
+   },
+   {
+    "src": "ficus_microcarpa/456748952.jpg",
+    "by": "zr217",
+    "credit": "© zr217, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/254933259"
+   }
+  ],
+  "茄苳": [
+   {
+    "src": "bischofia_javanica/401099572.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/226181000"
+   },
+   {
+    "src": "bischofia_javanica/266551447.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/154273968"
+   },
+   {
+    "src": "bischofia_javanica/261844940.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/151731257"
+   },
+   {
+    "src": "bischofia_javanica/288870535.jpg",
+    "by": "潘立傑 LICHIEH_PAN",
+    "credit": "© 潘立傑 LICHIEH_PAN, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/166798999"
+   },
+   {
+    "src": "bischofia_javanica/245073408.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/142905061"
+   },
+   {
+    "src": "bischofia_javanica/31984457.jpg",
+    "by": "呂一起(Lyu yi-chi)",
+    "credit": "© 呂一起(Lyu yi-chi), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/20744222"
+   }
+  ],
+  "樟樹": [
+   {
+    "src": "camphora_officinarum/19300166.jpg",
+    "by": "Yj",
+    "credit": "© Yj, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/13200998"
+   },
+   {
+    "src": "camphora_officinarum/60642978.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/38180308"
+   },
+   {
+    "src": "camphora_officinarum/306341650.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/176050719"
+   },
+   {
+    "src": "camphora_officinarum/300321115.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/172960285"
+   },
+   {
+    "src": "camphora_officinarum/69129429.jpg",
+    "by": "高山田鼠",
+    "credit": "© 高山田鼠, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/43571866"
+   },
+   {
+    "src": "camphora_officinarum/72393320.jpg",
+    "by": "Cynthia Su",
+    "credit": "© Cynthia Su, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/45649514"
+   }
+  ],
+  "楓香": [
+   {
+    "src": "liquidambar_formosana/691855679.jpg",
+    "by": "祐",
+    "credit": "© 祐, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/378289684"
+   },
+   {
+    "src": "liquidambar_formosana/58424720.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/36910445"
+   },
+   {
+    "src": "liquidambar_formosana/399234769.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/225196817"
+   },
+   {
+    "src": "liquidambar_formosana/260836879.jpg",
+    "by": "S Brian Treelife",
+    "credit": "CC0 S Brian Treelife",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/151194275"
+   },
+   {
+    "src": "liquidambar_formosana/375620261.jpg",
+    "by": "銀杏",
+    "credit": "© 銀杏, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/212553606"
+   },
+   {
+    "src": "liquidambar_formosana/363205958.jpg",
+    "by": "林正文",
+    "credit": "© 林正文, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/205416851"
+   }
+  ],
+  "臺灣欒樹": [
+   {
+    "src": "koelreuteria_elegans/320159332.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/183504279"
+   },
+   {
+    "src": "koelreuteria_elegans/59888945.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/37739363"
+   },
+   {
+    "src": "koelreuteria_elegans/422567093.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/237435812"
+   },
+   {
+    "src": "koelreuteria_elegans/59015984.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/37247025"
+   },
+   {
+    "src": "koelreuteria_elegans/251096088.jpg",
+    "by": "潘立傑 LICHIEH_PAN",
+    "credit": "© 潘立傑 LICHIEH_PAN, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/146094182"
+   },
+   {
+    "src": "koelreuteria_elegans/445362393.jpg",
+    "by": "Cheongweei Gan",
+    "credit": "© Cheongweei Gan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/249171389"
+   }
+  ],
+  "黑板樹": [
+   {
+    "src": "alstonia_scholaris/184830591.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/109645938"
+   },
+   {
+    "src": "alstonia_scholaris/579830836.jpg",
+    "by": "謝麗霦",
+    "credit": "© 謝麗霦, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/320676337"
+   },
+   {
+    "src": "alstonia_scholaris/257977763.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/149689751"
+   },
+   {
+    "src": "alstonia_scholaris/197297176.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/116859899"
+   },
+   {
+    "src": "alstonia_scholaris/617081111.jpg",
+    "by": "Shiwen Yu",
+    "credit": "CC0 Shiwen Yu",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/339240114"
+   },
+   {
+    "src": "alstonia_scholaris/18385615.jpg",
+    "by": "Lin Scott",
+    "credit": "© Lin Scott, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/12698656"
+   }
+  ],
+  "白千層": [
+   {
+    "src": "melaleuca_quinquenervia/219036772.jpg",
+    "by": "Jay Horn",
+    "credit": "© Jay Horn, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/128925863"
+   },
+   {
+    "src": "melaleuca_quinquenervia/508492096.jpg",
+    "by": "Lucas Christofides",
+    "credit": "© Lucas Christofides, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/283006447"
+   },
+   {
+    "src": "melaleuca_quinquenervia/146218314.jpg",
+    "by": "Nicole",
+    "credit": "© Nicole, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/88609647"
+   },
+   {
+    "src": "melaleuca_quinquenervia/590280101.jpg",
+    "by": "T. Hammer",
+    "credit": "© T. Hammer, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/325968745"
+   }
+  ],
+  "小葉欖仁": [
+   {
+    "src": "terminalia_mantaly/444446958.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/248706939"
+   },
+   {
+    "src": "terminalia_mantaly/65069692.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/41041505"
+   },
+   {
+    "src": "terminalia_mantaly/38386584.jpg",
+    "by": "陳姿云",
+    "credit": "© 陳姿云, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/24819150"
+   },
+   {
+    "src": "terminalia_mantaly/242472662.jpg",
+    "by": "Karim Haddad",
+    "credit": "© Karim Haddad, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/141522560"
+   }
+  ],
+  "水黃皮": [
+   {
+    "src": "pongamia_pinnata/62168435.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/39205586"
+   },
+   {
+    "src": "pongamia_pinnata/152381581.jpg",
+    "by": "Che Wei Liu",
+    "credit": "CC0 Che Wei Liu",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/92066410"
+   },
+   {
+    "src": "pongamia_pinnata/254536175.jpg",
+    "by": "高山田鼠",
+    "credit": "© 高山田鼠, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/147875307"
+   },
+   {
+    "src": "pongamia_pinnata/63399017.jpg",
+    "by": "國立臺灣博物館",
+    "credit": "© 國立臺灣博物館, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/39929251"
+   },
+   {
+    "src": "pongamia_pinnata/31485003.jpg",
+    "by": "呂一起(Lyu yi-chi)",
+    "credit": "© 呂一起(Lyu yi-chi), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/20389072"
+   },
+   {
+    "src": "pongamia_pinnata/299413664.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/172469787"
+   }
+  ],
+  "山櫻花": [
+   {
+    "src": "prunus_campanulata/348834748.jpg",
+    "by": "曾昱承 Yu-Cheng Zeng",
+    "credit": "© 曾昱承 Yu-Cheng Zeng, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/197978480"
+   },
+   {
+    "src": "prunus_campanulata/173387369.jpg",
+    "by": "Jacy Chen",
+    "credit": "© Jacy Chen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/103579333"
+   },
+   {
+    "src": "prunus_campanulata/306146296.jpg",
+    "by": "潘立傑 LICHIEH_PAN",
+    "credit": "© 潘立傑 LICHIEH_PAN, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/176120344"
+   },
+   {
+    "src": "prunus_campanulata/431112119.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/241860687"
+   },
+   {
+    "src": "prunus_campanulata/256744523.jpg",
+    "by": "My-Lan Le",
+    "credit": "© My-Lan Le, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/149031205"
+   },
+   {
+    "src": "prunus_campanulata/32622972.jpg",
+    "by": "呂一起(Lyu yi-chi)",
+    "credit": "© 呂一起(Lyu yi-chi), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/21107699"
+   }
+  ],
+  "大花紫薇": [
+   {
+    "src": "lagerstroemia_speciosa/467158066.jpg",
+    "by": "HM Emon",
+    "credit": "© HM Emon, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/260162523"
+   },
+   {
+    "src": "lagerstroemia_speciosa/245473833.jpg",
+    "by": "Karthik Thrikkadeeri",
+    "credit": "© Karthik Thrikkadeeri, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/143148910"
+   },
+   {
+    "src": "lagerstroemia_speciosa/506656942.jpg",
+    "by": "renjus box",
+    "credit": "© renjus box, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/282020891"
+   },
+   {
+    "src": "lagerstroemia_speciosa/170982844.jpg",
+    "by": "卢江离",
+    "credit": "© 卢江离, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/102304092"
+   }
+  ],
+  "大王椰子": [
+   {
+    "src": "roystonea_regia/285025897.jpg",
+    "by": "Yoannis Domínguez",
+    "credit": "© Yoannis Domínguez, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/164713855"
+   },
+   {
+    "src": "roystonea_regia/356900756.jpg",
+    "by": "Kaden Slone",
+    "credit": "© Kaden Slone, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/202115348"
+   },
+   {
+    "src": "roystonea_regia/589115444.jpg",
+    "by": "Jeff Clark",
+    "credit": "© Jeff Clark, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/325384742"
+   },
+   {
+    "src": "roystonea_regia/255335915.jpg",
+    "by": "Irene",
+    "credit": "CC0 Irene",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/148290564"
+   }
+  ],
+  "光蠟樹": [
+   {
+    "src": "fraxinus_griffithii/195830784.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/116028660"
+   },
+   {
+    "src": "fraxinus_griffithii/222395885.jpg",
+    "by": "何小花",
+    "credit": "© 何小花, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/130743904"
+   },
+   {
+    "src": "fraxinus_griffithii/283989560.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/164151962"
+   },
+   {
+    "src": "fraxinus_griffithii/248216977.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/144603218"
+   },
+   {
+    "src": "fraxinus_griffithii/220378458.jpg",
+    "by": "謝麗霦",
+    "credit": "© 謝麗霦, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/129659289"
+   },
+   {
+    "src": "fraxinus_griffithii/632849062.jpg",
+    "by": "五色鳥",
+    "credit": "© 五色鳥, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/347115586"
+   }
+  ],
+  "阿勃勒": [
+   {
+    "src": "cassia_fistula/615388883.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/338394930"
+   },
+   {
+    "src": "cassia_fistula/79950978.jpg",
+    "by": "Ben Machado",
+    "credit": "© Ben Machado, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/50350676"
+   },
+   {
+    "src": "cassia_fistula/152349848.jpg",
+    "by": "Tony van Kampen",
+    "credit": "© Tony van Kampen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/92049419"
+   },
+   {
+    "src": "cassia_fistula/426975533.jpg",
+    "by": "Sinaloa Silvestre",
+    "credit": "CC0 Sinaloa Silvestre",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/239713814"
+   }
+  ],
+  "苦楝": [
+   {
+    "src": "melia_azedarach/110681713.jpg",
+    "by": "呂一起(Lyu yi-chi)",
+    "credit": "© 呂一起(Lyu yi-chi), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/68366667"
+   },
+   {
+    "src": "melia_azedarach/59896162.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/37743219"
+   },
+   {
+    "src": "melia_azedarach/62919395.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/39643530"
+   },
+   {
+    "src": "melia_azedarach/130910556.jpg",
+    "by": "田 珈源",
+    "credit": "© 田 珈源, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/79900612"
+   },
+   {
+    "src": "melia_azedarach/77331840.jpg",
+    "by": "林嘉恩",
+    "credit": "© 林嘉恩, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/48728188"
+   },
+   {
+    "src": "melia_azedarach/365013707.jpg",
+    "by": "高山田鼠",
+    "credit": "© 高山田鼠, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/206383765"
+   }
+  ],
+  "木棉": [
+   {
+    "src": "bombax_ceiba/139650754.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/84928331"
+   },
+   {
+    "src": "bombax_ceiba/134895114.jpg",
+    "by": "NINA WENÓLI",
+    "credit": "CC0 NINA WENÓLI",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/82201367"
+   },
+   {
+    "src": "bombax_ceiba/192791674.jpg",
+    "by": "Yoav Daniel Bar-Ness",
+    "credit": "© Yoav Daniel Bar-Ness, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/114153382"
+   },
+   {
+    "src": "bombax_ceiba/253150810.jpg",
+    "by": "Utain Pummarin",
+    "credit": "© Utain Pummarin, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/147149441"
+   }
+  ],
+  "垂榕": [
+   {
+    "src": "ficus_benjamina/68686108.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/43273852"
+   },
+   {
+    "src": "ficus_benjamina/258509923.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/149969730"
+   },
+   {
+    "src": "ficus_benjamina/313926051.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/179843752"
+   },
+   {
+    "src": "ficus_benjamina/511432915.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/284572074"
+   },
+   {
+    "src": "ficus_benjamina/22886563.jpg",
+    "by": "Cheng-Tao Lin",
+    "credit": "© Cheng-Tao Lin, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/15289885"
+   },
+   {
+    "src": "ficus_benjamina/31478590.jpg",
+    "by": "呂一起(Lyu yi-chi)",
+    "credit": "© 呂一起(Lyu yi-chi), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/20384774"
+   }
+  ],
+  "福木": [
+   {
+    "src": "garcinia_subelliptica/329106579.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/188099911"
+   },
+   {
+    "src": "garcinia_subelliptica/438166976.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/245534038"
+   },
+   {
+    "src": "garcinia_subelliptica/399235051.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/225196946"
+   },
+   {
+    "src": "garcinia_subelliptica/427989885.jpg",
+    "by": "Niels Klazenga",
+    "credit": "© Niels Klazenga, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/240242026"
+   }
+  ],
+  "蒲葵": [
+   {
+    "src": "livistona_chinensis/680169130.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/372228160"
+   },
+   {
+    "src": "livistona_chinensis/420338188.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/236295604"
+   },
+   {
+    "src": "livistona_chinensis/63077979.jpg",
+    "by": "Takaaki Hattori",
+    "credit": "© Takaaki Hattori, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/39739364"
+   },
+   {
+    "src": "livistona_chinensis/170686472.jpg",
+    "by": "Ben Machado",
+    "credit": "© Ben Machado, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/102141550"
+   }
+  ],
+  "烏桕": [
+   {
+    "src": "triadica_sebifera/732486638.jpg",
+    "by": "Yu-Huang Wang",
+    "credit": "© Yu-Huang Wang, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/399253372"
+   },
+   {
+    "src": "triadica_sebifera/734870286.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/400457570"
+   },
+   {
+    "src": "triadica_sebifera/87404725.jpg",
+    "by": "高山田鼠",
+    "credit": "© 高山田鼠, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/54914778"
+   },
+   {
+    "src": "triadica_sebifera/381306918.jpg",
+    "by": "如此甚好",
+    "credit": "© 如此甚好, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/215657698"
+   },
+   {
+    "src": "triadica_sebifera/50911193.jpg",
+    "by": "lansan",
+    "credit": "© lansan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/32458048"
+   },
+   {
+    "src": "triadica_sebifera/386267229.jpg",
+    "by": "Augustus Chen",
+    "credit": "© Augustus Chen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/218291676"
+   }
+  ],
+  "菩提樹": [
+   {
+    "src": "ficus_religiosa/682573012.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/373486970"
+   },
+   {
+    "src": "ficus_religiosa/327580790.jpg",
+    "by": "S Brian Treelife",
+    "credit": "CC0 S Brian Treelife",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/187331295"
+   },
+   {
+    "src": "ficus_religiosa/92417705.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/57912706"
+   },
+   {
+    "src": "ficus_religiosa/241699656.jpg",
+    "by": "林正文",
+    "credit": "© 林正文, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/141129666"
+   },
+   {
+    "src": "ficus_religiosa/595741689.jpg",
+    "by": "Shiwen Yu",
+    "credit": "CC0 Shiwen Yu",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/328727293"
+   },
+   {
+    "src": "ficus_religiosa/243920120.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/142290049"
+   }
+  ],
+  "芒果": [
+   {
+    "src": "mangifera_indica/352339045.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/199762654"
+   },
+   {
+    "src": "mangifera_indica/469305240.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/261248416"
+   },
+   {
+    "src": "mangifera_indica/30269758.jpg",
+    "by": "Jagdish Supekar",
+    "credit": "© Jagdish Supekar, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/19655004"
+   },
+   {
+    "src": "mangifera_indica/601990910.jpg",
+    "by": "Aadi Kulkarni",
+    "credit": "© Aadi Kulkarni, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/331796879"
+   }
+  ],
+  "黃椰子": [
+   {
+    "src": "chrysalidocarpus_lutescens/105878197.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/65749878"
+   },
+   {
+    "src": "chrysalidocarpus_lutescens/551087816.jpg",
+    "by": "Gabriel",
+    "credit": "© Gabriel, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/305635758"
+   },
+   {
+    "src": "chrysalidocarpus_lutescens/108441068.jpg",
+    "by": "Zoltán Stekkelpak",
+    "credit": "CC0 Zoltán Stekkelpak",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/67161334"
+   },
+   {
+    "src": "chrysalidocarpus_lutescens/258907856.jpg",
+    "by": "Irene",
+    "credit": "CC0 Irene",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/150180703"
+   }
+  ],
+  "紫薇": [
+   {
+    "src": "lagerstroemia_indica/316841613.jpg",
+    "by": "Nonbinary-Naturalist",
+    "credit": "CC0 Nonbinary-Naturalist",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/181794585"
+   },
+   {
+    "src": "lagerstroemia_indica/193874888.jpg",
+    "by": "Cleveland Powell",
+    "credit": "© Cleveland Powell, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/114838239"
+   },
+   {
+    "src": "lagerstroemia_indica/369988415.jpg",
+    "by": "Arthur Bruck",
+    "credit": "© Arthur Bruck, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/209083039"
+   },
+   {
+    "src": "lagerstroemia_indica/351379343.jpg",
+    "by": "Prince Molokomme",
+    "credit": "CC0 Prince Molokomme",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/199261904"
+   }
+  ],
+  "榔榆": [
+   {
+    "src": "ulmus_parvifolia/109074753.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/67502151"
+   },
+   {
+    "src": "ulmus_parvifolia/280516062.jpg",
+    "by": "潘立傑 LICHIEH_PAN",
+    "credit": "© 潘立傑 LICHIEH_PAN, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/162241139"
+   },
+   {
+    "src": "ulmus_parvifolia/212520870.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/125325084"
+   },
+   {
+    "src": "ulmus_parvifolia/605235953.jpg",
+    "by": "張朝翔",
+    "credit": "© 張朝翔, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/333379163"
+   },
+   {
+    "src": "ulmus_parvifolia/576172336.jpg",
+    "by": "謝麗霦",
+    "credit": "© 謝麗霦, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/318779635"
+   },
+   {
+    "src": "ulmus_parvifolia/295185922.jpg",
+    "by": "Meng-Chi Hung",
+    "credit": "© Meng-Chi Hung, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/170210552"
+   }
+  ],
+  "九芎": [
+   {
+    "src": "lagerstroemia_subcostata/329691692.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/188381815"
+   },
+   {
+    "src": "lagerstroemia_subcostata/686837918.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/375691843"
+   },
+   {
+    "src": "lagerstroemia_subcostata/221462005.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/130240265"
+   },
+   {
+    "src": "lagerstroemia_subcostata/56276749.jpg",
+    "by": "國立臺灣博物館",
+    "credit": "© 國立臺灣博物館, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/35672470"
+   },
+   {
+    "src": "lagerstroemia_subcostata/430671847.jpg",
+    "by": "許慶棠Ray",
+    "credit": "© 許慶棠Ray, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/241631109"
+   },
+   {
+    "src": "lagerstroemia_subcostata/92585823.jpg",
+    "by": "雲一百香果",
+    "credit": "© 雲一百香果, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/58013420"
+   }
+  ],
+  "盾柱木": [
+   {
+    "src": "peltophorum_pterocarpum/127785056.jpg",
+    "by": "ritirene",
+    "credit": "© ritirene, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/78107548"
+   },
+   {
+    "src": "peltophorum_pterocarpum/556386007.jpg",
+    "by": "Aadi Kulkarni",
+    "credit": "© Aadi Kulkarni, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/308396516"
+   },
+   {
+    "src": "peltophorum_pterocarpum/177698559.jpg",
+    "by": "Ramnarayan K",
+    "credit": "© Ramnarayan K, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/105851243"
+   },
+   {
+    "src": "peltophorum_pterocarpum/241792118.jpg",
+    "by": "Aravinth",
+    "credit": "© Aravinth, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/141176798"
+   }
+  ],
+  "龍柏": [
+   {
+    "src": "juniperus_chinensis/658996682.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/361106406"
+   },
+   {
+    "src": "juniperus_chinensis/316715308.jpg",
+    "by": "Илья Руденко",
+    "credit": "© Илья Руденко, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/181725693"
+   },
+   {
+    "src": "juniperus_chinensis/320092812.jpg",
+    "by": "Tatyana Petrenko",
+    "credit": "© Tatyana Petrenko, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/183468133"
+   },
+   {
+    "src": "juniperus_chinensis/337241054.jpg",
+    "by": "Marco Mussita",
+    "credit": "© Marco Mussita, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/192143629"
+   }
+  ],
+  "落羽杉": [
+   {
+    "src": "taxodium_distichum/251646155.jpg",
+    "by": "William J. Deml",
+    "credit": "© William J. Deml, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/146379113"
+   },
+   {
+    "src": "taxodium_distichum/94199870.jpg",
+    "by": "mfeaver",
+    "credit": "© mfeaver, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/58979916"
+   },
+   {
+    "src": "taxodium_distichum/257959532.jpg",
+    "by": "harrier",
+    "credit": "© harrier, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/149680992"
+   },
+   {
+    "src": "taxodium_distichum/283262538.jpg",
+    "by": "Ryan Sorrells",
+    "credit": "© Ryan Sorrells, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/163753925"
+   }
+  ],
+  "櫻花": [
+   {
+    "src": "prunus_yedoensis/61647036.jpg",
+    "by": "Daniel Atha",
+    "credit": "CC0 Daniel Atha",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/38756395"
+   },
+   {
+    "src": "prunus_yedoensis/64416070.jpg",
+    "by": "Yoshihiro Tokue",
+    "credit": "© Yoshihiro Tokue, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/40638234"
+   },
+   {
+    "src": "prunus_yedoensis/630901517.jpg",
+    "by": "renshuchu",
+    "credit": "CC0 renshuchu",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/346134074"
+   },
+   {
+    "src": "prunus_yedoensis/713807159.jpg",
+    "by": "ねこのみくす 肉球新党",
+    "credit": "CC0 ねこのみくす 肉球新党",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/389675612"
+   }
+  ],
+  "櫸": [
+   {
+    "src": "zelkova_serrata/633502108.jpg",
+    "by": "如此甚好",
+    "credit": "© 如此甚好, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/347444138"
+   },
+   {
+    "src": "zelkova_serrata/109729671.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/67850172"
+   },
+   {
+    "src": "zelkova_serrata/173289645.jpg",
+    "by": "Jacy Chen",
+    "credit": "© Jacy Chen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/103527824"
+   },
+   {
+    "src": "zelkova_serrata/122705941.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/75032432"
+   },
+   {
+    "src": "zelkova_serrata/18660193.jpg",
+    "by": "Cheng-Tao Lin",
+    "credit": "© Cheng-Tao Lin, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/12857741"
+   },
+   {
+    "src": "zelkova_serrata/210485526.jpg",
+    "by": "Meng-Chi Hung",
+    "credit": "© Meng-Chi Hung, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/124197371"
+   }
+  ],
+  "羅比親王海棗": [
+   {
+    "src": "phoenix_roebelenii/445403409.jpg",
+    "by": "Josiah Londerée",
+    "credit": "© Josiah Londerée, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/249197745"
+   },
+   {
+    "src": "phoenix_roebelenii/570357035.jpg",
+    "by": "nick_goldwater",
+    "credit": "© nick_goldwater, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/315712360"
+   },
+   {
+    "src": "phoenix_roebelenii/108230320.jpg",
+    "by": "E. Goossen",
+    "credit": "© E. Goossen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/67048051"
+   },
+   {
+    "src": "phoenix_roebelenii/591654067.jpg",
+    "by": "Jhonatan Matheus",
+    "credit": "© Jhonatan Matheus, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/326657490"
+   }
+  ],
+  "亞力山大椰子": [
+   {
+    "src": "archontophoenix_alexandrae/529034822.jpg",
+    "by": "Lucas Christofides",
+    "credit": "© Lucas Christofides, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/293939443"
+   },
+   {
+    "src": "archontophoenix_alexandrae/518637189.jpg",
+    "by": "Kevin Faccenda",
+    "credit": "© Kevin Faccenda, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/288396543"
+   },
+   {
+    "src": "archontophoenix_alexandrae/412518578.jpg",
+    "by": "Wairambar Rainforest",
+    "credit": "© Wairambar Rainforest, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/232209301"
+   },
+   {
+    "src": "archontophoenix_alexandrae/599710816.jpg",
+    "by": "Samuel Brown",
+    "credit": "© Samuel Brown, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/330684767"
+   }
+  ],
+  "流蘇": [
+   {
+    "src": "chionanthus_retusus/33354488.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/21550795"
+   },
+   {
+    "src": "chionanthus_retusus/305760541.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/175906653"
+   },
+   {
+    "src": "chionanthus_retusus/3640062.jpg",
+    "by": "Kim, Hyun-tae",
+    "credit": "© Kim, Hyun-tae, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/3149537"
+   },
+   {
+    "src": "chionanthus_retusus/385022195.jpg",
+    "by": "Agnes Trekker",
+    "credit": "CC0 Agnes Trekker",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/217628084"
+   }
+  ],
+  "蘭嶼羅漢松": [
+   {
+    "src": "podocarpus_costalis/207318645.jpg",
+    "by": "Cheng-Te Hsu",
+    "credit": "© Cheng-Te Hsu, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/122446722"
+   },
+   {
+    "src": "podocarpus_costalis/95367235.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/59675347"
+   },
+   {
+    "src": "podocarpus_costalis/252575149.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/146852693"
+   },
+   {
+    "src": "podocarpus_costalis/402320116.jpg",
+    "by": "曾昱承 Yu-Cheng Zeng",
+    "credit": "© 曾昱承 Yu-Cheng Zeng, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/226828061"
+   },
+   {
+    "src": "podocarpus_costalis/304110974.jpg",
+    "by": "Bella Lin",
+    "credit": "© Bella Lin, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/175010076"
+   },
+   {
+    "src": "podocarpus_costalis/418628258.jpg",
+    "by": "林正文",
+    "credit": "© 林正文, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/235395587"
+   }
+  ],
+  "印度紫檀": [
+   {
+    "src": "pterocarpus_indicus/511293438.jpg",
+    "by": "Pippo Carmona",
+    "credit": "CC0 Pippo Carmona",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/284492421"
+   },
+   {
+    "src": "pterocarpus_indicus/176569974.jpg",
+    "by": "ritirene",
+    "credit": "© ritirene, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/105259186"
+   },
+   {
+    "src": "pterocarpus_indicus/24222154.jpg",
+    "by": "Al Kordesch",
+    "credit": "CC0 Al Kordesch",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/16157538"
+   },
+   {
+    "src": "pterocarpus_indicus/13597782.jpg",
+    "by": "Shawn O'Donnell",
+    "credit": "© Shawn O'Donnell, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/9913576"
+   }
+  ],
+  "第倫桃": [
+   {
+    "src": "dillenia_indica/61572782.jpg",
+    "by": "Siddarth Machado",
+    "credit": "© Siddarth Machado, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/38716499"
+   },
+   {
+    "src": "dillenia_indica/163057113.jpg",
+    "by": "Samuel Lee",
+    "credit": "© Samuel Lee, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/97988886"
+   },
+   {
+    "src": "dillenia_indica/264597292.jpg",
+    "by": "Luan Mazzeo",
+    "credit": "© Luan Mazzeo, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/153214914"
+   },
+   {
+    "src": "dillenia_indica/258213962.jpg",
+    "by": "Sayee Girdhari",
+    "credit": "© Sayee Girdhari, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/149814511"
+   }
+  ],
+  "鳳凰木": [
+   {
+    "src": "delonix_regia/19461455.jpg",
+    "by": "Robert Taylor",
+    "credit": "© Robert Taylor, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/13291302"
+   },
+   {
+    "src": "delonix_regia/171100257.jpg",
+    "by": "Lucas Kaminski",
+    "credit": "© Lucas Kaminski, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/102367314"
+   },
+   {
+    "src": "delonix_regia/199323932.jpg",
+    "by": "Johannes Schuster",
+    "credit": "© Johannes Schuster, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/117997968"
+   },
+   {
+    "src": "delonix_regia/246231465.jpg",
+    "by": "Sindhu Haridas",
+    "credit": "© Sindhu Haridas, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/143564575"
+   }
+  ],
+  "血桐": [
+   {
+    "src": "macaranga_tanarius/180888100.jpg",
+    "by": "Tzu-Neng Yuan",
+    "credit": "© Tzu-Neng Yuan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/107538295"
+   },
+   {
+    "src": "macaranga_tanarius/660039414.jpg",
+    "by": "prosperosity",
+    "credit": "© prosperosity, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/361652180"
+   },
+   {
+    "src": "macaranga_tanarius/231089209.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/135485693"
+   },
+   {
+    "src": "macaranga_tanarius/109074246.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/67501947"
+   },
+   {
+    "src": "macaranga_tanarius/374942841.jpg",
+    "by": "高山田鼠",
+    "credit": "© 高山田鼠, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/212164585"
+   },
+   {
+    "src": "macaranga_tanarius/11763518.jpg",
+    "by": "Cheng-Tao Lin",
+    "credit": "© Cheng-Tao Lin, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/8759566"
+   }
+  ],
+  "黃連木": [
+   {
+    "src": "pistacia_chinensis/252083713.jpg",
+    "by": "chiuluan",
+    "credit": "© chiuluan, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/146602870"
+   },
+   {
+    "src": "pistacia_chinensis/173824425.jpg",
+    "by": "葉子",
+    "credit": "CC0 葉子",
+    "licence": "CC0",
+    "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "link": "https://www.inaturalist.org/observations/103804310"
+   },
+   {
+    "src": "pistacia_chinensis/314958520.jpg",
+    "by": "胡正恆(Jackson Hu)",
+    "credit": "© 胡正恆(Jackson Hu), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/180777092"
+   },
+   {
+    "src": "pistacia_chinensis/105283116.jpg",
+    "by": "Jacy Chen",
+    "credit": "© Jacy Chen, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/65415208"
+   },
+   {
+    "src": "pistacia_chinensis/523293526.jpg",
+    "by": "黃其君",
+    "credit": "© 黃其君, CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/290867060"
+   },
+   {
+    "src": "pistacia_chinensis/163784165.jpg",
+    "by": "呂一起(Lyu yi-chi)",
+    "credit": "© 呂一起(Lyu yi-chi), CC BY",
+    "licence": "CC BY",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+    "link": "https://www.inaturalist.org/observations/98381610"
+   }
+  ]
+ }
+}

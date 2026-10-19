@@ -9,3 +9,5 @@ dist/
 # Firebase emulator logs
 firebase-debug.log*
 firestore-debug.log*
+# iNaturalist API response cache (scripts/fetch_inat_photos.py)
+material/raw/inat/_cache/

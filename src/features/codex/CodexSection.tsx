@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { Art, formatDate } from '../../components/ui'
 import { useStore } from '../../store'
 import { useViewedFlag } from '../onboarding/viewed'
+import { PhotoCarousel } from '../species/PhotoCarousel'
+import { loadSpeciesPhotos, photoUrl, type SpeciesPhoto } from '../../lib/speciesPhotos'
 import type { Checkin } from '../../store/types'
 
 interface SpeciesRow {
@@ -18,6 +20,8 @@ const SHOWN = 40
 export function CodexSection() {
   const [rows, setRows] = useState<SpeciesRow[]>([])
   const [q, setQ] = useState('')
+  const [photos, setPhotos] = useState<Record<string, SpeciesPhoto[]>>({})
+  const [open, setOpen] = useState<string | null>(null)
   const checkins = useStore((s) => s.checkins)
   const ref = useRef<HTMLElement>(null)
   useViewedFlag('viewedCodexAt', ref)
@@ -28,6 +32,21 @@ export function CodexSection() {
       .then(setRows)
       .catch(() => setRows([]))
   }, [])
+
+  useEffect(() => {
+    let alive = true
+    loadSpeciesPhotos().then((i) => alive && setPhotos(i.species))
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(null)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
 
   const met = useMemo(() => {
     const m = new Map<string, Checkin>()
@@ -67,7 +86,20 @@ export function CodexSection() {
           const c = met.get(r.species)
           return (
             <div key={r.species} className={`tile ${c ? '' : 'locked'}`}>
-              <Art id="species-card" alt="" />
+              {c && photos[r.species] ? (
+                <button
+                  type="button"
+                  className="tile-photo"
+                  onClick={() => setOpen(r.species)}
+                  aria-label={`看${r.species}的照片`}
+                  data-testid="codex-photo"
+                >
+                  <img src={photoUrl(photos[r.species][0].src)} alt="" loading="lazy" decoding="async" />
+                  <span className="tile-credit">{photos[r.species][0].credit}</span>
+                </button>
+              ) : (
+                <Art id="species-card" alt="" />
+              )}
               <strong>{r.species}</strong>
               <span className="small muted">全市 {r.count.toLocaleString()} 棵</span>
               {c ? (
@@ -85,6 +117,18 @@ export function CodexSection() {
           )
         })}
       </div>
+      {open && photos[open] && (
+        <div className="modal-back" onClick={(e) => e.target === e.currentTarget && setOpen(null)}>
+          <div className="modal species-detail" role="dialog" aria-modal="true" aria-label={`${open}的照片`} data-testid="species-detail">
+            <h2>{open}</h2>
+            <PhotoCarousel species={open} photos={photos[open]} />
+            <p className="muted small">照片來自 iNaturalist 的觀察紀錄，只收 CC0 與 CC BY 授權。</p>
+            <button className="btn primary block" onClick={() => setOpen(null)} autoFocus>
+              關上
+            </button>
+          </div>
+        </div>
+      )}
       {!query && (
         <details className="about">
           <summary>
