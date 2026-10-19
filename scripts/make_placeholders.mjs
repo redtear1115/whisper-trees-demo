@@ -1,8 +1,8 @@
 // 依 src/assets.ts 的清單產生佔位 SVG（public/assets/ph/）與給設計的清單 docs/ui-assets.md。
 // Run: node scripts/make_placeholders.mjs
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { deflateSync } from 'node:zlib'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -107,28 +107,76 @@ const pwaDir = join(root, 'public/assets/pwa')
 mkdirSync(pwaDir, { recursive: true })
 for (const i of icons) writeFileSync(join(pwaDir, i.file), renderIcon(i.size))
 
+// ---- 掃 src/ 找出每個素材在程式裡的參照位置（檔案:行號），寫進清單 ----
+const walk = (dir) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const p = join(dir, e.name)
+    if (e.isDirectory()) return e.name === '__tests__' ? [] : walk(p)
+    return /\.(tsx?|css)$/.test(e.name) && !/\.test\.tsx?$/.test(e.name) ? [p] : []
+  })
+const sources = walk(join(root, 'src'))
+  .filter((p) => !p.endsWith(join('src', 'assets.ts')))
+  .map((p) => ({ rel: relative(root, p), lines: readFileSync(p, 'utf8').split('\n') }))
+const refs = new Map(assets.map((a) => [a.id, []]))
+const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+for (const { rel, lines } of sources) {
+  lines.forEach((line, i) => {
+    const at = `${rel}:${i + 1}`
+    for (const a of assets) {
+      // 只認用到素材的寫法：<Art id="…">、art: '…'、assetUrl('…')、直接寫路徑 assets/ph/….svg
+      const q = `['"\`]${reEsc(a.id)}['"\`]`
+      if (new RegExp(`<Art\\b[^>]*${q}|\\bart:\\s*${q}|assetUrl\\(${q}|assets/ph/${reEsc(a.id)}\\.`).test(line)) refs.get(a.id).push(at)
+    }
+    // 動態組出的 ID，例如 \`badge-\${b.id}\`：算到所有同字首的素材
+    for (const m of line.matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)*-)\$\{/g)) {
+      for (const a of assets) if (a.id.startsWith(m[1])) refs.get(a.id).push(`${at}（動態）`)
+    }
+  })
+}
+const refCell = (id) => refs.get(id).map((r) => `\`${r}\``).join('<br>') || '（尚未使用）'
+
+// public/assets 下，不是佔位檔、也不是 PWA 圖示的其他圖片
+const others = readdirSync(join(root, 'public/assets'), { withFileTypes: true })
+  .filter((e) => e.isDirectory() && !['ph', 'pwa'].includes(e.name))
+  .flatMap((d) => readdirSync(join(root, 'public/assets', d.name)).map((f) => `assets/${d.name}/${f}`))
+  .map((path) => ({
+    path,
+    refs: sources.flatMap(({ rel, lines }) => lines.flatMap((l, i) => (l.includes(path) ? [`${rel}:${i + 1}`] : []))),
+  }))
+
 const md = `# UI 美術素材清單（交給 UX/UI）
 
 > 由 \`node scripts/make_placeholders.mjs\` 依 \`src/assets.ts\` 產生，請勿手改。
-> 目前畫面上的都是佔位檔（\`public/assets/ph/<id>.svg\`）。交件時用同名檔案取代；
-> 若改成 .webp / .png，請同步改 \`src/assets.ts\` 的 \`assetUrl\`。
+> 新增素材：在 \`src/assets.ts\` 加一筆，跑上面的指令，畫面用 \`<Art id="…">\`。「程式參照」欄是掃描 \`src/\` 自動找出的。
 
 風格：2.5D 斜俯視、蠟筆手繪繪本風（簡報 v15）。語氣是慢下來、無壓陪伴。
 
-| ID | 尺寸（px，@1x） | 用在 | 說明 |
-|---|---|---|---|
-${assets.map((a) => `| \`${a.id}\` | ${a.w}×${a.h} | ${a.where} | ${a.brief} |`).join('\n')}
+## 交件方式
 
-共 ${assets.length} 項。建議另交 @2x。
+- 目前畫面上的都是佔位檔，位置是 \`public/assets/ph/<id>.svg\`。
+- 交件時用**同名檔案**覆蓋同一個位置即可，程式不用改。
+- 若改成 .webp／.png，副檔名不同，要同步改 \`src/assets.ts\` 的 \`assetUrl\`（全部素材要用同一種格式）。
+- 尺寸是畫面上的 @1x 大小；請另交 @2x（寬高各乘 2），透明背景的素材請保留透明。
+
+## 素材
+
+| ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
+|---|---|---|---|---|---|---|
+${assets.map((a) => `| \`${a.id}\` | ${a.w}×${a.h} | ${a.w * 2}×${a.h * 2} | \`public/assets/ph/${a.id}.svg\` | ${a.where} | ${refCell(a.id)} | ${a.brief} |`).join('\n')}
+
+共 ${assets.length} 項。
 
 ## PWA 圖示（加到手機主畫面）
 
 佔位檔是 PNG（\`public/assets/pwa/<file>\`，由同一支腳本產生）；交件時用同名檔案取代。\`public/manifest.webmanifest\` 與 \`index.html\` 的 \`apple-touch-icon\` 指向這些檔案。
 
-| 檔名 | 尺寸（px） | 說明 |
-|---|---|---|
-${icons.map((i) => `| \`${i.file}\` | ${i.size}×${i.size} | ${i.brief} |`).join('\n')}
+| 檔名 | 尺寸（px） | 放置位置 | 說明 |
+|---|---|---|---|
+${icons.map((i) => `| \`${i.file}\` | ${i.size}×${i.size} | \`public/assets/pwa/${i.file}\` | ${i.brief} |`).join('\n')}
 
+## 其他圖片（不是佔位檔）
+
+${others.length ? `| 檔案位置 | 程式參照 |\n|---|---|\n${others.map((o) => `| \`public/${o.path}\` | ${o.refs.map((r) => `\`${r}\``).join('<br>') || '（尚未使用）'} |`).join('\n')}` : '（無）'}
 `
 writeFileSync(join(root, 'docs/ui-assets.md'), md)
 console.log(`${assets.length} placeholders → public/assets/ph, ${icons.length} PWA icons → public/assets/pwa, docs/ui-assets.md`)
