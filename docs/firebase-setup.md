@@ -12,7 +12,7 @@
 | Security Rules | 已部署 | Rules API 建 ruleset 並發佈到 `cloud.firestore` |
 | Auth：匿名、Google、授權網域 | 完成 | 使用者在 console 開啟；授權網域含 `whisper-trees.pages.dev`；匿名登入已在正式專案以 REST 實測（測試帳號已刪） |
 | 註冊配額（每 IP 每小時） | 完成 | 500，2026-10-24 07:00（台北）起 3 天，之後回到預設 100 |
-| 白名單 `admins/{uid}` | 待 S3 | 見下方 |
+| 白名單 `admins/{uid}` | 完成 | 2026-10-19 使用者在 console 加入 1 筆（政府端示範帳號）；Google 綁定已在本機 localhost 對正式專案實測 |
 | API key 的 HTTP referrer 限制 | 待 S6 | 見下方 |
 
 ### 已部署的規則
