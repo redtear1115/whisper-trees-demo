@@ -17,6 +17,7 @@ export interface PitInfo {
 /** 在空樹穴許願；送出當下給可行性的初步判斷 */
 export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => void }) {
   const [reasons, setReasons] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
   const toggle = (r: string) => setReasons((rs) => (rs.includes(r) ? rs.filter((x) => x !== r) : [...rs, r]))
 
   return (
@@ -24,7 +25,17 @@ export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => v
       className="wish-form"
       onSubmit={(e) => {
         e.preventDefault()
-        const wish = createWish({ ...pit, reasons, feasibility: pit.pitId ? 'emptyPit' : 'needsSurvey' })
+        let wish: Wish
+        try {
+          wish = createWish({ ...pit, reasons, feasibility: pit.pitId ? 'emptyPit' : 'needsSurvey' })
+        } catch (err) {
+          const why = (err as Error).message
+          return setError(
+            why === 'district'
+              ? '這個位置找不到所在的行政區，請在樹穴或街道旁邊再許一次。'
+              : '還沒連上雲端，請稍等一下再許願。',
+          )
+        }
         award('wish', wish.id)
         onDone(wish)
       }}
@@ -43,6 +54,11 @@ export function WishForm({ pit, onDone }: { pit: PitInfo; onDone: (w: Wish) => v
           </button>
         ))}
       </div>
+      {error && (
+        <p className="error small" role="alert">
+          {error}
+        </p>
+      )}
       <button className="btn primary block" disabled={reasons.length === 0} aria-describedby="wish-hint">
         許願種樹
       </button>

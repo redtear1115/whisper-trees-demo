@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { findTree, type Tree } from '../lib/trees'
 import { seededInt, weekKey } from '../lib/seed'
 import type { CheckinResult } from '../lib/geo'
+import { useSession } from '../store'
 import { addWhisper, recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
 import { Art, MockTag, formatDate, relativeDays } from '../components/ui'
 import { IconBack } from '../components/icons'
@@ -196,6 +197,7 @@ function CheckinStrip({
 }
 
 function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
+  const cloud = useSession().backend === 'cloud'
   const [text, setText] = useState('')
   const [writing, setWriting] = useState(said.length === 0)
   const [justSaid, setJustSaid] = useState<string | null>(null)
@@ -206,7 +208,9 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
       <section className="whisper received" aria-live="polite">
         <p className={`whisper-sent ${justSaid ? 'drift' : ''}`}>「{last}」</p>
         <p className="whisper-ack">樹收到了。</p>
-        <p className="muted small">只有你看得到，不會上傳。下次回來，它會記得。</p>
+        <p className="muted small">
+          {cloud ? '其他人看不到。存在曦語的雲端，不公開。下次回來，它會記得。' : '只有你看得到，不會上傳。下次回來，它會記得。'}
+        </p>
         <button
           className="btn ghost again"
           onClick={() => {
@@ -222,7 +226,7 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
   return (
     <section className="whisper" aria-labelledby="whisper-title">
       <h2 id="whisper-title">樹洞</h2>
-      <p className="muted small">只有你看得到。不會上傳，也不公開。</p>
+      <p className="muted small">{cloud ? '其他人看不到。存在曦語的雲端，不公開。' : '只有你看得到。不會上傳，也不公開。'}</p>
       <form
         onSubmit={(e) => {
           e.preventDefault()

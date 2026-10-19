@@ -13,6 +13,12 @@ export const STATUS_LABEL: Record<WishStatus, string> = {
 
 export const STATUS_FLOW: WishStatus[] = ['received', 'surveying', 'scheduled', 'planted']
 
+/** 台北 12 個行政區；Firestore 規則也只接受這些 */
+export const TAIPEI_DISTRICTS = [
+  '中正區', '大同區', '中山區', '松山區', '大安區', '萬華區',
+  '信義區', '士林區', '北投區', '內湖區', '南港區', '文山區',
+] as const
+
 export const WISH_REASONS = ['通學', '等公車', '太曬', '散步路線', '其他'] as const
 
 export interface StatusEvent {
@@ -74,4 +80,6 @@ export interface TreeReport {
   hasPhoto: boolean
   at: number
   mock?: boolean
+  /** 雲端模式：這筆是不是自己送的（本機模式的回報都是自己的，沒有這個欄位） */
+  mine?: boolean
 }

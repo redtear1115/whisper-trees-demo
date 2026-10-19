@@ -7,7 +7,7 @@
 台北每年移除約 3,164 棵樹。曦語把 16 萬棵行道樹與公園樹變成市民可以停下來、對它說話的「樹洞」；同時讓市民在空樹穴許願、澆水，政府依市民需求與樹蔭缺口排出補種順序，並公開進度。
 
 - 掃公園處樹牌上**現有的 QR Code**，加上 **GPS** 確認人在樹旁，就能打卡。不需要新增任何設施。
-- 樹洞內容只存在自己的裝置，不公開、無按讚、無留言；只顯示「這棵樹本週有幾道微光陪伴」。
+- 樹洞內容只存在自己的雲端資料，其他使用者讀不到，不公開、無按讚、無留言；只顯示「這棵樹本週有幾道微光陪伴」。
 - 許願與澆水數，就是補種優先分數裡的「市民需求」。
 
 ## 專案範圍
@@ -31,13 +31,18 @@
 - 光點經濟、商店、圖鑑、成長徽章、角色養成
 - 遊戲營運後台（GM）、對外開放 API（靜態 JSON）、發包商後台
 
+### 登入與資料
+
+- 匿名自動登入；選單可「用 Google 保留紀錄」。「以台北通登入」仍只做畫面。
+- 資料存在 Firebase（Firestore，asia-east1）。後台（政府端、發包商、GM）寫入限白名單帳號，其他人是「示範：只在這台裝置」的本機示範模式。
+- 沒有設定 Firebase 時，退回本機 localStorage。設定見 [docs/firebase-setup.md](docs/firebase-setup.md)。
+
 ### 這次不做（放在「未來展望」）
 
 - Apple Watch 冥想、AI 初審照片
 - 樹木認養（單人或多人合資）、彩繪石尋寶：見[討論紀錄](docs/discussion-2026-10-17.md)
 - 3D 街廓、樓層窗景
 - NFC 打卡：目前沒有 NFC 樹牌，也沒有驗證過，改用現有的 QR 樹牌 + GPS
-- 真實登入：「以台北通登入」只做畫面
 
 ### 未來擴充（DLC）
 
@@ -86,14 +91,14 @@
 
 | 資料 | 為什麼用模擬 |
 |---|---|
-| 樹洞留言 | 只存在使用者自己的裝置（localStorage），Demo 預先放幾則示範 |
+| 樹洞留言 | 真實使用者的留言存在自己的雲端資料（`users/{uid}/whispers`）；範例時空膠囊仍是模擬（`src/mock`） |
 | 「本週微光陪伴人數」 | 沒有真實使用者，以固定種子產生 |
-| 許願、澆水數 | 同上 |
-| 補種案件的處理進度（已收件 → 會勘中 → 已排程 → 已種植） | 市府沒有這套流程，由政府端畫面手動切換 |
+| 許願、澆水數 | 真實使用者的許願與澆水已存在 Firestore；種子數量仍是模擬 |
+| 補種案件的處理進度（已收件 → 會勘中 → 已排程 → 已種植） | 市府沒有這套流程，由白名單承辦帳號在政府端切換；評審操作的改動只留在自己的裝置 |
 | 樹況回報 | 同上；政府端預先放幾筆示範回報（`src/mock/reports.json`） |
 | 移樹紀錄與原因 | 逐年移除紀錄未完整開放 |
 | 移樹前公告與意見數（`src/mock/notices.json`） | 市府目前沒有對外的移樹前公告；示範一筆 |
-| 「以台北通登入」 | 只做畫面，不接真的帳號 |
+| 「以台北通登入」 | 仍是模擬畫面；真正的登入是匿名與 Google |
 | Demo 模式的 GPS 位置 | 現場不在樹旁時，用 `?demo=1` 固定位置 |
 | 垃圾桶、路燈（DLC 預告） | 只放預告圖層 |
 | 光點、商店購買、小芽造型、徽章 | 延伸功能示意，存在使用者自己的裝置（store） |
@@ -102,6 +107,24 @@
 | 開放 API 的 `wishes.json` | 由 `src/mock/wishes.json` 產生的固定快照，檔案內標 `"mock": true` |
 
 不使用任何真實個資；「市長，你給我聽好了」的資料不會用來反推陳情人身分。
+
+## 隱私
+
+- **樹洞**存在你自己的帳號底下，其他使用者讀不到。專案管理者在 Firebase console 技術上看得到。
+- **樹況回報的備註**只有承辦人看得到；畫面提醒不要填個資。
+- Firestore 不存 email 或姓名，只用匿名 uid。
+- 「提示點」（seen）只留在這台裝置。
+- 登出會清掉這台裝置上的快取。
+
+## 已知限制（Demo 接受的風險）
+
+- 一個人可開很多匿名帳號，灌高澆水數或洗版許願；管理者可以刪除。
+- 光點帳本存在使用者自己的資料裡，使用者可以改自己的光點。
+- GPS 可以偽造。
+- 專案擁有者在 console 看得到所有資料。
+- 免費額度用完時，網站退回本機模式。
+- 被放棄的匿名帳號資料不會清理。
+- 管理者角色只有一種，沒有分級。
 
 ## 如果市府上任 100 天內要落地
 
@@ -120,6 +143,7 @@
 | Vite、TypeScript、Vitest | 建置、型別、測試 | MIT／Apache-2.0 |
 | MapLibre GL JS | 地圖 | BSD-3-Clause |
 | @zxing/browser、@zxing/library | 掃樹牌 QR Code | Apache-2.0 |
+| firebase | 匿名／Google 登入、Firestore 雲端資料 | Apache-2.0 |
 | SunCalc | 日出日落（夜間模式） | BSD-2-Clause |
 | tippecanoe | 產生樹木點位向量圖磚 | BSD-2-Clause |
 | OpenFreeMap | 底圖圖磚（免金鑰） | 資料 © OpenMapTiles、OpenStreetMap |
@@ -142,10 +166,14 @@ uv run scripts/build_web_data.py   # 需要 tippecanoe（brew install tippecanoe
 npm install
 npm run dev      # http://localhost:5173，加 ?demo=1 進 Demo 模式（模擬定位、可掃示範樹牌）
 npm test
+npm run test:rules   # 本機 Firestore emulator 跑規則測試（brew install openjdk）
+cp .env.example .env.local   # 填入 6 個 VITE_FIREBASE_* 值；沒有這個檔就用 localStorage
 npm run build    # 輸出 dist/，靜態網站
 npm run deploy   # 建置並部署到 Cloudflare Pages（專案 whisper-trees，Ray Personal Account）
 node scripts/make_placeholders.mjs   # 依 src/assets.ts 重新產生佔位美術與 docs/ui-assets.md
 ```
+
+Firebase 設定與部署紀錄見 [docs/firebase-setup.md](docs/firebase-setup.md)。
 
 美術目前都是佔位檔，交給設計的清單見 [docs/ui-assets.md](docs/ui-assets.md)。
 

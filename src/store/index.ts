@@ -1,16 +1,27 @@
-// 所有資料存取都經過這個模組。目前存在 localStorage；日後換 Supabase 只改這一層。
-// 同一台電腦的兩個分頁靠 storage 事件即時同步（市民端 ↔ 政府端）。
+// 所有資料存取都經過這個模組；元件只認這裡的 API（同步讀取、useStore 選取器）。
+// 兩個後端，API 完全一樣：
+//   - 雲端（Firebase：匿名登入＋Firestore，見 cloud.ts）：有 VITE_FIREBASE_*（或 VITE_FIREBASE_EMULATOR=1）時啟用。
+//     讀取靠 onSnapshot 鏡射成下面的 State，寫入先樂觀更新記憶體、再用 batch 寫 Firestore（格式需符合 firestore.rules）。
+//     `seen`（提示點）只存在這台裝置，不上雲端。
+//   - localStorage：沒有 Firebase 設定、Vitest、匿名登入失敗、或 Firestore 額度用完／長時間連不上時使用，
+//     UI 會顯示「離線示範模式」橫幅（session.fallback）。同一台電腦的兩個分頁靠 storage 事件即時同步。
+// 非承辦人在後台（/gov、/vendor、/gm）的改動只寫本機覆寫層（overlay.ts），不進雲端。
 
 import { useSyncExternalStore } from 'react'
-import seedWishes from '../mock/wishes.json'
-import capsules from '../mock/capsules.json'
-import seedReports from '../mock/reports.json'
 import { CHECKIN } from '../config'
 import { dayKey } from '../lib/seed'
+import { firebaseEnabled } from '../lib/firebase'
+import * as cloud from './cloud'
+import { OVERLAY_KEY } from './overlay'
+import { LOCAL_KEY, pruneBackup } from './migrate'
+import { capsuleSeed, DAY, SEED, seedNow, SEED_REPORTS } from './seedData'
+import { setSession } from './session'
 import type { Checkin, ReportKind, StatusEvent, TreeReport, Whisper, Wish, WishStatus } from './types'
 
-const KEY = 'whisper-trees:v1'
-const DAY = 86_400_000
+export { useSession, canWriteAdmin, inDemoOverlay } from './session'
+
+const KEY = LOCAL_KEY
+const SEEN_KEY = 'whisper-trees:seen'
 
 export interface State {
   checkins: Checkin[]
@@ -50,6 +61,10 @@ function read(): State {
 let state = read()
 const listeners = new Set<() => void>()
 
+/** 雲端模式 */
+let cloudOn = false
+let seen: Record<string, number> = {}
+
 function emit() {
   listeners.forEach((l) => l())
 }
@@ -70,11 +85,56 @@ function update(fn: (s: State) => State) {
 
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
-    if (e.key === KEY || e.key === null) {
+    if (!cloudOn && (e.key === KEY || e.key === null)) {
       state = read()
       emit()
     }
   })
+}
+
+function loadSeen(): Record<string, number> {
+  try {
+    return JSON.parse(storage?.getItem(SEEN_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
+/** 提示點的「看過幾個狀態」：本機模式跟著整份 State，雲端模式只存在這台裝置 */
+function setSeen(patch: Record<string, number>) {
+  if (!cloudOn) return update((s) => ({ ...s, seen: { ...s.seen, ...patch } }))
+  seen = { ...seen, ...patch }
+  try {
+    storage?.setItem(SEEN_KEY, JSON.stringify(seen))
+  } catch {
+    // ignore
+  }
+  state = { ...state, seen }
+  emit()
+}
+
+function startCloud() {
+  cloudOn = true
+  seen = loadSeen()
+  state = { ...emptyState(), seen }
+  setSession({ backend: 'cloud', fallback: false })
+  cloud.startCloud({
+    onState(s) {
+      state = { ...s, seen }
+      emit()
+    },
+    onFallback() {
+      cloudOn = false
+      state = read()
+      setSession({ backend: 'local', fallback: true, admin: 'no', migration: null })
+      emit()
+    },
+  })
+}
+
+if (firebaseEnabled && typeof window !== 'undefined') {
+  pruneBackup()
+  startCloud()
 }
 
 export function subscribe(l: () => void) {
@@ -90,44 +150,23 @@ export function useStore<T>(selector: (s: State) => T): T {
   return useSyncExternalStore(subscribe, () => selector(state))
 }
 
+/** 清除這台裝置的資料。雲端模式：刪掉自己的樹洞與使用者文件、登出並重新載入。 */
 export function resetAll() {
+  if (cloudOn) {
+    for (const k of [KEY, SEEN_KEY, OVERLAY_KEY]) {
+      try {
+        storage?.removeItem(k)
+      } catch {
+        // ignore
+      }
+    }
+    void cloud.resetCloud()
+    return
+  }
   write(emptyState())
 }
 
-// ---------- 示範許願 ----------
-
-interface SeedWish {
-  id: string
-  pitId: string | null
-  lngLat: [number, number]
-  road: string
-  district: string
-  reasons: string[]
-  feasibility: Wish['feasibility']
-  daysAgo: number
-  seedWater: number
-  history: (string | number)[][]
-}
-
-const seedNow = Date.now()
-const SEED: Wish[] = (seedWishes as SeedWish[]).map((w) => ({
-  id: w.id,
-  pitId: w.pitId,
-  lngLat: w.lngLat,
-  road: w.road,
-  district: w.district,
-  reasons: w.reasons,
-  feasibility: w.feasibility,
-  createdAt: seedNow - w.daysAgo * DAY,
-  seedWater: w.seedWater,
-  water: 0,
-  history: w.history.map(([status, days, reason]) => ({
-    status: status as WishStatus,
-    at: seedNow - (days as number) * DAY,
-    ...(reason ? { reason: reason as string } : {}),
-  })),
-  mock: true,
-}))
+// ---------- 示範許願（資料在 seedData.ts） ----------
 
 let wishesCache: { src: Record<string, Wish>; list: Wish[] } | null = null
 
@@ -155,9 +194,15 @@ export function wishByPit(pitId: string): Wish | undefined {
   return allWishes().find((w) => w.pitId === pitId)
 }
 
+/** 雲端模式可能丟出 Error：'not-ready'（還沒連上）、'district'（找不到行政區）、'reasons'。 */
 export function createWish(input: Omit<Wish, 'id' | 'createdAt' | 'seedWater' | 'water' | 'history' | 'mock'>): Wish {
   const existing = input.pitId ? wishByPit(input.pitId) : undefined
   if (existing) return existing
+  if (cloudOn) {
+    const wish = cloud.createWish(input)
+    setSeen({ [wish.id]: 1 })
+    return wish
+  }
   const now = Date.now()
   const wish: Wish = {
     ...input,
@@ -186,6 +231,11 @@ export function waterWish(wishId: string): boolean {
   if (hasWateredToday(wishId)) return false
   const wish = allWishes().find((w) => w.id === wishId)
   if (!wish) return false
+  if (cloudOn) {
+    cloud.waterWish(wishId)
+    if (state.seen[wishId] === undefined) setSeen({ [wishId]: wish.history.length })
+    return true
+  }
   update((s) => ({
     ...s,
     wishes: { ...s.wishes, [wishId]: { ...wish, water: wish.water + 1 } },
@@ -203,20 +253,38 @@ export function setWishStatus(wishId: string, status: WishStatus, reason?: strin
   if (status === 'rejected' && !why) return false
   if (wishStatus(wish) === status) return true
   const event: StatusEvent = { status, at: Date.now(), ...(why ? { reason: why } : {}) }
-  update((s) => ({ ...s, wishes: { ...s.wishes, [wishId]: { ...wish, history: [...wish.history, event] } } }))
+  if (cloudOn) cloud.setWishStatus(wish, event)
+  else update((s) => ({ ...s, wishes: { ...s.wishes, [wishId]: { ...wish, history: [...wish.history, event] } } }))
   return true
+}
+
+/**
+ * 發包商推進工單；完工的補種工單同一次寫入把許願改成「已種植」（雲端：一個 batch）。
+ * 非承辦人只寫本機覆寫層。
+ */
+export function saveOrder(orderId: string, order: Record<string, unknown>, doneWishId?: string) {
+  const wish = doneWishId ? allWishes().find((w) => w.id === doneWishId) : undefined
+  if (cloudOn) {
+    const done = wish && wishStatus(wish) !== 'planted' ? { wish, event: { status: 'planted', at: Date.now() } as StatusEvent } : undefined
+    cloud.advanceOrder(orderId, order, done)
+    return
+  }
+  setExt('vendor', { ...(getExt<Record<string, unknown>>('vendor', {}) as object), [orderId]: order })
+  if (doneWishId) setWishStatus(doneWishId, 'planted')
 }
 
 export function markSeen(wishId: string) {
   const wish = allWishes().find((w) => w.id === wishId)
   if (!wish || state.seen[wishId] === wish.history.length) return
-  update((s) => ({ ...s, seen: { ...s.seen, [wishId]: wish.history.length } }))
+  setSeen({ [wishId]: wish.history.length })
 }
 
 // ---------- 打卡與樹洞 ----------
 
 export function recordCheckin(treeId: string, result: Checkin['result'], extra: Pick<Checkin, 'species' | 'night'> = {}) {
-  update((s) => ({ ...s, checkins: [...s.checkins, { treeId, result, at: Date.now(), ...extra }] }))
+  const checkin: Checkin = { treeId, result, at: Date.now(), ...extra }
+  if (cloudOn) return cloud.recordCheckin(checkin)
+  update((s) => ({ ...s, checkins: [...s.checkins, checkin] }))
 }
 
 /** 最近一次（30 分鐘內）在這棵樹的打卡，重新整理樹的頁面時用來維持現場狀態 */
@@ -224,8 +292,6 @@ export function recentCheckin(treeId: string, s: State = state): Checkin | undef
   const since = Date.now() - CHECKIN.sessionMinutes * 60_000
   return [...s.checkins].reverse().find((c) => c.treeId === treeId && c.at >= since)
 }
-
-const capsuleSeed = capsules as unknown as Record<string, { text: string; daysAgo: number }>
 
 /** 這棵樹的樹洞：示範膠囊 + 自己留的話（新到舊） */
 export function whispersOf(treeId: string, s: State = state): Whisper[] {
@@ -238,6 +304,7 @@ export function whispersOf(treeId: string, s: State = state): Whisper[] {
 export function addWhisper(treeId: string, text: string) {
   const t = text.trim().slice(0, 140)
   if (!t) return
+  if (cloudOn) return cloud.addWhisper(treeId, t)
   update((s) => ({
     ...s,
     whispers: { ...s.whispers, [treeId]: [...(s.whispers[treeId] ?? []), { text: t, at: Date.now() }] },
@@ -250,10 +317,6 @@ export function visitedThisWeek(treeId: string, s: State = state): boolean {
 }
 
 // ---------- 樹況回報 ----------
-
-const SEED_REPORTS: TreeReport[] = (seedReports as (Omit<TreeReport, 'at'> & { daysAgo: number })[]).map(
-  ({ daysAgo, ...r }) => ({ ...r, at: seedNow - daysAgo * DAY, mock: true }),
-)
 
 let reportsCache: { src: TreeReport[]; list: TreeReport[] } | null = null
 
@@ -270,7 +333,9 @@ export function useReports() {
 }
 
 export function addReport(r: Omit<TreeReport, 'id' | 'at' | 'note'> & { note: string; kind: ReportKind }): TreeReport {
-  const report: TreeReport = { ...r, note: r.note.trim().slice(0, 140), id: `r-${Date.now().toString(36)}`, at: Date.now() }
+  const note = r.note.trim().slice(0, 140)
+  if (cloudOn) return cloud.addReport({ ...r, note })
+  const report: TreeReport = { ...r, note, id: `r-${Date.now().toString(36)}`, at: Date.now() }
   update((s) => ({ ...s, reports: [...s.reports, report] }))
   return report
 }
@@ -283,6 +348,7 @@ export function getExt<T>(key: string, fallback: T, s: State = state): T {
 }
 
 export function setExt<T>(key: string, value: T) {
+  if (cloudOn) return cloud.setExt(key, value)
   update((s) => ({ ...s, ext: { ...s.ext, [key]: value } }))
 }
 
@@ -308,4 +374,16 @@ export function exitDemoMode() {
   } catch {
     // ignore
   }
+}
+
+// ---------- 雲端帳號 ----------
+
+/** 使用者同意後，把這台裝置舊的本機紀錄搬到雲端 */
+export function migrateToCloud(withWhispers: boolean) {
+  cloud.migrate(withWhispers)
+}
+
+/** 登出（雲端的紀錄不刪）；會重新載入頁面 */
+export function signOutAccount() {
+  void cloud.signOutCloud()
 }

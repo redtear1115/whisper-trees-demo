@@ -1,6 +1,6 @@
 // 發包商工單：補種（政府端排程的許願）與養護（樹況回報）。存在 store 的 ext.vendor。
 
-import { getExt, setExt, setWishStatus, useStore, type State } from '../../store'
+import { getExt, saveOrder, useStore, type State } from '../../store'
 
 export type OrderStage = 'new' | 'accepted' | 'working' | 'done'
 
@@ -40,8 +40,7 @@ export function advance(
   stage: OrderStage,
   opts: { wishId?: string; note?: string; hasPhoto?: boolean } = {},
 ) {
-  setExt('vendor', { ...orders(), [id]: { stage, at: Date.now(), note: opts.note, hasPhoto: opts.hasPhoto } })
-  if (stage === 'done' && opts.wishId) setWishStatus(opts.wishId, 'planted')
+  saveOrder(id, { stage, at: Date.now(), note: opts.note, hasPhoto: opts.hasPhoto }, stage === 'done' ? opts.wishId : undefined)
 }
 
 /** 樹況回報是否已由廠商處理完 */

@@ -1,9 +1,74 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui'
-import { exitDemoMode, isDemoMode, resetAll } from '../store'
+import { exitDemoMode, isDemoMode, resetAll, signOutAccount, useSession } from '../store'
+import { externalBrowserUrl, inAppBrowser, linkGoogle, useAuth } from '../lib/firebase'
 import { IconBack } from '../components/icons'
 
+/** 帳號：訪客 / 已用 Google 保留。Google 綁定要在 click 事件裡同步呼叫（見 linkGoogle）。 */
+function AccountCard() {
+  const auth = useAuth()
+  const [msg, setMsg] = useState<string | null>(null)
+  const app = inAppBrowser()
+
+  const link = () => {
+    setMsg(null)
+    linkGoogle().then((r) => {
+      if (r === 'linked') setMsg('已用 Google 保留。換瀏覽器或換手機，用同一個 Google 登入就找得回來。')
+      else if (r === 'switched')
+        setMsg('這個 Google 帳號已經有紀錄，已切換過去。這台裝置原本的訪客紀錄不會合併，會留在這台裝置的訪客帳號裡。')
+      else if (r === 'error') setMsg('沒有連上 Google，請稍後再試。')
+    })
+  }
+
+  return (
+    <>
+      <h2 className="section-title">帳號</h2>
+      <Card>
+        <p>
+          目前：<strong>{auth.status !== 'ready' ? '連線中…' : auth.google ? '已用 Google 保留（不顯示 email）' : '訪客'}</strong>
+        </p>
+        {auth.status === 'ready' && !auth.google && (
+          <p className="muted small">訪客的紀錄存在這個瀏覽器的雲端帳號；清掉瀏覽器資料就找不回來。</p>
+        )}
+        {auth.status === 'ready' && !auth.google &&
+          (app ? (
+            <p className="small" role="note">
+              請用 Safari／Chrome 開啟，才能用 Google 保留紀錄。
+              {app === 'line' && (
+                <>
+                  {' '}
+                  <a href={externalBrowserUrl()}>用瀏覽器開啟</a>
+                </>
+              )}
+            </p>
+          ) : (
+            <button className="btn primary" onClick={link}>
+              用 Google 保留紀錄
+            </button>
+          ))}
+        {auth.google && (
+          <button
+            className="btn"
+            onClick={() => {
+              if (confirm('登出後，這台裝置會回到新的訪客身分。你的紀錄還在雲端，再用 Google 登入就找得回來。')) signOutAccount()
+            }}
+          >
+            登出
+          </button>
+        )}
+        {msg && (
+          <p className="small" role="status">
+            {msg}
+          </p>
+        )}
+      </Card>
+    </>
+  )
+}
+
 export default function MorePage() {
+  const cloud = useSession().backend === 'cloud'
   return (
     <div className="page">
       <header className="topbar">
@@ -28,6 +93,8 @@ export default function MorePage() {
           樹的圖鑑
         </Link>
       </Card>
+
+      {cloud && <AccountCard />}
 
       <h2 className="section-title">後台（示範）</h2>
       <Card>
@@ -66,10 +133,13 @@ export default function MorePage() {
         <button
           className="menu-link danger"
           onClick={() => {
-            if (confirm('清除這台裝置上的所有曦語資料？')) resetAll()
+            const ok = cloud
+              ? confirm('刪除你在雲端的樹洞與紀錄，然後登出？你送出的許願、澆水和回報會保留。這無法復原。')
+              : confirm('清除這台裝置上的所有曦語資料？')
+            if (ok) resetAll()
           }}
         >
-          清除本機資料
+          {cloud ? '刪除我的雲端資料並登出' : '清除本機資料'}
         </button>
       </Card>
       <p className="muted small">

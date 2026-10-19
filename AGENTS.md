@@ -32,8 +32,10 @@
   - 模擬資料只放在 `src/mock/`，畫面上標「模擬」。
   - 新增任何模擬資料時，同步更新 README 的「模擬資料」表。
 - `material/raw/` 是原始開放資料，**不要修改**；要改處理方式就改 `scripts/`，再重新產生。
-- 不使用任何真實個資；樹洞內容只存在使用者的裝置。
-- 所有資料存取都經過 `store` 模組（目前是 localStorage），元件不直接碰 localStorage。
+- 不使用任何真實個資：Firestore 與畫面只存、只顯示 uid，不存 email 或姓名；回報備註提示勿填個資，只有承辦人看得到。
+- 樹洞存在使用者自己的雲端資料（`users/{uid}/whispers`），其他使用者讀不到；專案管理者在 console 技術上看得到，README 要寫明。
+- 所有資料存取都經過 `store` 模組。設定了 `VITE_FIREBASE_*` 時後端是 Firestore（見 `docs/firebase-setup.md`），否則是 localStorage；元件不直接碰 localStorage 或 Firestore。
+- 安全規則的唯一來源是 `firestore.rules`；部署步驟與紀錄在 `docs/firebase-setup.md`。
 - 手機版優先：寬 360 px 不能出現水平捲動，輸入框字級至少 16 px。
 - 使用者看得到的文字一律用繁體中文。
 
@@ -59,11 +61,13 @@ uv run scripts/build_web_data.py   # 產生 public/data/，需要 tippecanoe
 ```sh
 npm run dev     # 加 ?demo=1 進 Demo 模式
 npm test        # vitest
+npm run test:rules   # 本機 Firestore emulator 跑規則測試，需要 brew install openjdk；改 firestore.rules 一定要跑
 npm run build   # tsc + vite build
 npm run deploy  # 部署到 Cloudflare Pages：https://whisper-trees.pages.dev（部署前先問）
 node scripts/make_placeholders.mjs   # 佔位美術，清單在 src/assets.ts
 ```
 
+- `.env.local`：複製 6 個 `VITE_FIREBASE_*` 值進去，不要進版控。Cloudflare Pages 建置時也要設同樣 6 個變數。
 - 美術一律先用佔位檔：在 `src/assets.ts` 加一筆，跑上面的腳本，畫面用 `<Art id="…">`。
 - 延伸功能（光點、商店、GM 等）見 `docs/specs/08-extensions.md`；討論紀錄見 `docs/discussion-2026-10-17.md`。
 

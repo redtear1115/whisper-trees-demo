@@ -16,8 +16,22 @@ export interface Entry {
 
 const NONE: Entry[] = []
 
-export function ledger(s?: State): Entry[] {
+/** 真正存下來的流水帳（寫入時以它為底，不能把本機覆寫的補發混進去） */
+function baseLedger(s?: State): Entry[] {
   return getExt<Entry[]>('ledger', NONE, s)
+}
+
+let merged: { base: Entry[]; extra: Entry[]; list: Entry[] } | null = null
+
+/** 流水帳 = 存下來的 + GM 在這台裝置補發的（本機覆寫，不進雲端） */
+export function ledger(s?: State): Entry[] {
+  const base = baseLedger(s)
+  const extra = getExt<Entry[]>('ledgerOverlay', NONE, s)
+  if (extra === NONE || extra.length === 0) return base
+  if (!merged || merged.base !== base || merged.extra !== extra) {
+    merged = { base, extra, list: [...base, ...extra].sort((a, b) => a.at - b.at) }
+  }
+  return merged.list
 }
 
 export function balance(s?: State): number {
@@ -64,7 +78,7 @@ export function award(action: Action, key: string, now = new Date()): number {
   const delta = Math.round(cfg.points[action] * mult)
   if (delta <= 0) return 0
   const reason = event ? `${ACTION_LABEL[action]}（${event.name}）` : ACTION_LABEL[action]
-  setExt('ledger', [...list, { at: now.getTime(), delta, reason, key: fullKey }])
+  setExt('ledger', [...baseLedger(), { at: now.getTime(), delta, reason, key: fullKey }])
   return delta
 }
 
@@ -77,11 +91,11 @@ export function awardCheckin(treeId: string, kind: 'success' | 'farView', now = 
 
 export function spend(amount: number, reason: string): boolean {
   if (amount <= 0 || balance() < amount) return false
-  setExt('ledger', [...ledger(), { at: Date.now(), delta: -amount, reason }])
+  setExt('ledger', [...baseLedger(), { at: Date.now(), delta: -amount, reason }])
   return true
 }
 
-/** GM 補發或扣回（客服用） */
+/** GM 補發或扣回（客服用）。一律只記在這台裝置（本機覆寫），不寫進雲端的光點。 */
 export function adjust(delta: number, reason: string) {
-  setExt('ledger', [...ledger(), { at: Date.now(), delta, reason }])
+  setExt('ledgerOverlay', [...getExt<Entry[]>('ledgerOverlay', NONE), { at: Date.now(), delta, reason }])
 }

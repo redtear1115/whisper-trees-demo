@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { REPORT_KINDS, type ReportKind } from '../../store/types'
-import { addReport } from '../../store'
+import { addReport, useSession } from '../../store'
 import type { Tree } from '../../lib/trees'
 import { Card } from '../../components/ui'
 
@@ -12,6 +12,8 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
   const [note, setNote] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const cloud = useSession().backend === 'cloud'
 
   useEffect(() => () => void (photo && URL.revokeObjectURL(photo)), [photo])
 
@@ -28,7 +30,9 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
       <Card>
         <h2>樹況回報</h2>
         <p className="banner ok">已送出，謝謝你。</p>
-        <p className="muted small">這是示範：回報只存在這台裝置，不會真的送出。</p>
+        <p className="muted small">
+          {cloud ? '回報會送到公園處，補充說明只有承辦人看得到。' : '這是示範：回報只存在這台裝置，不會真的送出。'}
+        </p>
         <button
           className="btn small"
           onClick={() => {
@@ -61,16 +65,21 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
           onSubmit={(e) => {
             e.preventDefault()
             if (!kind) return
-            addReport({
-              treeId: tree.id,
-              species: tree.species,
-              road: tree.place,
-              district: tree.district,
-              kind,
-              details,
-              note,
-              hasPhoto: !!photo,
-            })
+            try {
+              addReport({
+                treeId: tree.id,
+                species: tree.species,
+                road: tree.place,
+                district: tree.district,
+                kind,
+                details,
+                note,
+                hasPhoto: !!photo,
+              })
+            } catch {
+              return setError('還沒連上雲端，請稍等一下再送出。')
+            }
+            setError(null)
             setSent(true)
             setOpen(false)
           }}
@@ -112,8 +121,8 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
             rows={2}
             maxLength={140}
             value={note}
-            placeholder="補充說明（選填）"
-            aria-label="補充說明"
+            placeholder="補充說明（選填，請勿填寫個資）"
+            aria-label="補充說明（選填，請勿填寫個資）"
             onChange={(e) => setNote(e.target.value)}
           />
           <label className="btn small">
@@ -134,6 +143,11 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
               <img className="report-photo" src={photo} alt="回報照片預覽" />
               <p className="muted small">照片只在你的手機上預覽，不會上傳。</p>
             </>
+          )}
+          {error && (
+            <p className="error small" role="alert">
+              {error}
+            </p>
           )}
           <div className="row gap">
             <button className="btn primary" disabled={!kind}>

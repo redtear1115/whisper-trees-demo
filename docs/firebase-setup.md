@@ -60,4 +60,5 @@ GCP console › API 和服務 › 憑證 › 瀏覽器金鑰：應用程式限�
 ## 本機開發
 
 - `.env.local`：`VITE_FIREBASE_*` 六個值（web config 是公開設定，不是密鑰）。沒有這個檔時網站自動用 localStorage 後端。
+- `VITE_FIREBASE_EMULATOR=1`：改連本機 emulator，不碰正式專案。
 - `npm run test:rules`：在本機 emulator 跑 158 條規則測試；不碰正式專案。

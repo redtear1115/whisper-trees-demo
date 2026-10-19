@@ -16,7 +16,7 @@
 
 **市民端只能用手機開**（2026-10-19 決定）：判斷依據是觸控為主的裝置（`pointer: coarse`，手機與平板）。桌機開市民端頁面會看到「曦語要用手機開」與該頁的 QR Code；網址加 `?demo=1` 進 Demo 模式才能在桌機試玩。政府端、發包商、GM、開放 API 是桌機工具，不受限制。
 
-兩端共用同一份模擬資料庫（Demo 先用 localStorage；同一台電腦開兩個分頁，狀態會即時同步）。
+兩端共用同一份資料庫（Firestore，跨裝置即時同步；沒有設定 Firebase 時退回 localStorage，同一台電腦開兩個分頁會同步）。
 
 ## Demo 路線（2 分鐘）
 
@@ -45,7 +45,7 @@ P0 = Demo 路線一定要有；P1 = 有時間再做；P2 = 只寫進未來展望
 - **前端**：Vite + React + TypeScript，部署為靜態網站（Cloudflare Pages 或 GitHub Pages，皆為 HTTPS；相機與定位只能在 HTTPS 下使用）。
 - **地圖**：MapLibre GL JS，底圖用免金鑰的向量圖磚（例如 OpenFreeMap）。
 - **掃碼**：zxing 系列函式庫（`@zxing/browser` 或 `html5-qrcode`）。樹牌照片用 OpenCV 解不出來、zxing 可以；iOS Safari 沒有 `BarcodeDetector`。
-- **模擬資料庫**：`src/mock/` 的種子資料 + localStorage。介面集中在一個 `store` 模組，日後要換 Supabase 只改這一層。
+- **資料庫與登入**：Firebase（匿名自動登入、可選 Google；Firestore）+ `src/mock/` 的種子資料；沒有設定 Firebase 時退回 localStorage。介面集中在一個 `store` 模組。後台寫入限白名單帳號，其他人是本機示範覆寫層。見 [firebase-setup](../firebase-setup.md)。
 - **資料前處理**：Python（uv）腳本，輸出到 `public/data/`。
 
 ## 設計方向

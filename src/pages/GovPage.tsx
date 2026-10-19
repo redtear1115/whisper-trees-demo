@@ -9,6 +9,7 @@ import { MockTag, relativeDays } from '../components/ui'
 import { IconCamera } from '../components/icons'
 import { reportResolved, useOrders } from '../features/vendor/orders'
 import { NOTICES, useMyOpinions } from '../features/notice/notices'
+import { AdminMode, useCanSeeNotes } from '../features/cloud/AdminMode'
 
 const GovMap = lazy(() => import('../features/gov/GovMap').then((m) => ({ default: m.GovMap })))
 
@@ -72,7 +73,7 @@ export default function GovPage() {
       <header className="gov-head">
         <div>
           <h1>補種優先排序</h1>
-          <p className="muted small">示範：承辦人視角（公園處）・不需登入</p>
+          <AdminMode role="承辦人視角（公園處）" />
         </div>
         <AdminNav />
       </header>
@@ -130,7 +131,7 @@ export default function GovPage() {
         </label>
       </div>
       <p className="muted small">
-        列表含示範資料 <MockTag />；黃色標籤是這台裝置上市民剛送出的許願。點位置可以看分數怎麼算。
+        列表含示範資料 <MockTag />；黃色標籤是市民剛送出的許願。點位置可以看分數怎麼算。
       </p>
       <p className="toast" role="status" aria-live="polite">
         {toast && (
@@ -369,6 +370,7 @@ function useFlip(order: string) {
 function ReportsByRoad() {
   const reports = useReports()
   const orders = useOrders()
+  const canSeeNotes = useCanSeeNotes()
   const groups = new Map<string, TreeReport[]>()
   for (const r of reports) {
     const k = `${r.district} ${r.road}`
@@ -380,6 +382,7 @@ function ReportsByRoad() {
       <h2 className="section-title">
         樹況回報（依路段） <MockTag title="含模擬的示範回報" />
       </h2>
+      {!canSeeNotes && <p className="muted small">備註只有承辦人看得到。</p>}
       {rows.length === 0 && <p className="muted">目前沒有回報。</p>}
       <div className="report-list">
         {rows.map(([road, list]) => {
@@ -398,7 +401,7 @@ function ReportsByRoad() {
                   <li key={r.id} className="small">
                     <span className={`kind-tag ${r.kind}`}>{REPORT_KINDS[r.kind].label}</span>
                     {r.species}（<span className="mono">{r.treeId}</span>）{r.details.join('、')}
-                    {r.note && `：${r.note}`}
+                    {r.note && (canSeeNotes || r.mock || r.mine) && `：${r.note}`}
                     {r.hasPhoto && (
                       <span className="has-photo" aria-label="附照片">
                         {' '}

@@ -2061,3 +2061,56 @@ label.btn:focus-within {
   width: 220px;
   height: 220px;
 }
+
+/* ---------- 離線示範橫幅、遷移對話框 ---------- */
+.offline-banner {
+  position: fixed;
+  z-index: 70;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 3px 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  background: var(--amber-ink);
+  color: #fff;
+}
+
+body.has-offline .demo-badge {
+  display: none;
+}
+
+body.has-offline .map-top {
+  padding-top: max(30px, env(safe-area-inset-top));
+}
+
+body.has-offline .page,
+body.has-offline .console,
+body.has-offline .gov {
+  padding-top: 30px;
+}
+
+.modal-back {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(44, 58, 46, 0.45);
+}
+
+.modal {
+  width: min(420px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.modal h2 {
+  margin-top: 0;
+}

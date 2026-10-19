@@ -21,9 +21,10 @@ export function weekKey(date = new Date()): string {
   return d.toISOString().slice(0, 10)
 }
 
+/**
+ * 日期一律用台北時區（UTC+8，沒有夏令時間）的日曆日，格式 YYYY-MM-DD。
+ * Firestore 規則用 request.time + 8 小時算同一天，這裡必須一致，澆水一天一次才不會兩邊算出不同的日子。
+ */
 export function dayKey(date = new Date()): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  return new Date(date.getTime() + 8 * 3_600_000).toISOString().slice(0, 10)
 }

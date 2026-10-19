@@ -3,6 +3,7 @@ import { AdminNav } from '../components/AdminNav'
 import { MockTag, formatDate, relativeDays } from '../components/ui'
 import { useReports, useWishes, wishStatus } from '../store'
 import { REPORT_KINDS } from '../store/types'
+import { AdminMode, useCanSeeNotes } from '../features/cloud/AdminMode'
 import { advance, STAGE_LABEL, stageOf, useOrders, type OrderStage } from '../features/vendor/orders'
 
 const NEXT: Partial<Record<OrderStage, { to: OrderStage; label: string }>> = {
@@ -15,6 +16,7 @@ export default function VendorPage() {
   const wishes = useWishes()
   const reports = useReports()
   const orders = useOrders()
+  const canSeeNotes = useCanSeeNotes()
   const [tab, setTab] = useState<'plant' | 'care'>('plant')
 
   // 政府端排程的案件，以及廠商已經完工的
@@ -26,7 +28,7 @@ export default function VendorPage() {
       <header className="gov-head">
         <div>
           <h1>發包商後台</h1>
-          <p className="muted small">示範：植栽養護廠商視角・不需登入</p>
+          <AdminMode role="植栽養護廠商視角" />
         </div>
         <AdminNav />
       </header>
@@ -67,12 +69,13 @@ export default function VendorPage() {
           <h2>
             養護工單 <MockTag title="來自市民的樹況回報（含示範資料）" />
           </h2>
+          {!canSeeNotes && <p className="muted small">備註只有承辦人看得到。</p>}
           {care.map((r) => (
             <Order
               key={r.id}
               id={`report:${r.id}`}
               title={`${r.district} ${r.road}・${r.species}（${r.treeId}）`}
-              detail={`${REPORT_KINDS[r.kind].label}：${r.details.join('、') || '未選細項'}${r.note ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報`}
+              detail={`${REPORT_KINDS[r.kind].label}：${r.details.join('、') || '未選細項'}${r.note && (canSeeNotes || r.mock || r.mine) ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報`}
               stage={stageOf(`report:${r.id}`, orders)}
               at={orders[`report:${r.id}`]?.at}
               doneNote={orders[`report:${r.id}`]?.note}

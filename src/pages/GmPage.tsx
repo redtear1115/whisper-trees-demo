@@ -14,6 +14,7 @@ import {
 } from '../features/game/config'
 import { adjust, useBalance, useLedger } from '../features/game/ledger'
 import { useInventory } from '../features/game/inventory'
+import { AdminMode } from '../features/cloud/AdminMode'
 
 const WEEK = 7 * 86_400_000
 
@@ -24,7 +25,7 @@ export default function GmPage() {
       <header className="gov-head">
         <div>
           <h1>遊戲營運後台（GM）</h1>
-          <p className="muted small">示範：營運人員視角・不需登入・改動即時套用到市民端</p>
+          <AdminMode role="營運人員視角" />
         </div>
         <AdminNav />
       </header>
