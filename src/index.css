@@ -247,24 +247,29 @@ textarea.input {
   position: fixed;
   z-index: 50;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1px 12px 2px;
-  border-radius: 0 0 10px 10px;
-  border: 0;
-  white-space: nowrap;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--demo-h, 34px);
+  padding: env(safe-area-inset-top, 0px) 12px 0;
   margin: 0;
-  background: var(--amber-ink);
-  color: #fff;
-  font-size: 0.78rem;
+  border: 0;
+  border-bottom: 1px solid #e6cfae;
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-/* 看起來是細條，可點範圍放大到約 44 px（往兩側與下方延伸、透明） */
+/* 細條本身 34 px，可點範圍往下多 10 px 到 44 px（透明）；頁面內容從 44 px 以下開始，不會被它蓋到 */
 .demo-badge::after {
   content: '';
   position: absolute;
-  inset: 0 -12px -18px;
+  inset: 0 0 -10px;
 }
 
 .demo-badge:focus-visible {
@@ -576,8 +581,37 @@ textarea.input {
   }
 }
 
-.maplibregl-ctrl-bottom-right {
-  bottom: calc(var(--map-base) + 54px);
+/* 右下角（署名的 i）：貼在導覽上緣，整顆 44 px 看得到也點得到；右側工具列在它上面 */
+.map-page .maplibregl-ctrl-bottom-right {
+  bottom: calc(var(--nav-h) + 6px);
+  right: 6px;
+}
+
+.map-page .maplibregl-ctrl-attrib.maplibregl-compact {
+  min-width: 44px;
+  min-height: 44px;
+  /* 右邊留出 44 px 給按鈕（按鈕在右上角絕對定位） */
+  box-sizing: border-box;
+  padding: 2px 44px 2px 0;
+  margin: 0;
+  border-radius: 22px;
+  background: rgba(255, 253, 248, 0.94);
+  box-shadow: 0 2px 8px rgba(44, 58, 46, 0.14);
+}
+
+.map-page .maplibregl-ctrl-attrib-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background-size: 24px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.map-page .maplibregl-ctrl-attrib-inner {
+  color: var(--ink);
+  font-size: 0.75rem;
+  line-height: 1.5;
 }
 
 /* 指北針放大到好按的尺寸 */
@@ -1662,14 +1696,23 @@ pre.code {
 }
 
 /* Demo 模式頂端細條讓位 */
+body.is-demo {
+  /* Demo 細條高度（含安全區）；頁面內容從它下面再空 10 px 開始 */
+  --demo-h: calc(34px + env(safe-area-inset-top, 0px));
+}
+
 body.is-demo .map-top {
-  padding-top: max(26px, env(safe-area-inset-top));
+  padding-top: calc(var(--demo-h) + 10px);
+}
+
+body.is-demo .scanner-top {
+  top: calc(var(--demo-h) + 8px);
 }
 
 body.is-demo .page,
 body.is-demo .console,
 body.is-demo .gov {
-  padding-top: 26px;
+  padding-top: calc(var(--demo-h) + 10px);
 }
 
 .visually-hidden {
@@ -2380,20 +2423,20 @@ body.has-offline .gov {
 
 /* 新手任務：地圖上的小入口（左下，在「附近／全市」切換的上方，不和右側地圖工具重疊）與 /me 的任務卡 */
 .tasks-chip {
-  position: absolute;
-  z-index: 2;
-  left: 12px;
-  bottom: calc(var(--map-base) + 150px);
+  /* 在地圖頁首（左上，和光點餘額同一排），不在大拇指會點的弧線上 */
+  margin-right: auto;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   padding: 0 16px;
+  border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 253, 248, 0.96);
-  color: var(--green);
+  color: var(--green-ink);
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(44, 58, 46, 0.15);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(44, 58, 46, 0.12);
 }
 
 .tasks-head {
@@ -2894,7 +2937,8 @@ body.has-offline .gov {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 2px;
+  /* 佔位圖底部有一行小字（正式美術換上後就沒有）：標籤往下讓開，不疊在上面 */
+  margin-top: 8px;
   padding: 0 7px;
   border-radius: 999px;
   background: rgba(255, 253, 248, 0.92);
@@ -2915,7 +2959,8 @@ body.has-offline .gov {
   gap: 0;
   width: max-content;
   max-width: min(230px, calc(100vw - 24px));
-  margin-bottom: 4px;
+  /* 氣泡在人物頭上方留一段空，不蓋到牠 */
+  margin-bottom: 14px;
   padding: 0 0 0 10px;
   border-radius: 999px;
   background: rgba(255, 253, 248, 0.95);
@@ -4509,4 +4554,104 @@ body.has-offline .gov {
 .atlas-credit {
   margin: 12px 0 0;
   line-height: 1.5;
+}
+
+/* ---------- 地圖與全站（批評修正 M） ---------- */
+
+/* 手寫感的聲音（2026-10-20）：卡片標題、區塊標題、章與徽章的名字、關鍵數字都用 --font-voice（霞鶩文楷）；
+   內文、說明、按鈕、表單維持 UI 字。霞鶩文楷在小字會變細，所以這裡只放 ≥ 14 px 的文字，
+   `max(1em, 0.875rem)` 保證不會小於 14 px。 */
+.tile > strong,
+.stamp-list strong,
+.atlas-tier,
+.atlas-big,
+.stat strong,
+.stats strong,
+.me-hero-title,
+.me-settings-title,
+.me-badges-head > span:first-child,
+.fog-card-title,
+.animal-name,
+.nearby-name,
+.village-row-name,
+.tree-rings-title,
+.tree-rings-name,
+.tasks-head h2,
+.wish-card > strong,
+.codex-name,
+.voice {
+  font-family: var(--font-voice);
+  font-size: max(1em, 0.875rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* 數字：關鍵數字（章數、棵數）用手寫字，仍然等寬對齊 */
+.atlas-big strong,
+.stat strong,
+.stats strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 地圖頁首：左邊新手任務、右邊光點餘額，一排；有路線時頂端列換到下一排 */
+.map-top .tasks-chip,
+.map-top .balance-pill {
+  flex: none;
+}
+
+/* 遷移提示：不是對話框，是浮在導覽上方的小卡。不擋住畫面、不鎖背景，使用者照常看自己的頁面 */
+.migrate-banner {
+  position: fixed;
+  z-index: 60;
+  left: 12px;
+  right: 12px;
+  /* 導覽中間的大按鈕高出導覽約 30 px，小卡坐在它上面，不蓋住 */
+  bottom: calc(var(--nav-h) + 36px);
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 -2px 18px rgba(44, 58, 46, 0.18);
+  animation: migrate-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body:not(:has(.bottom-nav)) .migrate-banner {
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.migrate-banner h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.migrate-banner p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
+
+.migrate-banner .muted.small {
+  font-size: 0.8rem;
+}
+
+.migrate-banner .check {
+  font-size: 0.9rem;
+}
+
+.migrate-banner .row {
+  margin-top: 8px;
+}
+
+@keyframes migrate-in {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .migrate-banner {
+    animation: none;
+  }
 }

@@ -211,7 +211,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 
 - **/explore 任務卡**（`TasksCard`；2026-10-19 起從 `/me` 搬到 `/explore`，`/me` 不再放，避免重複）（，清單 `tasks-list`、每項 `task-<id>` 帶 `data-done`、`tasks-count`、`tasks-toggle`）：拿到第一道光後出現，4 項依 `tasks()` 推算打勾，順序不拘、可收合（`tasksCollapsed` 存在 `onboarding`）。「在樹洞留一句話」說明「到地圖點一棵樹，進樹的頁面」，「在空樹穴許願」說明「到地圖點一個空樹穴」，連結都回地圖。4 項做完卡片換成一行小字（`tasks-card-done`），不再有按鈕。
 - **看過旗標**（`useViewedFlag`）：`/explore` 的圖鑑區（`data-testid="codex-section"`）真的出現在畫面上時記 `viewedCodexAt`（IntersectionObserver）；`/me` 的徽章區（`data-testid="badges-section"`）真的出現在畫面上時記 `viewedBadgesAt`（IntersectionObserver，不支援就在載入時記）。只在使用者文件載入完成、旗標還沒有時寫一次。
-- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在左下（整組浮動元件都排在底部導覽上面），不和右側地圖工具重疊。判斷是純函式 `showTasksChip`。
+- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在地圖頁首左上、和右上的光點餘額同一排（2026-10-20 起；原本在左下，緊貼導覽中間大按鈕旁的拇指弧線）。判斷是純函式 `showTasksChip`。
 - **A3**：`OnboardingEffects` 在使用者文件載入後、4 項都完成、沒有 `newcomerCelebratedAt` 時記下時間並跳出「城市的新朋友」慶祝，只一次（`shouldCelebrateNewcomer`）。早就完成過的舊使用者會在下次開啟時看到一次。
 - 雲端不用改：`onboarding` 本來就是 `users/{uid}` 的一個 map 欄位，新旗標照逐欄合併。
 
@@ -327,7 +327,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - 只顯示在這 5 個**分頁根頁面**（`TabLayout`）；`/tree/:id`、`/shop`、`/scan`、`/wishes` 是子頁面，沒有導覽、用返回連結；`/gov`、`/vendor`、`/gm`、`/developers`、`/demo-control` 也沒有。桌機閘門（`MobileOnly`）不變。
 - 每個分頁 ≥ 44 px 高（56 px + 底部安全區 `safe-area-inset-bottom`），目前的分頁 `aria-current="page"`、字加粗、圖示加粗；沒有紅點或數字。360 px 寬 5 等分（各 72 px）。`data-testid`：`bottom-nav`、`tab-stamps`、`tab-explore`、`tab-home`、`tab-journal`、`tab-me`。
 - 右上角光點餘額（`BalanceChip`，`data-testid="balance-chip"`，「✦ N 光點」，`aria-label`「光點 N，前往商店」）連到 `/shop`；每個分頁頁首（`TabHeader`）與地圖右上都有。
-- 地圖頁的浮動元件（任務小入口、右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
+- 地圖頁的浮動元件（右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`；任務小入口在左上頁首）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
 - 從樹洞點進樹的頁面，返回回到樹洞（路由 state `from`）；其他來源回地圖。
 
 ### 探索 `/explore`
@@ -358,7 +358,12 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ### Demo 切換台 `/demo-control`
 
-2026-10-20 決定：Demo 模式時**每個頁面（市民端與各後台）頂端都有固定的「Demo 模式・切換 ›」細條**（`demo-badge`，可點範圍約 44 px，各頁已讓出位置），點了到這裡；切換台最下面有紅色「離開 Demo 模式」（`demo-exit`，先確認，離開後回首頁）。切換台**只在 Demo 模式顯示**（`?demo=1`，或這次瀏覽已進入 Demo 模式），否則轉回 `/`。在這裡切換「市民端（手機版）」——首頁地圖、集章冊、探索、樹洞、我的——與「後台」——政府端、發包商後台、遊戲營運（GM）、開放 API——並說明「後台寫入限白名單 Google 帳號、其他人是本機示範」。獨立頁面：不在導覽裡、「我的」也不連過去；直接開 `/demo-control?demo=1`，或從桌機開市民端時「請用手機開」頁面上的「Demo 切換台」按鈕（會帶 `?demo=1`）。`/more` 轉址到 `/me`；不認得的網址轉址到 `/`。
+2026-10-20 決定：Demo 模式時**每個頁面（市民端與各後台）頂端都有固定的「Demo 模式・切換 ›」細條**（`demo-badge`；2026-10-20 改成全寬 34 px 的淡琥珀細條、可點範圍 44 px，各頁內容從 `--demo-h` + 10 px 以下開始，所以不和右上的光點餘額擠在一起），點了到這裡；切換台最下面有紅色「離開 Demo 模式」（`demo-exit`，先確認，離開後回首頁）。切換台**只在 Demo 模式顯示**（`?demo=1`，或這次瀏覽已進入 Demo 模式），否則轉回 `/`。在這裡切換「市民端（手機版）」——首頁地圖、集章冊、探索、樹洞、我的——與「後台」——政府端、發包商後台、遊戲營運（GM）、開放 API——並說明「後台寫入限白名單 Google 帳號、其他人是本機示範」。獨立頁面：不在導覽裡、「我的」也不連過去；直接開 `/demo-control?demo=1`，或從桌機開市民端時「請用手機開」頁面上的「Demo 切換台」按鈕（會帶 `?demo=1`）。`/more` 轉址到 `/me`；不認得的網址轉址到 `/`。
+
+### 字型與雲端遷移提示（2026-10-20，批評修正 M）
+
+- **手寫感的聲音**：`--font-voice`（霞鶩文楷 TC，`index.html` 從 Google Fonts 載入 400／700）原本只用在 `h1`–`h3` 與幾個情感句。現在也用在：卡片標題（`.tile > strong`：徽章、商店、圖鑑的名字）、區塊標題（`.me-settings-title`、`.me-hero-title`、`.fog-card-title`、`.tasks-head h2`）、章與區的名字（`.stamp-list strong`、`.atlas-tier`、`.village-row-name`）、關鍵數字（`.atlas-big`、`.stat strong`）、動物與附近的樹的名字。規則在 `src/index.css` 的「地圖與全站（批評修正 M）」，加 `.voice` 工具類別給之後的元件用。**內文、說明、按鈕、表單維持 UI 字（Noto Sans TC）**。楷體在小字會變細，所以這些元素最小 14 px（`font-size: max(1em, 0.875rem)`），更小的文字（`.small`、標籤、註解）不用。
+- **雲端遷移提示不是對話框**：第一次進雲端模式、這台裝置有舊的本機紀錄時，原本蓋住整個畫面的對話框會打斷回來的本機使用者看集章冊。改成浮在導覽上方（在中間大按鈕上面）的小卡（`MigrationPrompt`，`data-testid="migrate-banner"`，`role` 是 region、沒有 `aria-modal`、沒有遮罩、不搶焦點），使用者可以先看自己的頁面、切分頁，想處理再按。內容與動作不變：摘要、「也把我的 N 則樹洞存上去」勾選、「存到雲端」（`migrateToCloud`）、「先不要」（`declineMigration`：這台記下已拒絕，之後不再問）；錯誤與「存放中…」也一樣。沒有新增「稍後再問」：維持原本的語意。
 
 ### 驗收
 
@@ -367,6 +372,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - [x] 批評修正 E（2026-10-20，Playwright 390／360 px、本機後端、Demo 模式，截圖在 scratchpad `fixE-*.png`）：樹洞分頁 44 px 高、`tabindex` 0／-1、→ 切到我的許願且焦點跟著移、再 → 繞回、End／Home 跳頭尾、選中分頁的 `aria-controls` 與 panel 的 `aria-labelledby` 對得上；附近的樹 8 列只有第一列是 `btn primary`、按鈕 44 px 高、Demo 在範圍內寫「掃樹牌留言」、真實定位（遠處）寫「怎麼走」；「查看樹木」44 px 高、箭頭跟在字後；集章冊分段 44 px、360 px 無水平捲動。**「走過去」列沒有在畫面上走過（Demo 位置旁的 8 棵都在感應圈內），只有單元測試；沒有在實機、雲端模式驗過。**
 - [x] `npm test`、`npm run test:rules`、`npm run build` 通過。
 - [x] `/me` 批評修正 P（2026-10-20，Playwright 390 與 360 px、本機後端、新使用者與有紀錄的使用者）：動物與小芽在頂部、沒有重複的餘額；「換一隻」就地展開選動物並立刻換、設定區沒有動物選項；進度條有 `role=progressbar` 與 `aria-valuenow／min／max／valuetext`；換裝選項與所有按鈕、連結、單選 ≥ 44 px；光點紀錄預設 3 筆、「看全部」展開 7 筆；有樹的列顯示「樹種・路名」、許願列顯示「路名的願望」、點了到 `/tree/<id>`；2025 年的紀錄顯示年份；徽章區標題下說明為什麼（新使用者「做到一件小事就會亮起」，有紀錄者列出名字）；沒有水平捲動；沒有主控台錯誤。**沒有在實機驗；`TreePage` 返回回地圖（見上）。**
+- [x] 批評修正 M（2026-10-20，Playwright 390 與 360 px，Demo，本機無 Firebase）：Demo 細條全寬 34 px、各分頁與地圖的光點餘額在它下面（y 44 px），沒有重疊；掃描頁返回鈕讓開；字型：`/me`、`/shop`、`/explore`、`/journal` 量過上面列的元素都是楷體、沒有任何一個小於 14 px，360 px 沒有水平捲動。遷移提示（用 `setSession({ migration })` 在集章冊上觸發）：不是對話框、頁面後面可以切分頁（點「探索」成功、小卡留著）、在導覽上方、不蓋中間大按鈕、360 px 沒有水平捲動。單元測試（`migrationPrompt.test.tsx`）：沒有遷移就不畫、不是 dialog／modal、內容與動作不變、沒有樹洞就沒有勾選、存放中與錯誤。**遷移提示沒有接 Firebase emulator 實際搬過一次（搬資料的邏輯沒動）；楷體在實機 iOS 小字的粗細沒看過。**
 
 ## 不做
 

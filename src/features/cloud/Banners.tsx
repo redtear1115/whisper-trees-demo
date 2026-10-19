@@ -41,7 +41,11 @@ export function WriteFailedToast() {
   )
 }
 
-/** 第一次進雲端模式、這台裝置有舊的本機紀錄：問要不要搬 */
+/**
+ * 第一次進雲端模式、這台裝置有舊的本機紀錄：問要不要搬。
+ * 不是對話框（2026-10-20 決定）：浮在導覽上方的小卡，不擋住畫面、不搶焦點、不鎖背景，
+ * 回來的本機使用者照常看集章冊，想處理再按。內容與動作和原本的對話框一樣：存到雲端、先不要（= 這台不再問）。
+ */
 export function MigrationPrompt() {
   const { migration } = useSession()
   const [whispers, setWhispers] = useState(false)
@@ -54,34 +58,32 @@ export function MigrationPrompt() {
     s.progress && '光點與造型',
   ].filter(Boolean)
   return (
-    <div className="modal-back">
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="mig-title">
-        <h2 id="mig-title">把這台裝置上的紀錄存到雲端？</h2>
-        <p>
-          {parts.length ? `這台裝置上有：${parts.join('、')}。` : '這台裝置上有舊的紀錄。'}
-          存到雲端後，換裝置或用 Google 保留也找得回來。
+    <section className="migrate-banner" aria-labelledby="mig-title" data-testid="migrate-banner">
+      <h2 id="mig-title">把這台裝置上的紀錄存到雲端？</h2>
+      <p>
+        {parts.length ? `這台裝置上有：${parts.join('、')}。` : '這台裝置上有舊的紀錄。'}
+        存到雲端後，換裝置或用 Google 保留也找得回來。
+      </p>
+      {s.whispers > 0 && (
+        <label className="check">
+          <input type="checkbox" checked={whispers} onChange={(e) => setWhispers(e.target.checked)} />
+          也把我的 {s.whispers} 則樹洞存上去（其他人看不到）
+        </label>
+      )}
+      <p className="muted small">示範資料與後台的設定不會搬。不搬的紀錄會在備份裡留到 2026-10-31。</p>
+      {error && (
+        <p className="error small" role="alert">
+          {error}
         </p>
-        {s.whispers > 0 && (
-          <label className="check">
-            <input type="checkbox" checked={whispers} onChange={(e) => setWhispers(e.target.checked)} />
-            也把我的 {s.whispers} 則樹洞存上去（其他人看不到）
-          </label>
-        )}
-        <p className="muted small">示範資料與後台的設定不會搬。不搬的紀錄會在備份裡留到 2026-10-31。</p>
-        {error && (
-          <p className="error small" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="row gap">
-          <button className="btn primary" disabled={running} onClick={() => migrateToCloud(whispers)}>
-            {running ? '存放中…' : '存到雲端'}
-          </button>
-          <button className="btn" disabled={running} onClick={declineMigration}>
-            先不要
-          </button>
-        </div>
+      )}
+      <div className="row gap">
+        <button className="btn primary" disabled={running} onClick={() => migrateToCloud(whispers)} data-testid="migrate-yes">
+          {running ? '存放中…' : '存到雲端'}
+        </button>
+        <button className="btn" disabled={running} onClick={declineMigration} data-testid="migrate-no">
+          先不要
+        </button>
       </div>
-    </div>
+    </section>
   )
 }

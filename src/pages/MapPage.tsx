@@ -26,6 +26,7 @@ import { ringRadius, treesInRing } from '../features/map/ring'
 import { hasFinePointer } from '../features/map/rotation'
 import { RotationControl } from '../features/map/RotationControl'
 import { BalanceChip } from '../features/nav/BalanceChip'
+import { BUILDING_3D_PAINT, firstLabelLayerId, toneBasemap } from '../features/map/basemapTone'
 import { setScanHint } from '../features/nav/scanHint'
 import { useAnimal } from '../features/avatar/useAnimal'
 import { TreeRingLayer } from '../features/map/TreeRingLayer'
@@ -129,6 +130,7 @@ export default function MapPage() {
       locale: MAP_LOCALE,
     })
     map.current = m
+    toneBasemap(m) // 底圖改成繪本的暖紙色（樣式載入後套用）
     ;(window as unknown as { __map: MLMap }).__map = m // 給自動化測試用
     m.addControl(
       new maplibregl.AttributionControl({
@@ -174,13 +176,13 @@ export default function MapPage() {
         'source-layer': 'building',
         minzoom: 15,
         paint: {
-          // 淡、暖、矮一點：建物只是舞台，樹才是主角
-          'fill-extrusion-color': '#f3ecdc',
+          // 淡、暖、矮一點：建物只是舞台，樹才是主角（顏色與透明度見 basemapTone.ts）
+          ...BUILDING_3D_PAINT,
           'fill-extrusion-height': ['*', 0.6, ['coalesce', ['get', 'render_height'], 8]],
           'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-          'fill-extrusion-opacity': 0.5,
         },
-      })
+        // 加在底圖文字圖層下面：街名畫在建物上，不會被蓋住
+      }, firstLabelLayerId(m))
       // 附近模式的可探索範圍
       m.addSource('nearby', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addLayer({
@@ -845,6 +847,12 @@ export default function MapPage() {
       {/* 頁首放在地圖前面：鍵盤 Tab 先到導覽，再到地圖 */}
       <header className={`map-top${activeTour && !treeFocus ? ' has-tour' : ''}`}>
         <h1 className="sr-only">曦語地圖</h1>
+        {/* 新手任務放在左上（和光點餘額同一排），離開大拇指會點的弧線 */}
+        {!sheet && !treeFocus && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
+          <Link className="tasks-chip" to="/explore" data-testid="tasks-chip">
+            新手任務 {tasksDone}/4
+          </Link>
+        )}
         <BalanceChip />
         {activeTour && !treeFocus && (
           <TourBar tour={activeTour} done={tourDone.size} onFit={() => fitTour(activeTour)} onEnd={clearActiveTour} />
@@ -964,12 +972,6 @@ export default function MapPage() {
       )}
 
       {tour.open && !sheet && !treeFocus && <TourSheet step={tour.step} />}
-
-      {!sheet && !treeFocus && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
-        <Link className="tasks-chip" to="/explore" data-testid="tasks-chip">
-          新手任務 {tasksDone}/4
-        </Link>
-      )}
 
       {idle && (
         <div className="map-tools" role="group" aria-label="地圖工具">
