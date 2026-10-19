@@ -28,6 +28,8 @@ import { BalanceChip } from '../features/nav/BalanceChip'
 import { useAnimal } from '../features/avatar/useAnimal'
 import { TreeRingLayer } from '../features/map/TreeRingLayer'
 import { rangeInfo, TREE_FOCUS } from '../features/map/treeRings'
+import { loadRoadGraph, prefixAtAsync, routeBetween, routeLabel, routeMidpoint, type Route } from '../lib/route'
+import { treePrefix } from '../lib/treeId'
 
 type Sheet =
   | { kind: 'pit'; pit: PitInfo; justWished?: boolean }
@@ -81,6 +83,11 @@ export default function MapPage() {
   const [treeFocus, setTreeFocus] = useState<{ tree: Tree; shown: boolean } | null>(null)
   const focusRef = useRef(treeFocus)
   focusRef.current = treeFocus
+  // 「怎麼走」：要畫路線的那棵樹的 id（只在那棵樹的行動圈開著時有效）、找到的路線（'none' = 找不到，null = 還沒找）
+  const [routeFor, setRouteFor] = useState<string | null>(null)
+  const [route, setRoute] = useState<Route | 'none' | null>(null)
+  const routeFitted = useRef(false) // 這一次點「怎麼走」鏡頭是否已經拉過去（人走動重算路線時不再動鏡頭）
+  const boundsLifted = useRef(false) // 為了看整條路線，暫時拿掉「只能在附近移動」的限制
   const prevView = useRef<View | null>(null)
   const navigate = useNavigate()
   const animal = useAnimal()
@@ -231,6 +238,26 @@ export default function MapPage() {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3.5, 17, 6, 19, 10],
         },
       })
+      // 「怎麼走」的步行路線：白色描邊加一條平靜的深綠色線，畫在樹的上面
+      m.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      m.addLayer(
+        {
+          id: 'route-casing',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#ffffff', 'line-opacity': 0.9, 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 8, 18, 12, 20, 16] },
+        },
+      )
+      m.addLayer(
+        {
+          id: 'route-line',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          paint: { 'line-color': '#2f7d6d', 'line-opacity': 0.95, 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 5, 18, 7, 20, 10] },
+        },
+      )
       // 選到的樹或樹穴：一圈光暈
       m.addSource('selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addLayer(
@@ -367,10 +394,10 @@ export default function MapPage() {
     const key = `${anchor.source}:${anchor.lngLat.join()}`
     nearby?.setData({ type: 'Polygon', coordinates: [circleRing(anchor.lngLat, NEAR.radiusMeters)] })
     m.setMaxBounds(null)
-    m.setMinZoom(NEAR.minZoom)
+    if (!boundsLifted.current) m.setMinZoom(NEAR.minZoom)
     if (focusRef.current) {
-      // 正在看一棵樹：不把鏡頭拉回人身上，只更新可移動範圍
-      m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
+      // 正在看一棵樹：不把鏡頭拉回人身上，只更新可移動範圍（正在看整條路線時先不限制）
+      if (!boundsLifted.current) m.setMaxBounds(boundsAround(anchor.lngLat, NEAR.radiusMeters))
     } else if (centeredOn.current !== key) {
       // 進附近模式、或人移動了：鏡頭移到新的中心。進附近模式用預設街景縮放；人走動時保留使用者目前的縮放（至少 minZoom）。
       // 上一段動畫可能被打斷，所以角度用「至少」而不是沿用目前值
@@ -483,20 +510,91 @@ export default function MapPage() {
     if (duration === 0) show()
     else m.once('moveend', show)
   }
+  function restoreBounds() {
+    if (!boundsLifted.current) return
+    boundsLifted.current = false
+    map.current?.setMinZoom(NEAR.minZoom)
+    map.current?.setMaxBounds(boundsAround(anchorRef.current.lngLat, NEAR.radiusMeters))
+  }
   // 收起行動圈並飛回原來的街景
   const unfocusTree = useRef<() => void>(() => {})
   unfocusTree.current = () => {
     const m = map.current
     const prev = prevView.current
-    leaveFocus()
-    if (m && prev) m.easeTo({ ...prev, duration: motionMs(TREE_FOCUS.durationMs) })
+    leaveFocus(!prev)
+    if (m && prev) {
+      m.easeTo({ ...prev, duration: motionMs(TREE_FOCUS.durationMs) })
+      m.once('moveend', restoreBounds) // 飛回街景之後才把「只能在附近移動」的限制裝回去
+    }
   }
-  // 不飛回去，只是離開（要開別的抽屜時）
-  function leaveFocus() {
+  // 不飛回去，只是離開（要開別的抽屜時）。restore = false：呼叫的人自己等鏡頭到位再裝回移動限制
+  function leaveFocus(restore = true) {
     prevView.current = null
     setTreeFocus(null)
+    setRouteFor(null)
+    if (restore) restoreBounds()
     ;(map.current?.getSource('selected') as maplibregl.GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features: [] })
   }
+
+  // 「怎麼走」：找路網、算路線（人移動了就重算，鏡頭只在第一次拉）
+  const focusTreeId = treeFocus?.tree.id ?? null
+  const anchorKey = anchor.lngLat.join()
+  useEffect(() => {
+    const tree = focusRef.current?.tree
+    if (!ready || !tree || routeFor !== tree.id) return setRoute(null)
+    let alive = true
+    ;(async () => {
+      const from = anchorRef.current.lngLat
+      const prefixes = [treePrefix(tree.id), await prefixAtAsync(from)]
+      let found: Route | null = null
+      for (const prefix of new Set(prefixes)) {
+        const graph = prefix ? await loadRoadGraph(prefix) : null
+        found = graph && routeBetween(graph, from, tree.lngLat)
+        if (found) break
+      }
+      if (alive) setRoute(found ?? 'none')
+    })()
+    return () => {
+      alive = false
+    }
+  }, [routeFor, focusTreeId, anchorKey, ready])
+
+  // 畫路線與路線上的標籤；第一次出現時鏡頭拉到看得到整條路線
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    const source = m.getSource('route') as maplibregl.GeoJSONSource | undefined
+    if (!route || route === 'none') {
+      source?.setData({ type: 'FeatureCollection', features: [] })
+      return
+    }
+    source?.setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: route.coords } })
+    const label = document.createElement('div')
+    label.className = 'route-label'
+    label.dataset.testid = 'route-label'
+    label.setAttribute('role', 'status')
+    label.textContent = routeLabel(route)
+    const marker = new maplibregl.Marker({ element: label, anchor: 'bottom', offset: [0, -16] }).setLngLat(routeMidpoint(route.coords)).addTo(m)
+    if (!routeFitted.current) {
+      routeFitted.current = true
+      // 把路線連同它對著樹的鏡像一起框進畫面：樹留在畫面中間，行動圈（左右各約 150 px）才不會被切到
+      const tree = route.coords[route.coords.length - 1]
+      const bounds = new maplibregl.LngLatBounds(tree, tree)
+      for (const c of route.coords) bounds.extend(c).extend([2 * tree[0] - c[0], 2 * tree[1] - c[1]])
+      boundsLifted.current = true
+      m.setMaxBounds(null)
+      m.setMinZoom(13) // 路線長時要拉得比街景遠才框得下
+      m.fitBounds(bounds, {
+        padding: { top: 130, bottom: 240, left: 24, right: 24 },
+        maxZoom: 19.5,
+        pitch: 0,
+        duration: motionMs(TREE_FOCUS.durationMs),
+      })
+    }
+    return () => {
+      marker.remove()
+    }
+  }, [route, ready])
 
   // 人物感應圈與圈內的樹（只在附近模式、有定位或 Demo 時）
   const radius = ringRadius(anchor)
@@ -698,9 +796,18 @@ export default function MapPage() {
           range={focusRange}
           onClose={() => unfocusTree.current()}
           demo={demo}
+          extraNote={route === 'none' ? '找不到路線，這裡的小路可能沒有收錄' : routeFor === treeFocus.tree.id && !route ? '正在找路線…' : ''}
           onGo={(a) => {
-            // Demo 的「走過去」：模擬位置移到樹旁，圈就跟著亮了（不換頁）
-            if (a.id === 'walk') return setDemoPosition(walkTarget(anchor.lngLat, treeFocus.tree.lngLat))
+            // 怎麼走：畫出（再點一次收起）從人物到這棵樹的步行路線，不換頁
+            if (a.id === 'route') {
+              routeFitted.current = false
+              return setRouteFor((id) => (id === treeFocus.tree.id ? null : treeFocus.tree.id))
+            }
+            // Demo 的「走過去」：模擬位置移到樹旁，圈就跟著亮了（不換頁）；路線跟著收起
+            if (a.id === 'walk') {
+              setRouteFor(null)
+              return setDemoPosition(walkTarget(anchor.lngLat, treeFocus.tree.lngLat))
+            }
             // nearTree：從行動圈來而且在感應圈內，樹的頁面可以說「你已經在樹旁邊了」；打卡仍然要掃樹牌
             const state = { ...(a.hintTreeId && { hintTreeId: a.hintTreeId }), nearTree: focusRange.inRange }
             navigate({ pathname: a.to, hash: a.hash ? `#${a.hash}` : undefined }, { state })

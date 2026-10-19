@@ -59,6 +59,7 @@ uv run scripts/fetch_admin_osm.py  # 下載 OSM 行政區界到 material/raw/osm
 uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json（集章冊背景）；加 --check 只檢查
 uv run scripts/fetch_villages.py   # 下載內政部村里界到 material/raw/village/village.zip（只在要更新時跑）
 uv run scripts/build_villages.py   # 產生 public/data/villages/<前綴>.json（456 里的界線與每里樹數）；加 --check 只檢查
+uv run scripts/build_road_graph.py # 產生 public/data/roads/<前綴>.json（步行路網，來自 OSM 具名道路；需要先有 villages）；加 --check 只檢查
 ```
 
 前端：

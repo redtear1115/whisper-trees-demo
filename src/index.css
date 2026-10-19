@@ -3045,6 +3045,21 @@ body.has-offline .gov {
   display: none;
 }
 
+/* 「怎麼走」路線中間的小膠囊：「約 120 公尺・步行 2 分鐘」 */
+.route-label {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.96);
+  border: 1px solid #2f7d6d;
+  box-shadow: var(--shadow);
+  color: var(--green-ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tree-ring,
   .tree-rings-title {

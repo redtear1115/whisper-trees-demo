@@ -59,6 +59,7 @@ export const ASSETS: AssetSpec[] = [
   { id: 'action-whisper', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上' },
   { id: 'action-info', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹的資料（樹牌或葉子加一個 i）。規格同上' },
   { id: 'action-report', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹況回報（剪刀或旗標）。規格同上' },
+  { id: 'action-route', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：怎麼走（彎彎的路線加一個終點標記）。規格同上' },
   { id: 'action-walk', w: 64, h: 64, where: '點樹後的行動圈（只有 Demo 模式）', brief: '圖示：走過去（腳印）。規格同上' },
 ]
 

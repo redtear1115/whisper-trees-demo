@@ -46,20 +46,25 @@ describe('farNote', () => {
 describe('ringActions', () => {
   const near = { distance: 3, inRange: true, remaining: null }
   const far = { distance: 60, inRange: false, remaining: 25 }
-  it('in range all three are active, in a fixed order (掃樹牌 is the big button, not a ring)', () => {
+  it('in range all four are active, in a fixed order (掃樹牌 is the big button, not a ring)', () => {
     const a = ringActions('DA0030211045', near)
-    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report'])
+    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report', 'route'])
     expect(a.every((x) => x.enabled)).toBe(true)
   })
-  it('out of range only 樹的資料 is active; the others say why in their aria-label', () => {
+  it('out of range only 樹的資料 and 怎麼走 are active; the others say why in their aria-label', () => {
     const a = ringActions('DA0030211045', far)
-    expect(a.filter((x) => x.enabled).map((x) => x.id)).toEqual(['info'])
+    expect(a.filter((x) => x.enabled).map((x) => x.id)).toEqual(['info', 'route'])
     for (const x of a.filter((x) => !x.enabled)) expect(x.aria).toContain('走近一點，還有約 25 公尺')
     expect(a.find((x) => x.id === 'info')!.aria).toBe('樹的資料')
   })
-  it('no location: same as far', () => {
+  it('no location: only 樹的資料 is active (怎麼走 needs a starting point)', () => {
     const a = ringActions('X', { distance: null, inRange: false, remaining: null })
     expect(a.filter((x) => x.enabled).map((x) => x.id)).toEqual(['info'])
+    expect(a.find((x) => x.id === 'route')!.aria).toContain('暫時不能用')
+  })
+  it('怎麼走 stays on however far the tree is, and does not change page', () => {
+    const r = ringActions('X', { distance: 5000, inRange: false, remaining: 4965 }).find((x) => x.id === 'route')!
+    expect(r).toMatchObject({ label: '怎麼走', art: 'action-route', enabled: true, to: '' })
   })
   it('routes: whisper and report land on page anchors; there is no scan ring', () => {
     const a = Object.fromEntries(ringActions('DA0030211045-001', near).map((x) => [x.id, x]))
@@ -76,11 +81,18 @@ describe('ringActions in Demo (走過去)', () => {
   it('adds a ring 走過去, always active, only in Demo', () => {
     expect(ringActions('X', far).some((x) => x.id === 'walk')).toBe(false)
     const a = ringActions('X', far, true)
-    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report', 'walk'])
+    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report', 'route', 'walk'])
     expect(a.find((x) => x.id === 'walk')).toMatchObject({ label: '走過去', enabled: true })
   })
   it('after walking (in range) every ring is active', () => {
     expect(ringActions('X', { distance: 10, inRange: true, remaining: null }, true).every((x) => x.enabled)).toBe(true)
+  })
+  it('4 and 5 rings keep the 72 px wide buttons (disc + label) apart at 360 px', () => {
+    for (const n of [4, 5]) {
+      const o = arcOffsets(n, 118)
+      for (let i = 1; i < o.length; i++) expect(Math.hypot(o[i].x - o[i - 1].x, o[i].y - o[i - 1].y)).toBeGreaterThanOrEqual(72)
+      expect(Math.max(...o.map((p) => Math.abs(p.x))) + 36).toBeLessThanOrEqual(180)
+    }
   })
   it('5 rings fan wider so 56 px discs stay apart (>= 56 px between centres)', () => {
     const o = arcOffsets(5, 118)

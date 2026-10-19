@@ -32,7 +32,7 @@
 |---|---|---|
 | 集章冊 | `/stamps` | 各行政區的章與光點歷史 |
 | 探索 | `/explore` | 探索地圖（迷霧：打卡過的樹周圍 50 m 散開，見 [09-fog](docs/specs/09-fog.md)）、新手任務、樹的圖鑑 |
-| 首頁 | `/` | 地圖（只有「附近」街景，預設縮放 18.5；你選的動物站在你的位置；點樹飛到樹旁、浮出掃樹牌／樹洞／樹的資料／樹況回報四個圈，離太遠的灰掉）、掃樹牌 |
+| 首頁 | `/` | 地圖（只有「附近」街景，預設縮放 18.5；你選的動物站在你的位置；點樹飛到樹旁、浮出樹洞／樹的資料／樹況回報／怎麼走四個圈（Demo 多一個走過去），離太遠的灰掉；「怎麼走」在地圖上畫出沿路的步行路線與距離、分鐘）、掃樹牌 |
 | 樹洞 | `/journal` | 我在各棵樹留下的話、我的許願 |
 | 我的 | `/me` | 小芽、光點紀錄、徽章、設定（陪你的動物、帳號、新手引導、Demo 工具） |
 
@@ -100,6 +100,7 @@
 | `public/data/` | 網頁用的樹木點位（向量圖磚）、樹籍查詢表、空樹穴、行政區與樹種統計 | `scripts/build_web_data.py`，見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
 | `public/data/taipei-outline.json` | 集章冊示意地圖的背景：台北市輪廓、12 區界、鄰近的新北與基隆（已投影成 SVG 路徑，約 11 KB）；OSM 資料，© OpenStreetMap contributors（ODbL），畫面上有出處 | `scripts/build_admin_outline.py` |
 | `public/data/villages/<前綴>.json` | 臺北市 456 個里的界線（WGS84，簡化約 12 公尺）與每里的樹木總數（以樹木座標落在哪個里計；51 棵落在所有里之外，不計入），每區一個檔案（11～72 KB）；里界來自內政部國土測繪中心，畫面出處需標明 | `scripts/build_villages.py`，見 [08-extensions §10](docs/specs/08-extensions.md) |
+| `public/data/roads/<前綴>.json` | 步行路網（怎麼走、集章冊里路線）：每區一個檔案（93～302 KB），OSM 具名道路（去掉快速道路與高架、不能走的），路口與路的盡頭為節點、邊帶長度與中間座標，每區外擴 300 公尺；**只含具名道路，小巷可能沒有**；© OpenStreetMap contributors（ODbL） | `scripts/build_road_graph.py`，見 [02-map](docs/specs/02-map.md)「怎麼走」 |
 | `public/api/v1/` | 開放 API 的靜態 JSON（行政區、樹種、端點清單；許願為模擬） | 同上 |
 
 推算的限制：
@@ -185,6 +186,7 @@ uv run scripts/fetch_admin_osm.py  # 重新下載行政區界到 material/raw/os
 uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json，順便做 --check
 uv run scripts/fetch_villages.py   # 下載內政部村里界到 material/raw/village/village.zip（只在要更新時跑）
 uv run scripts/build_villages.py   # 產生 public/data/villages/<前綴>.json（里界與每里樹數），順便做 --check
+uv run scripts/build_road_graph.py # 產生 public/data/roads/<前綴>.json（步行路網，需要先有 villages），順便做 --check
 ```
 
 ## 開發

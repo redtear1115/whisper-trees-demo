@@ -62,9 +62,10 @@
 | `action-whisper` | 64×64 | 128×128 | `public/assets/ph/action-whisper.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:74` | 圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上 |
 | `action-info` | 64×64 | 128×128 | `public/assets/ph/action-info.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:75` | 圖示：樹的資料（樹牌或葉子加一個 i）。規格同上 |
 | `action-report` | 64×64 | 128×128 | `public/assets/ph/action-report.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:76` | 圖示：樹況回報（剪刀或旗標）。規格同上 |
-| `action-walk` | 64×64 | 128×128 | `public/assets/ph/action-walk.svg` | 點樹後的行動圈（只有 Demo 模式） | `src/features/map/treeRings.ts:78` | 圖示：走過去（腳印）。規格同上 |
+| `action-route` | 64×64 | 128×128 | `public/assets/ph/action-route.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:82` | 圖示：怎麼走（彎彎的路線加一個終點標記）。規格同上 |
+| `action-walk` | 64×64 | 128×128 | `public/assets/ph/action-walk.svg` | 點樹後的行動圈（只有 Demo 模式） | `src/features/map/treeRings.ts:88` | 圖示：走過去（腳印）。規格同上 |
 
-共 47 項。
+共 48 項。
 
 ## PWA 圖示（加到手機主畫面）
 

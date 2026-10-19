@@ -16,7 +16,7 @@ export const TREE_FOCUS = {
   durationMs: 1100,
 }
 
-export type RingActionId = 'whisper' | 'info' | 'report' | 'walk'
+export type RingActionId = 'whisper' | 'info' | 'report' | 'route' | 'walk'
 
 export interface RangeInfo {
   /** 沒有定位（fallback）時是 null：當作很遠 */
@@ -50,7 +50,7 @@ export interface RingAction {
   enabled: boolean
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
-  /** 要去哪（router 路徑）；「走過去」不換頁，是空字串 */
+  /** 要去哪（router 路徑）；「怎麼走」「走過去」不換頁，是空字串 */
   to: string
   /** 樹的頁面上的錨點（id，不含 #） */
   hash?: string
@@ -59,7 +59,7 @@ export interface RingAction {
 }
 
 /**
- * 三個行動，順序固定（左到右）。圈外只有「樹的資料」能用。
+ * 四個行動，順序固定（左到右）。圈外只有「樹的資料」和「怎麼走」能用（怎麼走：有位置就能用，不管多遠）。
  * 掃樹牌不是圈：沿用畫面下方的大綠色按鈕（點樹時也一直在，帶著這棵樹去掃描頁）。
  * Demo 模式（demo = true）多一個「走過去」：把模擬位置移到樹旁，永遠能用（MapPage 處理）。
  */
@@ -75,6 +75,16 @@ export function ringActions(treeId: string, range: RangeInfo, demo = false): Rin
     make({ id: 'info', label: '樹的資料', art: 'action-info', to: `/tree/${treeId}` }, false, '樹的資料'),
     make({ id: 'report', label: '樹況回報', art: 'action-report', to: `/tree/${treeId}`, hash: 'report' }, true, '樹況回報'),
   ]
+  // 怎麼走：畫出從人物到這棵樹的步行路線。沒有位置（沒定位也不是 Demo）時沒有起點，灰色
+  actions.push({
+    id: 'route',
+    label: '怎麼走',
+    art: 'action-route',
+    to: '',
+    ...(range.distance !== null
+      ? { enabled: true, aria: '怎麼走：在地圖上畫出走到這棵樹的路線' }
+      : { enabled: false, aria: `怎麼走（暫時不能用：${why}）` }),
+  })
   if (demo) actions.push(make({ id: 'walk', label: '走過去', art: 'action-walk', to: '' }, false, 'Demo：走到這棵樹旁邊'))
   return actions
 }
@@ -85,7 +95,7 @@ export interface Offset {
 }
 
 /**
- * 在樹的下方排成一道弧：count 個圈、半徑 radius（px），整道弧張開 spanDeg 度（4 個圈 140°，5 個圈 170° 才不擠），正下方為中間。
+ * 在樹的下方排成一道弧：count 個圈、半徑 radius（px），整道弧張開 spanDeg 度（4 個圈 140°，5 個圈 170° 才不擠；4 個圈的間距約 93 px、5 個約 85 px，72 px 寬的圈加標籤不重疊），正下方為中間。
  * 回傳相對樹中心的位置（x 向右、y 向下），由左到右。
  */
 export function arcOffsets(count: number, radius: number, spanDeg = count > 4 ? 170 : 140): Offset[] {

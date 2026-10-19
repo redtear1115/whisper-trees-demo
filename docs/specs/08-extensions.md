@@ -204,6 +204,10 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - **示意地圖的背景（2026-10-19 使用者決定）**：區卡後面畫台北市輪廓與 12 區界（淡線），外圍的新北市、基隆市用較深的色塊，區卡的格子排法不變。資料用 OSM 行政區界（ODbL，同既有的 OSM 資料）：`scripts/fetch_admin_osm.py` 經 Overpass 下載到 `material/raw/osm/admin_boundaries_osm.json`（2026-10-19；臺北市、新北市、基隆市 `admin_level=4`，臺北市各區在 OSM 是 `admin_level=7`），`scripts/build_admin_outline.py` 組成多邊形、投影到 TWD97、把新北與基隆裁到「台北市外框＋4 公里」、簡化（25～60 公尺）後輸出已投影的 SVG 路徑 `public/data/taipei-outline.json`（約 11 KB，含出處欄位）。畫面是一張靜態 SVG（不用 MapLibre），`meet` 置中貼合格子容器，`aria-hidden`、不接受點擊；鄰近縣市在裁切邊緣淡出；區卡背景微透明（82%）讓區界透出來。載入失敗（404、格式不對）就不畫背景、也不顯示出處，其餘照常。地圖下方一行出處「行政區界：© OpenStreetMap contributors（ODbL）」。這是示意背景，區卡位置仍不精確對應地理位置。
 - 語氣沿用設計原則：沒有紅點、排行、催促；文案「不用急」。章的美術是佔位檔 `stamp-iron`／`stamp-bronze`／`stamp-silver`／`stamp-gold`（清單見 [ui-assets](../ui-assets.md)），畫面用 `<Art id>`。
 
+### 里的步行路線（2026-10-19 使用者核准，只有函式庫）
+
+集章冊的里路線（之後的畫面）用 `src/lib/route.ts` 的 `planTreeTour(graph, start, candidates, maxStops = 8)`：從 `start` 出發，每次走向路上距離最近的下一棵還沒點亮的樹（貪婪），回傳 `{ start, stops, path, meters, minutes }`；`path` 是整條路線座標（接點不重複）。路網由 `loadRoadGraph(前綴)` 載入（`public/data/roads/`，只含 OSM 具名道路，小巷可能沒有；細節與限制見 [02-map「怎麼走」](02-map.md)）。走不到的樹會被略過、一棵都排不出來回傳 null，畫面要處理「找不到路線」。
+
 ### 里（資料）
 
 2026-10-19 使用者核准，只有資料與載入函式，還沒有畫面；之後的「里層級集章地圖」會用。
