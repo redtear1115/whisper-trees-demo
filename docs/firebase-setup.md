@@ -1,14 +1,14 @@
 # Firebase 設定紀錄
 
-專案 `whisper-trees`（免費 Spark 方案，不綁卡）。設計與安全審查見 Plan（rev 4）與 `firestore.rules` 開頭註解。
+專案 **`whisper-trees-demo`**（免費 Spark 方案，不綁卡）。2026-10-19 先建過 `whisper-trees`，後來改用使用者在 console 建的 `whisper-trees-demo`；`whisper-trees` 不再使用，待使用者決定是否刪除。設計與安全審查見 Plan（rev 4）與 `firestore.rules` 開頭註解。
 
 ## 已完成（2026-10-19）
 
 | 項目 | 狀態 | 做法 |
 |---|---|---|
-| GCP／Firebase 專案 `whisper-trees` | 完成 | `gcloud projects create`＋Firebase Management API `addFirebase`（Firebase console 在自動化瀏覽器無法載入） |
+| Firebase 專案 `whisper-trees-demo` | 完成 | 使用者在 Firebase console 建立 |
 | Firestore | 完成 | `gcloud firestore databases create --location=asia-east1`（Native） |
-| Web app `whisper-trees-web` | 完成 | Management API；設定寫入本機 `.env.local`（不進版控） |
+| Web app `whisper-trees-web` | 完成 | Management API（appId `1:724757846221:web:83db19ea8c8326e434b184`）；設定寫入本機 `.env.local`（不進版控） |
 | Security Rules | 已部署 | Rules API 建 ruleset 並發佈到 `cloud.firestore` |
 | Auth：匿名、Google、授權網域 | 待使用者在 console 操作 | 見下方 |
 | 白名單 `admins/{uid}` | 待 S3 | 見下方 |
@@ -18,7 +18,7 @@
 
 | 日期 | ruleset | `firestore.rules` sha256 |
 |---|---|---|
-| 2026-10-19 | `5c48e0ce-7b3a-43ed-9ba6-dbea39af745b` | `104022f0ec16525873ae54bf7be86a16a1617dfe6ff81004d90382bdf3740f8f` |
+| 2026-10-19 | `27a31e8d-2167-4963-ad53-caf3a929a0ce` | `104022f0ec16525873ae54bf7be86a16a1617dfe6ff81004d90382bdf3740f8f` |
 
 改規則後：先跑 `npm run test:rules`（本機 emulator，需要 `brew install openjdk`），通過才部署，並在上表加一列。
 
@@ -27,17 +27,17 @@
 ```sh
 TOKEN=$(gcloud auth print-access-token)
 python3 -c "import json;print(json.dumps({'source':{'files':[{'name':'firestore.rules','content':open('firestore.rules').read()}]}}))" > /tmp/ruleset.json
-curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whisper-trees" -H "Content-Type: application/json" \
-  https://firebaserules.googleapis.com/v1/projects/whisper-trees/rulesets --data @/tmp/ruleset.json
+curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whisper-trees-demo" -H "Content-Type: application/json" \
+  https://firebaserules.googleapis.com/v1/projects/whisper-trees-demo/rulesets --data @/tmp/ruleset.json
 # 用回傳的 name 更新 release
-curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whisper-trees" -H "Content-Type: application/json" \
-  https://firebaserules.googleapis.com/v1/projects/whisper-trees/releases/cloud.firestore \
-  -d '{"release":{"name":"projects/whisper-trees/releases/cloud.firestore","rulesetName":"<ruleset name>"}}'
+curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whisper-trees-demo" -H "Content-Type: application/json" \
+  https://firebaserules.googleapis.com/v1/projects/whisper-trees-demo/releases/cloud.firestore \
+  -d '{"release":{"name":"projects/whisper-trees-demo/releases/cloud.firestore","rulesetName":"<ruleset name>"}}'
 ```
 
 ## Auth 設定（console）
 
-1. https://console.firebase.google.com/project/whisper-trees/authentication →「開始使用」。
+1. https://console.firebase.google.com/project/whisper-trees-demo/authentication →「開始使用」。
 2. 登入方式：啟用「匿名」與「Google」（支援信箱選專案擁有者）。
 3. 設定 › 授權網域：新增 `whisper-trees.pages.dev`（`localhost` 預設已有）。
 4. 不要升級到 Identity Platform（免費方案會有每日 3,000 名活躍使用者上限）。
