@@ -1466,32 +1466,6 @@ textarea.input {
   color: var(--muted);
 }
 
-.character {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 14px;
-  align-items: center;
-}
-
-.character .stack {
-  position: relative;
-  width: 120px;
-  height: 120px;
-}
-
-.character .stack .art {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.character .stack .art.outfit {
-  inset: auto 0 0 auto;
-  width: 50%;
-  height: 50%;
-}
-
 .ledger {
   list-style: none;
   padding: 0;
@@ -3026,19 +3000,6 @@ body.has-offline .gov {
   overflow-wrap: anywhere;
 }
 
-.me-animal {
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
-}
-
-.me-animal-title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  margin: 0;
-}
-
 /* ---------- 點樹：樹旁的行動圈 ---------- */
 
 /* 蓋在地圖上的一層；位置由 TreeRingLayer 依樹在畫面上的位置設定。這層不吃點擊，只有圈本身吃，點地圖其他地方還是會到地圖 */
@@ -3992,6 +3953,304 @@ body.has-offline .gov {
 .demo-exit:hover {
   border-color: var(--red-ink);
   background: var(--red-ink);
+}
+
+/* ---------- 我的（批評修正 P） ---------- */
+
+/* 繪本感：手剪般不對稱的圓角、暖色紙底、柔和有位移的陰影。全部只用既有的色彩變數。 */
+.me-hero {
+  --me-wobble: 22px 18px 24px 16px / 18px 24px 16px 22px;
+  position: relative;
+  margin: 12px 0;
+  padding: 16px 16px 14px;
+  border: 2px solid var(--line);
+  border-radius: var(--me-wobble);
+  background:
+    radial-gradient(120% 70% at 50% 0%, rgba(242, 193, 78, 0.22), rgba(242, 193, 78, 0) 70%),
+    var(--card);
+  box-shadow: 0 8px 18px -6px rgba(44, 58, 46, 0.18);
+  text-align: center;
+}
+
+.me-scene {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  min-height: 136px;
+  padding-bottom: 10px;
+}
+
+/* 腳下的一小塊草地，像用蠟筆塗出來的 */
+.me-scene::before {
+  content: '';
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 0;
+  height: 34px;
+  border-radius: 62% 38% 55% 45% / 70% 60% 40% 30%;
+  background: var(--green-soft);
+  border-bottom: 3px dashed rgba(63, 125, 78, 0.35);
+}
+
+.me-companion,
+.me-sprout {
+  position: relative;
+  flex: none;
+}
+
+.me-companion {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 6px;
+}
+
+.me-sprout {
+  width: 116px;
+  height: 116px;
+}
+
+.me-companion .art,
+.me-sprout .art {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.me-sprout .art.outfit {
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  width: 48%;
+  height: 48%;
+}
+
+.me-hero-title {
+  margin: 4px 0 2px;
+  font-size: 1.3rem;
+  text-wrap: balance;
+}
+
+.me-hero-line {
+  margin: 4px auto 10px;
+  max-width: 30ch;
+  text-wrap: pretty;
+}
+
+.me-grow {
+  height: 12px;
+  border-radius: 99px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.me-grow > div {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--green);
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.me-hero-note {
+  margin: 8px 0 0;
+}
+
+.me-swap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  text-align: left;
+}
+
+.me-swap > .muted {
+  min-width: 0;
+  flex: 1 1 8rem;
+}
+
+.me-swap-btn {
+  flex: none;
+  min-width: 88px;
+  border-color: var(--green);
+  color: var(--green-ink);
+  font-weight: 600;
+}
+
+.me-hero .animal-picker {
+  margin: 10px 0 0;
+}
+
+.me-hero .animal-option {
+  min-height: 72px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .me-companion .art,
+  .me-closing-art {
+    animation: me-bob 2.8s ease-in-out infinite alternate;
+  }
+  @keyframes me-bob {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-4px);
+    }
+  }
+}
+
+/* 換裝 */
+.me-chips {
+  gap: 8px;
+}
+
+.me-chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 18px 14px 18px 14px / 14px 18px 14px 18px;
+}
+
+/* 光點紀錄 */
+.me-page .ledger li {
+  display: block;
+  padding: 0;
+}
+
+.me-page .ledger li:last-child {
+  border-bottom: 0;
+}
+
+.ledger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.ledger-row.linked::after {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-right: 1.75px solid var(--muted);
+  border-top: 1.75px solid var(--muted);
+  transform: rotate(45deg);
+}
+
+.ledger-main {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ledger-reason {
+  font-weight: 600;
+}
+
+.ledger-where {
+  overflow-wrap: anywhere;
+}
+
+.ledger-when {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.ledger-delta {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-delta.in {
+  color: var(--green-ink);
+}
+
+.ledger-delta.out {
+  color: var(--amber-ink);
+}
+
+.ledger-more {
+  width: 100%;
+  margin-top: 6px;
+}
+
+/* 成長徽章 */
+.me-badges-head {
+  display: grid;
+  gap: 0;
+  padding: 6px 0;
+  min-width: 0;
+}
+
+.me-badges summary {
+  line-height: 1.35;
+}
+
+/* 設定與其他：安靜、縮在底下，不做成卡片 */
+.me-settings {
+  margin: 28px 0 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+}
+
+.me-settings-title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.me-settings-list .menu-link {
+  font-size: 0.95rem;
+}
+
+.me-account {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+
+.me-account .btn {
+  margin-top: 4px;
+}
+
+.me-data-note {
+  margin: 12px 0 4px;
+}
+
+.me-settings-list .menu-link.danger {
+  margin-top: 4px;
+  font-size: 0.9rem;
+}
+
+/* 頁尾：以陪你的動物收尾，不以紅字收尾 */
+.me-closing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 0;
+  font-family: var(--font-voice);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.me-closing-art {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
 }
 
 /* ---------- 探索與樹洞（批評修正 E） ---------- */
