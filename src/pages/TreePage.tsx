@@ -22,9 +22,9 @@ export default function TreePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
-  // 從樹洞或圖鑑點進來，返回就回到那一頁；其他（掃碼、地圖）回地圖
+  // 從某個分頁點進來（樹洞、我的光點紀錄、探索、集章冊），返回就回到那一頁；其他（掃碼、地圖）回地圖
   const fromTab = (location.state as { from?: string } | null)?.from
-  const back = fromTab === '/journal' ? { to: '/journal', label: '樹洞' } : { to: '/', label: '地圖' }
+  const back = backTarget(fromTab)
   // 從地圖行動圈來、人在感應圈內：還沒打卡就提醒「掃一下樹牌就好」，不要再叫人走過去
   const nearTree = (location.state as { nearTree?: boolean } | null)?.nearTree === true
   const night = !isDaytime()
@@ -288,4 +288,11 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
       </form>
     </section>
   )
+}
+
+const BACK_LABEL: Record<string, string> = { '/journal': '樹洞', '/me': '我的', '/explore': '探索', '/stamps': '集章冊' }
+
+/** 樹的頁面的返回鍵：記得從哪個分頁來 */
+export function backTarget(from: string | undefined): { to: string; label: string } {
+  return from && BACK_LABEL[from] ? { to: from, label: BACK_LABEL[from] } : { to: '/', label: '地圖' }
 }

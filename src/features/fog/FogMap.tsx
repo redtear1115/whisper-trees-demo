@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Map as MLMap } from 'maplibre-gl'
+import { toneBasemap } from '../map/basemapTone'
 import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../../lib/maplibre'
 import { MAP_STYLE } from '../../config'
 import type { LngLat } from '../../lib/geo'
@@ -142,6 +143,7 @@ function FogView({
       attributionControl: false,
       locale: MAP_LOCALE,
     })
+    toneBasemap(m) // 和首頁同一套暖色紙面底圖
     map.current = m
     ;(window as unknown as { __fogMap: MLMap }).__fogMap = m // 給自動化測試用
     m.touchZoomRotate.disableRotation()

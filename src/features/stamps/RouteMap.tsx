@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { Map as MLMap, Marker } from 'maplibre-gl'
+import { toneBasemap } from '../map/basemapTone'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { MAP_STYLE } from '../../config'
 import { MAP_LOCALE, applyChineseLabels, maplibregl } from '../../lib/maplibre'
@@ -38,6 +39,7 @@ export function RouteMap({ tour }: { tour: Tour }) {
       attributionControl: false,
       locale: MAP_LOCALE,
     })
+    toneBasemap(m) // 和首頁同一套暖色紙面底圖
     map.current = m
     ;(window as unknown as { __routeMap: MLMap }).__routeMap = m // 給自動化測試用
     m.touchZoomRotate.disableRotation()
