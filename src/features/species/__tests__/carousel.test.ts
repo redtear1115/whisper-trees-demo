@@ -32,3 +32,18 @@ describe('carousel text', () => {
     expect(slideLabel(4, 5)).toBe('第 5 張，共 5 張')
   })
 })
+
+describe('photoIndexForTree', () => {
+  it('uses the tree number modulo the photo count', async () => {
+    const { photoIndexForTree } = await import('../carousel')
+    expect(photoIndexForTree('DA0030211045', 6)).toBe(30211045 % 6)
+    expect(photoIndexForTree('DA0030211046', 6)).toBe(30211046 % 6)
+    expect(photoIndexForTree('DA0030211045', 4)).toBe(30211045 % 4)
+  })
+  it('includes suffixes and handles edge cases', async () => {
+    const { photoIndexForTree } = await import('../carousel')
+    expect(photoIndexForTree('DA0030211045-001', 6)).toBe(Number('0030211045001') % 6)
+    expect(photoIndexForTree('XX', 6)).toBe(0)
+    expect(photoIndexForTree('DA1', 0)).toBe(0)
+  })
+})

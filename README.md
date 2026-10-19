@@ -89,7 +89,7 @@
 
 `material/raw/village/village.zip` 為 2026-10-19 下載的內政部國土測繪中心[村（里）界](https://data.gov.tw/dataset/7438)（資料集「村里界圖(TWD97經緯度)」，SHP，版本 `VILLAGE_NLSC_1150817`，全國 7,986 個村里），依[政府資料開放授權條款第 1 版](https://data.gov.tw/license)使用；由 `scripts/fetch_villages.py` 下載（連結取自 data.gov.tw API，備援為 TGOS 的固定網址），用來做 456 個里的界線與每里樹木數，供之後的里層級集章地圖使用。
 
-`material/raw/inat/` 為 2026-10-20 透過 iNaturalist 官方 API v1 下載的樹種照片（圖鑑與樹的頁面輪播用）：台北最常見的 40 個樹種，每種 4～6 張（共 198 張，「medium」約 500 px），由 `scripts/fetch_inat_photos.py` 下載，逐張記在 `material/raw/inat/manifest.json`（樹種、學名、照片與觀察編號、攝影者、授權、原始網址、下載日期）。**只收 CC0 與 CC BY 授權的照片**（不收 CC BY-NC、BY-SA、ND 與保留所有權利）；`photo_license` 篩選只代表觀察「至少有一張」符合，所以腳本逐張檢查照片自己的 `license_code`。每位攝影者在同一樹種最多一張，優先取台灣（place 7887）的研究級觀察、依票數排序，台灣不足 4 張才從其他地區補（`manifest` 的 `scope` 欄位記錄）。照片版權屬各攝影者；畫面上每張照片都標「© 攝影者, CC BY」或「CC0 攝影者」、授權條款連結與 iNaturalist 原始觀察連結。資料裡只有中文樹種名，學名對照是手動整理在腳本裡的，所以樹的頁面上標明「這個樹種的照片，不是這一棵樹」。API 回應的快取（`material/raw/inat/_cache/`）不進版控。
+`material/raw/inat/` 為 2026-10-20 透過 iNaturalist 官方 API v1 下載的樹種照片（圖鑑輪播與樹的頁面用；樹的頁面每棵樹依編號固定顯示其中一張）：台北最常見的 40 個樹種，每種 4～6 張（共 198 張，「medium」約 500 px），由 `scripts/fetch_inat_photos.py` 下載，逐張記在 `material/raw/inat/manifest.json`（樹種、學名、照片與觀察編號、攝影者、授權、原始網址、下載日期）。**只收 CC0 與 CC BY 授權的照片**（不收 CC BY-NC、BY-SA、ND 與保留所有權利）；`photo_license` 篩選只代表觀察「至少有一張」符合，所以腳本逐張檢查照片自己的 `license_code`。每位攝影者在同一樹種最多一張，優先取台灣（place 7887）的研究級觀察、依票數排序，台灣不足 4 張才從其他地區補（`manifest` 的 `scope` 欄位記錄）。照片版權屬各攝影者；畫面上每張照片都標「© 攝影者, CC BY」或「CC0 攝影者」、授權條款連結與 iNaturalist 原始觀察連結。資料裡只有中文樹種名，學名對照是手動整理在腳本裡的，所以樹的頁面上標明「這個樹種的照片，不是這一棵樹」。API 回應的快取（`material/raw/inat/_cache/`）不進版控。
 
 **樹牌 QR Code**：公園處樹牌上的 QR Code 內容為 `http://trees.gov.taipei/show/?treeid=<樹籍編號>`（以實拍樹牌 `SL0560111023` 解碼確認，照片在 `material/samples/`）。`treeid` 就是上表樹木資料的 `TreeID`，所以掃到樹牌就能查到這棵樹的座標、樹種、樹高與胸徑。
 
