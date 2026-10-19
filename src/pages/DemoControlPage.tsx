@@ -1,34 +1,66 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Card } from '../components/ui'
-import { IconBack } from '../components/icons'
+import { isDemoMode } from '../store'
 
-/** 示範後台入口：評審與承辦人用，不在市民端的導覽裡（從「我的」最下方的小連結進來）。 */
+/** 切換台上的一個去處 */
+interface Stop {
+  to: string
+  label: string
+  note: string
+}
+
+const CITIZEN: Stop[] = [
+  { to: '/', label: '首頁地圖', note: '人物、感應範圍、點樹的行動圈、掃樹牌' },
+  { to: '/stamps', label: '集章冊', note: '全市 → 區 → 里，建議路線' },
+  { to: '/explore', label: '探索', note: '迷霧地圖、新手任務、樹的圖鑑' },
+  { to: '/journal', label: '樹洞', note: '我的日記、我的許願、附近的樹' },
+  { to: '/me', label: '我的', note: '小芽、光點、徽章、設定' },
+]
+
+const BACK_OFFICE: Stop[] = [
+  { to: '/gov', label: '政府端', note: '補種優先排序、案件狀態、樹況回報、API 用戶端' },
+  { to: '/vendor', label: '發包商後台', note: '補種與養護工單、我的 API 用戶端' },
+  { to: '/gm', label: '遊戲營運（GM）', note: '活動、光點規則、商店、客服' },
+  { to: '/developers', label: '開放 API', note: 'OAuth 授權、端點文件、試打、MCP' },
+]
+
+/**
+ * Demo 切換台：只在 Demo 模式（?demo=1）出現，在市民端與各後台之間切換。
+ * 獨立頁面，市民端不放入口；不是 Demo 模式就回首頁。
+ */
 export default function DemoControlPage() {
+  if (!isDemoMode()) return <Navigate to="/" replace />
   return (
-    <div className="page">
+    <div className="page demo-control">
       <header className="topbar">
-        <Link className="btn ghost back" to="/me">
-          <IconBack /> 我的
-        </Link>
-        <h1 className="topbar-title">示範後台</h1>
+        <h1 className="topbar-title">Demo 切換台</h1>
       </header>
       <p className="muted small">
-        這些是桌機用的後台（政府端、發包商、遊戲營運、開放資料 API），手機也能開。後台寫入限白名單 Google 帳號；其他人看到的是「示範：只在這台裝置」，改動只留在自己的裝置，不會影響別人。
+        在市民端和各後台之間切換。市民端在電腦上也維持手機寬度、用模擬定位。後台寫入限白名單 Google 帳號；其他人看到的是「示範：只在這台裝置」，改動只留在自己的裝置，不會影響別人。
       </p>
-      <Card>
-        <Link className="menu-link" to="/gov">
-          政府端：補種優先排序、樹況回報
-        </Link>
-        <Link className="menu-link" to="/vendor">
-          發包商後台：補種與養護工單
-        </Link>
-        <Link className="menu-link" to="/gm">
-          遊戲營運後台（GM）：活動、光點規則、客服
-        </Link>
-        <Link className="menu-link" to="/developers">
-          開放資料 API
-        </Link>
-      </Card>
+
+      <h2 className="section-title">市民端（手機版）</h2>
+      <StopList stops={CITIZEN} testid="demo-citizen" />
+
+      <h2 className="section-title">後台</h2>
+      <StopList stops={BACK_OFFICE} testid="demo-back-office" />
     </div>
+  )
+}
+
+function StopList({ stops, testid }: { stops: Stop[]; testid: string }) {
+  return (
+    <Card>
+      <ul className="demo-stops" data-testid={testid}>
+        {stops.map((s) => (
+          <li key={s.to}>
+            <Link className="menu-link" to={s.to}>
+              <span className="demo-stop-label">{s.label}</span>
+              <span className="muted small">{s.note}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Card>
   )
 }

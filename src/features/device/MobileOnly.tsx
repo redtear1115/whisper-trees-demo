@@ -66,9 +66,9 @@ function DesktopNotice() {
         <Link className="btn" to="/gov">
           政府端（桌機）
         </Link>
-        <Link className="btn" to="/demo-control">
-          其他後台
-        </Link>
+        <a className="btn" href={`${import.meta.env.BASE_URL}demo-control?demo=1`}>
+          Demo 切換台
+        </a>
       </div>
       <p className="muted small">Demo 模式用模擬定位，可以掃示範樹牌，不需要相機。</p>
     </main>

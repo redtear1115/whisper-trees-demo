@@ -3950,3 +3950,39 @@ body.has-offline .gov {
   outline: 3px solid #f2c14e;
   outline-offset: 2px;
 }
+
+/* ---------- Demo 切換台 ---------- */
+
+.demo-stops {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.demo-stops li + li {
+  border-top: 1px solid var(--line);
+}
+
+.demo-stops .menu-link {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+  min-height: 44px;
+  border-bottom: 0;
+}
+
+/* 箭頭固定在右側一欄、跨兩列置中 */
+.demo-stops .menu-link::after {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.demo-stops .menu-link > * {
+  grid-column: 1;
+}
+
+.demo-stop-label {
+  font-weight: 700;
+}

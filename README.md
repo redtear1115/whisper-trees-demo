@@ -36,11 +36,11 @@
 | 樹洞 | `/journal` | 我在各棵樹留下的話、我的許願 |
 | 我的 | `/me` | 小芽、光點紀錄、徽章、設定（陪你的動物、帳號、新手引導、Demo 工具） |
 
-右上角是光點餘額，點了去商店 `/shop`。樹的頁面、掃描、商店是子頁面。後台（政府端、發包商、GM、開放 API）集中在獨立頁面 [`/demo-control`](https://whisper-trees.pages.dev/demo-control)，不從市民端連過去。
+右上角是光點餘額，點了去商店 `/shop`。樹的頁面、掃描、商店是子頁面。Demo 切換台 [`/demo-control?demo=1`](https://whisper-trees.pages.dev/demo-control?demo=1)：只在 Demo 模式顯示，在市民端（手機版）與各後台（政府端、發包商、GM、開放 API）之間切換；不從市民端連過去。
 
 ### 延伸功能（主線之後的示意）
 
-主線之外的畫面（集章冊、探索、樹洞、我的，以及獨立的示範後台 `/demo-control`）；全部是前端示意、模擬資料。見 [08-extensions](docs/specs/08-extensions.md)。
+主線之外的畫面（集章冊、探索、樹洞、我的，以及只在 Demo 模式顯示的「Demo 切換台」`/demo-control?demo=1`）；全部是前端示意、模擬資料。見 [08-extensions](docs/specs/08-extensions.md)。
 
 - 光點經濟、商店、圖鑑、成長徽章、角色養成
 - 集章冊：12 個行政區各依打卡過幾棵不同的樹得鐵（1）、銅（10）、銀（50）、金（200）章，另看每區累計的光點與明細；全由打卡紀錄與光點流水帳推算，不另存資料（已做，見 [08 §10](docs/specs/08-extensions.md)）
