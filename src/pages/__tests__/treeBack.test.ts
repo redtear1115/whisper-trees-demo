@@ -5,6 +5,8 @@ describe('backTarget', () => {
   it('returns to the tab the tree was opened from', () => {
     expect(backTarget('/me')).toEqual({ to: '/me', label: '我的' })
     expect(backTarget('/journal')).toEqual({ to: '/journal', label: '樹洞' })
+    expect(backTarget('/stamps?tab=explore')).toEqual({ to: '/stamps?tab=explore', label: '探索' })
+    expect(backTarget('/stamps')).toEqual({ to: '/stamps', label: '集章冊' })
   })
   it('falls back to the map', () => {
     expect(backTarget(undefined)).toEqual({ to: '/', label: '地圖' })

@@ -290,7 +290,7 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
   )
 }
 
-const BACK_LABEL: Record<string, string> = { '/journal': '樹洞', '/me': '我的', '/explore': '探索', '/stamps': '集章冊' }
+const BACK_LABEL: Record<string, string> = { '/journal': '樹洞', '/me': '我的', '/stamps': '集章冊', '/stamps?tab=explore': '探索' }
 
 /** 樹的頁面的返回鍵：記得從哪個分頁來 */
 export function backTarget(from: string | undefined): { to: string; label: string } {

@@ -11,8 +11,8 @@ interface Stop {
 
 const CITIZEN: Stop[] = [
   { to: '/', label: '首頁地圖', note: '人物、感應範圍、點樹的行動圈、掃樹牌' },
-  { to: '/stamps', label: '集章冊', note: '全市 → 區 → 里，建議路線' },
-  { to: '/explore', label: '探索', note: '迷霧地圖、新手任務、樹的圖鑑' },
+  { to: '/stamps', label: '集章冊', note: '全市 → 區 → 里，建議路線；探索分頁有迷霧、新手任務、圖鑑' },
+
   { to: '/journal', label: '樹洞', note: '我的日記、我的許願、附近的樹' },
   { to: '/me', label: '我的', note: '小芽、光點、徽章、設定' },
 ]

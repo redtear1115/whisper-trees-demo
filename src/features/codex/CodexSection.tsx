@@ -105,7 +105,7 @@ export function CodexSection() {
               {c ? (
                 <>
                   <span className="small">{formatDate(c.at)} 遇見</span>
-                  <Link className="tile-tree-link" to={`/tree/${c.treeId}`} aria-label={`看這棵樹：${r.species}，${c.treeId}`}>
+                  <Link className="tile-tree-link" to={`/tree/${c.treeId}`} state={{ from: '/stamps?tab=explore' }} aria-label={`看這棵樹：${r.species}，${c.treeId}`}>
                     看這棵樹 ›
                   </Link>
                 </>

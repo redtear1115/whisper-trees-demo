@@ -32,7 +32,7 @@ export function DistrictCard({
                   <li key={n}>
                     <span>
                       {i.treeId ? (
-                        <Link className="mono" to={`/tree/${i.treeId}`}>
+                        <Link className="mono" to={`/tree/${i.treeId}`} state={{ from: '/stamps' }}>
                           {i.treeId}
                         </Link>
                       ) : (

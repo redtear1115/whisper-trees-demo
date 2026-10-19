@@ -856,7 +856,7 @@ export default function MapPage() {
         <h1 className="sr-only">曦語地圖</h1>
         {/* 新手任務放在左上（和光點餘額同一排），離開大拇指會點的弧線 */}
         {!sheet && !treeFocus && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
-          <Link className="tasks-chip" to="/explore" data-testid="tasks-chip">
+          <Link className="tasks-chip" to="/stamps?tab=explore" data-testid="tasks-chip">
             新手任務 {tasksDone}/4
           </Link>
         )}

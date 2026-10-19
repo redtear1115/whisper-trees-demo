@@ -100,8 +100,8 @@ export function tasks(s?: State): Task[] {
     {
       id: 'codex',
       label: '看看圖鑑與成就',
-      hint: '圖鑑在「探索」，成就徽章在「我的」',
-      to: '/explore',
+      hint: '圖鑑在「集章冊 › 探索」，成就徽章在「我的」',
+      to: '/stamps?tab=explore',
       done: !!(ob.viewedCodexAt && ob.viewedBadgesAt),
     },
     {

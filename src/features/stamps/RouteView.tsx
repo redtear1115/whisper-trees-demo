@@ -86,7 +86,7 @@ export function RouteView({ prefix, village, lit }: { prefix: string; village: V
       <ol className="route-stops" data-testid="route-stops">
         {tour.stops.map((s) => (
           <li key={s.id}>
-            <Link className="mono" to={`/tree/${s.id}`}>
+            <Link className="mono" to={`/tree/${s.id}`} state={{ from: '/stamps' }}>
               {s.id}
             </Link>
           </li>

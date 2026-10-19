@@ -3128,7 +3128,7 @@ body.has-offline .gov {
   pointer-events: auto;
   color: var(--ink);
   transform: translate(var(--x), var(--y)) scale(var(--s, 1));
-  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.25s ease-out;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out;
 }
 
 .tree-rings:not(.shown) .tree-ring {
