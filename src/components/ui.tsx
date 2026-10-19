@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { assetUrl } from '../assets'
+import { formatDay } from '../lib/datetime'
 
 /** 模擬資料的小標籤 */
 export function MockTag({ title }: { title?: string }) {
@@ -19,8 +20,9 @@ export function Card({ children, className }: { children: ReactNode; className?:
   return <section className={`card ${className ?? ''}`}>{children}</section>
 }
 
+/** 日期：全站同一種寫法（見 src/lib/datetime.ts） */
 export function formatDate(at: number): string {
-  return new Date(at).toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' })
+  return formatDay(at)
 }
 
 export function relativeDays(at: number): string {

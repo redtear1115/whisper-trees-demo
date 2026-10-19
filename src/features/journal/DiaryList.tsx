@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { formatDayTime } from '../../lib/datetime'
 import { findTree } from '../../lib/trees'
 import { useStore } from '../../store'
 import { journalEntries } from './journal'
 
-function formatAt(at: number): string {
-  return new Date(at).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
-}
+const formatAt = formatDayTime
 
 /** 我的日記：我在各棵樹留下的話（新到舊） */
 export function DiaryList() {
