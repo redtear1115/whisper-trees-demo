@@ -66,7 +66,7 @@ export default function MapPage() {
   })
   const [panel, setPanel] = useState(false)
   const [ready, setReady] = useState(false)
-  const navState = useLocation().state as { focus?: LngLat; wishId?: string } | null
+  const navState = useLocation().state as { focus?: LngLat; wishId?: string; routeTreeId?: string } | null
   const focus = navState?.focus
   const anchor = useAnchor(true)
   const [follow, setFollow] = useState(false)
@@ -365,6 +365,22 @@ export default function MapPage() {
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focus, ready])
+
+  // 從「樹洞」附近的樹按「怎麼走」：飛到那棵樹、浮出行動圈，並直接畫出步行路線
+  const routeTreeId = navState?.routeTreeId
+  useEffect(() => {
+    if (!routeTreeId || !ready || !map.current) return
+    let alive = true
+    findTree(routeTreeId).then((tree) => {
+      if (!alive || !tree) return
+      focusTree.current(tree)
+      routeFitted.current = false
+      setRouteFor(tree.id)
+    })
+    return () => {
+      alive = false
+    }
+  }, [routeTreeId, ready])
 
   // 圖層面板：Esc 關閉
   useEffect(() => {

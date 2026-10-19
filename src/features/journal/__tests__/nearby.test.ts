@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { DEMO } from '../../../config'
 import { offsetNorth } from '../../../lib/geo'
-import { leaveTarget, parseTreeTile, pickNearby, tilesCovering } from '../nearby'
+import { leaveTarget, nearbyAction, parseTreeTile, pickNearby, tilesCovering } from '../nearby'
 
 const c = DEMO.center
 describe('pickNearby', () => {
@@ -40,5 +40,16 @@ describe('tile decoding (real data)', () => {
     const near = pickNearby(all, c, 150)
     expect(near.length).toBeGreaterThan(0)
     expect(near.every((t) => t.distance <= 150)).toBe(true)
+  })
+})
+
+describe('nearbyAction', () => {
+  it('in check-in range: 留言', () => {
+    expect(nearbyAction(20, 35, false)).toBe('leave')
+    expect(nearbyAction(35, 35, true)).toBe('leave')
+  })
+  it('too far: Demo walks over, real GPS shows the route', () => {
+    expect(nearbyAction(60, 35, true)).toBe('walk')
+    expect(nearbyAction(60, 35, false)).toBe('route')
   })
 })

@@ -4,7 +4,7 @@ import { NearbyTrees } from '../features/journal/NearbyTrees'
 import { DiaryList } from '../features/journal/DiaryList'
 import { MyWishes } from './MyWishesPage'
 
-/** 樹洞：附近的樹（留言要先打卡）＋ 我的日記／我的許願 */
+/** 樹洞：我的日記／我的許願在上，附近的樹在下（留言要先走到樹旁、再掃樹牌打卡） */
 export default function JournalPage() {
   const [tab, setTab] = useState<'diary' | 'wishes'>('diary')
 
@@ -12,8 +12,6 @@ export default function JournalPage() {
     <div className="page">
       <TabHeader title="樹洞" />
       <p className="muted small">只有你看得到。想留話，先走到樹旁掃樹牌。</p>
-
-      <NearbyTrees />
 
       <div className="journal-tabs" role="tablist" data-testid="journal-tabs">
         <button role="tab" aria-selected={tab === 'diary'} data-testid="journal-tab-diary" onClick={() => setTab('diary')}>
@@ -25,6 +23,8 @@ export default function JournalPage() {
       </div>
 
       {tab === 'diary' ? <DiaryList /> : <MyWishes sub />}
+
+      <NearbyTrees />
     </div>
   )
 }

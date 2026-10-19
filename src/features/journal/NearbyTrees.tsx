@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { findTree, type Tree } from '../../lib/trees'
-import { recentCheckin, useStore } from '../../store'
+import { walkTarget } from '../../lib/geo'
+import { isDemoMode, recentCheckin, setDemoPosition, useStore } from '../../store'
+import { ringRadius } from '../map/ring'
 import { useAnchor } from '../map/useAnchor'
-import { formatDistance, leaveTarget, loadNearbyTrees, type NearbyTree } from './nearby'
+import { formatDistance, leaveTarget, loadNearbyTrees, nearbyAction, NEARBY_ACTION_LABEL, type NearbyTree } from './nearby'
 
 /** 先列幾棵，其餘按「看更多」才展開，讓下面的日記與許願不被擠到很下面 */
 export const NEARBY_FIRST = 3
 
-/** 樹洞頁上方：目前位置附近的樹。留言仍要先打卡（QR + GPS）。 */
+/** 樹洞頁：目前位置附近的樹。在打卡範圍內才能「留言」（仍要先掃樹牌）；太遠先「走過去」（Demo）或「怎麼走」。 */
 export function NearbyTrees() {
   const navigate = useNavigate()
   const anchor = useAnchor(true)
@@ -16,6 +18,8 @@ export function NearbyTrees() {
   const [rows, setRows] = useState<(NearbyTree & { tree: Tree | null })[] | null>(null)
   const [showAll, setShowAll] = useState(false)
   const located = anchor.source !== 'fallback'
+  const radius = ringRadius(anchor) ?? 0
+  const demo = isDemoMode()
   const [lon, lat] = anchor.lngLat
 
   useEffect(() => {
@@ -55,16 +59,24 @@ export function NearbyTrees() {
                     {formatDistance(r.distance)}
                   </span>
                 </div>
-                <button
-                  className="btn"
-                  data-testid="journal-nearby-leave"
-                  onClick={() => {
+                {(() => {
+                  const action = nearbyAction(r.distance, radius, demo)
+                  const go = () => {
+                    if (action === 'walk') return setDemoPosition(walkTarget(anchor.lngLat, r.lngLat))
+                    if (action === 'route') return navigate('/', { state: { routeTreeId: r.id } })
                     const t = leaveTarget(r.id, onSite.has(r.id))
                     navigate(t.to, { state: t.state })
-                  }}
-                >
-                  留言
-                </button>
+                  }
+                  return (
+                    <button
+                      className={action === 'leave' ? 'btn primary' : 'btn'}
+                      data-testid={action === 'leave' ? 'journal-nearby-leave' : `journal-nearby-${action}`}
+                      onClick={go}
+                    >
+                      {NEARBY_ACTION_LABEL[action]}
+                    </button>
+                  )
+                })()}
               </section>
             </li>
           ))}

@@ -36,6 +36,20 @@ export function leaveTarget(treeId: string, onSite: boolean): { to: string; stat
   return onSite ? { to: `/tree/${treeId}#whisper` } : { to: '/scan', state: { hintTreeId: treeId } }
 }
 
+export type NearbyAction = 'leave' | 'walk' | 'route'
+
+/**
+ * 附近的樹那一列的按鈕：在打卡範圍內才是「留言」；太遠要先走過去——
+ * Demo 是「走過去」（模擬位置移到樹旁），真實定位是「怎麼走」（回地圖畫出步行路線）。
+ * radius 是和地圖感應圈、打卡判斷同一個半徑（ringRadius）。
+ */
+export function nearbyAction(distance: number, radius: number, demo: boolean): NearbyAction {
+  if (distance <= radius) return 'leave'
+  return demo ? 'walk' : 'route'
+}
+
+export const NEARBY_ACTION_LABEL: Record<NearbyAction, string> = { leave: '留言', walk: '走過去', route: '怎麼走' }
+
 export function formatDistance(m: number): string {
   return `約 ${Math.max(1, Math.round(m))} 公尺`
 }

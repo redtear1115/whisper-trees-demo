@@ -265,7 +265,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ### 樹洞 `/journal`
 
-- 上方「附近的樹」（`journal-nearby`，2026-10-19 加）：用和地圖同一個 `useAnchor`（真實 GPS 或 Demo 模擬位置），從 z16 樹木圖磚（`public/data/tree-tiles`，`nearby.ts` 內建簡易解碼）取 150 公尺內、近到遠最多 8 棵（`pickNearby`）；先列 3 棵，其餘按「看更多（還有 N 棵）」（`journal-nearby-more`）才展開，讓下面的日記與許願不被擠到很下面（2026-10-19 決定）。每列（`journal-nearby-item`）樹種、路名、「約 N 公尺」，和「留言」鈕（`journal-nearby-leave`）。沒有位置時顯示「還沒有你的位置。打開定位，或用 Demo 模式。」
+- 上方「附近的樹」（`journal-nearby`，2026-10-19 加）：用和地圖同一個 `useAnchor`（真實 GPS 或 Demo 模擬位置），從 z16 樹木圖磚（`public/data/tree-tiles`，`nearby.ts` 內建簡易解碼）取 150 公尺內、近到遠最多 8 棵（`pickNearby`）；先列 3 棵，其餘按「看更多（還有 N 棵）」（`journal-nearby-more`）才展開，讓下面的日記與許願不被擠到很下面（2026-10-19 決定）。每列（`journal-nearby-item`）樹種、路名、「約 N 公尺」，和一顆按鈕（2026-10-20 決定：要先走過去）：在打卡範圍內（`ringRadius`，和地圖感應圈同一個半徑）是「留言」（`journal-nearby-leave`）；太遠時 Demo 是「走過去」（`journal-nearby-walk`，模擬位置移到樹旁，列表跟著重算、那棵變成「留言」），真實定位是「怎麼走」（`journal-nearby-route`，回首頁地圖，用 `state.routeTreeId` 飛到那棵樹並直接畫出步行路線）（`nearbyAction`）。版面：「我的日記／我的許願」在上，附近的樹在下。沒有位置時顯示「還沒有你的位置。打開定位，或用 Demo 模式。」
 - 「留言」仍要先打卡（QR + GPS）：這棵樹 30 分鐘內有有效打卡（`recentCheckin`）就進 `/tree/:id#whisper`，否則進 `/scan`，帶 `state.hintTreeId`（`leaveTarget`；和地圖點樹的「掃樹牌」大按鈕同一個介面），掃描頁顯示「要打卡的是：…」。
 - 下方分段切換（`journal-tabs`）：「我的日記」（`journal-tab-diary`）與「我的許願」（`journal-tab-wishes`）。
 - 我的日記：我在所有樹留下的話，新到舊（`journalEntries`，只看 `state.whispers`，不含示範膠囊；雲端模式也是同一份）。每則（`journal-item`，列表 `journal-list`）顯示日期時間、「行政區・樹種」（查不到就顯示樹籍編號）、內容，和「查看樹木」（`journal-view-tree`）連到 `/tree/:id`。沒有時顯示 `journal-empty`。
