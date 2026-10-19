@@ -785,8 +785,8 @@ export default function MapPage() {
           {nearCount > 0 ? `附近有 ${nearCount} 棵樹可以掃` : '找一棵樹，掃它樹幹上的樹牌'}
         </p>
       )}
-      {idle && (
-        <Link className="scan-fab" to="/scan">
+      {(idle || treeFocus) && (
+        <Link className="scan-fab" to="/scan" state={treeFocus ? { hintTreeId: treeFocus.tree.id } : undefined}>
           掃樹牌
         </Link>
       )}

@@ -16,7 +16,7 @@ export const TREE_FOCUS = {
   durationMs: 1100,
 }
 
-export type RingActionId = 'scan' | 'whisper' | 'info' | 'report' | 'walk'
+export type RingActionId = 'whisper' | 'info' | 'report' | 'walk'
 
 export interface RangeInfo {
   /** 沒有定位（fallback）時是 null：當作很遠 */
@@ -59,8 +59,9 @@ export interface RingAction {
 }
 
 /**
- * 四個行動，順序固定（左到右）。圈外只有「樹的資料」能用。
- * Demo 模式（demo = true）多第 5 個「走過去」：把模擬位置移到樹旁，永遠能用（MapPage 處理）。
+ * 三個行動，順序固定（左到右）。圈外只有「樹的資料」能用。
+ * 掃樹牌不是圈：沿用畫面下方的大綠色按鈕（點樹時也一直在，帶著這棵樹去掃描頁）。
+ * Demo 模式（demo = true）多一個「走過去」：把模擬位置移到樹旁，永遠能用（MapPage 處理）。
  */
 export function ringActions(treeId: string, range: RangeInfo, demo = false): RingAction[] {
   const near = range.inRange
@@ -70,7 +71,6 @@ export function ringActions(treeId: string, range: RangeInfo, demo = false): Rin
     return { ...a, enabled, aria: enabled ? desc : `${desc}（暫時不能用：${why}）` }
   }
   const actions = [
-    make({ id: 'scan', label: '掃樹牌', art: 'action-scan', to: '/scan', hintTreeId: treeId }, true, '掃樹牌打卡'),
     make({ id: 'whisper', label: '樹洞', art: 'action-whisper', to: `/tree/${treeId}`, hash: 'whisper' }, true, '樹洞：對這棵樹說一句話'),
     make({ id: 'info', label: '樹的資料', art: 'action-info', to: `/tree/${treeId}` }, false, '樹的資料'),
     make({ id: 'report', label: '樹況回報', art: 'action-report', to: `/tree/${treeId}`, hash: 'report' }, true, '樹況回報'),

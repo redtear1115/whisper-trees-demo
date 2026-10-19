@@ -46,9 +46,9 @@ describe('farNote', () => {
 describe('ringActions', () => {
   const near = { distance: 3, inRange: true, remaining: null }
   const far = { distance: 60, inRange: false, remaining: 25 }
-  it('in range all four are active, in a fixed order', () => {
+  it('in range all three are active, in a fixed order (掃樹牌 is the big button, not a ring)', () => {
     const a = ringActions('DA0030211045', near)
-    expect(a.map((x) => x.id)).toEqual(['scan', 'whisper', 'info', 'report'])
+    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report'])
     expect(a.every((x) => x.enabled)).toBe(true)
   })
   it('out of range only 樹的資料 is active; the others say why in their aria-label', () => {
@@ -61,9 +61,9 @@ describe('ringActions', () => {
     const a = ringActions('X', { distance: null, inRange: false, remaining: null })
     expect(a.filter((x) => x.enabled).map((x) => x.id)).toEqual(['info'])
   })
-  it('routes: scan carries the tree as a hint; whisper and report land on page anchors', () => {
+  it('routes: whisper and report land on page anchors; there is no scan ring', () => {
     const a = Object.fromEntries(ringActions('DA0030211045-001', near).map((x) => [x.id, x]))
-    expect(a.scan).toMatchObject({ to: '/scan', hintTreeId: 'DA0030211045-001' })
+    expect(a.scan).toBeUndefined()
     expect(a.whisper).toMatchObject({ to: '/tree/DA0030211045-001', hash: 'whisper' })
     expect(a.info).toMatchObject({ to: '/tree/DA0030211045-001' })
     expect(a.info.hash).toBeUndefined()
@@ -73,10 +73,10 @@ describe('ringActions', () => {
 
 describe('ringActions in Demo (走過去)', () => {
   const far = { distance: 60, inRange: false, remaining: 25 }
-  it('adds a 5th ring 走過去, always active, only in Demo', () => {
+  it('adds a ring 走過去, always active, only in Demo', () => {
     expect(ringActions('X', far).some((x) => x.id === 'walk')).toBe(false)
     const a = ringActions('X', far, true)
-    expect(a.map((x) => x.id)).toEqual(['scan', 'whisper', 'info', 'report', 'walk'])
+    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report', 'walk'])
     expect(a.find((x) => x.id === 'walk')).toMatchObject({ label: '走過去', enabled: true })
   })
   it('after walking (in range) every ring is active', () => {
