@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { STATUS_FLOW, STATUS_LABEL, type Wish } from '../../store/types'
 import { hasWateredToday, totalWater, useStore, waterWish, wishStatus } from '../../store'
 import { Art, MockTag, formatDate } from '../../components/ui'
@@ -10,6 +10,12 @@ import { IconCheck } from '../../components/icons'
 export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
   const watered = useStore((s) => hasWateredToday(wish.id, s))
   const [msg, setMsg] = useState<string | null>(null)
+  // 雲端拒絕、畫面已撤回時，清掉剛才的「謝謝你」，只留錯誤提示
+  useEffect(() => {
+    const clear = () => setMsg(null)
+    window.addEventListener('wt:write-failed', clear)
+    return () => window.removeEventListener('wt:write-failed', clear)
+  }, [])
   const status = wishStatus(wish)
 
   return (
