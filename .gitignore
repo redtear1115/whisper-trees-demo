@@ -5,3 +5,7 @@ node_modules/
 dist/
 .playwright-mcp/
 .impeccable/
+.env*.local
+# Firebase emulator logs
+firebase-debug.log*
+firestore-debug.log*

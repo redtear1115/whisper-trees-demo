@@ -1,0 +1,259 @@
+rules_version = '2';
+
+// 曦語 Whisper Trees: Firestore Security Rules.
+// Tests: tests/rules/firestore.rules.test.ts (npm run test:rules, local emulator only).
+//
+// Deliberately absent:
+//   - match /{document=**}           (no catch-all; unmatched paths are denied)
+//   - a collection-group rule for whispers (nobody can query whispers across users)
+// Not stored in the cloud: `seen` (kept on the device). Rules do not enforce this.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwner(uid) {
+      return signedIn() && uid == request.auth.uid;
+    }
+
+    // Every list query must carry an explicit limit of at most 500.
+    // A query without a limit has request.query.limit == null and is denied.
+    function limitedList() {
+      return signedIn() && request.query.limit != null && request.query.limit <= 500;
+    }
+
+    function pad2(n) {
+      return n < 10 ? '0' + string(n) : string(n);
+    }
+
+    // Calendar day in Asia/Taipei (UTC+8, no DST), formatted YYYY-MM-DD.
+    function taipeiDay() {
+      let t = request.time + duration.value(8, 'h');
+      return string(t.year()) + '-' + pad2(t.month()) + '-' + pad2(t.day());
+    }
+
+    function hasPrefix(s, prefix) {
+      return s.size() > prefix.size() && s[0:prefix.size()] == prefix;
+    }
+
+    function taipeiDistricts() {
+      return ['中正區', '大同區', '中山區', '松山區', '大安區', '萬華區',
+              '信義區', '士林區', '北投區', '內湖區', '南港區', '文山區'];
+    }
+
+    function wishPath(wishId) {
+      return /databases/$(database)/documents/wishes/$(wishId);
+    }
+
+    function wishStatsPath(wishId) {
+      return /databases/$(database)/documents/wishStats/$(wishId);
+    }
+
+    function todaysWateringPath(wishId) {
+      return /databases/$(database)/documents/wishes/$(wishId)/waterings/$(request.auth.uid + '_' + taipeiDay());
+    }
+
+    // The caller creates today's watering for this wish in this very write/batch.
+    function wateringCreatedNow(wishId) {
+      return !exists(todaysWateringPath(wishId)) && existsAfter(todaysWateringPath(wishId));
+    }
+
+    // ---------- admins ----------
+
+    match /admins/{uid} {
+      allow get: if signedIn() && uid == request.auth.uid;
+      allow list, write: if false;   // created by hand in the Firebase console only
+    }
+
+    // ---------- config (e.g. config/gm) ----------
+
+    match /config/{doc} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---------- wishes ----------
+
+    function validNewWish(wishId) {
+      let d = request.resource.data;
+      let fields = ['pitId', 'lngLat', 'road', 'district', 'reasons',
+                    'feasibility', 'createdAt', 'createdBy', 'history'];
+      return signedIn()
+        && d.keys().hasOnly(fields)
+        && d.keys().hasAll(fields)
+        && d.createdBy == request.auth.uid
+        && d.createdAt == request.time
+        && !wishId.matches('mock-.*')
+        && (
+          d.pitId == null
+            ? (d.feasibility == 'needsSurvey'
+               && hasPrefix(wishId, 'spot-' + request.auth.uid + '-'))
+            : (d.pitId is string
+               && d.pitId.size() > 0
+               && d.pitId.size() <= 32
+               && wishId == 'pit-' + d.pitId
+               && d.feasibility == 'emptyPit')
+        )
+        && d.district in taipeiDistricts()
+        && d.road is string && d.road.size() <= 40
+        && d.reasons is list
+        && d.reasons.size() >= 1 && d.reasons.size() <= 5
+        && d.reasons.hasOnly(['通學', '等公車', '太曬', '散步路線', '其他'])
+        && d.lngLat is list && d.lngLat.size() == 2
+        && d.lngLat[0] is number && d.lngLat[1] is number
+        && d.lngLat[0] >= 121.4 && d.lngLat[0] <= 121.7
+        && d.lngLat[1] >= 24.9 && d.lngLat[1] <= 25.3
+        && d.history is list && d.history.size() == 1
+        && d.history[0] is map
+        && d.history[0].keys().hasOnly(['status', 'at'])
+        && d.history[0].status == 'received';
+    }
+
+    match /wishes/{wishId} {
+      allow get: if signedIn();
+      allow list: if limitedList();
+      // `create` only fires when the document does not exist yet, so a second
+      // wish on the same pit (same id 'pit-<pitId>') is an update and is denied.
+      allow create: if validNewWish(wishId);
+      allow update, delete: if isAdmin();
+
+      // One watering per user per Taipei day: id = '<uid>_<YYYY-MM-DD>'.
+      match /waterings/{wid} {
+        allow get: if signedIn() && hasPrefix(wid, request.auth.uid + '_');
+        allow list, update, delete: if false;
+        allow create: if signedIn()
+          && wid == request.auth.uid + '_' + taipeiDay()
+          && request.resource.data.keys().hasOnly(['at'])
+          && request.resource.data.at == request.time
+          && (exists(wishPath(wishId)) || wishId.matches('mock-[0-9]+'))
+          && getAfter(wishStatsPath(wishId)).data.water
+               == (exists(wishStatsPath(wishId)) ? get(wishStatsPath(wishId)).data.water : 0) + 1;
+      }
+    }
+
+    // Demo (mock) wishes' status changes, written by the admin console.
+    match /wishOverrides/{mockId} {
+      allow get: if signedIn();
+      allow list: if limitedList();
+      allow write: if isAdmin();
+    }
+
+    // Public water counter; only ever +1, in the same batch as a new watering.
+    match /wishStats/{wishId} {
+      allow get: if signedIn();
+      allow list: if limitedList();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['water'])
+        && request.resource.data.water == 1
+        && wateringCreatedNow(wishId);
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['water'])
+        && request.resource.data.water == resource.data.water + 1
+        && wateringCreatedNow(wishId);
+      allow delete: if isAdmin();
+    }
+
+    // ---------- reports ----------
+
+    match /reports/{id} {
+      allow get: if signedIn();
+      allow list: if limitedList();
+      allow create: if signedIn() && validNewReport();
+      allow update, delete: if isAdmin();
+
+      // Private note, readable by the author and admins only.
+      match /private/{doc} {
+        allow read: if isAdmin()
+          || (signedIn() && resource.data.createdBy == request.auth.uid);
+        allow create: if signedIn()
+          && doc == 'note'
+          && request.resource.data.keys().hasOnly(['note', 'createdBy'])
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.note is string
+          && request.resource.data.note.size() <= 140
+          // same batch as the report itself
+          && !exists(/databases/$(database)/documents/reports/$(id))
+          && existsAfter(/databases/$(database)/documents/reports/$(id));
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    function validNewReport() {
+      let d = request.resource.data;
+      let fields = ['treeId', 'species', 'road', 'district', 'kind', 'details', 'hasPhoto', 'at'];
+      return d.keys().hasOnly(fields)
+        && d.keys().hasAll(fields)
+        && d.at == request.time
+        && d.kind in ['pruning', 'sick']
+        && d.details is list
+        && d.details.size() <= 3
+        && d.details.hasOnly(['修剪過度', '遮蔭過多', '枝葉擋路', '病蟲害', '枯枝或落枝', '樹幹傾斜或受損'])
+        && d.treeId is string && d.treeId.size() <= 20
+        && d.species is string && d.species.size() <= 20
+        && d.road is string && d.road.size() <= 40
+        && d.district in taipeiDistricts()
+        && d.hasPhoto is bool;
+    }
+
+    // ---------- vendor orders ----------
+
+    match /vendorOrders/{id} {
+      allow get: if signedIn();
+      allow list: if limitedList();
+      allow write: if isAdmin();
+    }
+
+    // ---------- notices / opinions ----------
+
+    match /notices/{noticeId}/opinions/{uid} {
+      allow read: if signedIn() && (uid == request.auth.uid || isAdmin());
+      allow create, update: if isOwner(uid)
+        && noticeId in ['notice-1']
+        && request.resource.data.keys().hasOnly(['text', 'at'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() >= 1
+        && request.resource.data.text.size() <= 140
+        && request.resource.data.at == request.time;
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Admin console reads all opinions with a collection-group query.
+    match /{path=**}/opinions/{uid} {
+      allow read: if isAdmin();
+    }
+
+    // ---------- users ----------
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /whispers/{id} {
+        allow get, list, delete: if isOwner(uid);
+        allow update: if false;
+        allow create: if isOwner(uid) && validNewWhisper();
+      }
+    }
+
+    function validNewWhisper() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['treeId', 'text', 'at', 'migrated'])
+        && d.keys().hasAll(['treeId', 'text', 'at'])
+        && d.text is string && d.text.size() >= 1 && d.text.size() <= 140
+        && d.treeId is string && d.treeId.size() <= 20
+        && (
+          d.at == request.time
+          || (d.get('migrated', false) == true && d.at is timestamp && d.at <= request.time)
+        );
+    }
+  }
+}
