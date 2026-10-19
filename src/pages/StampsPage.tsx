@@ -29,6 +29,8 @@ export default function StampsPage() {
   const light = useMemo(() => lightByDistrict(ledger, wishes), [ledger, wishes])
   const stamps = useMemo(() => earnedStampsNewestFirst(book), [book])
 
+  const intro = <p className="muted small stamps-intro">在各區的樹旁掃樹牌，每棵不同的樹算一次，不用急，哪一區先走都可以。</p>
+
   return (
     <div className="page stamps-page">
       <TabHeader title="集章冊" />
@@ -52,16 +54,6 @@ export default function StampsPage() {
         </div>
       ) : (
         <div {...segmentedPanelProps('stamps-tab', 'stamps')} className="stamps-panel" data-testid="stamps-panel">
-          <p>
-            {stamps.length === 0 ? (
-              <>在各區的樹旁掃樹牌，每棵不同的樹算一次，哪一區先走都可以。</>
-            ) : (
-              <>
-                在各區的樹旁掃樹牌，每棵不同的樹算一次。已集到 <strong data-testid="stamp-count">{stamps.length}</strong> 枚章，不用急，哪一區先走都可以。
-              </>
-            )}
-          </p>
-
           {/* 切換鈕在地圖上面（讀屏先遇到它），不浮在畫面上，不會蓋住圖例、提示或出處 */}
           <div className="stamps-view">
             <Segmented<View>
@@ -73,7 +65,15 @@ export default function StampsPage() {
                 { value: 'time', label: '依取得時間', testId: 'view-time' },
               ]}
             />
+            {stamps.length > 0 && (
+              <span className="stamps-count">
+                已集 <strong data-testid="stamp-count">{stamps.length}</strong> 枚章
+              </span>
+            )}
           </div>
+
+          {/* 說明放在地圖下面：手機第一屏要留給「我的區」與地圖（見 08 §10 第四輪 X） */}
+          {view === 'time' && intro}
 
           {view === 'map' ? (
             <StampAtlas book={book} light={light} checkins={checkins} homeDistrict={home} />
@@ -99,6 +99,7 @@ export default function StampsPage() {
               </ul>
             </Card>
           )}
+          {view === 'map' && intro}
         </div>
       )}
     </div>

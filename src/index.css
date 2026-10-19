@@ -3339,9 +3339,9 @@ body.has-offline .gov {
   display: block;
   width: 100%;
   height: auto;
-  /* 地圖不要比半個螢幕高太多，下面的狀態卡才不會被擠到導覽列後面 */
-  max-height: 55vh;
-  max-height: 55svh;
+  /* 地圖不要比半個螢幕高太多，下面的狀態卡標題才在第一屏（數字同步 CityMap.tsx 的 CITY_MAP_VH） */
+  max-height: 36vh;
+  max-height: 36svh;
 }
 
 .atlas-region {

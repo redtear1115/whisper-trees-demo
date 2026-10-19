@@ -78,8 +78,8 @@ export function Scanner({ onResult, onClose, hint, hintId }: Props) {
       <video ref={video} className="scanner-video" playsInline muted />
       <div className="scanner-frame" aria-hidden />
       <div className="scanner-top">
-        <button className="btn ghost light" onClick={onClose}>
-          <IconBack /> 返回
+        <button className="btn ghost light" onClick={onClose} aria-label="關閉掃描，回地圖">
+          <IconBack /> 回地圖
         </button>
       </div>
       <div className="scanner-bottom">

@@ -1,5 +1,5 @@
 // 集章冊地圖的配色：繪本的紙面，章像印泥蓋上去，印得越深 = 章越高。
-// 未開始 = 還沒蓋章的空白紙格（比紙面亮、虛線邊）→ 鐵（淡青）→ 銅（嫩綠）→ 銀（深綠）→ 金（金黃）。
+// 還沒走過 = 還沒蓋章的空白紙格（比紙面亮、虛線邊）→ 鐵（淡青）→ 銅（嫩綠）→ 銀（深綠）→ 金（金黃）。
 // 規格見 docs/specs/08-extensions.md §10「地圖（C）」。
 
 import type { Tier } from '../game/districts'
@@ -15,7 +15,7 @@ export interface TierTone {
 }
 
 export const TIER_TONES: TierTone[] = [
-  { key: 'none', name: '未開始', fill: '#fcf8ec', text: '#2c3a2e' },
+  { key: 'none', name: '還沒走過', fill: '#fcf8ec', text: '#2c3a2e' },
   { key: 'iron', name: '鐵章', fill: '#cfe2bf', text: '#1f2a1c' },
   { key: 'bronze', name: '銅章', fill: '#9dc98c', text: '#1f2a1c' },
   { key: 'silver', name: '銀章', fill: '#5fa275', text: '#14201a' },

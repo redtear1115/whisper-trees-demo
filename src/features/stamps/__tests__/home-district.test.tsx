@@ -4,7 +4,8 @@ import { MemoryRouter } from 'react-router-dom'
 import { TAIPEI_DISTRICTS, type Checkin } from '../../../store/types'
 import type { Village } from '../../../lib/villages'
 import { stampBook } from '../../game/districts'
-import { WAITING_INVITATION, asDistrict, isWaiting, selectedDistrict, villageCountText, villageUntouched } from '../home'
+import { WAITING_INVITATION, asDistrict, homeSummaryText, isWaiting, selectedDistrict, splitUntouched, villageCountText, villageUntouched } from '../home'
+import { TIER_TONES, toneOf } from '../colors'
 import { KEEP_MAP_PX, revealDelta } from '../reveal'
 import { DistrictCard } from '../DistrictCard'
 
@@ -27,6 +28,32 @@ describe('home district', () => {
 
   it('a district the user tapped wins over the home district', () => {
     expect(selectedDistrict('信義區', '大安區')).toBe('信義區')
+  })
+})
+
+describe('home summary line', () => {
+  it('says how many trees, or that the district is still a blank sheet', () => {
+    expect(homeSummaryText('大安區', 3)).toBe('我的區：大安區・3 棵')
+    expect(homeSummaryText('文山區', 0)).toBe('我的區：文山區・還是一張白紙')
+  })
+})
+
+describe('untouched wording', () => {
+  it('the legend and the district label say 還沒走過, not 未開始', () => {
+    expect(TIER_TONES[0].name).toBe('還沒走過')
+    expect(toneOf(null).name).toBe('還沒走過')
+    expect(TIER_TONES.map((t) => t.name)).not.toContain('未開始')
+  })
+
+  it('a stamped district card still says its tier', () => {
+    const book = stampBook([ck(1)])
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <DistrictCard b={book.find((x) => x.district === '大安區')!} light={undefined} onEnter={() => {}} />
+      </MemoryRouter>,
+    )
+    expect(html).toContain('鐵章')
+    expect(html).not.toContain('未開始')
   })
 })
 
@@ -80,6 +107,21 @@ describe('untouched villages', () => {
     expect(villageCountText(v('a', 'A里', 100), 0)).toBe('')
     expect(villageCountText(v('a', 'A里', 100), 3)).toBe('3／100 棵')
     expect(villageCountText(v('b', 'B里', 0), 0)).toBe('沒有樹木資料')
+  })
+})
+
+describe('village list split', () => {
+  it('keeps walked villages and no-data villages up front; untouched ones collapse, order unchanged', () => {
+    const rows = [
+      { village: { total: 100 }, lit: 5, id: 'a' },
+      { village: { total: 100 }, lit: 0, id: 'b' },
+      { village: { total: 0 }, lit: 0, id: 'c' },
+      { village: { total: 50 }, lit: 0, id: 'd' },
+    ]
+    const { active, untouched } = splitUntouched(rows)
+    expect(active.map((r) => r.id)).toEqual(['a', 'c'])
+    expect(untouched.map((r) => r.id)).toEqual(['b', 'd'])
+    expect(splitUntouched([]).untouched).toEqual([])
   })
 })
 

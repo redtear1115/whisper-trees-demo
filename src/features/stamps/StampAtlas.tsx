@@ -10,7 +10,7 @@ import { VillageList } from './VillageList'
 import { VillageMap } from './VillageMap'
 import { creditText } from './credit'
 import { useReveal } from './reveal'
-import { selectedDistrict, villageUntouched } from './home'
+import { asDistrict, homeSummaryText, selectedDistrict, villageUntouched } from './home'
 import { litTreeIds, litTreePoints, loadTreePoints, type TreePoint } from './villageTrees'
 
 const PREFIX_OF = Object.fromEntries(Object.entries(PREFIX_DISTRICT).map(([p, d]) => [d, p])) as Record<District, string>
@@ -40,6 +40,9 @@ export function StampAtlas({
   const [picked, setDistrict] = useState<District | null>(null)
   const district = selectedDistrict(picked, homeDistrict)
   const [village, setVillage] = useState<Village | null>(null)
+
+  const home = asDistrict(homeDistrict)
+  const homeBook = home ? book.find((x) => x.district === home) : undefined
 
   const b = district ? book.find((x) => x.district === district) : undefined
   const prefix = district ? PREFIX_OF[district] : null
@@ -119,6 +122,14 @@ export function StampAtlas({
 
       {level === 'city' && (
         <>
+          {home && homeBook && (
+            <div className="atlas-home" data-testid="home-summary" data-district={home}>
+              <p>{homeSummaryText(home, homeBook.distinct)}</p>
+              <button type="button" className="btn small" onClick={() => pickDistrict(home)} data-testid="home-jump">
+                看我的區 <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+          )}
           {outline ? (
             <CityMap
               outline={outline}

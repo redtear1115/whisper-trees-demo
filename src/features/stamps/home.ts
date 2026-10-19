@@ -31,3 +31,16 @@ export function villageCountText(v: Pick<Village, 'total'>, lit: number): string
   if (v.total === 0) return '沒有樹木資料'
   return lit === 0 ? '' : `${lit}／${v.total} 棵`
 }
+
+/** 全市地圖上面的一行：「我的區：大安區・3 棵」；還沒打卡過就是「我的區：文山區・還是一張白紙」 */
+export function homeSummaryText(district: string, distinct: number): string {
+  return `我的區：${district}・${distinct > 0 ? `${distinct} 棵` : '還是一張白紙'}`
+}
+
+/** 里列表分成兩段：走過的（含沒有樹木資料的里，它們沒得走）在前面，還沒走過的收在一個可展開的按鈕後面；順序維持不變 */
+export function splitUntouched<T extends { village: Pick<Village, 'total'>; lit: number }>(rows: readonly T[]): { active: T[]; untouched: T[] } {
+  const active: T[] = []
+  const untouched: T[] = []
+  for (const r of rows) (villageUntouched(r.village, r.lit) ? untouched : active).push(r)
+  return { active, untouched }
+}

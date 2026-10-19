@@ -12,8 +12,12 @@ const PREFIX_OF = Object.fromEntries(Object.entries(PREFIX_DISTRICT).map(([p, d]
 
 /** 台北市外框外多留的邊（SVG 單位，1 單位 = 20 公尺） */
 const MARGIN = 70
+/** 全市地圖最多佔螢幕高度的幾成：手機上下面的狀態卡標題與「我的區」摘要要在第一屏看得到（CSS 同步） */
+export const CITY_MAP_VH = 0.36
 /** 區名字級（手機上約 12 px：viewBox 寬度換算） */
 const LABEL_PX = 14
+/** 區名在畫面上最小的字級（CSS px） */
+const LABEL_MIN_PX = 10
 
 /** 一區的 SVG 形狀、名字位置。純資料，隨 outline 算一次。 */
 export function useCityGeometry(outline: Outline) {
@@ -70,16 +74,25 @@ export function CityMap({
   }
   const geo = useCityGeometry(outline)
   const [vx, vy, vw, vh] = geo.viewBox
-  const fs = (LABEL_PX * vw) / 360
-  // 畫面上 1 個 SVG 單位約幾個螢幕像素：寬度 ≈ 容器 340 px，高度被 55svh 夾住
+  // 畫面上 1 個 SVG 單位約幾個螢幕像素：寬度 ≈ 容器 340 px，高度被 CITY_MAP_VH 夾住（CSS 的 .atlas-panel svg 同步）
   const vh0 = typeof window === 'undefined' ? 800 : window.innerHeight
-  const pxPerUnit = Math.min(340 / vw, (vh0 * 0.55) / vh)
+  const pxPerUnit = Math.min(340 / vw, (vh0 * CITY_MAP_VH) / vh)
+  // 區名在畫面上至少 LABEL_MIN_PX：地圖縮小時字不跟著縮到看不見
+  const fs = Math.max((LABEL_PX * vw) / 360, LABEL_MIN_PX / pxPerUnit)
   const byDistrict = new Map(book.map((b) => [b.district, b]))
   // 選到的區畫在最上面，外框才不會被鄰居蓋住
   const names = Object.keys(outline.districts).sort((a, b) => Number(a === picked) - Number(b === picked))
 
   return (
     <div className="atlas-panel city-map" data-testid="city-map">
+      <ul className="atlas-legend" aria-label="圖例">
+        {TIER_TONES.map((t) => (
+          <li key={t.key}>
+            <i style={{ background: t.fill }} aria-hidden="true" />
+            {t.name}
+          </li>
+        ))}
+      </ul>
       <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} role="group" aria-label="台北市行政區地圖" style={{ backgroundColor: PANEL_BG }}>
         <CrayonDefs id="atlas-crayon-city" unitsPerPx={1 / pxPerUnit} />
         <g filter="url(#atlas-crayon-city)">
@@ -99,7 +112,7 @@ export function CityMap({
               role="button"
               tabIndex={0}
               aria-pressed={on}
-              aria-label={`${name}：${b?.top ? b.top.name : '未開始'}，${b?.distinct ?? 0} 棵`}
+              aria-label={`${name}：${b?.top ? b.top.name : '還沒走過'}，${b?.distinct ?? 0} 棵`}
               data-testid={prefix ? `district-${prefix}` : undefined}
               data-tier={b?.top?.id ?? 'none'}
               data-count={b?.distinct ?? 0}
@@ -144,14 +157,6 @@ export function CityMap({
           )
         })}
       </svg>
-      <ul className="atlas-legend" aria-label="圖例">
-        {TIER_TONES.map((t) => (
-          <li key={t.key}>
-            <i style={{ background: t.fill }} aria-hidden="true" />
-            {t.name}
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }

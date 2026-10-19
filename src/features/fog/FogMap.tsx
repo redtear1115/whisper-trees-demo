@@ -17,7 +17,7 @@ const FOG_COLOR = 'rgba(224, 231, 220, 0.9)'
 // 散開處的暖光：--glow（#f2c14e）疊在霧上，像燈籠照出來的一圈；中央再被挖空
 const GLOW_RGB = '242, 193, 78'
 /** 暖光的半徑是散開半徑的幾倍 */
-const GLOW_SCALE = 1.5
+const GLOW_SCALE = 1.7
 
 /** 柔邊的圓（中心完全透明、邊緣漸層），先畫一次，之後用 drawImage 縮放貼上 */
 function makeSprite(): HTMLCanvasElement {
@@ -41,8 +41,8 @@ function makeGlow(): HTMLCanvasElement {
   c.width = c.height = size
   const g = c.getContext('2d')!
   const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  grad.addColorStop(0, `rgba(${GLOW_RGB}, 0.7)`)
-  grad.addColorStop(0.55, `rgba(${GLOW_RGB}, 0.5)`)
+  grad.addColorStop(0, `rgba(${GLOW_RGB}, 0.8)`)
+  grad.addColorStop(0.5, `rgba(${GLOW_RGB}, 0.6)`)
   grad.addColorStop(1, `rgba(${GLOW_RGB}, 0)`)
   g.fillStyle = grad
   g.fillRect(0, 0, size, size)

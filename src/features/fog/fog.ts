@@ -138,7 +138,7 @@ export function formatArea(km2: number): string {
 }
 
 /** 縮小到看全市時，50 m 不到 1 px 看不見；畫面上的圓至少畫這麼大（只影響顯示，不影響統計） */
-export const MIN_CLEAR_PX = 9
+export const MIN_CLEAR_PX = 14
 
 export function clearPixelRadius(meterRadius: number, metersPerPixel: number, minPx = MIN_CLEAR_PX): number {
   return Math.max(meterRadius / metersPerPixel, minPx)

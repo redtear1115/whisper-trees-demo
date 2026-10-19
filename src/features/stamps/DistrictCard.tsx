@@ -75,7 +75,7 @@ export function DistrictCard({
       <h2 tabIndex={-1} data-reveal-heading>
         <i className="atlas-dot" style={{ background: tone.fill }} aria-hidden="true" />
         {b.district}
-        <span className="atlas-tier">{b.top ? b.top.name : '未開始'}</span>
+        <span className="atlas-tier">{b.top ? b.top.name : '還沒走過'}</span>
       </h2>
       <p className="atlas-big">
         <strong data-testid="district-count">{b.distinct}</strong> 棵不同的樹
