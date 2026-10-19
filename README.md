@@ -2,7 +2,7 @@
 
 [台北市政 debug 松](https://puma.taipei/hackathon) 題目 #1「把三千棵樹種回來」的參賽作品 Demo。
 
-**網址：[https://whisper-trees.pages.dev](https://whisper-trees.pages.dev)**（市民端只能用手機開；桌機請加 `?demo=1` 進 Demo 模式：模擬定位、可掃示範樹牌。政府端 `/gov` 用桌機開）
+**網址：[https://whisper-trees.pages.dev](https://whisper-trees.pages.dev)**（市民端只能用手機開；桌機請加 `?demo=1` 進 Demo 模式：模擬定位（可以拖曳地圖上的人物、或點樹按「走過去」移動，離樹太遠一樣會被判「太遠」）、可掃示範樹牌。政府端 `/gov` 用桌機開）
 
 台北每年移除約 3,164 棵樹。曦語把 16 萬棵行道樹與公園樹變成市民可以停下來、對它說話的「樹洞」；同時讓市民在空樹穴許願、澆水，政府依市民需求與樹蔭缺口排出補種順序，並公開進度。
 
@@ -119,7 +119,7 @@
 | 移樹紀錄與原因 | 逐年移除紀錄未完整開放 |
 | 移樹前公告與意見數（`src/mock/notices.json`） | 市府目前沒有對外的移樹前公告；示範一筆 |
 | 「以台北通登入」 | 仍是模擬畫面；真正的登入是匿名與 Google |
-| Demo 模式的 GPS 位置 | 現場不在樹旁時，用 `?demo=1` 固定位置 |
+| Demo 模式的 GPS 位置 | 現場不在樹旁時，用 `?demo=1` 的模擬位置：預設站在示範樹旁，可以拖曳人物或按「走過去」移動；打卡仍依距離判斷 |
 | 垃圾桶、路燈（DLC 預告） | 只放預告圖層 |
 | 光點、商店購買、小芽造型、徽章 | 延伸功能示意，存在使用者自己的裝置（store） |
 | GM 後台的全市經濟數字、其他玩家與客訴（`src/mock/players.json`） | 沒有真實營運資料 |
@@ -186,7 +186,7 @@ uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json
 
 ```sh
 npm install
-npm run dev      # http://localhost:5173，加 ?demo=1 進 Demo 模式（模擬定位、可掃示範樹牌）
+npm run dev      # http://localhost:5173，加 ?demo=1 進 Demo 模式（可移動的模擬定位、可掃示範樹牌）
 npm test
 npm run test:rules   # 本機 Firestore + Auth emulator 跑規則測試與雲端 store 測試（tests/rules、tests/cloud；brew install openjdk）
 cp .env.example .env.local   # 填入 6 個 VITE_FIREBASE_* 值；沒有這個檔就用 localStorage

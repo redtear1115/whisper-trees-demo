@@ -19,6 +19,17 @@ export function offsetNorth([lon, lat]: LngLat, meters: number): LngLat {
   return [lon, lat + meters / 111_320]
 }
 
+/**
+ * Demo 的「走過去」：站到樹旁 offsetMeters 公尺，從目前位置往樹的方向看過去那一側（人是從那邊走來的）。
+ * 已經在 offsetMeters 以內就留在原地；人和樹在同一點時也不動（沒有方向可言）。
+ */
+export function walkTarget(from: LngLat, tree: LngLat, offsetMeters: number = CHECKIN.demoOffsetMeters): LngLat {
+  const d = distanceMeters(from, tree)
+  if (d <= offsetMeters) return from
+  const t = offsetMeters / d // 沿著 tree → from 的連線，離樹 offsetMeters（短距離，經緯度線性內插即可）
+  return [tree[0] + (from[0] - tree[0]) * t, tree[1] + (from[1] - tree[1]) * t]
+}
+
 export type CheckinResult =
   | { kind: 'success'; distance: number }
   | { kind: 'farView'; distance: number }

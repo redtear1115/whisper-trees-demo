@@ -16,7 +16,7 @@ export const TREE_FOCUS = {
   durationMs: 1100,
 }
 
-export type RingActionId = 'scan' | 'whisper' | 'info' | 'report'
+export type RingActionId = 'scan' | 'whisper' | 'info' | 'report' | 'walk'
 
 export interface RangeInfo {
   /** 沒有定位（fallback）時是 null：當作很遠 */
@@ -50,7 +50,7 @@ export interface RingAction {
   enabled: boolean
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
-  /** 要去哪（router 路徑） */
+  /** 要去哪（router 路徑）；「走過去」不換頁，是空字串 */
   to: string
   /** 樹的頁面上的錨點（id，不含 #） */
   hash?: string
@@ -58,20 +58,25 @@ export interface RingAction {
   hintTreeId?: string
 }
 
-/** 四個行動，順序固定（左到右）。圈外只有「樹的資料」能用。 */
-export function ringActions(treeId: string, range: RangeInfo): RingAction[] {
+/**
+ * 四個行動，順序固定（左到右）。圈外只有「樹的資料」能用。
+ * Demo 模式（demo = true）多第 5 個「走過去」：把模擬位置移到樹旁，永遠能用（MapPage 處理）。
+ */
+export function ringActions(treeId: string, range: RangeInfo, demo = false): RingAction[] {
   const near = range.inRange
   const why = farNote(range)
   const make = (a: Omit<RingAction, 'enabled' | 'aria'>, needsNear: boolean, desc: string): RingAction => {
     const enabled = !needsNear || near
     return { ...a, enabled, aria: enabled ? desc : `${desc}（暫時不能用：${why}）` }
   }
-  return [
+  const actions = [
     make({ id: 'scan', label: '掃樹牌', art: 'action-scan', to: '/scan', hintTreeId: treeId }, true, '掃樹牌打卡'),
     make({ id: 'whisper', label: '樹洞', art: 'action-whisper', to: `/tree/${treeId}`, hash: 'whisper' }, true, '樹洞：對這棵樹說一句話'),
     make({ id: 'info', label: '樹的資料', art: 'action-info', to: `/tree/${treeId}` }, false, '樹的資料'),
     make({ id: 'report', label: '樹況回報', art: 'action-report', to: `/tree/${treeId}`, hash: 'report' }, true, '樹況回報'),
   ]
+  if (demo) actions.push(make({ id: 'walk', label: '走過去', art: 'action-walk', to: '' }, false, 'Demo：走到這棵樹旁邊'))
+  return actions
 }
 
 export interface Offset {
@@ -80,10 +85,10 @@ export interface Offset {
 }
 
 /**
- * 在樹的下方排成一道弧：count 個圈、半徑 radius（px），整道弧張開 spanDeg 度，正下方為中間。
+ * 在樹的下方排成一道弧：count 個圈、半徑 radius（px），整道弧張開 spanDeg 度（4 個圈 140°，5 個圈 170° 才不擠），正下方為中間。
  * 回傳相對樹中心的位置（x 向右、y 向下），由左到右。
  */
-export function arcOffsets(count: number, radius: number, spanDeg = 140): Offset[] {
+export function arcOffsets(count: number, radius: number, spanDeg = count > 4 ? 170 : 140): Offset[] {
   if (count <= 0) return []
   if (count === 1) return [{ x: 0, y: radius }]
   return Array.from({ length: count }, (_, i) => {

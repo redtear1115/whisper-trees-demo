@@ -6,13 +6,13 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
-import { totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
+import { demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
 import { IconHeading, IconLamp, IconLayers, IconNorth, IconTrash } from '../components/icons'
-import { distanceMeters } from '../lib/geo'
+import { distanceMeters, walkTarget } from '../lib/geo'
 import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
 import { EventBar } from '../features/game/EventBar'
@@ -74,6 +74,9 @@ export default function MapPage() {
   const [finePointer] = useState(hasFinePointer)
   const [rotateOpen, setRotateOpen] = useState(false)
   const [nearCount, setNearCount] = useState(0)
+  // Demo 模式：人物可以拖曳；「可以拖曳牠移動位置」的提示每個 session 只出現一次
+  const demo = isDemoMode()
+  const [dragHint, setDragHint] = useState(() => demo && !demoHintSeen())
   // 點樹：鏡頭飛到樹旁，樹旁浮出行動圈。shown = 鏡頭到位了才顯示行動圈
   const [treeFocus, setTreeFocus] = useState<{ tree: Tree; shown: boolean } | null>(null)
   const focusRef = useRef(treeFocus)
@@ -304,10 +307,12 @@ export default function MapPage() {
         },
       })
     }
-    m.on('contextmenu', (e) => wishAt(e.point, e.lngLat))
+    // 拖曳人物（Demo）不是許願：手指或滑鼠落在人物上時不開許願
+    const onAvatar = (e: { originalEvent?: Event }) => !!(e.originalEvent?.target as Element | null)?.closest?.('.me-avatar')
+    m.on('contextmenu', (e) => !onAvatar(e) && wishAt(e.point, e.lngLat))
     let press: ReturnType<typeof setTimeout> | undefined
     m.on('touchstart', (e) => {
-      if (e.points.length !== 1) return
+      if (e.points.length !== 1 || onAvatar(e)) return
       press = setTimeout(() => wishAt(e.point, e.lngLat), 650)
     })
     for (const ev of ['touchend', 'touchmove', 'touchcancel', 'movestart'] as const) m.on(ev, () => clearTimeout(press))
@@ -388,6 +393,9 @@ export default function MapPage() {
   }, [anchor, ready])
 
   // 人物：使用者選的動物站在目前位置（Demo 示範位置或 GPS）。HTML 標記，永遠面向畫面。附近模式才顯示
+  // Demo：可以拖曳（滑鼠與觸控都行，拖曳人物不會平移地圖），放開時模擬位置移到那裡，感應圈、範圍、提示都跟著重算
+  const draggable = demo && anchor.source === 'demo'
+  const showDragHint = draggable && dragHint && !sheet && !tour.open && !treeFocus
   useEffect(() => {
     const m = map.current
     if (!m || !ready) return
@@ -410,11 +418,45 @@ export default function MapPage() {
       tag.textContent = '示範位置'
       node.append(tag)
     }
-    const marker = new maplibregl.Marker({ element: node, anchor: 'bottom' }).setLngLat(anchor.lngLat).addTo(m)
+    if (draggable) {
+      node.classList.add('draggable')
+      node.dataset.draggable = 'true'
+      node.addEventListener('click', (e) => e.stopPropagation()) // 拖曳放開後的 click 不要當成點地圖
+    }
+    if (showDragHint) {
+      const hint = document.createElement('div')
+      hint.className = 'me-avatar-hint'
+      hint.dataset.testid = 'drag-hint'
+      hint.setAttribute('role', 'status')
+      const text = document.createElement('span')
+      text.textContent = 'Demo：可以拖曳牠移動位置'
+      const close = document.createElement('button')
+      close.type = 'button'
+      close.className = 'me-avatar-hint-close'
+      close.dataset.testid = 'drag-hint-close'
+      close.setAttribute('aria-label', '知道了，收起提示')
+      close.textContent = '×'
+      close.addEventListener('click', (e) => {
+        e.stopPropagation()
+        dismissDemoHint()
+        setDragHint(false)
+      })
+      hint.append(text, close)
+      node.append(hint)
+    }
+    const marker = new maplibregl.Marker({ element: node, anchor: 'bottom', draggable }).setLngLat(anchor.lngLat).addTo(m)
+    if (draggable) {
+      marker.on('dragend', () => {
+        const at = marker.getLngLat()
+        dismissDemoHint()
+        setDragHint(false)
+        setDemoPosition([at.lng, at.lat])
+      })
+    }
     return () => {
       marker.remove()
     }
-  }, [ready, anchor.lngLat, anchor.source, animal])
+  }, [ready, anchor.lngLat, anchor.source, animal, draggable, showDragHint])
 
   // 點樹：鏡頭飛到樹旁（約 20.5 級、60° 俯角、樹在畫面中心偏上），到位後浮出行動圈
   const focusTree = useRef<(tree: Tree) => void>(() => {})
@@ -655,7 +697,10 @@ export default function MapPage() {
           shown={treeFocus.shown}
           range={focusRange}
           onClose={() => unfocusTree.current()}
+          demo={demo}
           onGo={(a) => {
+            // Demo 的「走過去」：模擬位置移到樹旁，圈就跟著亮了（不換頁）
+            if (a.id === 'walk') return setDemoPosition(walkTarget(anchor.lngLat, treeFocus.tree.lngLat))
             // nearTree：從行動圈來而且在感應圈內，樹的頁面可以說「你已經在樹旁邊了」；打卡仍然要掃樹牌
             const state = { ...(a.hintTreeId && { hintTreeId: a.hintTreeId }), nearTree: focusRange.inRange }
             navigate({ pathname: a.to, hash: a.hash ? `#${a.hash}` : undefined }, { state })

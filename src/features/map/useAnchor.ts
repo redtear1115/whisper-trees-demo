@@ -3,7 +3,7 @@ import { DEMO } from '../../config'
 import type { LngLat } from '../../lib/geo'
 import { distanceMeters } from '../../lib/geo'
 import { findTree } from '../../lib/trees'
-import { isDemoMode } from '../../store'
+import { getDemoPosition, isDemoMode, useDemoPosition } from '../../store'
 
 export interface Anchor {
   lngLat: LngLat
@@ -18,23 +18,30 @@ const MIN_MOVE_M = 15
 const MIN_ACCURACY_CHANGE_M = 5
 
 /**
- * 「附近」模式的中心：持續追蹤 GPS；Demo 模式或沒有定位時，用東門的示範樹。
+ * 「附近」模式的中心：持續追蹤 GPS；Demo 模式用模擬位置（預設在東門的示範樹旁）；沒有定位時用東門的示範樹。
  * enabled 為 false 時不追蹤（全市模式不需要一直要定位）。
  */
 export function useAnchor(enabled: boolean): Anchor {
   const demo = isDemoMode()
-  const [anchor, setAnchor] = useState<Anchor>({ lngLat: DEMO.center, source: demo ? 'demo' : 'fallback' })
+  // Demo：模擬位置（可以拖曳人物移動，存在 sessionStorage）；沒移動過就站在示範樹旁
+  const demoPos = useDemoPosition()
+  const [anchor, setAnchor] = useState<Anchor>({ lngLat: (demo && demoPos) || DEMO.center, source: demo ? 'demo' : 'fallback' })
 
-  // 示範樹的真實座標
+  // 示範樹的真實座標（Demo 已經有模擬位置時不覆蓋）
   useEffect(() => {
     let alive = true
     findTree(DEMO.treeId).then((t) => {
-      if (alive && t) setAnchor((a) => (a.source === 'gps' ? a : { ...a, lngLat: t.lngLat }))
+      if (alive && t && !(demo && getDemoPosition())) setAnchor((a) => (a.source === 'gps' ? a : { ...a, lngLat: t.lngLat }))
     })
     return () => {
       alive = false
     }
-  }, [])
+  }, [demo])
+
+  // Demo：模擬位置一變（拖曳放開、走過去），錨點跟著走
+  useEffect(() => {
+    if (demo && demoPos) setAnchor((a) => (a.source === 'demo' && a.lngLat.join() === demoPos.join() ? a : { lngLat: demoPos, source: 'demo' }))
+  }, [demo, demoPos])
 
   useEffect(() => {
     if (!enabled || demo || !('geolocation' in navigator)) return

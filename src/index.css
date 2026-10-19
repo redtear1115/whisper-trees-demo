@@ -2744,6 +2744,17 @@ body.has-offline .gov {
   pointer-events: none;
 }
 
+/* Demo：人物可以拖曳。touch-action: none 讓手指拖人物時不會變成捲動或平移地圖 */
+.me-avatar.draggable {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+
+.me-avatar.draggable:active {
+  cursor: grabbing;
+}
+
 .me-avatar img {
   display: block;
   width: 100%;
@@ -2765,6 +2776,41 @@ body.has-offline .gov {
   font-size: 0.72rem;
   line-height: 1.5;
   white-space: nowrap;
+}
+
+/* 「可以拖曳牠移動位置」：人物上方的小氣泡，安靜、可關閉 */
+.me-avatar-hint {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0;
+  width: max-content;
+  max-width: min(230px, calc(100vw - 24px));
+  margin-bottom: 4px;
+  padding: 0 0 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.95);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  cursor: default;
+}
+
+.me-avatar-hint-close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -8px 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: no-preference) {

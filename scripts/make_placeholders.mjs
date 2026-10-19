@@ -30,6 +30,7 @@ const GLYPH = {
   'action-whisper': '💬',
   'action-info': '🌳',
   'action-report': '✂️',
+  'action-walk': '👣',
 }
 
 const outDir = join(root, 'public/assets/ph')

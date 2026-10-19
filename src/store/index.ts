@@ -7,8 +7,9 @@
 //     UI 會顯示「離線示範模式」橫幅（session.fallback）。同一台電腦的兩個分頁靠 storage 事件即時同步。
 // 非承辦人在後台（/gov、/vendor、/gm）的改動只寫本機覆寫層（overlay.ts），不進雲端。
 
-import { useSyncExternalStore } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 import { CHECKIN } from '../config'
+import type { LngLat } from '../lib/geo'
 import { dayKey } from '../lib/seed'
 import { firebaseEnabled } from '../lib/firebase'
 import * as cloud from './cloud'
@@ -376,6 +377,73 @@ export function isDemoMode(): boolean {
 export function exitDemoMode() {
   try {
     sessionStorage.removeItem(DEMO_KEY)
+    sessionStorage.removeItem(DEMO_POS_KEY)
+    sessionStorage.removeItem(DEMO_HINT_KEY)
+  } catch {
+    // ignore
+  }
+  demoPosListeners.forEach((l) => l())
+}
+
+// Demo 模式的模擬位置（2026-10-19）：可以拖曳地圖上的人物移動，只存在這個瀏覽器分頁（sessionStorage）。
+// null = 還沒移動過，站在示範樹旁（預設位置由 src/lib/demoPosition.ts 決定）。
+
+const DEMO_POS_KEY = 'whisper-trees:demo-pos'
+const DEMO_HINT_KEY = 'whisper-trees:demo-hint-seen'
+const demoPosListeners = new Set<() => void>()
+
+/** 字串形式（"lng,lat"），給 useSyncExternalStore 當快照用；null = 沒有 */
+function demoPosRaw(): string | null {
+  try {
+    return sessionStorage.getItem(DEMO_POS_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function parseDemoPosition(raw: string | null): LngLat | null {
+  if (!raw) return null
+  const [lng, lat] = raw.split(',').map(Number)
+  return Number.isFinite(lng) && Number.isFinite(lat) ? [lng, lat] : null
+}
+
+export function getDemoPosition(): LngLat | null {
+  return parseDemoPosition(demoPosRaw())
+}
+
+export function setDemoPosition(lngLat: LngLat) {
+  try {
+    sessionStorage.setItem(DEMO_POS_KEY, lngLat.join(','))
+  } catch {
+    // ignore
+  }
+  demoPosListeners.forEach((l) => l())
+}
+
+/** 模擬位置；地圖跟著它更新 */
+export function useDemoPosition(): LngLat | null {
+  const raw = useSyncExternalStore(
+    (cb) => {
+      demoPosListeners.add(cb)
+      return () => demoPosListeners.delete(cb)
+    },
+    demoPosRaw,
+  )
+  return useMemo(() => parseDemoPosition(raw), [raw])
+}
+
+/** 「可以拖曳牠移動位置」的提示：每個 session 只出現一次 */
+export function demoHintSeen(): boolean {
+  try {
+    return sessionStorage.getItem(DEMO_HINT_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function dismissDemoHint() {
+  try {
+    sessionStorage.setItem(DEMO_HINT_KEY, '1')
   } catch {
     // ignore
   }

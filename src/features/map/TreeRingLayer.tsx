@@ -4,7 +4,7 @@ import type { Tree } from '../../lib/trees'
 import { Art } from '../../components/ui'
 import { arcOffsets, farNote, ringActions, type RangeInfo, type RingAction } from './treeRings'
 
-/** 弧的半徑（px）：4 個 56 px 的圈在 360 px 寬的螢幕上排得下，彼此不重疊 */
+/** 弧的半徑（px）：Demo 的 5 個 56 px 圈（弧張到 170°）在 360 px 寬的螢幕上排得下，彼此不重疊 */
 const ARC_RADIUS = 118
 
 interface Props {
@@ -15,6 +15,8 @@ interface Props {
   range: RangeInfo
   onClose: () => void
   onGo: (a: RingAction) => void
+  /** Demo 模式：多一個「走過去」 */
+  demo?: boolean
 }
 
 /**
@@ -22,10 +24,10 @@ interface Props {
  * 是蓋在地圖上的一層（不是地圖標記），位置跟著樹在畫面上的位置走；圈外只有「樹的資料」能用，其餘變灰，
  * 點灰色的會出現平靜的提醒。焦點移到第一個圈、Esc 關閉。
  */
-export function TreeRingLayer({ map, tree, shown, range, onClose, onGo }: Props) {
+export function TreeRingLayer({ map, tree, shown, range, onClose, onGo, demo = false }: Props) {
   const host = useRef<HTMLDivElement>(null)
   const [note, setNote] = useState('')
-  const actions = ringActions(tree.id, range)
+  const actions = ringActions(tree.id, range, demo)
   const offsets = arcOffsets(actions.length, ARC_RADIUS)
 
   // 跟著樹在畫面上的位置
@@ -44,8 +46,8 @@ export function TreeRingLayer({ map, tree, shown, range, onClose, onGo }: Props)
     }
   }, [map, tree])
 
-  // 換一棵樹就清掉上一個提醒
-  useEffect(() => setNote(''), [tree.id])
+  // 換一棵樹、或走進（走出）感應圈，就清掉上一個提醒
+  useEffect(() => setNote(''), [tree.id, range.inRange])
 
   // 到位後：焦點移到第一個圈
   useEffect(() => {

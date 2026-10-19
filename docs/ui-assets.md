@@ -58,12 +58,13 @@
 | `avatar-night-heron` | 96×96 | 192×192 | `public/assets/ph/avatar-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:17` | 地圖人物：黑冠麻鷺。規格同上（2.5D 繪本風、站著、正面、透明背景、腳底在下緣中央） |
 | `avatar-squirrel` | 96×96 | 192×192 | `public/assets/ph/avatar-squirrel.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:18` | 地圖人物：赤腹松鼠。規格同上 |
 | `avatar-pangolin` | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：穿山甲。規格同上 |
-| `action-scan` | 64×64 | 128×128 | `public/assets/ph/action-scan.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:70` | 圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理 |
-| `action-whisper` | 64×64 | 128×128 | `public/assets/ph/action-whisper.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:71` | 圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上 |
-| `action-info` | 64×64 | 128×128 | `public/assets/ph/action-info.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:72` | 圖示：樹的資料（樹牌或葉子加一個 i）。規格同上 |
-| `action-report` | 64×64 | 128×128 | `public/assets/ph/action-report.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:73` | 圖示：樹況回報（剪刀或旗標）。規格同上 |
+| `action-scan` | 64×64 | 128×128 | `public/assets/ph/action-scan.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:73` | 圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理 |
+| `action-whisper` | 64×64 | 128×128 | `public/assets/ph/action-whisper.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:74` | 圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上 |
+| `action-info` | 64×64 | 128×128 | `public/assets/ph/action-info.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:75` | 圖示：樹的資料（樹牌或葉子加一個 i）。規格同上 |
+| `action-report` | 64×64 | 128×128 | `public/assets/ph/action-report.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:76` | 圖示：樹況回報（剪刀或旗標）。規格同上 |
+| `action-walk` | 64×64 | 128×128 | `public/assets/ph/action-walk.svg` | 點樹後的行動圈（只有 Demo 模式） | `src/features/map/treeRings.ts:78` | 圖示：走過去（腳印）。規格同上 |
 
-共 46 項。
+共 47 項。
 
 ## PWA 圖示（加到手機主畫面）
 

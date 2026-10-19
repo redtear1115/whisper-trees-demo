@@ -3,9 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Scanner } from '../features/checkin/Scanner'
 import { parseTreeId } from '../lib/treeId'
 import { findTree, type Tree } from '../lib/trees'
-import { judgeCheckin, offsetNorth, type CheckinResult } from '../lib/geo'
+import { judgeCheckin, type CheckinResult } from '../lib/geo'
+import { currentDemoPosition } from '../lib/demoPosition'
 import { locate } from '../lib/locate'
-import { CHECKIN, DATA_VERSION } from '../config'
+import { DATA_VERSION } from '../config'
 import { isDemoMode, recordCheckin } from '../store'
 import { awardCheckin, isDaytime } from '../features/game/ledger'
 
@@ -37,7 +38,7 @@ export default function ScanPage() {
     setStep({ kind: 'working', text: '找到樹牌了，正在確認你的位置…' })
     const [tree, position] = await Promise.all([
       findTree(id),
-      isDemoMode() ? Promise.resolve(null) : locate(),
+      isDemoMode() ? currentDemoPosition() : locate(),
     ])
     if (!tree) {
       return setStep({
@@ -45,8 +46,8 @@ export default function ScanPage() {
         text: `資料裡還沒有這棵樹（${id}）。資料是 ${DATA_VERSION} 的版本，新種的樹可能還沒有。`,
       })
     }
-    const pos = isDemoMode() ? { lngLat: offsetNorth(tree.lngLat, CHECKIN.demoOffsetMeters), accuracy: CHECKIN.demoAccuracy } : position
-    const checkin = judgeCheckin(tree.lngLat, tree.remark, pos)
+    // Demo：用模擬位置判斷（可以在地圖上拖曳人物移動），離太遠就是「太遠」，和真實使用一樣
+    const checkin = judgeCheckin(tree.lngLat, tree.remark, position)
     let glow: number | undefined
     if (checkin.kind === 'success' || checkin.kind === 'farView') {
       recordCheckin(id, checkin.kind, { species: tree.species, night: !isDaytime() })

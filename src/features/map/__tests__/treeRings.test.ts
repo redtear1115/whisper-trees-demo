@@ -71,6 +71,24 @@ describe('ringActions', () => {
   })
 })
 
+describe('ringActions in Demo (走過去)', () => {
+  const far = { distance: 60, inRange: false, remaining: 25 }
+  it('adds a 5th ring 走過去, always active, only in Demo', () => {
+    expect(ringActions('X', far).some((x) => x.id === 'walk')).toBe(false)
+    const a = ringActions('X', far, true)
+    expect(a.map((x) => x.id)).toEqual(['scan', 'whisper', 'info', 'report', 'walk'])
+    expect(a.find((x) => x.id === 'walk')).toMatchObject({ label: '走過去', enabled: true })
+  })
+  it('after walking (in range) every ring is active', () => {
+    expect(ringActions('X', { distance: 10, inRange: true, remaining: null }, true).every((x) => x.enabled)).toBe(true)
+  })
+  it('5 rings fan wider so 56 px discs stay apart (>= 56 px between centres)', () => {
+    const o = arcOffsets(5, 118)
+    for (let i = 1; i < o.length; i++) expect(Math.hypot(o[i].x - o[i - 1].x, o[i].y - o[i - 1].y)).toBeGreaterThanOrEqual(56)
+    expect(Math.max(...o.map((p) => Math.abs(p.x))) + 36).toBeLessThanOrEqual(180) // 360 px 寬，樹在中間
+  })
+})
+
 describe('arcOffsets', () => {
   it('puts the middle of the arc straight below the tree and mirrors left/right', () => {
     const o = arcOffsets(3, 100, 120)

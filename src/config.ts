@@ -8,9 +8,9 @@ export const CHECKIN = {
   farViewMeters: 80,
   /** 定位逾時 */
   geoTimeoutMs: 10_000,
-  /** Demo 模式假裝站在樹旁幾公尺 */
+  /** Demo 模式「走過去」：站到樹旁幾公尺 */
   demoOffsetMeters: 10,
-  /** Demo 模式假裝的定位誤差（公尺）：打卡判斷與地圖感應圈共用 */
+  /** Demo 模擬位置的定位誤差（公尺）：打卡判斷與地圖感應圈共用 */
   demoAccuracy: 5,
   /** 打卡後多久內重新整理樹的頁面仍算在現場 */
   sessionMinutes: 30,

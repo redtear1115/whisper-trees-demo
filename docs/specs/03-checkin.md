@@ -34,7 +34,7 @@ http://trees.gov.taipei/show/?treeid=SL0560111023
 | 太遠 | 其他 | 「你離這棵樹約 N 公尺，走近一點再掃一次」，仍可以看樹的資料 |
 | 無法定位 | 使用者拒絕或逾時 10 秒 | 「沒有位置就無法打卡」，仍可以看樹的資料 |
 
-**感應半徑**只有一個定義：`checkinRadius(accuracy) = nearMeters + min(accuracy, maxAccuracyBonus)`（`src/lib/geo.ts`）。打卡判斷（`judgeCheckin`）與地圖「附近」模式的人物感應圈（[02](02-map.md)）都呼叫它，兩邊不會不一致。Demo 模式的假定位誤差是 `CHECKIN.demoAccuracy`（5 m）→ 半徑 35 m。地圖上圈內有樹只是提示，打卡仍要掃樹牌 QR Code。
+**感應半徑**只有一個定義：`checkinRadius(accuracy) = nearMeters + min(accuracy, maxAccuracyBonus)`（`src/lib/geo.ts`）。打卡判斷（`judgeCheckin`）與地圖「附近」模式的人物感應圈（[02](02-map.md)）都呼叫它，兩邊不會不一致。Demo 模式的模擬位置誤差是 `CHECKIN.demoAccuracy`（5 m）→ 半徑 35 m。地圖上圈內有樹只是提示，打卡仍要掃樹牌 QR Code。
 
 門檻值集中放在設定檔，Demo 前依現場測試調整。
 
@@ -42,7 +42,10 @@ http://trees.gov.taipei/show/?treeid=SL0560111023
 
 現場會場不在 Demo 的樹旁邊，需要備案：
 
-- 網址帶 `?demo=1` 時，定位改成「剛好站在這棵樹旁 10 m」，畫面角落顯示「Demo 模式：模擬定位」。
+- 網址帶 `?demo=1` 時，定位改成**可以移動的模擬位置**（2026-10-19 決定），畫面角落顯示「Demo 模式：模擬定位」。
+  - 預設站在示範樹 `DA0030211045` 的位置（`DEMO`），所以現場照舊：開 `?demo=1`、掃示範樹牌就成功。
+  - 模擬位置存在這個瀏覽器分頁（sessionStorage，經 store 的 `getDemoPosition` / `setDemoPosition` / `useDemoPosition`；`exitDemoMode` 會清掉）。移動的方式見 [02 地圖](02-map.md)：拖曳人物，或點樹後的「走過去」。
+  - **掃樹牌用模擬位置判斷**（`CHECKIN.demoAccuracy`，`judgeCheckin` 不變）：離樹太遠就是「太遠」，和真實使用一樣；走到樹旁（35 m 內）才成功；安全島樹的遠觀規則照舊，只是距離從模擬位置算。示範按鈕（「掃示範樹牌（Demo）」「掃這棵樹的樹牌（Demo）」）只是代掃，不再假裝站在樹旁。
 - README 已註明這是模擬資料。
 - **首選**：Demo 前找一棵會場（北平東路 30-1 號）附近的真實行道樹，拍下樹牌、印出來，現場掃。這樣 GPS 也是真的。
 
@@ -70,3 +73,4 @@ http://trees.gov.taipei/show/?treeid=SL0560111023
 - [ ] iPhone Safari、Android Chrome 實機掃印出來的樹牌成功。
 - [ ] 距離判斷有單元測試，涵蓋四種結果，以及 `checkinRadius` 邊界（半徑內 0.5 m 成功、外 0.5 m 太遠），且地圖感應圈與判斷用同一個半徑。
 - [ ] `?demo=1` 時畫面有清楚的模擬標示。
+- [x] Demo 掃樹牌用模擬位置判斷（單元測試 `demoPosition.test.ts`）：預設位置掃示範樹成功；拖曳到約 60 m 外再掃同一棵（手動輸入編號）→「太遠」（你離這棵樹約 60 公尺）；「走過去」之後掃這棵樹的樹牌 → 成功。2026-10-19 Playwright 360 px、1440 px 驗過。
