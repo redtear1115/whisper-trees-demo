@@ -2478,3 +2478,109 @@ body.has-offline .gov {
     animation: none;
   }
 }
+
+/* 桌機的旋轉控制：開在「方向」按鈕旁邊（和圖層面板同一個位置） */
+.rotate-panel {
+  position: absolute;
+  z-index: 3;
+  right: 72px;
+  bottom: calc(max(36px, env(safe-area-inset-bottom)) + 150px);
+  width: min(212px, calc(100% - 96px));
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 253, 248, 0.97);
+  box-shadow: var(--shadow);
+}
+
+.rotate-head {
+  justify-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rotate-close {
+  width: 44px;
+  height: 44px;
+  margin: -8px -10px -8px 0;
+  border: 0;
+  background: none;
+  font-size: 1.4rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.rotate-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.rotate-ring:active {
+  cursor: grabbing;
+}
+
+.rotate-ring svg {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.12s linear;
+}
+
+.rotate-disc {
+  fill: var(--green-soft);
+  stroke: var(--green);
+  stroke-width: 2;
+}
+
+.rotate-tick {
+  stroke: var(--green-ink);
+  stroke-width: 1.5;
+}
+
+.rotate-north {
+  fill: var(--red-ink);
+}
+
+.rotate-n {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--red-ink);
+}
+
+.rotate-deg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  pointer-events: none;
+}
+
+.rotate-steps {
+  display: flex;
+  gap: 8px;
+  justify-self: stretch;
+}
+
+.rotate-steps .btn {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.rotate-tip {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--muted);
+}

@@ -35,7 +35,7 @@ export default function ScanPage() {
         text: `資料裡還沒有這棵樹（${id}）。資料是 ${DATA_VERSION} 的版本，新種的樹可能還沒有。`,
       })
     }
-    const pos = isDemoMode() ? { lngLat: offsetNorth(tree.lngLat, CHECKIN.demoOffsetMeters), accuracy: 5 } : position
+    const pos = isDemoMode() ? { lngLat: offsetNorth(tree.lngLat, CHECKIN.demoOffsetMeters), accuracy: CHECKIN.demoAccuracy } : position
     const checkin = judgeCheckin(tree.lngLat, tree.remark, pos)
     let glow: number | undefined
     if (checkin.kind === 'success' || checkin.kind === 'farView') {

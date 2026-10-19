@@ -34,6 +34,11 @@ export function isMedianStrip(remark: string): boolean {
   return remark.includes('安全島')
 }
 
+/** 打卡的感應半徑（公尺）：nearMeters + min(定位誤差, maxAccuracyBonus)。打卡判斷與地圖上的感應圈共用，不會不一致。 */
+export function checkinRadius(accuracy: number): number {
+  return CHECKIN.nearMeters + Math.min(Math.max(accuracy, 0), CHECKIN.maxAccuracyBonus)
+}
+
 /** 依距離判斷打卡結果，規則見 docs/specs/03-checkin.md */
 export function judgeCheckin(
   tree: LngLat,
@@ -42,8 +47,7 @@ export function judgeCheckin(
 ): CheckinResult {
   if (!position) return { kind: 'noLocation' }
   const d = distanceMeters(tree, position.lngLat)
-  const limit = CHECKIN.nearMeters + Math.min(position.accuracy, CHECKIN.maxAccuracyBonus)
-  if (d <= limit) return { kind: 'success', distance: d }
+  if (d <= checkinRadius(position.accuracy)) return { kind: 'success', distance: d }
   if (isMedianStrip(remark) && d <= CHECKIN.farViewMeters) return { kind: 'farView', distance: d }
   return { kind: 'tooFar', distance: d }
 }

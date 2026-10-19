@@ -14,6 +14,8 @@ export interface Anchor {
 
 /** 位置移動超過這個距離才更新範圍，避免 GPS 抖動讓地圖一直跳 */
 const MIN_MOVE_M = 15
+/** 定位誤差變動超過這個值才更新（感應圈半徑跟著誤差變） */
+const MIN_ACCURACY_CHANGE_M = 5
 
 /**
  * 「附近」模式的中心：持續追蹤 GPS；Demo 模式或沒有定位時，用東門的示範樹。
@@ -39,11 +41,12 @@ export function useAnchor(enabled: boolean): Anchor {
     const id = navigator.geolocation.watchPosition(
       (p) => {
         const next: LngLat = [p.coords.longitude, p.coords.latitude]
-        setAnchor((a) =>
-          a.source === 'gps' && distanceMeters(a.lngLat, next) < MIN_MOVE_M
-            ? a
-            : { lngLat: next, source: 'gps', accuracy: p.coords.accuracy },
-        )
+        const accuracy = p.coords.accuracy
+        setAnchor((a) => {
+          if (a.source !== 'gps' || distanceMeters(a.lngLat, next) >= MIN_MOVE_M) return { lngLat: next, source: 'gps', accuracy }
+          // 沒走動：位置不變，但誤差變了就更新，感應圈才跟著變
+          return Math.abs((a.accuracy ?? 0) - accuracy) >= MIN_ACCURACY_CHANGE_M ? { ...a, accuracy } : a
+        })
       },
       () => setAnchor((a) => (a.source === 'gps' ? a : { ...a, source: 'fallback' })),
       { enableHighAccuracy: true, maximumAge: 10_000, timeout: 20_000 },

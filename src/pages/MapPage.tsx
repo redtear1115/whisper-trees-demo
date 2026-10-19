@@ -21,6 +21,9 @@ import { TourSheet, useTourView } from '../features/onboarding/TourSheet'
 import { useAnchor } from '../features/map/useAnchor'
 import { boundsAround, circleRing } from '../lib/nearby'
 import { angleDiff, requestHeadingPermission, watchHeading } from '../features/map/heading'
+import { ringRadius, treesInRing } from '../features/map/ring'
+import { hasFinePointer } from '../features/map/rotation'
+import { RotationControl } from '../features/map/RotationControl'
 
 type Sheet =
   | { kind: 'tree'; tree: Tree }
@@ -72,6 +75,10 @@ export default function MapPage() {
   const [follow, setFollow] = useState(false)
   const [bearing, setBearing] = useState(0)
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
+  // 桌機（沒有指南針）：「方向」按鈕改開旋轉控制
+  const [finePointer] = useState(hasFinePointer)
+  const [rotateOpen, setRotateOpen] = useState(false)
+  const [nearCount, setNearCount] = useState(0)
   const wishes = useWishes()
   const tour = useTourView()
   const userReady = useUserReady()
@@ -170,6 +177,26 @@ export default function MapPage() {
         source: 'nearby',
         paint: { 'line-color': '#3f7d4e', 'line-width': 2, 'line-dasharray': [2, 2], 'line-opacity': 0.7 },
       })
+      // 人物感應圈：半徑和打卡判斷共用（ringRadius → checkinRadius）。畫在樹的下面，圈內的樹另外畫一層亮的
+      m.addSource('ring', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      m.addLayer({
+        id: 'ring-fill',
+        type: 'fill',
+        source: 'ring',
+        paint: { 'fill-color': '#f6d98a', 'fill-opacity': 0.2 },
+      })
+      m.addLayer({
+        id: 'ring-glow',
+        type: 'line',
+        source: 'ring',
+        paint: { 'line-color': '#f2c14e', 'line-width': 10, 'line-blur': 8, 'line-opacity': 0.45 },
+      })
+      m.addLayer({
+        id: 'ring-line',
+        type: 'line',
+        source: 'ring',
+        paint: { 'line-color': '#d9a935', 'line-width': 1.5, 'line-opacity': 0.8 },
+      })
       m.addSource('me', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addLayer({
         id: 'trees',
@@ -183,6 +210,22 @@ export default function MapPage() {
           'circle-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0.55, 15, 0.82],
           'circle-stroke-color': '#d8ead5',
           'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 15, 0, 17, 1.5],
+          'circle-pitch-alignment': 'map',
+        },
+      })
+      // 圈內的樹：用同一份圖磚，只畫落在感應圈裡的（filter 在 MapPage 的感應圈 effect 設定）
+      m.addLayer({
+        id: 'trees-near',
+        type: 'circle',
+        source: 'trees',
+        'source-layer': 'trees',
+        layout: { visibility: 'none' },
+        paint: {
+          'circle-color': '#7fc48c',
+          'circle-radius': ['interpolate', ['exponential', 1.6], ['zoom'], 10, 0.9, 14, 2.4, 16, 6, 18, 15, 20, 40],
+          'circle-opacity': 0.95,
+          'circle-stroke-color': '#f2c14e',
+          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 17, 2.5],
           'circle-pitch-alignment': 'map',
         },
       })
@@ -388,6 +431,41 @@ export default function MapPage() {
     }
   }, [mode, anchor, ready])
 
+  // 人物感應圈與圈內的樹（只在附近模式、有定位或 Demo 時）
+  const radius = mode === 'near' ? ringRadius(anchor) : null
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    const ring = m.getSource('ring') as maplibregl.GeoJSONSource | undefined
+    if (radius === null) {
+      ring?.setData({ type: 'FeatureCollection', features: [] })
+      m.setLayoutProperty('trees-near', 'visibility', 'none')
+      setNearCount(0)
+      return
+    }
+    const polygon = { type: 'Polygon' as const, coordinates: [circleRing(anchor.lngLat, radius)] }
+    ring?.setData(polygon)
+    m.setFilter('trees-near', ['within', polygon])
+    m.setLayoutProperty('trees-near', 'visibility', layers.trees ? 'visible' : 'none')
+    // 數圈內的樹：用已載入的圖磚算距離（和打卡同一個半徑）。人拖開、圖磚還沒載入時保留上一次的數字
+    const count = () => {
+      if (!layers.trees) return setNearCount(0)
+      const p = m.project(anchor.lngLat)
+      const { clientWidth: w, clientHeight: h } = m.getCanvas()
+      if (p.x < 0 || p.y < 0 || p.x > w || p.y > h) return
+      const found = m.querySourceFeatures('trees', { sourceLayer: 'trees' }).map((f) => ({
+        id: String(f.properties.id),
+        lngLat: (f.geometry as unknown as { coordinates: LngLat }).coordinates,
+      }))
+      setNearCount(treesInRing(found, anchor.lngLat, radius).length)
+    }
+    count()
+    m.on('idle', count)
+    return () => {
+      m.off('idle', count)
+    }
+  }, [radius, anchor.lngLat, ready, layers.trees])
+
   // 跟著方向：地圖隨手機指南針轉動，讓畫面的上方就是你面向的方向
   useEffect(() => {
     const m = map.current
@@ -396,7 +474,7 @@ export default function MapPage() {
     const noSensor = setTimeout(() => {
       if (got) return
       setFollow(false)
-      setHeadingMsg('這台裝置沒有指南針，可以用兩指旋轉地圖。')
+      setRotateOpen(true) // 沒有指南針：改開旋轉控制
     }, 2500)
     const stop = watchHeading((deg) => {
       got = true
@@ -604,14 +682,22 @@ export default function MapPage() {
             </span>
             <span>北</span>
           </button>
-          {mode === 'near' && (
+          {(mode === 'near' || finePointer) && (
             <button
-              className={`tool ${follow ? 'on' : ''}`}
-              aria-pressed={follow}
-              aria-label="跟著手機方向轉動地圖"
+              className={`tool ${follow || rotateOpen ? 'on' : ''}`}
+              data-testid="heading-button"
+              aria-pressed={finePointer ? undefined : follow}
+              aria-expanded={finePointer ? rotateOpen : undefined}
+              aria-label={finePointer ? '旋轉地圖' : '跟著手機方向轉動地圖'}
               onClick={async () => {
                 setHeadingMsg(null)
+                if (rotateOpen) return setRotateOpen(false)
                 if (follow) return setFollow(false)
+                // 桌機沒有指南針：直接開旋轉控制
+                if (finePointer) {
+                  setPanel(false)
+                  return setRotateOpen(true)
+                }
                 if (!(await requestHeadingPermission())) {
                   return setHeadingMsg('沒有方向權限。可以在瀏覽器設定開啟，或用兩指旋轉地圖。')
                 }
@@ -623,6 +709,10 @@ export default function MapPage() {
             </button>
           )}
         </div>
+      )}
+
+      {!sheet && !tour.open && rotateOpen && (
+        <RotationControl map={map.current} bearing={bearing} onClose={() => setRotateOpen(false)} />
       )}
 
       {!sheet && !tour.open && (
@@ -650,7 +740,11 @@ export default function MapPage() {
         </div>
       )}
 
-      {!sheet && !tour.open && <p className="scan-hint">找一棵樹，掃它樹幹上的樹牌</p>}
+      {!sheet && !tour.open && (
+        <p className="scan-hint" data-testid={mode === 'near' && nearCount > 0 ? 'near-hint' : undefined} data-count={nearCount || undefined}>
+          {mode === 'near' && nearCount > 0 ? `附近有 ${nearCount} 棵樹可以掃` : '找一棵樹，掃它樹幹上的樹牌'}
+        </p>
+      )}
       {!sheet && !tour.open && (
         <Link className="scan-fab" to="/scan">
           掃樹牌

@@ -34,6 +34,8 @@ http://trees.gov.taipei/show/?treeid=SL0560111023
 | 太遠 | 其他 | 「你離這棵樹約 N 公尺，走近一點再掃一次」，仍可以看樹的資料 |
 | 無法定位 | 使用者拒絕或逾時 10 秒 | 「沒有位置就無法打卡」，仍可以看樹的資料 |
 
+**感應半徑**只有一個定義：`checkinRadius(accuracy) = nearMeters + min(accuracy, maxAccuracyBonus)`（`src/lib/geo.ts`）。打卡判斷（`judgeCheckin`）與地圖「附近」模式的人物感應圈（[02](02-map.md)）都呼叫它，兩邊不會不一致。Demo 模式的假定位誤差是 `CHECKIN.demoAccuracy`（5 m）→ 半徑 35 m。地圖上圈內有樹只是提示，打卡仍要掃樹牌 QR Code。
+
 門檻值集中放在設定檔，Demo 前依現場測試調整。
 
 ## Demo 模式（模擬 GPS）
@@ -62,5 +64,5 @@ http://trees.gov.taipei/show/?treeid=SL0560111023
 - [ ] 用 `material/samples/tree-tag-SL0560111023.jpg` 測試，解出 `SL0560111023`（單元測試）。
 - [ ] 解析函式能處理：完整網址、`https` 網址、只有編號、帶 `-001` 後綴、亂碼。
 - [ ] iPhone Safari、Android Chrome 實機掃印出來的樹牌成功。
-- [ ] 距離判斷有單元測試，涵蓋四種結果。
+- [ ] 距離判斷有單元測試，涵蓋四種結果，以及 `checkinRadius` 邊界（半徑內 0.5 m 成功、外 0.5 m 太遠），且地圖感應圈與判斷用同一個半徑。
 - [ ] `?demo=1` 時畫面有清楚的模擬標示。
