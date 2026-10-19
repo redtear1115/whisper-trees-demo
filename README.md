@@ -41,7 +41,7 @@
 
 主線之外的畫面（集章冊與其中的探索、樹洞、我的，以及只在 Demo 模式顯示的「Demo 切換台」`/demo-control?demo=1`）；全部是前端示意、模擬資料。見 [08-extensions](docs/specs/08-extensions.md)。
 
-- 光點經濟（規則對齊團隊簡報 v17：靠近一棵樹 +10、同一棵樹第 2／3 個互動 +2／+1、日照最高 ×1.5、寂寞樹 ×2～×5、樹況回報 +15、每日第 11 棵起減半；受保護樹木基礎 20 已實作但開放資料沒有名冊，未啟用；見 [08 §1](docs/specs/08-extensions.md)）、商店、圖鑑、成長徽章、角色養成
+- 光點經濟（規則對齊團隊簡報 v17：靠近一棵樹 +10、同一棵樹第 2／3 個互動 +2／+1、日照最高 ×1.5、寂寞樹 ×2～×5、樹況回報 +15、每日第 11 棵起減半；受保護樹木基礎 20 用臺北市受保護樹木名冊依位置比對到的 1,161 棵；見 [08 §1](docs/specs/08-extensions.md)）、商店、圖鑑、成長徽章、角色養成
 - 集章冊：12 個行政區各依打卡過幾棵不同的樹得鐵（1）、銅（10）、銀（50）、金（200）章，另看每區累計的光點與明細；全由打卡紀錄與光點流水帳推算，不另存資料（已做，見 [08 §10](docs/specs/08-extensions.md)）
 - 新手引導：收集第一道光（送草帽新手禮，不送光點）、加入手機主畫面、4 項新手任務，共 3 枚徽章（資料、徽章、引導一「收集光點」與加入主畫面已做；新手任務卡已做、瀏覽器與實機待驗，見 [08 §9](docs/specs/08-extensions.md)）
 - 遊戲營運後台（GM）、發包商後台
@@ -80,6 +80,7 @@
 | `TaipeiTreeHole.csv` | 同上：樹穴 | 工務局公園處 | TWD97 |
 | `treepit_nwo.json` | [臺北市人行道固定設施物＿樹穴](https://data.gov.tw/dataset/134908) | 工務局新工處 | EPSG:3826 |
 | `sidewalk.json` | [臺北市人行道範圍圖](https://data.taipei/dataset/detail?id=715d3a83-8445-4496-b6bf-b0900538b7e7) | 工務局新工處 | EPSG:3826 |
+| `protected_trees/protected_trees.csv` | [臺北市受保護樹木](https://data.gov.tw/dataset/121274)：3,874 棵（2026-10-20 下載；資料集 2026-10-13 更新；`source.json` 記連結與日期）。UTF-8 含 BOM，經緯度只有 4 位小數（約 11 m），沒有公園處 TreeID；由 `scripts/fetch_protected_trees.py` 下載 | 臺北市政府文化局 | WGS84 |
 | `parks.json` | [臺北市公園基本資料](https://data.taipei/dataset/detail?id=ea732fb5-4bec-4be7-93f2-8ab91e74a6c6) | 工務局公園處 | WGS84 |
 
 `material/raw/osm/` 為 2026-10-16 透過 Overpass API 下載的 OpenStreetMap 資料（公園範圍、具名道路），© OpenStreetMap contributors，依 [ODbL 1.0](https://opendatacommons.org/licenses/odbl/) 授權。
@@ -100,6 +101,7 @@
 | `material/processed/parks_osm_match.csv`、`parks_boundary.geojson` | 公園處 813 座公園對上 OSM 範圍，622 座有範圍 | `scripts/match_parks_osm.py` |
 | `public/data/` | 網頁用的樹木點位（向量圖磚）、樹籍查詢表、空樹穴、行政區與樹種統計 | `scripts/build_web_data.py`，見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
 | `public/data/taipei-outline.json` | 集章冊示意地圖的背景：台北市輪廓、12 區界、鄰近的新北與基隆（已投影成 SVG 路徑，約 11 KB）；OSM 資料，© OpenStreetMap contributors（ODbL），畫面上有出處 | `scripts/build_admin_outline.py` |
+| `public/data/protected-trees.json` | 受保護樹木對上公園處 TreeID 的清單：3,874 棵中 1,161 棵對到（同樹種 8 m 內 1,064、其餘 3 m 內不論樹種 97），2,713 棵沒對到（多在學校、寺廟、私人土地，沒有公園處樹牌）；約 115 KB；打卡的基礎光點由 10 變 20，樹的頁面標「受保護樹木」。是位置比對的推測，不是官方對照；出處標臺北市政府文化局（政府資料開放授權條款第 1 版） | `scripts/build_protected_trees.py`，見 [08 §1](docs/specs/08-extensions.md) |
 | `public/data/villages/<前綴>.json` | 臺北市 456 個里的界線（WGS84，簡化約 12 公尺）與每里的樹木總數（以樹木座標落在哪個里計；51 棵落在所有里之外，不計入），每區一個檔案（11～72 KB）；里界來自內政部國土測繪中心，畫面出處需標明 | `scripts/build_villages.py`，見 [08-extensions §10](docs/specs/08-extensions.md) |
 | `public/data/roads/<前綴>.json` | 步行路網（怎麼走、集章冊里路線）：每區一個檔案（93～302 KB），OSM 具名道路（去掉快速道路與高架、不能走的），路口與路的盡頭為節點、邊帶長度與中間座標，每區外擴 300 公尺；**只含具名道路，小巷可能沒有**；© OpenStreetMap contributors（ODbL） | `scripts/build_road_graph.py`，見 [02-map](docs/specs/02-map.md)「怎麼走」 |
 | `public/data/species-photos/` | 樹種照片的網頁版：最長邊 640 px、JPEG 品質 80、去掉 EXIF（含 GPS），共約 9.9 MB；`index.json` 記每張的攝影者、授權（只有 CC0 與 CC BY）、原始觀察連結；樹的頁面與圖鑑讀它 | `scripts/build_species_photos.py`（輸入 `material/raw/inat/`，見上方「真實開放資料」） |
@@ -192,6 +194,8 @@ uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json
 uv run scripts/fetch_villages.py   # 下載內政部村里界到 material/raw/village/village.zip（只在要更新時跑）
 uv run scripts/build_villages.py   # 產生 public/data/villages/<前綴>.json（里界與每里樹數），順便做 --check
 uv run scripts/build_road_graph.py # 產生 public/data/roads/<前綴>.json（步行路網，需要先有 villages），順便做 --check
+uv run scripts/fetch_protected_trees.py   # 下載臺北市受保護樹木 CSV 到 material/raw/protected_trees/（只在要更新時跑）
+uv run scripts/build_protected_trees.py   # 對上公園處 TreeID，產生 public/data/protected-trees.json，--check 檢查是否最新
 uv run scripts/fetch_inat_photos.py   # 從 iNaturalist 下載樹種照片到 material/raw/inat/（只收 CC0 / CC BY；每秒 1 次請求，回應有快取；--check 離線檢查授權與張數）
 uv run scripts/build_species_photos.py # 縮圖、去 EXIF，產生 public/data/species-photos/，順便做 --check
 ```

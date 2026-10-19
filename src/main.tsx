@@ -4,6 +4,10 @@ import App from './App'
 import './index.css'
 // 要在 App 之前載入：beforeinstallprompt 很早就會觸發，先接住才能在引導的最後一步用
 import './features/onboarding/install'
+import { loadProtectedTrees } from './features/game/protectedTrees'
+
+// 受保護樹木名冊：啟動就開始讀，掃樹牌時通常已經好了
+void loadProtectedTrees()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

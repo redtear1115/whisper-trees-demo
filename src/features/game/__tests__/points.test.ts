@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { resetAll } from '../../../store'
 import { DEFAULT_CONFIG, gameConfig, saveGameConfig } from '../config'
 import { award, awardCheckin, balance, baseLedger, daylightFactor } from '../ledger'
 import { calcTreePoints, lonelyFactor, type TreePointsInput } from '../points'
-import { isProtectedTree } from '../protectedTrees'
+import { isProtectedTree, setProtectedTreesForTest } from '../protectedTrees'
 import { daysSinceVisit, mockDaysSinceVisit } from '../visits'
 
 const DAY = 86_400_000
@@ -157,9 +157,19 @@ describe('mock "last visited" (labelled 模擬)', () => {
 })
 
 describe('protected trees', () => {
-  it('there is no protected-tree list in the open data, so none is active', () => {
+  afterEach(() => setProtectedTreesForTest(null))
+
+  it('before the list is loaded a tree is not protected: 10', () => {
     expect(isProtectedTree('SL0560111023')).toBe(false)
     expect(awardCheckin('SL0560111023', 'success', night)).toBe(10)
+  })
+
+  it('a listed tree pays the protected base 20 on check-in, with the reason in the ledger; far view stays 5', () => {
+    setProtectedTreesForTest(['SL0560111023', 'SL0560111025'])
+    expect(awardCheckin('SL0560111023', 'success', night)).toBe(20)
+    expect(baseLedger().at(-1)?.reason).toContain('受保護樹木 基礎 20')
+    expect(awardCheckin('SL0560111024', 'success', night)).toBe(10)
+    expect(awardCheckin('SL0560111025', 'farView', night)).toBe(5)
   })
 })
 

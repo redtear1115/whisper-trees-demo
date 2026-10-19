@@ -10,6 +10,7 @@ import { IconBack } from '../components/icons'
 import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
 import { award, isDaytime } from '../features/game/ledger'
+import { useIsProtectedTree } from '../features/game/protectedTrees'
 import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
@@ -31,6 +32,7 @@ export default function TreePage() {
   const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
   const photos = useSpeciesPhotos(tree?.species)
+  const isProtected = useIsProtectedTree(treeId)
 
   useEffect(() => {
     let alive = true
@@ -96,6 +98,11 @@ export default function TreePage() {
         )}
         <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
+      {isProtected && (
+        <p className="protected-tag" data-testid="protected-tag">
+          受保護樹木
+        </p>
+      )}
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
       {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}
@@ -170,6 +177,7 @@ export default function TreePage() {
           <dd className="num">{tree.id}</dd>
         </dl>
         <p className="muted small">資料來源：臺北市政府工務局公園路燈工程管理處開放資料</p>
+        {isProtected && <p className="muted small">受保護樹木名冊：臺北市政府文化局開放資料，依位置與樹種比對到這棵樹。</p>}
       </details>
 
       <div id="report" className="anchor-target">

@@ -56,6 +56,8 @@ Python 腳本用 uv 執行：
 uv run scripts/merge_treepits.py
 uv run scripts/match_parks_osm.py
 uv run scripts/build_web_data.py   # 產生 public/data/，需要 tippecanoe
+uv run scripts/fetch_protected_trees.py   # 下載受保護樹木名冊到 material/raw/protected_trees/（只在要更新時跑）
+uv run scripts/build_protected_trees.py   # 對上 TreeID，產生 public/data/protected-trees.json（--check 檢查）
 uv run scripts/fetch_inat_photos.py    # 樹種照片：iNaturalist，只收 CC0 / CC BY，下載到 material/raw/inat/（--check 驗授權與張數）
 uv run scripts/build_species_photos.py # 縮圖、去 EXIF，產生 public/data/species-photos/（--check）
 uv run scripts/fetch_admin_osm.py  # 下載 OSM 行政區界到 material/raw/osm/admin_boundaries_osm.json（只在要更新時跑）

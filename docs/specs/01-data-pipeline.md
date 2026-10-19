@@ -102,9 +102,14 @@ TWD97（EPSG:3826）→ WGS84（EPSG:4326），用 `pyproj`，`always_xy=True`�
 
 `ratio` = OSM 面積 ÷ 官方面積；`contains` 與 `intersection+*` 的品質較差，使用前看一下 `ratio`。
 
+## 受保護樹木名冊（2026-10-20）
+
+不是公園處資料的一部分，獨立一條：`scripts/fetch_protected_trees.py` 下載 [臺北市受保護樹木](https://data.gov.tw/dataset/121274) 到 `material/raw/protected_trees/`，`scripts/build_protected_trees.py` 依位置與樹種比對到 TreeID，輸出 `public/data/protected-trees.json`。方法、門檻與結果見 [08 §1](08-extensions.md)。
+
 ## 驗收
 
 - [ ] `uv run scripts/build_web_data.py` 一次跑完，沒有錯誤。
+- [x] `uv run scripts/build_protected_trees.py --check` 通過：名冊 3,874 棵、比對到 1,161 棵、每個 TreeID 只用一次且都查得到（`protectedTrees.test.ts` 也檢查）。
 - [ ] 查詢表涵蓋 162,406 棵，`SL0560111023`、`SY0030551077`、帶後綴的 `SL0174321005-001` 都查得到。
 - [ ] `pits-empty.geojson` 有 16,781 個點。
 - [ ] 單一查詢表檔案 gzip 後小於 500 KB。

@@ -199,7 +199,7 @@ function Rules() {
           <NumRow label="寂寞樹：每多幾天加 ×1" value={cfg.lonelyStepDays} min={1} max={365} onChange={(n) => saveGameConfig({ lonelyStepDays: n })} />
           <NumRow
             label="受保護樹木：打卡基礎光點"
-            note="取代「打卡成功」的基礎點數。開放資料目前沒有受保護樹木名冊，這條規則先不會觸發"
+            note="取代「打卡成功」的基礎點數，只用在受保護樹木（臺北市受保護樹木名冊比對到的樹）"
             value={cfg.protectedBase}
             onChange={(n) => saveGameConfig({ protectedBase: n })}
           />

@@ -9,6 +9,7 @@ import { locate } from '../lib/locate'
 import { DATA_VERSION } from '../config'
 import { isDemoMode, recordCheckin } from '../store'
 import { awardCheckin, isDaytime } from '../features/game/ledger'
+import { loadProtectedTrees } from '../features/game/protectedTrees'
 import { SCAN_CLOSE_TO } from '../features/nav/tabs'
 
 type Step = { kind: 'scan' } | { kind: 'working'; text: string } | { kind: 'error'; text: string }
@@ -52,6 +53,7 @@ export default function ScanPage() {
     let glow: number | undefined
     if (checkin.kind === 'success' || checkin.kind === 'farView') {
       recordCheckin(id, checkin.kind, { species: tree.species, night: !isDaytime() })
+      await loadProtectedTrees() // 名冊還沒讀完就掃的話，等它，受保護的樹才會拿到 20
       glow = awardCheckin(id, checkin.kind)
     }
     navigate(`/tree/${id}`, { replace: true, state: { checkin, glow } satisfies CheckinState })
