@@ -162,7 +162,7 @@ S2 引導一與加入主畫面（已做；桌機 360 px 與單元測試驗過，
 - [x] 模擬 standalone 啟動只記一次「回家的路」，不洗掉其他旗標；`manifest.webmanifest` 內容類型正確（dev server 驗過；Cloudflare 靠 `_headers`，部署後要再確認）。
 - [x] 360 px 沒有水平捲動、輸入框字級至少 16 px（引導裡沒有輸入框）、全部繁體中文。
 - [ ] 實機 iPhone（需使用者同意部署後）：加入主畫面、「回家的路」亮起、standalone 內 Google 登入視窗可用；只在桌機測過的項目要註明。
-- [ ] 雲端（Firestore 模擬器）下的瀏覽器流程：單元／整合測試涵蓋旗標寫入與合併，還沒用 Playwright 在模擬器模式走一遍。
+- [x] 雲端（Firestore 模擬器）下的瀏覽器流程：2026-10-19 用 Playwright（360 px）在模擬器模式走過新使用者、之後再說＋重新整理、從選單接著看、第一道光慶祝與新手禮；重新整理後旗標仍在，模擬器的 `users/{uid}.onboarding` 是 map 欄位。standalone 在雲端模式只有整合測試涵蓋。
 
 S3 新手任務（待做）
 
