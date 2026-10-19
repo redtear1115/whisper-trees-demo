@@ -121,11 +121,6 @@ export function SettingsSection() {
       <p className="muted small">
         樹籍資料為臺北市政府 2026-10-16 開放資料；許願、澆水、微光人數、案件進度是示範用的模擬資料。
       </p>
-      <p className="small">
-        <Link to="/demo-control" data-testid="demo-control-link">
-          示範後台
-        </Link>
-      </p>
     </>
   )
 }
