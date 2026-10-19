@@ -20,10 +20,11 @@
 | 日期 | ruleset | `firestore.rules` sha256 |
 |---|---|---|
 | 2026-10-19 | `27a31e8d-2167-4963-ad53-caf3a929a0ce` | `104022f0ec16525873ae54bf7be86a16a1617dfe6ff81004d90382bdf3740f8f` |
+| 2026-10-20 | `af18248f-5492-4581-bf62-dc10d08f6234` | `6761ac5dc6b1e6c8c0990be40366127f1a8b4be76be3ff4dd6b79aab20a3ccd5` |
 
 改規則後：先跑 `npm run test:rules`（本機 emulator，需要 `brew install openjdk`），通過才部署，並在上表加一列。
 
-部署指令（需要 gcloud 已登入有權限的帳號）：
+部署指令（需要 gcloud 已登入有權限的帳號；兩個請求都要帶 `X-Goog-User-Project`，少了會建立失敗）：
 
 ```sh
 TOKEN=$(gcloud auth print-access-token)
