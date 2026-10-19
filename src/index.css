@@ -3944,7 +3944,7 @@ body.has-offline .gov {
 .route-pin.tour-pin::before {
   content: '';
   position: absolute;
-  inset: -6px;
+  inset: -7px; /* 1 px 邊框在 padding box 外：32 px 的鈕 +(-7 × 2) = 44 px */
 }
 
 .route-pin.tour-pin.next {
