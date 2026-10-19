@@ -4716,6 +4716,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 }
 
 .district-chip,
+.district-here,
 .district-other {
   display: flex;
   align-items: center;
@@ -4742,6 +4743,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 }
 
 .district-chip:has(input:focus-visible),
+.district-here:focus-visible,
 .district-other:focus-visible {
   outline: 3px solid var(--green);
   outline-offset: 2px;
@@ -4752,6 +4754,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   border-style: dashed;
 }
 
+.district-here:disabled,
 .district-other:disabled {
   cursor: progress;
   color: var(--muted);
@@ -5083,4 +5086,152 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   display: block;
   font-size: 0.8rem;
   color: var(--muted, #6b6455);
+}
+
+/* ---------- 第四輪 X：集章冊與迷霧 ---------- */
+
+/* 全市地圖上面的一行：我的區的進度，加一顆跳到卡片的鈕 */
+.atlas-home {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 0 0 8px;
+}
+
+.atlas-home p {
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-voice);
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.atlas-home .btn {
+  flex: none;
+  color: var(--green-ink);
+}
+
+/* 里列表：還沒走過的收在一顆按鈕後面 */
+.village-untouched-toggle {
+  margin-top: 8px;
+}
+
+/* 圖例放在地圖上面：地圖下緣不再被中間的掃樹牌鈕蓋住 */
+.city-map > .atlas-legend {
+  gap: 2px 10px;
+  padding: 4px 10px;
+  border-bottom: 1px dashed var(--stamp-rim);
+}
+
+/* 第一屏要塞得下摘要、地圖和卡片標題：這幾個間距收緊 */
+.stamps-page .stamps-view {
+  margin-bottom: 4px;
+}
+
+.stamps-page .atlas {
+  margin-top: 4px;
+}
+
+.stamps-page .atlas-home {
+  margin-bottom: 6px;
+}
+
+.stamps-page .atlas-card {
+  margin-top: 8px;
+}
+
+/* 「地圖／依取得時間」右邊放已集到的章數；說明句放在地圖下面 */
+.stamps-view {
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.stamps-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.stamps-intro {
+  margin: 12px 0 0;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+/* ---------- 第四輪 Y：新手、回報、我的 ---------- */
+
+/* 「用目前位置」：整排、放在 12 區前面，實心淺綠和下面虛線的「其他」分開 */
+.district-here {
+  grid-column: 1 / -1;
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green-ink);
+  font-weight: 600;
+}
+
+/* 第 0 步的第二個小步驟「你在哪一區？」：定位鈕、12 區、其他、提示、按鈕都要在不捲動下看得到（390×664、360×740）。
+   這一步用不到地圖，抽屜可以長到導覽上方 72 px；標題與提示收緊。 */
+.tour-sheet[data-sub='district'] h2 {
+  margin: 2px 0 2px;
+}
+
+.map-page .tour-sheet[data-sub='district'] {
+  max-height: calc(100dvh - var(--nav-h) - 72px);
+}
+
+.tour-sheet[data-sub='district'] .district-picker {
+  margin-top: 4px;
+}
+
+.tour-sheet[data-sub='district'] .district-note {
+  margin: 4px 0 0;
+  min-height: 1.4em;
+}
+
+.tour-sheet[data-sub='district'] .tour-actions.sticky {
+  margin-top: 4px;
+}
+
+/* 「我的」換一區：選到的那格捲進來時，要避開底部導覽和中間凸起的掃樹牌鈕（導覽高 + 40 px） */
+.me-district-box .district-chip,
+.me-district-box .district-here,
+.me-district-box .district-other,
+.me-district-box .district-note {
+  scroll-margin-bottom: calc(var(--nav-h) + 40px);
+}
+
+/* 樹況回報在樹旁以外時：下一步是去掃樹牌 */
+.report-scan {
+  margin-top: 10px;
+}
+
+/* 微光的「?」：看起來 32 px，點擊範圍 44 px */
+.inline-help summary {
+  position: relative;
+}
+
+.inline-help summary::after {
+  content: '';
+  position: absolute;
+  inset: -7px; /* 1 px 邊框在 padding box 外：32 px 的鈕 +(-7 × 2) = 44 px */
+}
+
+/* 照片授權與出處連結：字還是小字，但每個連結是 44 px 高的整列點擊範圍。
+   作者那行獨佔一列，兩個連結排在下一列，總高度和原本三行小字差不多 */
+.carousel-credit {
+  gap: 0 18px;
+  padding-bottom: 0;
+}
+
+.carousel-credit > span {
+  flex-basis: 100%;
+}
+
+.carousel-credit a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }

@@ -203,7 +203,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 
 ### 資料與新手禮的規則
 
-- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`animal`（陪你的動物，`'blue-magpie' | 'night-heron' | 'squirrel' | 'pangolin'`，沒有或不認得就當 `blue-magpie`；2026-10-19 加，同樣逐欄合併、不需改 `cloud.ts` 與 `firestore.rules`）、`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）、`firstLightCelebratedAt`（A1 慶祝過）。
+- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`animal`（陪你的動物，`'blue-magpie' | 'night-heron' | 'squirrel' | 'pangolin'`，沒有或不認得就當 `blue-magpie`；2026-10-19 加，同樣逐欄合併、不需改 `cloud.ts` 與 `firestore.rules`）、`tourStep`、`tourSub`（第 0 步的小步驟，2026-10-20；見下「引導一」）、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）、`firstLightCelebratedAt`（A1 慶祝過）。
 - 只能用 `patchOnboarding(partial)` 寫：以目前的值為底合併，雲端以 map 逐欄合併，所以不會蓋掉另一台裝置或舊快取寫的欄位。
 - 新手禮**只記 `onboarding.giftAt`**。擁有權由 `inventory()` 推算（`giftAt` 有值就把 `hat-straw` 算進 `owned`，不重複）；`buy('hat-straw')` 回傳「已擁有」。換上草帽走原本的 `equip`，由使用者操作。**不會自動寫入 `ext.inventory` 或 `ext.ledger`**，光點與餘額都不動。
 - 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式與退回本機時一律 ready。`grantStarterGift()` 在 ready 之前什麼都不做。
@@ -211,24 +211,26 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 ### 我的區（2026-10-20 使用者決定，第三輪 B）
 
 - **資料**：`onboarding.homeDistrict` = 中文區名，和 `PREFIX_DISTRICT`／`TAIPEI_DISTRICTS` 一模一樣（如「大安區」）；`onboarding.homeDistrictChoice` = `'other'`（選了「其他」，由定位或亂數決定）或 `'pick'`（自己點選）。讀用 `homeDistrict(s?)`（不是 12 區之一的值回傳 undefined）；寫用 `patchOnboarding`。`onboarding` 本來就是雲端 `users/{uid}.onboarding` 的 map 欄位，**不需要改 `cloud.ts` 或 `firestore.rules`**。雲端是逐欄合併、欄位清不掉，所以從「其他」改成自己點選時寫 `'pick'`，不寫 undefined。
-- **選擇器**（`DistrictPicker`，`src/features/onboarding/`）：12 區 3 欄、每格 44 px 高的單選（原生 radio，`district-option-<區名>`），下面全寬的「其他（不在台北市）」（`district-other`）。點了立刻存；有一個 `role="status"` 的說明（`district-note`）。360 px 沒有水平捲動。
-- **「其他」怎麼決定**（`resolveOtherDistrict`，純函式，rng 可注入）：問目前位置（Demo 模式用模擬位置、其他用 GPS）。位置在台北市內（`prefixAtAsync` → `PREFIX_DISTRICT`）→ 用那一區，說「你現在在○○區，就從這一區開始。」；沒有位置（拒絕、逾時）或在市界外 → 12 區亂數挑一區，溫和地說「先從○○區開始吧，之後可以在「我的」改。」Demo 的模擬位置預設在大安區的示範樹旁，所以 Demo 選「其他」會是大安區。
-- **什麼時候有、什麼時候沒有**：只有在引導第 0 步選過、或在 `/me` 設過才有。略過／按「之後再說」的人、Demo 模式（引導不自動打開）、已過第 0 步的舊使用者，沒設就沒有 `homeDistrict`；用到的人（例如集章冊）要處理「沒有」。
-- **在 `/me`**：頂部 hero 動物那一列下面有「我的區：大安區」（沒設是「我的區：還沒選」）與「換一區」（沒設是「選一區」）按鈕（`swap-district`，≥ 44 px，`aria-expanded`），展開同一個 `DistrictPicker`；「換一隻」保留。
+- **選擇器**（`DistrictPicker`，`src/features/onboarding/`；2026-10-20 第四輪 Y 重排）：由上到下是全寬的「用目前位置」（`district-here`）、12 區 3 欄 4 列的單選（每格 44 px 高，原生 radio，`district-option-<區名>`）、全寬虛線的「其他（不在台北市）」（`district-other`）；點了立刻存；有一個 `role="status"` 的說明（`district-note`）。360 px 沒有水平捲動。**12 區由北往南**（`DISTRICTS_NORTH_TO_SOUTH`，依村里界重心緯度；每列是同一緯度帶、由西往東讀）：北投 士林 內湖／大同 中山 松山／萬華 中正 大安／文山 信義 南港。最後一列的南港在東北邊（緯度比文山、信義高），放在右下角是為了讓每一列都由西往東；原本的 `TAIPEI_DISTRICTS` 順序（資料與集章冊用）不動。
+- **「用目前位置」**（`resolveHereDistrict`，純函式）：問目前位置（Demo 模式用模擬位置、其他用 GPS）；在台北市內 → 選那一區（`homeDistrictChoice: 'pick'`），說「你現在在○○區。」；沒有位置（拒絕、逾時）→「沒有拿到你的位置。直接點一區，或選「其他」。」；在市界外 →「你現在不在台北市。直接點一區，或選「其他」。」**失敗不亂數挑、不存任何東西，選項都還開著。** Demo 的模擬位置在大安區，所以 Demo 按它會是大安區。
+- **「其他」怎麼決定**（`resolveOtherDistrict`，純函式，rng 可注入）：問目前位置（Demo 模式用模擬位置、其他用 GPS）。位置在台北市內（`prefixAtAsync` → `PREFIX_DISTRICT`）→ 用那一區；沒有位置（拒絕、逾時）或在市界外 → 12 區亂數挑一區。**兩種都說同一句：「先從○○區開始集章，之後可以在「我的」換。」**（2026-10-20 第四輪 Y 改成講清楚用途；在 `/me` 內按的時候省掉「之後可以在「我的」換」，只說「先從○○區開始集章。」）Demo 的模擬位置預設在大安區的示範樹旁，所以 Demo 選「其他」會是大安區。
+- **什麼時候有、什麼時候沒有**：只有在引導第 0 步的「你在哪一區？」選過、或在 `/me` 設過才有。略過／按「之後再說」的人、Demo 模式（引導不自動打開）、已過第 0 步的舊使用者，沒設就沒有 `homeDistrict`；用到的人（例如集章冊）要處理「沒有」。
+- **在 `/me`**：頂部 hero 動物那一列下面有「我的區：大安區」（沒設是「我的區：還沒選」）與「換一區」（沒設是「選一區」）按鈕（`swap-district`，≥ 44 px，`aria-expanded`），展開同一個 `DistrictPicker`（含「用目前位置」與新順序）；「換一隻」保留。展開後選到的那一格會 `scrollIntoView({ block: 'nearest' })` 捲進來，格子與提示帶 `scroll-margin-bottom: nav 高 + 40 px`，不會被底部導覽或中間凸起的掃樹牌鈕蓋住（第四輪 Y；頁面本來就比 hero 長，所以用 scroll-margin 而不是在 hero 裡多塞一塊空白）。
 
 ### 引導一「收集光點」的畫面（S2）
 
-地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`。**動物步驟編號是 0，其餘維持 1–4、5 = 走完**（不搬資料）：已存的 `tourStep` 1–5 意思不變；沒存過步驟的新使用者從 0 開始（開著時補存 0）；已經在第 1 步以後的人不會被拉回選動物（得到預設穿山甲，可在 `/me` 換；也不會有「我的區」，要在 `/me` 設）；「新手引導」重看、或走完後重看，從 0 開始。進度點 5 個（`aria-label`「第 n 步，共 5 步」）：
+地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`。**動物步驟編號是 0，其餘維持 1–4、5 = 走完**（不搬資料）。**第 0 步在畫面上拆成兩個小步驟（2026-10-20 第四輪 Y）：先選動物，再「你在哪一區？」，兩個都是 `tourStep = 0`，用 `onboarding.tourSub`（`'animal'` | `'district'`，沒有就是 `'animal'`）分**：「就牠了」寫 `tourSub: 'district'`；「好了，出發」與「先跳過」寫 `tourStep: 1`；第 1 步的「上一步」寫 `{ tourStep: 0, tourSub: 'district' }`；重看走完（或沒開始過）的人寫 `{ tourStep: 0, tourSub: 'animal' }`（雲端欄位清不掉，所以寫值不寫 undefined）。已存 `tourStep ≥ 1` 的人完全不受影響，舊版用戶端不認得 `tourSub`、會畫原本的第 0 步。進度點改 6 個（動物、區、光點是什麼、去掃樹牌、慶祝、加到主畫面；`tourPosition`）。已存的 `tourStep` 1–5 意思不變；沒存過步驟的新使用者從 0 開始（開著時補存 0）；已經在第 1 步以後的人不會被拉回選動物（得到預設穿山甲，可在 `/me` 換；也不會有「我的區」，要在 `/me` 設）；「新手引導」重看、或走完後重看，從 0 開始。進度點 6 個（`aria-label`「第 n 步，共 6 步」）：
 
 | 步驟 | 內容 |
 |---|---|
-| 0 | **選一隻陪你的動物＋你在哪一區**（2026-10-19 加動物；2026-10-20 加區）：動物 4 選 1（**穿山甲〔預設，排第一〕**、臺灣藍鵲、**夜鷺**〔原黑冠麻鷺，id 仍是 `night-heron`〕、赤腹松鼠；團隊簡報 v17），佔位美術，點了立刻存、地圖上的人物立刻換（`AnimalPicker`，`data-testid="animal-picker"`、`animal-option-<id>`）。下面接「你在哪一區？」（`DistrictPicker`，見下「我的區」）。「就牠了」把目前的選擇存成 `onboarding.animal` 並到第 1 步（區不必選，**不選也可以**）；沒點過動物就是預設穿山甲。按鈕固定在抽屜底部（`tour-actions sticky`），不用捲到底。之後可在 `/me` 頂部的「換一隻」「換一區」改 |
+| 0a | **選一隻陪你的動物**（2026-10-19 加）：動物 4 選 1（**穿山甲〔預設，排第一〕**、臺灣藍鵲、**夜鷺**〔原黑冠麻鷺，id 仍是 `night-heron`〕、赤腹松鼠；團隊簡報 v17），佔位美術，點了立刻存、地圖上的人物立刻換（`AnimalPicker`，`data-testid="animal-picker"`、`animal-option-<id>`）。「就牠了」把目前的選擇存成 `onboarding.animal` 並進 0b；沒點過動物就是預設穿山甲。「之後再說」收起整個引導。按鈕固定在抽屜底部（`tour-actions sticky`） |
+| 0b | **你在哪一區？**（2026-10-20 加區，同日第四輪 Y 拆成獨立小步驟；`data-sub="district"`）：`DistrictPicker`（見下「我的區」：用目前位置、12 區由北往南、其他）。「好了，出發」（沒選區前 disabled）與「先跳過」都到第 1 步，**不選也可以**；這一步沒有「之後再說」（「先跳過」之後第 1 步就有）。抽屜在這一步可以長到導覽上方 72 px（用不到地圖），**定位鈕、12 區、其他、提示、按鈕在 390×664 與 360×740 都不用捲動**（Playwright 量過：抽屜高 458 px、沒有 overflow，最低一個選項的底邊在固定按鈕列上方 4 px 以上）。之後可在 `/me` 頂部的「換一隻」「換一區」改 |
 | 1 | 光點是什麼、怎麼得到：表格數值讀 GM 設定的 `gameConfig().points`（打卡、遠觀、樹洞、許願、澆水）。「下一步」 |
 | 2 | 去掃樹牌 → `/scan`。「附近沒有樹牌？」說明 Demo 模式（`?demo=1`，已在 Demo 模式就改說明模擬定位） |
 | 3 | 第一次拿到光點：慶祝徽章「第一道光」＋新手禮草帽（連到 `/me` 換上、`/shop`）。拿到第一道光就直接跳到這一步 |
 | 4 | 加到主畫面：沒綁 Google 的先建議「用 Google 保留紀錄」（說明 iOS 主畫面 App 的儲存空間和 Safari 分開），再給說明。2026-10-20 改成三個可切換的分頁（`tour-install-tabs`）：「iPhone（Safari）」「iPhone（Chrome）」「Android」，預設打開偵測到的那一個（`defaultInstallGuide`；電腦與內建瀏覽器先開 iPhone Safari）。iPhone Safari：點下方「分享」（沒看到就先點「⋯」再點「分享」，iOS 26）→ 分享選單往上滑、往下找「加入主畫面」→ 右上角「新增」；iPhone Chrome：網址列右邊「分享」→「加入主畫面」→「新增」；Android Chrome 有 `beforeinstallprompt` 就給「安裝到主畫面」按鈕（`main.tsx` 一開始就接住事件），否則「⋮」→「加到主畫面／安裝應用程式」，另附三星瀏覽器一行。電腦上多一個網站的 QR Code（`tour-install-qr`），用手機掃了再照做。App 內建瀏覽器（LINE、Threads…）先提示改用 Safari／Chrome 開啟（見 [00](00-overview.md)「App 內建瀏覽器」）。「我加好了」走完 |
 
-- **什麼時候開**：使用者文件已載入（`useUserReady()`，不然看不到有沒有按過「之後再說」）、沒按過「之後再說」、`tourStep` 未走完。還沒拿到第一道光的新使用者一開地圖就看到；**已拿到第一道光的人，只有「開始過」引導（`tourStep` 有存）才會接著看到第 3、4 步**，早就有光點、沒看過引導的人不會被打擾（要看可以從「我的」進）。開著時若 `tourStep` 還沒存，補存 1，讓「開始過」成立。**Demo 模式（`?demo=1`）不自動打開**（2026-10-19 決定：現場展示不多按），從「我的 → 設定與其他 →新手引導」打開過才顯示。
+- **什麼時候開**：使用者文件已載入（`useUserReady()`，不然看不到有沒有按過「之後再說」）、沒按過「之後再說」、`tourStep` 未走完。還沒拿到第一道光的新使用者一開地圖就看到；**已拿到第一道光的人，只有「開始過」引導（`tourStep` 有存）才會接著看到第 3、4 步**，早就有光點、沒看過引導的人不會被打擾（要看可以從「我的」進）。開著時若 `tourStep` 還沒存，補存 0，讓「開始過」成立。**Demo 模式（`?demo=1`）不自動打開**（2026-10-19 決定：現場展示不多按），從「我的 → 設定與其他 →新手引導」打開過才顯示。
 - **之後再說**：記 `tourDismissedAt`，之後不再自動出現。
 - **第一道光的慶祝只一次**（2026-10-19 決定）：引導停在第 3 步時由引導畫；否則（按過「之後再說」、Demo 模式、早就有光點的舊使用者）由 `OnboardingEffects` 跳一次慶祝視窗，含新手禮與「到小芽換上」連結。兩種都記 `firstLightCelebratedAt`，不會重複（`firstLightCelebration`）。
 - **「我的」的「新手引導」**（`/me` 的「設定與其他」）：把 `tourDismissedAt` 改成 `0`（雲端是逐欄合併，欄位寫 `undefined` 清不掉，所以用 0 表示沒收起），`tourStep` 維持原本停的步驟；已走完或沒開始過就從第 1 步。
@@ -276,6 +278,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - [x] 單元測試：`tourView` 新使用者從第 0 步開始（`needsInit`）、已存的 1–5 意思不變、已過第 0 步的人不被拉回、拿到第一道光從第 0 步直接跳第 3 步、`reopenPatch` 從第 0 步重來；`animalOf` 對沒有／不認得的值回傳穿山甲（預設）；每隻動物都有佔位素材，4 隻的素材說明都有「同一片發光葉子、點狀眼睛、臉部留白」。
 - [x] 瀏覽器（Playwright 360 px，本機後端）：新使用者的引導停在第 0 步（`data-step="0"`、進度「第 1 步，共 5 步」）、（當時預設藍鵲，2026-10-20 改穿山甲）；選穿山甲地圖上的人物立刻換、重新整理仍在；「就牠了」到第 1 步、「上一步」回第 0 步；「之後再說」後到 `/me` 換松鼠，地圖也換；沒有水平捲動。
 - [x] 第三輪 B（2026-10-20）：單元測試——`resolveOtherDistrict`（位置在台北市 → 那一區；市界外或沒有位置 → 注入 rng 後從 12 區挑，邊界值不越界）、預設動物與沒存動物的人是穿山甲、`homeDistrict` 寫入／驗證／不被後續 patch 蓋掉、`growthCopy` 安心話只在被要求時出現。瀏覽器（Playwright 390 與 360 px，本機後端）：新使用者（非 Demo）自動開引導、停在第 0 步、動物排序穿山甲／臺灣藍鵲／夜鷺／赤腹松鼠且穿山甲預設選中、下面有 12 區 3 欄（每格 44 px 高）與全寬「其他」、沒有水平捲動、「就牠了」固定在底部不用捲；沒有定位權限時選「其他」得到亂數的一區並說出來；Demo 模式（不自動開引導）從 `/me` 重開引導、選「其他」得到大安區（說「你現在在大安區…」）；`/me` 顯示「我的區：大安區」、「換一區」選文山區後重新整理仍在；0 光點的 `/me` 沒有「光點花掉了」那句；「模擬」標籤在頁尾資料說明。**沒有在實機、真的 GPS 定位在台北市內、雲端模式驗過。**
+- [x] 第四輪 Y（2026-10-20）：單元測試——引導依序 動物 → 區 → 光點是什麼、第 1 步「上一步」回到區、`tourStep ≥ 1` 的人不受 `tourSub` 影響（有沒有 `tourSub` 結果相同）、沒有或不認得的 `tourSub` 當成動物、重看走完的人從動物開始、進度點 6 個；12 區排列涵蓋全部 12 區各一次且每列由北往南；`resolveHereDistrict`（市內／市外／沒位置，失敗不亂數）；其他的說明文字。瀏覽器（Playwright 390×664 與 360×740，非 Demo、新使用者、本機後端，定位分「拒絕」「在大安區」「在新店」）：引導先出現動物、「就牠了」後出現「你在哪一區？」、進度「第 2 步，共 6 步」；定位鈕、12 區、其他、提示、固定按鈕都在畫面內，抽屜沒有 overflow、沒有水平捲動、每個選項 ≥ 44 px；拒絕與市外時說原因、選項仍可點；在大安區按「用目前位置」選到大安區；拒絕時按「其他」得到亂數一區並說「先從○○區開始集章，之後可以在「我的」換。」；「好了，出發」到第 1 步、「上一步」回到區（區還在）、重新整理仍停在區、「先跳過」到第 1 步。`/me` 換一區：選到最後一列（南港、文山）展開後，選到的那格距掃樹牌鈕上方 ≥ 41 px。**沒有在實機、真的 GPS、雲端模式驗過。**
 - [ ] 雲端（Firestore）下的動物同步：沿用 `onboarding` 的逐欄合併，**沒有另外在模擬器跑過 `animal` 欄位**。
 
 ## 10. 集章冊 `/stamps`

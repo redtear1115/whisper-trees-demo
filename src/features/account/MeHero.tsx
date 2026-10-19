@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { Art } from '../../components/ui'
 import { useStore } from '../../store'
 import { balance, ledger, useEarned } from '../game/ledger'
@@ -22,6 +22,16 @@ export function MeHero() {
   const [pickingDistrict, setPickingDistrict] = useState(false)
   const pickId = useId()
   const districtId = useId()
+  const districtBox = useRef<HTMLDivElement>(null)
+  // 展開「換一區」後，把目前選的那格捲進看得到的範圍；底部導覽中間凸起的掃樹牌鈕會蓋住畫面最下面一截，
+  // 所以格子帶 scroll-margin-bottom（導覽高 + 40 px，見 index.css）。
+  useEffect(() => {
+    if (!pickingDistrict) return
+    const box = districtBox.current
+    const target = box?.querySelector<HTMLElement>('.district-chip.on') ?? box
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    target?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
+  }, [pickingDistrict])
   const { stage } = stageOf(earned)
   const grow = growthCopy(earned, reassure)
   const outfit = cfg.shop.find((i) => i.id === inv.equipped.outfit)
@@ -85,8 +95,8 @@ export function MeHero() {
           {pickingDistrict ? '收起' : district ? '換一區' : '選一區'}
         </button>
       </div>
-      <div id={districtId} hidden={!pickingDistrict}>
-        {pickingDistrict && <DistrictPicker name="me-district" />}
+      <div id={districtId} ref={districtBox} className="me-district-box" hidden={!pickingDistrict}>
+        {pickingDistrict && <DistrictPicker name="me-district" where="me" />}
       </div>
     </section>
   )

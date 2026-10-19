@@ -4,7 +4,7 @@ import { TAIPEI_DISTRICTS } from '../../../store/types'
 import { prefixAt } from '../../../lib/route'
 import { PREFIX_DISTRICT } from '../../game/districts'
 import { homeDistrict, onboarding, patchOnboarding } from '../../game/onboarding'
-import { otherNote, resolveOtherDistrict, setHomeDistrict } from '../homeDistrict'
+import { DISTRICTS_NORTH_TO_SOUTH, hereNote, otherNote, resolveHereDistrict, resolveOtherDistrict, setHomeDistrict } from '../homeDistrict'
 
 const sync = async (p: [number, number]) => prefixAt(p)
 
@@ -29,8 +29,47 @@ describe('resolveOtherDistrict (其他（不在台北市）)', () => {
     }
   })
   it('says what happened, gently', () => {
-    expect(otherNote({ district: '大安區', how: 'random' })).toBe('先從大安區開始吧，之後可以在「我的」改。')
-    expect(otherNote({ district: '士林區', how: 'position' })).toContain('士林區')
+    expect(otherNote({ district: '大安區', how: 'random' })).toBe('先從大安區開始集章，之後可以在「我的」換。')
+    expect(otherNote({ district: '士林區', how: 'position' })).toBe('先從士林區開始集章，之後可以在「我的」換。')
+  })
+  it('does not say 「在我的換」 when the user is already in 我的', () => {
+    expect(otherNote({ district: '大安區', how: 'random' }, 'me')).toBe('先從大安區開始集章。')
+  })
+})
+
+describe('geographic order of the 12 chips', () => {
+  it('lists every district exactly once', () => {
+    expect(DISTRICTS_NORTH_TO_SOUTH).toHaveLength(12)
+    expect([...DISTRICTS_NORTH_TO_SOUTH].sort()).toEqual([...TAIPEI_DISTRICTS].sort())
+  })
+  it('runs north to south by band: 北投 first, 文山 and 信義 and 南港 in the last row', () => {
+    expect(DISTRICTS_NORTH_TO_SOUTH[0]).toBe('北投區')
+    expect(DISTRICTS_NORTH_TO_SOUTH.slice(0, 3)).toEqual(['北投區', '士林區', '內湖區'])
+    expect(DISTRICTS_NORTH_TO_SOUTH.slice(9)).toEqual(['文山區', '信義區', '南港區'])
+  })
+  it('each row of 3 is a latitude band: the band centroids never go north again', () => {
+    // 村里界重心緯度（public/data/villages，2026-10-20 量）；每列平均要由北往南
+    const lat: Record<string, number> = {
+      北投區: 25.129, 士林區: 25.104, 內湖區: 25.077, 大同區: 25.062, 中山區: 25.062, 松山區: 25.054,
+      萬華區: 25.03, 中正區: 25.03, 大安區: 25.03, 文山區: 24.994, 信義區: 25.035, 南港區: 25.047,
+    }
+    const rows = [0, 3, 6, 9].map((i) => DISTRICTS_NORTH_TO_SOUTH.slice(i, i + 3).reduce((a, d) => a + lat[d], 0) / 3)
+    expect([...rows].sort((a, b) => b - a)).toEqual(rows)
+  })
+})
+
+describe('resolveHereDistrict (用目前位置)', () => {
+  it('uses the district at the position inside Taipei', async () => {
+    expect(await resolveHereDistrict([121.55, 25.025], sync)).toEqual({ ok: true, district: '大安區' })
+    expect(await resolveHereDistrict([121.59, 25.15], sync)).toEqual({ ok: true, district: PREFIX_DISTRICT.SL })
+  })
+  it('never guesses: outside Taipei and no position are two different gentle failures', async () => {
+    expect(await resolveHereDistrict([121.5, 25.0], sync)).toEqual({ ok: false, why: 'outside' }) // 新店
+    expect(await resolveHereDistrict(null, sync)).toEqual({ ok: false, why: 'no-position' })
+  })
+  it('the failure notes say why and keep the other choices open', () => {
+    expect(hereNote({ ok: false, why: 'outside' })).toBe('你現在不在台北市。直接點一區，或選「其他」。')
+    expect(hereNote({ ok: false, why: 'no-position' })).toBe('沒有拿到你的位置。直接點一區，或選「其他」。')
   })
 })
 

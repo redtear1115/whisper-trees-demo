@@ -13,6 +13,9 @@ import {
   STEP_HOME,
   STEP_INTRO,
   STEP_SCAN,
+  TOUR_DOTS,
+  tourPosition,
+  tourSub,
   tourView,
 } from '../tour'
 
@@ -90,8 +93,16 @@ describe('reopenPatch', () => {
     expect(reopenPatch({ tourStep: 2, tourDismissedAt: 99 })).toEqual({ tourDismissedAt: 0, tourStep: 2 })
   })
   it('starts over when the tour was finished or never started', () => {
-    expect(reopenPatch({ tourStep: STEP_DONE })).toEqual({ tourDismissedAt: 0, tourStep: STEP_ANIMAL })
-    expect(reopenPatch({})).toEqual({ tourDismissedAt: 0, tourStep: STEP_ANIMAL })
+    expect(reopenPatch({ tourStep: STEP_DONE })).toEqual({ tourDismissedAt: 0, tourStep: STEP_ANIMAL, tourSub: 'animal' })
+    expect(reopenPatch({})).toEqual({ tourDismissedAt: 0, tourStep: STEP_ANIMAL, tourSub: 'animal' })
+  })
+  it('starting over resets the sub-step, so a finished tour that left tourSub = district begins with the animal', () => {
+    const ob = { tourStep: STEP_DONE, tourSub: 'district' as const }
+    const next = { ...ob, ...reopenPatch(ob) }
+    expect(tourSub(next)).toBe('animal')
+  })
+  it('resuming at a later step does not touch the sub-step', () => {
+    expect(reopenPatch({ tourStep: 1, tourSub: 'district' })).toEqual({ tourDismissedAt: 0, tourStep: 1 })
   })
   it('makes a dismissed tour visible again at the saved step', () => {
     const ob = { tourStep: 2, tourDismissedAt: 99 }
@@ -151,5 +162,53 @@ describe('defaultInstallGuide', () => {
     expect(defaultInstallGuide('android')).toBe('android')
     expect(defaultInstallGuide('other')).toBe('ios-safari')
     expect(defaultInstallGuide('in-app')).toBe('ios-safari')
+  })
+})
+
+
+describe('step 0 split into two sub-steps (animal → district), same tourStep', () => {
+  const view = (ob: object) => tourView({ ob, firstLight: false, ready: true })
+  const apply = (ob: object, patch: object) => ({ ...ob, ...patch })
+
+  it('a new user goes animal → district → intro, and 上一步 from intro comes back to the district', () => {
+    let ob: Record<string, unknown> = {}
+    expect(view(ob)).toMatchObject({ open: true, step: STEP_ANIMAL, needsInit: true })
+    expect(tourSub(ob)).toBe('animal')
+    ob = apply(ob, { tourStep: STEP_ANIMAL }) // useTourView 補存
+    ob = apply(ob, { animal: 'pangolin', tourSub: 'district' }) // 「就牠了」
+    expect(view(ob)).toMatchObject({ step: STEP_ANIMAL, needsInit: false })
+    expect(tourSub(ob)).toBe('district')
+    ob = apply(ob, { tourStep: STEP_INTRO }) // 「好了，出發」或「先跳過」
+    expect(view(ob).step).toBe(STEP_INTRO)
+    ob = apply(ob, { tourStep: STEP_ANIMAL, tourSub: 'district' }) // 上一步
+    expect(view(ob).step).toBe(STEP_ANIMAL)
+    expect(tourSub(ob)).toBe('district')
+  })
+
+  it('people already past step 0 are not dragged back, whatever tourSub says (or does not say)', () => {
+    for (const step of [1, 2, 3, 4]) {
+      const noSub = tourView({ ob: { tourStep: step }, firstLight: step >= 3, ready: true })
+      const withSub = tourView({ ob: { tourStep: step, tourSub: 'animal' }, firstLight: step >= 3, ready: true })
+      expect(noSub.step).toBe(step)
+      expect(withSub).toEqual(noSub)
+    }
+    expect(tourView({ ob: { tourStep: STEP_DONE, tourSub: 'district' }, firstLight: false, ready: true }).open).toBe(false)
+  })
+
+  it('a missing or unknown tourSub is the animal step (old data, old clients)', () => {
+    expect(tourSub({})).toBe('animal')
+    expect(tourSub({ tourStep: 0 })).toBe('animal')
+    expect(tourSub({ tourSub: 'bogus' as never })).toBe('animal')
+  })
+
+  it('first light still jumps straight to the celebration from either sub-step', () => {
+    expect(tourView({ ob: { tourStep: 0, tourSub: 'district' }, firstLight: true, ready: true }).step).toBe(STEP_CELEBRATE)
+  })
+
+  it('6 progress dots: animal 0, district 1, then every later step one further', () => {
+    expect(TOUR_DOTS).toBe(6)
+    expect(tourPosition(STEP_ANIMAL, {})).toBe(0)
+    expect(tourPosition(STEP_ANIMAL, { tourSub: 'district' })).toBe(1)
+    expect([STEP_INTRO, STEP_SCAN, STEP_CELEBRATE, STEP_HOME].map((n) => tourPosition(n, {}))).toEqual([2, 3, 4, 5])
   })
 })

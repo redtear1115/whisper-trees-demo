@@ -16,8 +16,10 @@ export interface Onboarding {
    * 雲端是逐欄合併、欄位清不掉，所以從「其他」改成自己點選時寫 'pick'，不寫 undefined。
    */
   homeDistrictChoice?: 'other' | 'pick'
-  /** 「收集光點」引導目前停在第幾步，從「我的」接著看。0 = 選動物、1–4 = 其餘步驟、5 = 走完 */
+  /** 「收集光點」引導目前停在第幾步，從「我的」接著看。0 = 選動物與區、1–4 = 其餘步驟、5 = 走完 */
   tourStep?: number
+  /** 第 0 步的小步驟：'animal'（沒有就是它）→ 'district'；只在 tourStep 是 0 時有意思，見 features/onboarding/tour.ts */
+  tourSub?: 'animal' | 'district'
   /** 按了「之後再說」 */
   tourDismissedAt?: number
   /** 第一次從手機桌面的圖示打開 */

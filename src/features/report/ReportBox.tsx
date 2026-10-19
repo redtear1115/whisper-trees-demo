@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { REPORT_KINDS, type ReportKind } from '../../store/types'
 import { addReport, useSession } from '../../store'
 import type { Tree } from '../../lib/trees'
@@ -24,6 +25,10 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
       <Card>
         <h2>樹況回報</h2>
         <p className="muted small">樹修剪得不對、生病了、擋路了？到樹旁掃樹牌就能回報。</p>
+        {/* 和樹洞的「掃樹牌」同一個介面：掃描頁從 state.hintTreeId 知道要打卡哪一棵 */}
+        <Link className="btn primary block report-scan" to="/scan" state={{ hintTreeId: tree.id }} data-testid="report-scan">
+          去掃樹牌
+        </Link>
       </Card>
     )
 

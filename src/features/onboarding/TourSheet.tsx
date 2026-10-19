@@ -6,10 +6,10 @@ import { isDemoMode, useStore, useUserReady } from '../../store'
 import { externalBrowserUrl, inAppBrowser, useAuth } from '../../lib/firebase'
 import { CHECKIN } from '../../config'
 import { pointRows, useGameConfig } from '../game/config'
-import { firstLightEarned, patchOnboarding, useOnboarding } from '../game/onboarding'
+import { firstLightEarned, homeDistrictOf, patchOnboarding, useOnboarding } from '../game/onboarding'
 import { Celebration } from './Celebration'
 import { promptInstall, useCanInstall } from './install'
-import { defaultInstallGuide, installPlatform, isStandalone, type InstallGuide, STEP_ANIMAL, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, tourView } from './tour'
+import { defaultInstallGuide, installPlatform, isStandalone, type InstallGuide, STEP_ANIMAL, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, TOUR_DOTS, tourPosition, tourSub, tourView } from './tour'
 import { useGoogleLink } from './useGoogleLink'
 import { AnimalPicker } from '../avatar/AnimalPicker'
 import { DistrictPicker } from './DistrictPicker'
@@ -34,6 +34,9 @@ const finish = () => patchOnboarding({ tourStep: STEP_DONE })
 
 /** 「收集光點」新手引導：地圖下方的小抽屜，不擋住地圖操作，隨時可以「之後再說」 */
 export function TourSheet({ step }: { step: number }) {
+  const ob = useOnboarding()
+  const sub = step === STEP_ANIMAL ? tourSub(ob) : undefined
+  const pos = tourPosition(step, ob)
   return (
     <div
       className="sheet tour-sheet"
@@ -42,13 +45,15 @@ export function TourSheet({ step }: { step: number }) {
       aria-label="新手引導：收集光點"
       data-testid="tour-sheet"
       data-step={step}
+      data-sub={sub}
     >
-      <p className="tour-progress" aria-label={`第 ${step + 1} 步，共 5 步`}>
-        {[0, 1, 2, 3, 4].map((n) => (
-          <span key={n} className={n === step ? 'on' : n < step ? 'past' : ''} aria-hidden />
+      <p className="tour-progress" aria-label={`第 ${pos + 1} 步，共 ${TOUR_DOTS} 步`}>
+        {Array.from({ length: TOUR_DOTS }, (_, n) => (
+          <span key={n} className={n === pos ? 'on' : n < pos ? 'past' : ''} aria-hidden />
         ))}
       </p>
-      {step === STEP_ANIMAL && <StepAnimal />}
+      {sub === 'animal' && <StepAnimal />}
+      {sub === 'district' && <StepDistrict />}
       {step === STEP_INTRO && <StepIntro />}
       {step === STEP_SCAN && <StepScan />}
       {step === STEP_CELEBRATE && <StepCelebrate />}
@@ -72,15 +77,31 @@ function StepAnimal() {
       <h2>選一隻陪你的動物</h2>
       <p>牠會在地圖上代表你，走到哪裡都跟著。</p>
       <AnimalPicker name="tour-animal" />
-      <h3 className="tour-sub">你在哪一區？</h3>
-      <DistrictPicker name="tour-district" />
-      <p className="muted small">動物和所在的區，之後都可以在「我的」改，不選區也可以。</p>
+      <p className="muted small">之後可以在「我的」換。</p>
       <div className="tour-actions sticky">
-        {/* 沒點過也把目前的（預設穿山甲）存下來，下一步起 tourStep 才算開始過 */}
-        <button className="btn primary" onClick={() => patchOnboarding({ animal: animal.id, tourStep: STEP_INTRO })}>
+        {/* 沒點過也把目前的（預設穿山甲）存下來，再進「你在哪一區？」 */}
+        <button className="btn primary" onClick={() => patchOnboarding({ animal: animal.id, tourSub: 'district' })}>
           就牠了
         </button>
         <Later />
+      </div>
+    </>
+  )
+}
+
+function StepDistrict() {
+  const chosen = homeDistrictOf(useOnboarding())
+  return (
+    <>
+      <h2>你在哪一區？</h2>
+      <DistrictPicker name="tour-district" />
+      <div className="tour-actions sticky">
+        <button className="btn primary" disabled={!chosen} onClick={() => go(STEP_INTRO)}>
+          好了，出發
+        </button>
+        <button className="btn" onClick={() => go(STEP_INTRO)}>
+          先跳過
+        </button>
       </div>
     </>
   )
@@ -109,7 +130,7 @@ function StepIntro() {
         <button className="btn primary" onClick={() => go(STEP_SCAN)}>
           下一步
         </button>
-        <button className="btn" onClick={() => go(STEP_ANIMAL)}>
+        <button className="btn" onClick={() => patchOnboarding({ tourStep: STEP_ANIMAL, tourSub: 'district' })}>
           上一步
         </button>
         <Later />

@@ -1,7 +1,16 @@
 // 「收集光點」引導的步驟邏輯與裝置判斷。全是純函式，元件只負責畫。
-// 步驟：0 選一隻陪你的動物 → 1 光點是什麼 → 2 去掃樹牌 → 3 第一道光慶祝（含新手禮）→ 4 加到主畫面。tourStep 存目前停的步驟，5 = 走完。
+// 步驟：0 選動物與所在的區 → 1 光點是什麼 → 2 去掃樹牌 → 3 第一道光慶祝（含新手禮）→ 4 加到主畫面。tourStep 存目前停的步驟，5 = 走完。
 // 動物步驟（2026-10-19 加）用 0，其餘編號不變：已存的 tourStep 1–5 意思不變、不用搬資料。
 // 已經在第 1 步以後的人不會被拉回選動物（預設穿山甲，之後可以在「我的」換）；沒存過步驟的新使用者從 0 開始。
+//
+// 第 0 步在畫面上拆成兩個小步驟（2026-10-20，第四輪 Y）：先選動物，再「你在哪一區？」。
+// 沒有改編號、不搬資料：兩個小步驟都是 tourStep = 0，用另一個欄位 tourSub（'animal' | 'district'，沒有就是 'animal'）分。
+//   - 「就牠了」：寫 { tourSub: 'district' }，tourStep 仍是 0。
+//   - 「好了，出發」或「先跳過」：寫 { tourStep: 1 }（tourSub 不用清，tourStep ≠ 0 時不看它）。
+//   - 第 1 步的「上一步」：寫 { tourStep: 0, tourSub: 'district' }。
+//   - 重看（reopenPatch）走完或沒開始過的人：從頭，寫 { tourStep: 0, tourSub: 'animal' }（雲端欄位清不掉，所以寫值不寫 undefined）。
+// 已存 tourStep ≥ 1 的人完全不受影響；舊版用戶端不認得 tourSub，會把第 0 步畫成原本的樣子，不會空白。
+// 進度點共 6 個：動物、區、光點是什麼、去掃樹牌、慶祝、加到主畫面（見 tourPosition）。
 
 import type { Onboarding } from '../game/onboarding'
 
@@ -11,6 +20,20 @@ export const STEP_SCAN = 2
 export const STEP_CELEBRATE = 3
 export const STEP_HOME = 4
 export const STEP_DONE = 5
+
+/** 第 0 步的兩個小步驟 */
+export type TourSub = 'animal' | 'district'
+export const TOUR_DOTS = 6
+
+/** 第 0 步停在哪個小步驟；沒存過（或不認得）就是選動物 */
+export function tourSub(ob: Onboarding): TourSub {
+  return ob.tourSub === 'district' ? 'district' : 'animal'
+}
+
+/** 進度點的位置（0–5）：第 0 步的兩個小步驟是 0 與 1，之後每步往後一格 */
+export function tourPosition(step: number, ob: Onboarding): number {
+  return step === STEP_ANIMAL ? (tourSub(ob) === 'district' ? 1 : 0) : step + 1
+}
 
 export interface TourInput {
   ob: Onboarding
@@ -52,11 +75,12 @@ export function tourView({ ob, firstLight, ready, demo }: TourInput): TourView {
 
 /**
  * 從「我的」的「新手引導」重新打開要寫的欄位。
- * 「之後再說」用 0 表示沒收起（雲端是逐欄合併，欄位寫 undefined 不會清掉）；已走完就從頭（選動物）重看。
+ * 「之後再說」用 0 表示沒收起（雲端是逐欄合併，欄位寫 undefined 不會清掉）；已走完就從頭（選動物）重看，所以小步驟也要寫回 'animal'。
  */
-export function reopenPatch(ob: Onboarding): Pick<Onboarding, 'tourDismissedAt' | 'tourStep'> {
+export function reopenPatch(ob: Onboarding): Pick<Onboarding, 'tourDismissedAt' | 'tourStep'> & Pick<Partial<Onboarding>, 'tourSub'> {
   const stored = ob.tourStep
-  return { tourDismissedAt: 0, tourStep: stored === undefined || stored >= STEP_DONE ? STEP_ANIMAL : stored }
+  if (stored === undefined || stored >= STEP_DONE) return { tourDismissedAt: 0, tourStep: STEP_ANIMAL, tourSub: 'animal' }
+  return { tourDismissedAt: 0, tourStep: stored }
 }
 
 /**
