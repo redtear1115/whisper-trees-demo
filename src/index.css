@@ -3065,3 +3065,63 @@ body.has-offline .gov {
 .anchor-target {
   scroll-margin-top: 12px;
 }
+
+/* ---------- 樹洞頁（D） ---------- */
+.nearby-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.nearby-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.nearby-info {
+  display: grid;
+  min-width: 0;
+}
+.nearby-name {
+  font-weight: 600;
+}
+.nearby-meta {
+  overflow-wrap: anywhere;
+}
+.nearby-item .btn {
+  flex: none;
+  min-height: 44px;
+}
+.journal-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 20px 0 12px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+}
+.journal-tabs button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.journal-tabs button[aria-selected='true'] {
+  background: var(--green);
+  color: #fff;
+}
+.journal-item {
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.journal-item .btn {
+  justify-self: start;
+}

@@ -1,45 +1,30 @@
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { Card, formatDate } from '../components/ui'
-import { useStore } from '../store'
+import { useState } from 'react'
 import { TabHeader } from '../features/nav/TabLayout'
-import { journalEntries } from '../features/journal/journal'
+import { NearbyTrees } from '../features/journal/NearbyTrees'
+import { DiaryList } from '../features/journal/DiaryList'
 import { MyWishes } from './MyWishesPage'
 
-/** 樹洞：我在各棵樹留下的話（新到舊），加上我的許願 */
+/** 樹洞：附近的樹（留言要先打卡）＋ 我的日記／我的許願 */
 export default function JournalPage() {
-  const whispers = useStore((s) => s.whispers)
-  const rows = useMemo(() => journalEntries(whispers), [whispers])
+  const [tab, setTab] = useState<'diary' | 'wishes'>('diary')
 
   return (
     <div className="page">
       <TabHeader title="樹洞" />
-      <p className="muted small">只有你看得到。想留新的話，到樹旁掃樹牌，進樹的頁面。</p>
+      <p className="muted small">只有你看得到。想留話，先走到樹旁掃樹牌。</p>
 
-      <h2 className="section-title">我留下的話</h2>
-      {rows.length === 0 ? (
-        <p className="muted" data-testid="journal-empty">
-          還沒有留過話。到樹旁掃樹牌，在樹洞留一句話，就會收在這裡。
-        </p>
-      ) : (
-        <ul className="journal-list" data-testid="journal-list">
-          {rows.map((r, i) => (
-            <li key={`${r.treeId}:${r.at}:${i}`}>
-              <Card className="journal-item">
-                <Link className="journal-link" to={`/tree/${r.treeId}`} state={{ from: '/journal' }} data-testid="journal-item">
-                  <span className="muted small">
-                    <span className="mono">{r.treeId}</span>・{formatDate(r.at)}
-                  </span>
-                  <span className="journal-text">{r.text}</span>
-                </Link>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
+      <NearbyTrees />
 
-      <h2 className="section-title">我的許願</h2>
-      <MyWishes sub />
+      <div className="journal-tabs" role="tablist" data-testid="journal-tabs">
+        <button role="tab" aria-selected={tab === 'diary'} data-testid="journal-tab-diary" onClick={() => setTab('diary')}>
+          我的日記
+        </button>
+        <button role="tab" aria-selected={tab === 'wishes'} data-testid="journal-tab-wishes" onClick={() => setTab('wishes')}>
+          我的許願
+        </button>
+      </div>
+
+      {tab === 'diary' ? <DiaryList /> : <MyWishes sub />}
     </div>
   )
 }

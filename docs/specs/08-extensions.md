@@ -248,8 +248,11 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ### 樹洞 `/journal`
 
-- 「我留下的話」：我在所有樹留下的話，新到舊（`journalEntries`，只看 `state.whispers`，不含示範膠囊；雲端模式也是同一份）。每則（`journal-item`，列表 `journal-list`）顯示樹籍編號、日期、內容，點了進 `/tree/:id`。沒有時顯示 `journal-empty`。
-- 「我的許願」：`MyWishes`（與 `/wishes` 共用的元件，`data-testid="my-wishes"`）。`/wishes` 仍可用，返回連到樹洞。
+- 上方「附近的樹」（`journal-nearby`，2026-10-19 加）：用和地圖同一個 `useAnchor`（真實 GPS 或 Demo 模擬位置），從 z16 樹木圖磚（`public/data/tree-tiles`，`nearby.ts` 內建簡易解碼）取 150 公尺內、近到遠最多 8 棵（`pickNearby`）。每列（`journal-nearby-item`）樹種、路名、「約 N 公尺」，和「留言」鈕（`journal-nearby-leave`）。沒有位置時顯示「還沒有你的位置。打開定位，或用 Demo 模式。」
+- 「留言」仍要先打卡（QR + GPS）：這棵樹 30 分鐘內有有效打卡（`recentCheckin`）就進 `/tree/:id#whisper`，否則進 `/scan`，帶 `state.hintTreeId`（`leaveTarget`；和地圖點樹的「掃樹牌」大按鈕同一個介面），掃描頁顯示「要打卡的是：…」。
+- 下方分段切換（`journal-tabs`）：「我的日記」（`journal-tab-diary`）與「我的許願」（`journal-tab-wishes`）。
+- 我的日記：我在所有樹留下的話，新到舊（`journalEntries`，只看 `state.whispers`，不含示範膠囊；雲端模式也是同一份）。每則（`journal-item`，列表 `journal-list`）顯示日期時間、「行政區・樹種」（查不到就顯示樹籍編號）、內容，和「查看樹木」（`journal-view-tree`）連到 `/tree/:id`。沒有時顯示 `journal-empty`。
+- 我的許願：`MyWishes`（與 `/wishes` 共用的元件，`data-testid="my-wishes"`）。`/wishes` 仍可用，返回連到樹洞。
 - 原本地圖「我的許願」按鈕上的「有新進度」小圓點已移除（不做紅點）；許願卡本身的「進度更新了」標示仍在。
 
 ### 我的 `/me`

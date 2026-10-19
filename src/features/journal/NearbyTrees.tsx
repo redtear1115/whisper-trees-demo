@@ -1,0 +1,71 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { findTree, type Tree } from '../../lib/trees'
+import { recentCheckin, useStore } from '../../store'
+import { useAnchor } from '../map/useAnchor'
+import { formatDistance, leaveTarget, loadNearbyTrees, type NearbyTree } from './nearby'
+
+/** 樹洞頁上方：目前位置附近的樹。留言仍要先打卡（QR + GPS）。 */
+export function NearbyTrees() {
+  const navigate = useNavigate()
+  const anchor = useAnchor(true)
+  const checkins = useStore((s) => s.checkins)
+  const [rows, setRows] = useState<(NearbyTree & { tree: Tree | null })[] | null>(null)
+  const located = anchor.source !== 'fallback'
+  const [lon, lat] = anchor.lngLat
+
+  useEffect(() => {
+    if (!located) return
+    let alive = true
+    loadNearbyTrees([lon, lat]).then(async (list) => {
+      const trees = await Promise.all(list.map((t) => findTree(t.id)))
+      if (alive) setRows(list.map((t, i) => ({ ...t, tree: trees[i] })))
+    })
+    return () => {
+      alive = false
+    }
+  }, [located, lon, lat])
+
+  // checkins 變動時重算「是否已在現場」
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onSite = useMemo(() => new Set((rows ?? []).filter((r) => recentCheckin(r.id)).map((r) => r.id)), [rows, checkins])
+
+  return (
+    <section data-testid="journal-nearby" aria-labelledby="journal-nearby-title">
+      <h2 className="section-title" id="journal-nearby-title">附近的樹</h2>
+      {!located ? (
+        <p className="muted">還沒有你的位置。打開定位，或用 Demo 模式。</p>
+      ) : rows === null ? (
+        <p className="muted">正在找附近的樹…</p>
+      ) : rows.length === 0 ? (
+        <p className="muted">這附近 150 公尺內沒有樹的資料。</p>
+      ) : (
+        <ul className="nearby-list">
+          {rows.map((r) => (
+            <li key={r.id}>
+              <section className="card nearby-item" data-testid="journal-nearby-item">
+                <div className="nearby-info">
+                  <span className="nearby-name">{r.tree?.species ?? '一棵樹'}</span>
+                  <span className="muted small nearby-meta">
+                    {r.tree?.place ? `${r.tree.place}・` : ''}
+                    {formatDistance(r.distance)}
+                  </span>
+                </div>
+                <button
+                  className="btn"
+                  data-testid="journal-nearby-leave"
+                  onClick={() => {
+                    const t = leaveTarget(r.id, onSite.has(r.id))
+                    navigate(t.to, { state: t.state })
+                  }}
+                >
+                  留言
+                </button>
+              </section>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
