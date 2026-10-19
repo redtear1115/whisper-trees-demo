@@ -26,6 +26,7 @@ import { ringRadius, treesInRing } from '../features/map/ring'
 import { hasFinePointer } from '../features/map/rotation'
 import { RotationControl } from '../features/map/RotationControl'
 import { BalanceChip } from '../features/nav/BalanceChip'
+import { setScanHint } from '../features/nav/scanHint'
 import { useAnimal } from '../features/avatar/useAnimal'
 import { TreeRingLayer } from '../features/map/TreeRingLayer'
 import { rangeInfo, TREE_FOCUS } from '../features/map/treeRings'
@@ -84,6 +85,12 @@ export default function MapPage() {
   const [dragHint, setDragHint] = useState(() => demo && !demoHintSeen())
   // 點樹：鏡頭飛到樹旁，樹旁浮出行動圈。shown = 鏡頭到位了才顯示行動圈
   const [treeFocus, setTreeFocus] = useState<{ tree: Tree; shown: boolean } | null>(null)
+  // 底部中間的「掃樹牌」大按鈕：選了樹就帶著它去掃描頁；離開地圖就清掉
+  const focusedId = treeFocus?.tree.id ?? null
+  useEffect(() => {
+    setScanHint(focusedId)
+  }, [focusedId])
+  useEffect(() => () => setScanHint(null), [])
   const focusRef = useRef(treeFocus)
   focusRef.current = treeFocus
   // 「怎麼走」：要畫路線的那棵樹的 id（只在那棵樹的行動圈開著時有效）、找到的路線（'none' = 找不到，null = 還沒找）
@@ -656,7 +663,7 @@ export default function MapPage() {
     const m = map.current
     if (!m) return
     const b = unionBounds(tourBounds(t), [anchorRef.current.lngLat, anchorRef.current.lngLat])
-    // 上面有光點餘額與頂端列，下面有掃樹牌按鈕與導覽，右邊有地圖工具
+    // 上面有光點餘額與頂端列，下面有導覽（中間是浮出的掃樹牌大按鈕），右邊有地圖工具
     m.fitBounds(b, { padding: { top: 150, bottom: 200, left: 36, right: 84 }, maxZoom: 18.5, pitch: 0, duration: motionMs(900) })
   }
   useEffect(() => {
@@ -1032,11 +1039,6 @@ export default function MapPage() {
         <p className="scan-hint" data-testid={nearCount > 0 ? 'near-hint' : undefined} data-count={nearCount || undefined}>
           {nearCount > 0 ? `附近有 ${nearCount} 棵樹可以掃` : '找一棵樹，掃它樹幹上的樹牌'}
         </p>
-      )}
-      {(idle || treeFocus) && (
-        <Link className="scan-fab" to="/scan" state={treeFocus ? { hintTreeId: treeFocus.tree.id } : undefined}>
-          掃樹牌
-        </Link>
       )}
     </div>
   )

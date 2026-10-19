@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { TABS, activeTab, showNav } from '../tabs'
+import { TABS, activeTab, showNav, centerAction } from '../tabs'
 
 describe('bottom nav tabs', () => {
   it('has 5 tabs in the agreed order, home in the middle', () => {
@@ -25,5 +25,13 @@ describe('bottom nav tabs', () => {
       expect(showNav(p), p).toBe(false)
     }
     for (const t of TABS) expect(showNav(t.to)).toBe(true)
+  })
+})
+
+describe('centerAction', () => {
+  it('is 掃樹牌 on the home map and 回首頁 everywhere else', () => {
+    expect(centerAction('home')).toEqual({ kind: 'scan', to: '/scan', label: '掃樹牌' })
+    for (const t of ['stamps', 'explore', 'journal', 'me'] as const) expect(centerAction(t)).toEqual({ kind: 'home', to: '/', label: '首頁' })
+    expect(centerAction(null).kind).toBe('home')
   })
 })

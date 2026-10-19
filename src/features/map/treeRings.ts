@@ -60,7 +60,7 @@ export interface RingAction {
 
 /**
  * 四個行動，順序固定（左到右）。圈外只有「樹的資料」和「怎麼走」能用（怎麼走：有位置就能用，不管多遠）。
- * 掃樹牌不是圈：沿用畫面下方的大綠色按鈕（點樹時也一直在，帶著這棵樹去掃描頁）。
+ * 掃樹牌不是圈：用底部導覽中間的大按鈕（在首頁是「掃樹牌」，點了樹就帶著這棵樹去掃描頁）。
  * Demo 模式（demo = true）多一個「走過去」：把模擬位置移到樹旁，永遠能用（MapPage 處理）。
  */
 export function ringActions(treeId: string, range: RangeInfo, demo = false): RingAction[] {

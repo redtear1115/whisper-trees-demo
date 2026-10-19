@@ -26,6 +26,17 @@ export function activeTab(pathname: string): TabId | null {
   return TABS.find((t) => t.to === path)?.id ?? null
 }
 
+/** 中間的大按鈕：在首頁是「掃樹牌」，在其他分頁是「回首頁」 */
+export interface CenterAction {
+  kind: 'scan' | 'home'
+  to: '/scan' | '/'
+  label: string
+}
+
+export function centerAction(active: TabId | null): CenterAction {
+  return active === 'home' ? { kind: 'scan', to: '/scan', label: '掃樹牌' } : { kind: 'home', to: '/', label: '首頁' }
+}
+
 /** 這個路徑要不要顯示底部導覽 */
 export function showNav(pathname: string): boolean {
   return activeTab(pathname) !== null

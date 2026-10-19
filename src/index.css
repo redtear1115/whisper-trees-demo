@@ -520,23 +520,6 @@ textarea.input {
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
 }
 
-.scan-fab {
-  position: absolute;
-  left: 50%;
-  bottom: var(--map-base);
-  transform: translateX(-50%);
-  min-width: 200px;
-  padding: 16px 28px;
-  border-radius: 999px;
-  background: var(--green);
-  color: #fff;
-  font-size: 1.15rem;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: none;
-  box-shadow: var(--shadow);
-}
-
 .sheet-grip {
   width: 40px;
   height: 4px;
@@ -1976,7 +1959,8 @@ label.btn:focus-within {
 .scan-hint {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--map-base) + 62px);
+  /* 掃樹牌改成導覽中間浮出的大按鈕（約高出導覽 26px），提示放在它上方 */
+  bottom: calc(var(--map-base) + 30px);
   transform: translateX(-50%);
   margin: 0;
   padding: 2px 10px;
@@ -2045,7 +2029,6 @@ label.btn:focus-within {
 .map-tools,
 .mode-toggle,
 .scan-hint,
-.scan-fab,
 .layer-panel,
 .map-event {
   z-index: 2;
@@ -2777,6 +2760,59 @@ body.has-offline .gov {
 
 .bottom-tab.on .icon-svg {
   stroke-width: 2.25;
+}
+
+/* 中間的大按鈕：浮出導覽列的圓。首頁時是「掃樹牌」（實心綠），其他分頁是「回首頁」（白底綠框） */
+.bottom-cta {
+  justify-content: flex-end;
+  padding-bottom: 6px;
+  color: var(--green-ink);
+  font-weight: 700;
+}
+
+.cta-disc {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-top: -30px;
+  border: 3px solid var(--card);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--green-ink);
+  box-shadow: 0 4px 14px rgba(44, 58, 46, 0.22), inset 0 0 0 2px var(--green);
+  transition: transform 0.15s;
+}
+
+.bottom-cta.scan .cta-disc {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(44, 58, 46, 0.3);
+}
+
+.bottom-cta .cta-disc .icon-svg {
+  width: 1.9rem;
+  height: 1.9rem;
+  stroke-width: 2;
+}
+
+.bottom-cta:active .cta-disc {
+  transform: scale(0.95);
+}
+
+.bottom-cta:focus-visible {
+  outline: none;
+}
+
+.bottom-cta:focus-visible .cta-disc {
+  outline: 3px solid var(--green-ink);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-disc {
+    transition: none;
+  }
 }
 
 /* 分頁頁面：內容底部留出導覽高度 */

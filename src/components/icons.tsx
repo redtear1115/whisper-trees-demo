@@ -121,6 +121,16 @@ export const IconMapPin = () => (
   </Svg>
 )
 
+/** 掃樹牌：QR Code 的取景框 */
+export const IconScan = () => (
+  <Svg>
+    <path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" />
+    <rect x="8" y="8" width="3" height="3" rx="0.5" />
+    <rect x="13" y="13" width="3" height="3" rx="0.5" />
+    <path d="M13 8h3v2M8 16h3" />
+  </Svg>
+)
+
 /** 樹洞：樹幹上的一個洞 */
 export const IconHollow = () => (
   <Svg>

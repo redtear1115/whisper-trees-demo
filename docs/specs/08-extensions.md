@@ -184,7 +184,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 
 ### 引導一「收集光點」的畫面（S2）
 
-地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具與掃樹牌浮鈕，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`。**動物步驟編號是 0，其餘維持 1–4、5 = 走完**（不搬資料）：已存的 `tourStep` 1–5 意思不變；沒存過步驟的新使用者從 0 開始（開著時補存 0）；已經在第 1 步以後的人不會被拉回選動物（得到預設藍鵲，可在 `/me` 換）；「新手引導」重看、或走完後重看，從 0 開始。進度點 5 個（`aria-label`「第 n 步，共 5 步」）：
+地圖頁下方的小抽屜（`role="dialog"`、`aria-modal="false"`、`data-testid="tour-sheet"`、`data-step`），不擋地圖操作；開著時暫時收起地圖工具，點地圖上的樹或許願時抽屜讓位。步驟邏輯是純函式（`src/features/onboarding/tour.ts`），`tourStep` 存在 `onboarding`。**動物步驟編號是 0，其餘維持 1–4、5 = 走完**（不搬資料）：已存的 `tourStep` 1–5 意思不變；沒存過步驟的新使用者從 0 開始（開著時補存 0）；已經在第 1 步以後的人不會被拉回選動物（得到預設藍鵲，可在 `/me` 換）；「新手引導」重看、或走完後重看，從 0 開始。進度點 5 個（`aria-label`「第 n 步，共 5 步」）：
 
 | 步驟 | 內容 |
 |---|---|
@@ -207,7 +207,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 
 - **/explore 任務卡**（`TasksCard`；2026-10-19 起從 `/me` 搬到 `/explore`，`/me` 不再放，避免重複）（，清單 `tasks-list`、每項 `task-<id>` 帶 `data-done`、`tasks-count`、`tasks-toggle`）：拿到第一道光後出現，4 項依 `tasks()` 推算打勾，順序不拘、可收合（`tasksCollapsed` 存在 `onboarding`）。「在樹洞留一句話」說明「到地圖點一棵樹，進樹的頁面」，「在空樹穴許願」說明「到地圖點一個空樹穴」，連結都回地圖。4 項做完卡片換成一行小字（`tasks-card-done`），不再有按鈕。
 - **看過旗標**（`useViewedFlag`）：`/explore` 的圖鑑區（`data-testid="codex-section"`）真的出現在畫面上時記 `viewedCodexAt`（IntersectionObserver）；`/me` 的徽章區（`data-testid="badges-section"`）真的出現在畫面上時記 `viewedBadgesAt`（IntersectionObserver，不支援就在載入時記）。只在使用者文件載入完成、旗標還沒有時寫一次。
-- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在左下、掃樹牌浮鈕上方（整組浮動元件都排在底部導覽上面），不和右側地圖工具重疊。判斷是純函式 `showTasksChip`。
+- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在左下（整組浮動元件都排在底部導覽上面），不和右側地圖工具重疊。判斷是純函式 `showTasksChip`。
 - **A3**：`OnboardingEffects` 在使用者文件載入後、4 項都完成、沒有 `newcomerCelebratedAt` 時記下時間並跳出「城市的新朋友」慶祝，只一次（`shouldCelebrateNewcomer`）。早就完成過的舊使用者會在下次開啟時看到一次。
 - 雲端不用改：`onboarding` 本來就是 `users/{uid}` 的一個 map 欄位，新旗標照逐欄合併。
 
@@ -314,7 +314,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - 只顯示在這 5 個**分頁根頁面**（`TabLayout`）；`/tree/:id`、`/shop`、`/scan`、`/wishes` 是子頁面，沒有導覽、用返回連結；`/gov`、`/vendor`、`/gm`、`/developers`、`/demo-control` 也沒有。桌機閘門（`MobileOnly`）不變。
 - 每個分頁 ≥ 44 px 高（56 px + 底部安全區 `safe-area-inset-bottom`），目前的分頁 `aria-current="page"`、字加粗、圖示加粗；沒有紅點或數字。360 px 寬 5 等分（各 72 px）。`data-testid`：`bottom-nav`、`tab-stamps`、`tab-explore`、`tab-home`、`tab-journal`、`tab-me`。
 - 右上角光點餘額（`BalanceChip`，`data-testid="balance-chip"`，「✦ N 光點」，`aria-label`「光點 N，前往商店」）連到 `/shop`；每個分頁頁首（`TabHeader`）與地圖右上都有。
-- 地圖頁的浮動元件（掃樹牌浮鈕、任務小入口、右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
+- 地圖頁的浮動元件（任務小入口、右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
 - 從樹洞點進樹的頁面，返回回到樹洞（路由 state `from`）；其他來源回地圖。
 
 ### 探索 `/explore`
@@ -324,7 +324,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 ### 樹洞 `/journal`
 
 - 上方「附近的樹」（`journal-nearby`，2026-10-19 加）：用和地圖同一個 `useAnchor`（真實 GPS 或 Demo 模擬位置），從 z16 樹木圖磚（`public/data/tree-tiles`，`nearby.ts` 內建簡易解碼）取 150 公尺內、近到遠最多 8 棵（`pickNearby`）；先列 3 棵，其餘按「看更多（還有 N 棵）」（`journal-nearby-more`）才展開，讓下面的日記與許願不被擠到很下面（2026-10-19 決定）。每列（`journal-nearby-item`）樹種、路名、「約 N 公尺」，和一顆按鈕（2026-10-20 決定：要先走過去）：在打卡範圍內（`ringRadius`，和地圖感應圈同一個半徑）是「留言」（`journal-nearby-leave`）；太遠時 Demo 是「走過去」（`journal-nearby-walk`，模擬位置移到樹旁，列表跟著重算、那棵變成「留言」），真實定位是「怎麼走」（`journal-nearby-route`，回首頁地圖，用 `state.routeTreeId` 飛到那棵樹並直接畫出步行路線）（`nearbyAction`）。版面：「我的日記／我的許願」在上，附近的樹在下。沒有位置時顯示「還沒有你的位置。打開定位，或用 Demo 模式。」
-- 「留言」仍要先打卡（QR + GPS）：這棵樹 30 分鐘內有有效打卡（`recentCheckin`）就進 `/tree/:id#whisper`，否則進 `/scan`，帶 `state.hintTreeId`（`leaveTarget`；和地圖點樹的「掃樹牌」大按鈕同一個介面），掃描頁顯示「要打卡的是：…」。
+- 「留言」仍要先打卡（QR + GPS）：這棵樹 30 分鐘內有有效打卡（`recentCheckin`）就進 `/tree/:id#whisper`，否則進 `/scan`，帶 `state.hintTreeId`（`leaveTarget`；和導覽中間的「掃樹牌」大按鈕同一個介面），掃描頁顯示「要打卡的是：…」。
 - 下方分段切換（`journal-tabs`）：「我的日記」（`journal-tab-diary`）與「我的許願」（`journal-tab-wishes`）。
 - 我的日記：我在所有樹留下的話，新到舊（`journalEntries`，只看 `state.whispers`，不含示範膠囊；雲端模式也是同一份）。每則（`journal-item`，列表 `journal-list`）顯示日期時間、「行政區・樹種」（查不到就顯示樹籍編號）、內容，和「查看樹木」（`journal-view-tree`）連到 `/tree/:id`。沒有時顯示 `journal-empty`。
 - 我的許願：`MyWishes`（與 `/wishes` 共用的元件，`data-testid="my-wishes"`）。`/wishes` 仍可用，返回連到樹洞。
