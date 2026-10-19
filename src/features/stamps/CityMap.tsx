@@ -2,7 +2,11 @@ import { useMemo, useRef } from 'react'
 import type { Outline } from '../../lib/outline'
 import { PREFIX_DISTRICT, shortName, type District, type DistrictStamps } from '../game/districts'
 import { NEIGHBOUR_FILL, PANEL_BG, TIER_TONES, toneOf } from './colors'
+import { CrayonDefs } from './Crayon'
 import { boundsOf, labelPoint, parseRings } from './svgPath'
+import { DOUBLE_TAP_MS, isDoubleTap, tapPadRadius } from './tap'
+
+export { DOUBLE_TAP_MS, isDoubleTap }
 
 const PREFIX_OF = Object.fromEntries(Object.entries(PREFIX_DISTRICT).map(([p, d]) => [d, p])) as Record<District, string>
 
@@ -20,25 +24,24 @@ export function useCityGeometry(outline: Outline) {
     const w = Math.min(outline.viewBox[0], b[2] + MARGIN) - x
     const h = Math.min(outline.viewBox[1], b[3] + MARGIN) - y
     const labels = new Map<string, [number, number]>()
+    const bounds = new Map<string, [number, number, number, number]>()
     for (const [name, d] of Object.entries(outline.districts)) {
-      const p = labelPoint(parseRings(d))
+      const rings = parseRings(d)
+      const p = labelPoint(rings)
       if (p) labels.set(name, p)
+      const bb = boundsOf(rings)
+      if (bb) bounds.set(name, bb)
     }
-    return { viewBox: [x, y, w, h] as const, labels }
+    return { viewBox: [x, y, w, h] as const, labels, bounds }
   }, [outline])
 }
 
 /**
- * 全市地圖：12 區是可以點的形狀，依集章等級上色（未開始最暗，鐵、銅、銀、金漸亮）。
- * 每一區是一個按鈕（鍵盤可操作，有 aria-label）；區名畫在形狀中央。
+ * 全市地圖：12 區是可以點的形狀，像蓋在紙上的印泥，依集章等級上色（未開始是空白紙格，鐵、銅、銀、金漸深）。
+ * 每一區是一個按鈕（鍵盤可操作，有 aria-label）；區名畫在形狀中央（手寫體）。
  * 點一下選取（看狀態卡），點兩下（或對已選的區再按 Enter）直接進里地圖。
+ * 小區（例如大同）螢幕上不到 44 px，另外補一個透明的點擊圈。
  */
-/** 兩次點擊算「點兩下」：同一區、間隔不超過 DOUBLE_TAP_MS */
-export const DOUBLE_TAP_MS = 350
-export function isDoubleTap(prev: { name: string; at: number } | null, name: string, now: number): boolean {
-  return !!prev && prev.name === name && now - prev.at <= DOUBLE_TAP_MS
-}
-
 export function CityMap({
   outline,
   book,
@@ -68,13 +71,18 @@ export function CityMap({
   const geo = useCityGeometry(outline)
   const [vx, vy, vw, vh] = geo.viewBox
   const fs = (LABEL_PX * vw) / 360
+  // 畫面上 1 個 SVG 單位約幾個螢幕像素：寬度 ≈ 容器 340 px，高度被 55svh 夾住
+  const vh0 = typeof window === 'undefined' ? 800 : window.innerHeight
+  const pxPerUnit = Math.min(340 / vw, (vh0 * 0.55) / vh)
   const byDistrict = new Map(book.map((b) => [b.district, b]))
   // 選到的區畫在最上面，外框才不會被鄰居蓋住
   const names = Object.keys(outline.districts).sort((a, b) => Number(a === picked) - Number(b === picked))
 
   return (
     <div className="atlas-panel city-map" data-testid="city-map">
-      <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} role="group" aria-label="台北市行政區地圖" style={{ background: PANEL_BG }}>
+      <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} role="group" aria-label="台北市行政區地圖" style={{ backgroundColor: PANEL_BG }}>
+        <CrayonDefs id="atlas-crayon-city" unitsPerPx={1 / pxPerUnit} />
+        <g filter="url(#atlas-crayon-city)">
         <path d={outline.newtaipei} fill={NEIGHBOUR_FILL} aria-hidden="true" />
         <path d={outline.keelung} fill={NEIGHBOUR_FILL} aria-hidden="true" />
         {names.map((name) => {
@@ -107,6 +115,15 @@ export function CityMap({
           )
         })}
         <path d={outline.taipei} className="atlas-city-edge" />
+        </g>
+        {names.map((name) => {
+          const bb = geo.bounds.get(name)
+          const p = geo.labels.get(name)
+          const r = bb ? tapPadRadius(bb, pxPerUnit) : null
+          if (!bb || !p || r === null) return null
+          // 補一個至少 44 px 的透明點擊圈（只給點的人用；鍵盤與讀屏走區塊本身）
+          return <circle key={name} cx={p[0]} cy={p[1]} r={r} className="atlas-tap-pad" aria-hidden="true" onClick={() => tap(name as District)} />
+        })}
         {names.map((name) => {
           const p = geo.labels.get(name)
           if (!p) return null
@@ -117,7 +134,7 @@ export function CityMap({
               x={p[0]}
               y={p[1]}
               className="atlas-label"
-              style={{ fontSize: fs, fill: tone.text, strokeWidth: fs * 0.18, stroke: tone.fill }}
+              style={{ fontSize: fs, fill: tone.text, strokeWidth: fs * 0.2, stroke: tone.fill }}
               textAnchor="middle"
               dominantBaseline="central"
               aria-hidden="true"

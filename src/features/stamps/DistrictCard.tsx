@@ -21,7 +21,7 @@ export function DistrictCard({
 
   return (
     <section className="atlas-card" aria-label={`${b.district}集章`} data-testid="district-detail" data-district={b.district}>
-      <h2>
+      <h2 tabIndex={-1} data-reveal-heading>
         <i className="atlas-dot" style={{ background: tone.fill }} aria-hidden="true" />
         {b.district}
         <span className="atlas-tier">{b.top ? b.top.name : '未開始'}</span>

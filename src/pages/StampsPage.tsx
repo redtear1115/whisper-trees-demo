@@ -19,21 +19,11 @@ export default function StampsPage() {
   const stamps = useMemo(() => earnedStampsNewestFirst(book), [book])
 
   return (
-    <div className="page">
+    <div className="page stamps-page">
       <TabHeader title="集章冊" />
       <p>
-        在各區的樹旁掃樹牌，每棵不同的樹算一次。已集到 <strong data-testid="stamp-count">{stamps.length}</strong> 枚章。
+        在各區的樹旁掃樹牌，每棵不同的樹算一次。已集到 <strong data-testid="stamp-count">{stamps.length}</strong> 枚章，不用急，哪一區先走都可以。
       </p>
-      <p className="muted small">不用急，哪一區先走、走多少都可以。章的圖案是佔位美術。</p>
-
-      <div className="segmented" role="group" aria-label="檢視方式">
-        <button className={view === 'map' ? 'on' : ''} aria-pressed={view === 'map'} onClick={() => setView('map')} data-testid="view-map">
-          地圖
-        </button>
-        <button className={view === 'time' ? 'on' : ''} aria-pressed={view === 'time'} onClick={() => setView('time')} data-testid="view-time">
-          依取得時間
-        </button>
-      </div>
 
       {view === 'map' ? (
         <StampAtlas book={book} light={light} checkins={checkins} />
@@ -59,6 +49,18 @@ export default function StampsPage() {
           </ul>
         </Card>
       )}
+
+      {/* 切換鈕貼在底部導覽上方，單手拇指點得到；放在內容後面，頁面捲到底時就停在這裡 */}
+      <div className="stamps-switch">
+        <div className="segmented" role="group" aria-label="檢視方式">
+          <button className={view === 'map' ? 'on' : ''} aria-pressed={view === 'map'} onClick={() => setView('map')} data-testid="view-map">
+            地圖
+          </button>
+          <button className={view === 'time' ? 'on' : ''} aria-pressed={view === 'time'} onClick={() => setView('time')} data-testid="view-time">
+            依取得時間
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

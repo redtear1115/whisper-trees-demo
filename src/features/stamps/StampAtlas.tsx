@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Checkin } from '../../store/types'
 import { useOutline } from '../game/OutlineBackdrop'
 import { PREFIX_DISTRICT, type District, type DistrictLedger, type DistrictStamps } from '../game/districts'
@@ -6,7 +6,10 @@ import { countLitByVillage, loadVillages, type DistrictVillages, type Village } 
 import { CityMap } from './CityMap'
 import { DistrictCard } from './DistrictCard'
 import { RouteView } from './RouteView'
+import { VillageList } from './VillageList'
 import { VillageMap } from './VillageMap'
+import { creditText } from './credit'
+import { useReveal } from './reveal'
 import { litTreeIds, litTreePoints, loadTreePoints, type TreePoint } from './villageTrees'
 
 const PREFIX_OF = Object.fromEntries(Object.entries(PREFIX_DISTRICT).map(([p, d]) => [d, p])) as Record<District, string>
@@ -56,6 +59,20 @@ export function StampAtlas({
     [data, lit],
   )
 
+  // 選了之後：下方的狀態卡捲進畫面、焦點移到卡片標題；另外用 aria-live 報一聲
+  const [cityReveal, setCityReveal] = useState<string | null>(null)
+  const [villageReveal, setVillageReveal] = useState<string | null>(null)
+  const [announce, setAnnounce] = useState('')
+  const seq = useRef(0)
+  const cityCardRef = useReveal<HTMLDivElement>(cityReveal)
+  const villageCardRef = useReveal<HTMLDivElement>(villageReveal)
+
+  const pickDistrict = (d: District) => {
+    setDistrict(d)
+    setCityReveal(`${d}:${seq.current++}`)
+    setAnnounce(`已選取${d}，詳細在下方的卡片。`)
+  }
+
   const goCity = () => {
     setLevel('city')
     setVillage(null)
@@ -64,7 +81,11 @@ export function StampAtlas({
     setLevel('district')
     setVillage(null)
   }
-  const pickVillage = (v: Village) => setVillage(v)
+  const pickVillage = (v: Village) => {
+    setVillage(v)
+    setVillageReveal(`${v.id}:${seq.current++}`)
+    setAnnounce(`已選取${v.name}，詳細在下方的卡片。`)
+  }
 
   const crumbs: { label: string; go?: () => void }[] = [{ label: '全市', go: level === 'city' ? undefined : goCity }]
   if (level !== 'city' && district) crumbs.push({ label: district, go: level === 'district' && !village ? undefined : goDistrict })
@@ -72,7 +93,11 @@ export function StampAtlas({
 
   return (
     <div className="atlas" data-testid="atlas" data-level={level}>
-      <nav className="atlas-crumbs" aria-label="地圖層級" data-testid="atlas-crumbs">
+      <p className="visually-hidden" role="status" aria-live="polite" data-testid="atlas-live">
+        {announce}
+      </p>
+      {/* 全市層只有一段、不能點，不佔位置；進到里或路線才出現 */}
+      <nav className="atlas-crumbs" aria-label="地圖層級" data-testid="atlas-crumbs" hidden={level === 'city'}>
         {crumbs.map((c, i) => (
           <span key={i}>
             {i > 0 && <span aria-hidden="true"> › </span>}
@@ -94,7 +119,7 @@ export function StampAtlas({
               outline={outline}
               book={book}
               picked={district}
-              onPick={setDistrict}
+              onPick={pickDistrict}
               onEnter={(d) => {
                 setDistrict(d)
                 goDistrict()
@@ -104,13 +129,15 @@ export function StampAtlas({
             <p className="atlas-note">正在載入地圖…</p>
           )}
           {b ? (
-            <DistrictCard b={b} light={light.get(b.district)} onEnter={goDistrict} />
+            <div ref={cityCardRef} className="atlas-reveal">
+              <DistrictCard b={b} light={light.get(b.district)} onEnter={goDistrict} />
+            </div>
           ) : (
-            <p className="muted small">點一區看進度與光點，點兩下直接進里地圖。顏色越亮，集到的章越高。</p>
+            <p className="muted small">點一區看進度與光點，點兩下直接進里地圖。印得越深，集到的章越高。</p>
           )}
           {outline && (
-            <p className="muted small outline-credit" data-testid="outline-credit">
-              行政區界：© OpenStreetMap contributors（ODbL）
+            <p className="muted small atlas-credit" data-testid="outline-credit">
+              {creditText('city')}
             </p>
           )}
         </>
@@ -124,12 +151,15 @@ export function StampAtlas({
             <>
               <VillageMap data={data.villages} lit={litByVillage} pickedId={village?.id ?? null} onPick={pickVillage} />
               {village ? (
-                <VillageCard village={village} lit={litByVillage.get(village.id) ?? 0} onRoute={() => setLevel('route')} />
+                <div ref={villageCardRef} className="atlas-reveal">
+                  <VillageCard village={village} lit={litByVillage.get(village.id) ?? 0} onRoute={() => setLevel('route')} />
+                </div>
               ) : (
-                <p className="muted small">點一個里看已點亮幾棵。每棵不同的樹打卡過就會點亮。</p>
+                <p className="muted small">點一個里看已點亮幾棵，里太小就用下面的列表選。每棵不同的樹打卡過就會點亮。</p>
               )}
-              <p className="muted small outline-credit" data-testid="village-credit">
-                {data.villages.attribution}
+              <VillageList villages={data.villages.villages} lit={litByVillage} pickedId={village?.id ?? null} onPick={pickVillage} />
+              <p className="muted small atlas-credit" data-testid="village-credit">
+                {creditText('district')}
               </p>
             </>
           )}
@@ -153,7 +183,9 @@ function VillageCard({ village, lit, onRoute }: { village: Village; lit: number;
   const all = !none && lit >= village.total
   return (
     <section className="atlas-card" aria-label={`${village.name}`} data-testid="village-card" data-village={village.id}>
-      <h2>{village.name}</h2>
+      <h2 tabIndex={-1} data-reveal-heading>
+        {village.name}
+      </h2>
       {none ? (
         <p data-testid="village-progress">這一里沒有樹木資料。</p>
       ) : (

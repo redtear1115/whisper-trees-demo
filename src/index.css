@@ -2463,11 +2463,6 @@ body.has-offline .gov {
 
 /* ---------- 集章冊 ---------- */
 
-.stamp-map-wrap {
-  position: relative;
-  margin: 14px 0 8px;
-}
-
 /* 背景：台北市輪廓、區界與鄰近縣市；貼滿容器、置中縮放，不接受點擊 */
 .outline-bg {
   position: absolute;
@@ -2499,57 +2494,6 @@ body.has-offline .gov {
   stroke-linejoin: round;
 }
 
-.outline-credit {
-  margin-top: 0;
-}
-
-.stamp-map {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-areas:
-    'bt sl nh .'
-    'dt js ss ng'
-    'wh jj da sy'
-    '.  ws ws .';
-  gap: 8px;
-}
-
-.stamp-card {
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  min-width: 0;
-  min-height: 88px;
-  padding: 8px 2px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  /* 微透明，讓後面的區界隱約透出來；字級與對比不變 */
-  background: rgb(255 253 248 / 0.82);
-  color: var(--ink);
-  font: inherit;
-  text-align: center;
-  cursor: pointer;
-}
-
-.stamp-card .icon {
-  width: 32px;
-  height: 32px;
-}
-
-.stamp-card.locked .icon {
-  filter: grayscale(1) opacity(0.45);
-}
-
-.stamp-card.locked {
-  color: var(--muted);
-}
-
-.stamp-card.on {
-  border-color: var(--green);
-  box-shadow: 0 0 0 2px var(--green-soft);
-}
-
 .stamp-list {
   list-style: none;
   margin: 0;
@@ -2574,27 +2518,8 @@ body.has-offline .gov {
   flex: none;
 }
 
-.stamp-sheet {
-  position: fixed;
-  z-index: 20;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  max-height: 78vh;
-  overflow-y: auto;
-  background: var(--card);
-  border-radius: 20px 20px 0 0;
-  padding: 18px 16px max(32px, env(safe-area-inset-bottom));
-  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.15);
-  animation: sheet-in 0.2s ease-out;
-}
-
-.stamp-sheet:focus {
-  outline: none;
-}
-
-.stamp-sheet .about {
-  padding: 0 12px;
+.stamp-list strong {
+  font-family: var(--font-voice);
 }
 
 .stamp-tiers {
@@ -2613,12 +2538,6 @@ body.has-offline .gov {
 .stamp-tier .icon {
   width: 44px;
   height: 44px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stamp-sheet {
-    animation: none;
-  }
 }
 
 /* 桌機的旋轉控制：開在「方向」按鈕旁邊（和圖層面板同一個位置） */
@@ -3358,7 +3277,11 @@ body.has-offline .gov {
 
 /* ---------- 集章冊地圖（C） ---------- */
 
+/* 繪本紙面：色票與 colors.ts 的 PANEL_BG／INK_EDGE 同步（colors.ts 是對比測試的來源） */
 .atlas {
+  --stamp-paper: #eadfc4;
+  --stamp-edge: #4d4230;
+  --stamp-rim: #d3c5a1;
   margin-top: 12px;
 }
 
@@ -3382,60 +3305,83 @@ body.has-offline .gov {
 
 .atlas-crumbs [aria-current='page'] {
   color: var(--ink);
-  font-weight: 600;
+  font-family: var(--font-voice);
+  font-weight: 700;
 }
 
 .atlas-panel {
   overflow: hidden;
-  border-radius: var(--radius);
-  background: #26332b;
+  border: 2px solid var(--stamp-rim);
+  border-radius: 20px 16px 22px 16px;
+  background: var(--stamp-paper);
+  box-shadow: 0 6px 18px rgba(77, 66, 48, 0.14);
 }
 
 .atlas-panel svg {
   display: block;
   width: 100%;
   height: auto;
+  /* 地圖不要比半個螢幕高太多，下面的狀態卡才不會被擠到導覽列後面 */
+  max-height: 55vh;
+  max-height: 55svh;
 }
 
 .atlas-region {
   outline: none;
-  stroke: #1a241e;
-  stroke-width: 1.5;
+  stroke: var(--stamp-edge);
+  stroke-width: 1.4px;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
   cursor: pointer;
   /* 連點兩下進里地圖，不要被當成放大頁面 */
   touch-action: manipulation;
-  transition: filter 0.15s;
+  transition: stroke-width 0.15s;
 }
 
-.atlas-region:hover {
-  filter: brightness(1.12);
+/* 還沒蓋章的空白紙格：虛線邊 */
+.atlas-region[data-tier='none'] {
+  stroke-dasharray: 5 4;
+}
+
+@media (hover: hover) {
+  .atlas-region:hover {
+    stroke-width: 2.4px;
+  }
 }
 
 .atlas-region.on {
-  stroke: #fff6c8;
-  stroke-width: 3;
-  filter: brightness(1.15);
+  stroke: var(--ink);
+  stroke-width: 3.2px;
+  stroke-dasharray: none;
 }
 
 .atlas-region:focus-visible {
   outline: none;
-  stroke: #fff6c8;
-  stroke-width: 3.5;
-  box-shadow: none;
+  stroke: var(--green-ink);
+  stroke-width: 4px;
+  stroke-dasharray: none;
+}
+
+.atlas-tap-pad {
+  fill: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .atlas-city-edge {
   fill: none;
-  stroke: #9cb59a;
-  stroke-width: 2;
+  stroke: var(--stamp-edge);
+  stroke-opacity: 0.75;
+  stroke-width: 2.4px;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 .atlas-label {
   font-family: var(--font-voice);
-  font-weight: 600;
+  font-weight: 700;
   paint-order: stroke;
   stroke-opacity: 0.55;
   stroke-linejoin: round;
@@ -3452,7 +3398,7 @@ body.has-offline .gov {
   margin: 0;
   padding: 8px 10px 10px;
   list-style: none;
-  color: #d5e0d1;
+  color: var(--muted);
   font-size: 0.8rem;
 }
 
@@ -3462,24 +3408,46 @@ body.has-offline .gov {
   gap: 5px;
 }
 
-.atlas-legend li i {
+.atlas-legend li i,
+.atlas-ramp-steps i {
   width: 14px;
   height: 14px;
+  border: 1px solid rgba(77, 66, 48, 0.55);
   border-radius: 4px;
 }
 
-.atlas-ramp i {
-  flex: 0 1 120px;
-  height: 10px;
-  border-radius: 5px;
+.atlas-legend li:first-child i,
+.atlas-ramp-steps i:first-child {
+  border-style: dashed;
+}
+
+.atlas-ramp-steps {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.atlas-ramp-steps i {
+  width: 22px;
+  height: 14px;
 }
 
 .atlas-card {
   margin: 12px 0 8px;
   padding: 14px 16px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 2px solid var(--stamp-rim);
+  border-radius: 16px 20px 16px 22px;
   background: var(--card);
+  box-shadow: 0 4px 14px rgba(77, 66, 48, 0.1);
+}
+
+.atlas-card h2:focus {
+  outline: none;
+}
+
+.atlas-card h2:focus-visible {
+  outline: 3px solid var(--green-ink);
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 .atlas-card h2 {
@@ -3506,6 +3474,11 @@ body.has-offline .gov {
 .atlas-big {
   margin: 4px 0;
   font-size: 1.05rem;
+}
+
+.atlas-big strong {
+  font-family: var(--font-voice);
+  font-size: 1.3em;
 }
 
 .atlas-card .btn.block {
@@ -4143,4 +4116,138 @@ body.has-offline .gov {
 /* 附近的樹：列與列之間只留列表的間距，不再疊上卡片自己的外距 */
 .nearby-item.card {
   margin: 0;
+}
+
+/* ---------- 集章冊（批評修正 S） ---------- */
+
+/* 紙紋：面板像一頁微微有顆粒的紙（顏色用 backgroundColor 內聯，圖案在這裡） */
+.atlas-panel svg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 選了區或里之後，狀態卡捲進來時留出上緣，底下讓出導覽列與浮動的切換鈕 */
+.atlas-reveal {
+  scroll-margin-top: 12px;
+  scroll-margin-bottom: calc(var(--nav-h) + 36px + 44px + 20px);
+}
+
+/* 蓋上去的章，每枚微微歪一點 */
+.stamp-tier .icon,
+.stamp-list .icon {
+  filter: drop-shadow(0 1px 1px rgba(77, 66, 48, 0.25));
+  transform: rotate(-4deg);
+}
+
+.stamp-tier:nth-child(even) .icon,
+.stamp-list li:nth-child(even) .icon {
+  transform: rotate(3deg);
+}
+
+/* 地圖／依取得時間：浮在底部導覽上方（比中間凸出的按鈕高一點），單手拇指點得到 */
+.stamps-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.stamps-switch {
+  position: sticky;
+  z-index: 3;
+  bottom: calc(var(--nav-h) + 36px);
+  display: flex;
+  justify-content: center;
+  /* 內容很短（依取得時間）時，切換鈕也留在底部，不要跳到頁面中間 */
+  margin-top: auto;
+  padding-top: 16px;
+  pointer-events: none;
+}
+
+.stamps-switch .segmented {
+  pointer-events: auto;
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 14px rgba(44, 58, 46, 0.2);
+}
+
+.stamps-switch .segmented button {
+  min-height: 44px;
+}
+
+/* 里列表 */
+.village-list-wrap {
+  margin: 8px 0;
+}
+
+.village-list-wrap > .btn.block {
+  margin-top: 0;
+}
+
+.village-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border: 2px solid var(--stamp-rim);
+  border-radius: 16px 20px 16px 22px;
+  background: var(--card);
+}
+
+.village-list li + li {
+  border-top: 1px dashed var(--stamp-rim);
+}
+
+.village-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.village-row.on {
+  background: var(--green-soft);
+}
+
+.village-row:focus-visible {
+  outline: 3px solid var(--green-ink);
+  outline-offset: -3px;
+}
+
+.village-row-name {
+  font-family: var(--font-voice);
+  font-weight: 700;
+}
+
+.village-row-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.village-row-bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--stamp-paper);
+}
+
+.village-row-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--green);
+}
+
+/* 出處：一行小字 */
+.atlas-credit {
+  margin: 12px 0 0;
+  line-height: 1.5;
 }

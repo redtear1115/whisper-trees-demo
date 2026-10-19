@@ -1,4 +1,5 @@
-// 集章冊地圖的配色：深色底、綠色系，由暗到亮 = 未開始 → 鐵 → 銅 → 銀 → 金。
+// 集章冊地圖的配色：繪本的紙面，章像印泥蓋上去，印得越深 = 章越高。
+// 未開始 = 還沒蓋章的空白紙格（比紙面亮、虛線邊）→ 鐵（淡青）→ 銅（嫩綠）→ 銀（深綠）→ 金（金黃）。
 // 規格見 docs/specs/08-extensions.md §10「地圖（C）」。
 
 import type { Tier } from '../game/districts'
@@ -14,29 +15,39 @@ export interface TierTone {
 }
 
 export const TIER_TONES: TierTone[] = [
-  { key: 'none', name: '未開始', fill: '#3d4d43', text: '#e9efe6' },
-  { key: 'iron', name: '鐵章', fill: '#5a7f62', text: '#ffffff' },
-  { key: 'bronze', name: '銅章', fill: '#86aa72', text: '#17251b' },
-  { key: 'silver', name: '銀章', fill: '#bcd8b6', text: '#17251b' },
-  { key: 'gold', name: '金章', fill: '#ecdc8e', text: '#2b2410' },
+  { key: 'none', name: '未開始', fill: '#fcf8ec', text: '#2c3a2e' },
+  { key: 'iron', name: '鐵章', fill: '#cfe2bf', text: '#1f2a1c' },
+  { key: 'bronze', name: '銅章', fill: '#9dc98c', text: '#1f2a1c' },
+  { key: 'silver', name: '銀章', fill: '#5fa275', text: '#14201a' },
+  { key: 'gold', name: '金章', fill: '#e8b645', text: '#2b2410' },
 ]
 
 export function toneOf(tier: Tier['id'] | null | undefined): TierTone {
   return TIER_TONES.find((t) => t.key === (tier ?? 'none')) ?? TIER_TONES[0]
 }
 
-/** 地圖面板底色與外圍（新北、基隆） */
-export const PANEL_BG = '#26332b'
-export const NEIGHBOUR_FILL = '#2f3d34'
+/** 地圖面板的紙色（比頁面的紙深一點，空白紙格才看得出來）與外圍（新北、基隆）的舊紙色 */
+export const PANEL_BG = '#eadfc4'
+export const NEIGHBOUR_FILL = '#d9cdae'
+/** 區與里的邊線墨色（對每一種填色與紙面對比 ≥ 3:1，除了最深的里色階） */
+export const INK_EDGE = '#4d4230'
 
 // ---------- 里：完成度色階 ----------
 
 type RGB = [number, number, number]
 const hex = (h: string): RGB => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)) as RGB
-const toHex = (c: RGB) => '#' + c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')
 
-/** 色階三個停靠點：還沒點亮（=未開始）→ 中 → 亮 */
-export const RAMP_STOPS: RGB[] = [hex('#3d4d43'), hex('#6f9a6a'), hex('#e3efc0')]
+/**
+ * 里的色階：像印泥一格一格加深。五格（不連續內插：連續內插會經過字色對比不夠的中間亮度）。
+ * 第 0 格 = 還沒點亮（空白紙格）；每一格的字色都挑對比最高的（≥ 4.5:1，單元測試逐格驗證）。
+ */
+export const RAMP_STEPS: { from: number; fill: string }[] = [
+  { from: 0, fill: '#fcf8ec' },
+  { from: 0.001, fill: '#c3dcb0' },
+  { from: 0.45, fill: '#8fc07f' },
+  { from: 0.65, fill: '#4f9a62' },
+  { from: 0.85, fill: '#2d7a46' },
+]
 
 /** 幾成的樹被點亮就滿色階（里的比例都很小，3 成已經很滿了） */
 const RAMP_FULL_RATIO = 0.3
@@ -55,16 +66,15 @@ export function rampT(lit: number, total: number): number {
   return Math.min(1, RAMP_FLOOR + (1 - RAMP_FLOOR) * x)
 }
 
+/** 色階位置 → 哪一格的顏色 */
 export function rampColor(t: number): string {
-  const u = Math.min(1, Math.max(0, t)) * (RAMP_STOPS.length - 1)
-  const i = Math.min(RAMP_STOPS.length - 2, Math.floor(u))
-  const f = u - i
-  const a = RAMP_STOPS[i]
-  const b = RAMP_STOPS[i + 1]
-  return toHex([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f])
+  const u = Math.min(1, Math.max(0, t))
+  let step = RAMP_STEPS[0]
+  for (const s of RAMP_STEPS) if (u >= s.from) step = s
+  return step.fill
 }
 
-/** 里的填色；沒有樹的里（total 0）和 0 棵一樣是暗色 */
+/** 里的填色；沒有樹的里（total 0）和 0 棵一樣是空白紙格 */
 export function villageFill(lit: number, total: number): string {
   return rampColor(rampT(lit, total))
 }
