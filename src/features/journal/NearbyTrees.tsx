@@ -5,12 +5,16 @@ import { recentCheckin, useStore } from '../../store'
 import { useAnchor } from '../map/useAnchor'
 import { formatDistance, leaveTarget, loadNearbyTrees, type NearbyTree } from './nearby'
 
+/** 先列幾棵，其餘按「看更多」才展開，讓下面的日記與許願不被擠到很下面 */
+export const NEARBY_FIRST = 3
+
 /** 樹洞頁上方：目前位置附近的樹。留言仍要先打卡（QR + GPS）。 */
 export function NearbyTrees() {
   const navigate = useNavigate()
   const anchor = useAnchor(true)
   const checkins = useStore((s) => s.checkins)
   const [rows, setRows] = useState<(NearbyTree & { tree: Tree | null })[] | null>(null)
+  const [showAll, setShowAll] = useState(false)
   const located = anchor.source !== 'fallback'
   const [lon, lat] = anchor.lngLat
 
@@ -40,8 +44,8 @@ export function NearbyTrees() {
       ) : rows.length === 0 ? (
         <p className="muted">這附近 150 公尺內沒有樹的資料。</p>
       ) : (
-        <ul className="nearby-list">
-          {rows.map((r) => (
+        <ul className="nearby-list" id="journal-nearby-list">
+          {(showAll ? rows : rows.slice(0, NEARBY_FIRST)).map((r) => (
             <li key={r.id}>
               <section className="card nearby-item" data-testid="journal-nearby-item">
                 <div className="nearby-info">
@@ -65,6 +69,17 @@ export function NearbyTrees() {
             </li>
           ))}
         </ul>
+      )}
+      {rows && rows.length > NEARBY_FIRST && (
+        <button
+          className="btn block nearby-more"
+          data-testid="journal-nearby-more"
+          aria-expanded={showAll}
+          aria-controls="journal-nearby-list"
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll ? '收起' : `看更多（還有 ${rows.length - NEARBY_FIRST} 棵）`}
+        </button>
       )}
     </section>
   )

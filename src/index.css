@@ -3067,6 +3067,9 @@ body.has-offline .gov {
 }
 
 /* ---------- 樹洞頁（D） ---------- */
+.nearby-more {
+  margin-top: 8px;
+}
 .nearby-list {
   list-style: none;
   margin: 0;
