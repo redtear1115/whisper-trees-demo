@@ -3,6 +3,7 @@ import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react
 import { isDemoMode } from './store'
 import { MobileOnly } from './features/device/MobileOnly'
 import { TabLayout } from './features/nav/TabLayout'
+import { LEGACY_REDIRECTS } from './features/nav/redirects'
 import { OnboardingEffects } from './features/onboarding/OnboardingEffects'
 import { FallbackBanner, MigrationPrompt, WriteFailedToast } from './features/cloud/Banners'
 
@@ -13,7 +14,6 @@ const MyWishesPage = lazy(() => import('./pages/MyWishesPage'))
 const GovPage = lazy(() => import('./pages/GovPage'))
 const MePage = lazy(() => import('./pages/MePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
-const ExplorePage = lazy(() => import('./pages/ExplorePage'))
 const JournalPage = lazy(() => import('./pages/JournalPage'))
 const DemoControlPage = lazy(() => import('./pages/DemoControlPage'))
 const StampsPage = lazy(() => import('./pages/StampsPage'))
@@ -61,7 +61,6 @@ export default function App() {
         <Routes>
           <Route path="/" element={<MobileOnly><TabLayout><MapPage /></TabLayout></MobileOnly>} />
           <Route path="/stamps" element={<MobileOnly><TabLayout><StampsPage /></TabLayout></MobileOnly>} />
-          <Route path="/explore" element={<MobileOnly><TabLayout><ExplorePage /></TabLayout></MobileOnly>} />
           <Route path="/journal" element={<MobileOnly><TabLayout><JournalPage /></TabLayout></MobileOnly>} />
           <Route path="/me" element={<MobileOnly><TabLayout><MePage /></TabLayout></MobileOnly>} />
           <Route path="/scan" element={<MobileOnly><ScanPage /></MobileOnly>} />
@@ -74,8 +73,9 @@ export default function App() {
           <Route path="/developers" element={<DevelopersPage />} />
           <Route path="/demo-control" element={<DemoControlPage />} />
           {/* 舊連結 */}
-          <Route path="/codex" element={<Navigate to="/explore" replace />} />
-          <Route path="/more" element={<Navigate to="/me" replace />} />
+          {Object.entries(LEGACY_REDIRECTS).map(([from, to]) => (
+            <Route key={from} path={from} element={<Navigate to={to} replace />} />
+          ))}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

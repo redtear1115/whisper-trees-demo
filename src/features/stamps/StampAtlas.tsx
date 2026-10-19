@@ -10,6 +10,7 @@ import { VillageList } from './VillageList'
 import { VillageMap } from './VillageMap'
 import { creditText } from './credit'
 import { useReveal } from './reveal'
+import { selectedDistrict, villageUntouched } from './home'
 import { litTreeIds, litTreePoints, loadTreePoints, type TreePoint } from './villageTrees'
 
 const PREFIX_OF = Object.fromEntries(Object.entries(PREFIX_DISTRICT).map(([p, d]) => [d, p])) as Record<District, string>
@@ -26,14 +27,18 @@ export function StampAtlas({
   book,
   light,
   checkins,
+  homeDistrict,
 }: {
   book: readonly DistrictStamps[]
   light: ReadonlyMap<District, DistrictLedger>
   checkins: readonly Checkin[]
+  /** 我的區（中文區名）：打開時就選好這一區、卡片可見；沒有就是空白的全市 */
+  homeDistrict?: string
 }) {
   const outline = useOutline()
   const [level, setLevel] = useState<Level>('city')
-  const [district, setDistrict] = useState<District | null>(null)
+  const [picked, setDistrict] = useState<District | null>(null)
+  const district = selectedDistrict(picked, homeDistrict)
   const [village, setVillage] = useState<Village | null>(null)
 
   const b = district ? book.find((x) => x.district === district) : undefined
@@ -181,6 +186,7 @@ export function StampAtlas({
 function VillageCard({ village, lit, onRoute }: { village: Village; lit: number; onRoute: () => void }) {
   const none = village.total === 0
   const all = !none && lit >= village.total
+  const untouched = villageUntouched(village, lit)
   return (
     <section className="atlas-card" aria-label={`${village.name}`} data-testid="village-card" data-village={village.id}>
       <h2 tabIndex={-1} data-reveal-heading>
@@ -188,6 +194,10 @@ function VillageCard({ village, lit, onRoute }: { village: Village; lit: number;
       </h2>
       {none ? (
         <p data-testid="village-progress">這一里沒有樹木資料。</p>
+      ) : untouched ? (
+        <p data-testid="village-progress">
+          這一里有 {village.total} 棵樹，走到任何一棵旁邊掃樹牌，就會點亮第一棵。
+        </p>
       ) : (
         <>
           <p className="atlas-big" data-testid="village-progress">

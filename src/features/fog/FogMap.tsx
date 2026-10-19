@@ -6,7 +6,7 @@ import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../../lib/maplibre'
 import { MAP_STYLE } from '../../config'
 import type { LngLat } from '../../lib/geo'
 import { Art } from '../../components/ui'
-import { FOG_RADIUS_M, TAIPEI_BBOX, clearPixelRadius, fogView, formatArea } from './fog'
+import { FOG_RADIUS_M, TAIPEI_BBOX, clearPixelRadius, fogActions, fogAllView, fogView, formatArea, type FogMode } from './fog'
 import { useFog } from './useFog'
 
 /** 底圖超過這麼久還沒載好，就當作載入失敗 */
@@ -118,12 +118,12 @@ function FogView({
   latest.current = centers
   const ready = useRef(false)
   const redraw = useRef<() => void>(() => {})
-  const [overview, setOverview] = useState(false)
+  const [mode, setMode] = useState<FogMode>('focus')
   const [loadFailed, setLoadFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
   const view = fogView(centers)
-  const overviewRef = useRef(overview)
-  overviewRef.current = overview
+  const modeRef = useRef(mode)
+  modeRef.current = mode
 
   useEffect(() => {
     setLoadFailed(false)
@@ -205,7 +205,7 @@ function FogView({
       setLoadFailed(false)
       applyChineseLabels(m)
       ready.current = true
-      fit(m, latest.current, overviewRef.current)
+      fit(m, latest.current, modeRef.current)
     })
     const ro = new ResizeObserver(() => m.resize())
     ro.observe(mapEl.current!)
@@ -218,15 +218,15 @@ function FogView({
     }
   }, [attempt])
 
-  // 圓更新、或切換「看全市」：重畫，並把畫面移到該看的地方
+  // 圓更新、或切換看哪裡：重畫，並把畫面移到該看的地方
   const key = centers.length
   useEffect(() => {
     const m = map.current
     if (!m) return
     redraw.current()
-    if (ready.current) fit(m, centers, overview)
+    if (ready.current) fit(m, centers, mode)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, overview])
+  }, [key, mode])
 
   return (
     <div className="fog" data-testid="fog-map" style={{ height }}>
@@ -236,15 +236,13 @@ function FogView({
         已探索 <strong>{count}</strong> 棵樹周圍
         {count > 0 && <span>，約 {formatArea(areaKm2)} 平方公里</span>}
       </p>
-      <button
-        type="button"
-        className="btn small light fog-view-toggle"
-        data-testid="fog-view-toggle"
-        aria-pressed={overview}
-        onClick={() => setOverview((v) => !v)}
-      >
-        {overview ? (view?.focused ? '回到我走過的地方' : '回到探索範圍') : '看全市'}
-      </button>
+      <div className="fog-actions">
+        {fogActions(mode, view).map((a) => (
+          <button key={a.to} type="button" className="btn small light" data-testid={`fog-go-${a.to}`} onClick={() => setMode(a.to)}>
+            {a.label}
+          </button>
+        ))}
+      </div>
       {loadFailed && (
         <div className="fog-card fog-error fog-overlay" data-testid="fog-error" role="alert">
           <div className="fog-card-body">
@@ -260,9 +258,9 @@ function FogView({
   )
 }
 
-/** 該看哪裡：看全市，或清出的範圍（散得很開時只框最密的一帶，見 fogView） */
-function fit(m: MLMap, centers: LngLat[], overview: boolean) {
-  const view = overview ? null : fogView(centers)
+/** 該看哪裡：我走過的地方（散得很開時只框最密的一帶，見 fogView）、全部走過的地方，或全市 */
+function fit(m: MLMap, centers: LngLat[], mode: FogMode) {
+  const view = mode === 'city' ? null : mode === 'all' ? fogAllView(centers) : fogView(centers)
   if (view) {
     const [w, s, e, n] = view.bounds
     m.fitBounds(

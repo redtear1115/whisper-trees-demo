@@ -11,6 +11,8 @@ import {
   formatArea,
   fogStat,
   fogView,
+  fogAllView,
+  fogActions,
   FOG_CLUSTER_M,
   FOG_FIT_MAX_ZOOM,
   FOG_FIT_SPAN_M,
@@ -162,5 +164,39 @@ describe('fogView', () => {
     expect(v.focused).toBe(true)
     expect(inside(v.bounds, b)).toBe(true)
     expect(inside(v.bounds, a)).toBe(false)
+  })
+})
+
+describe('走過的地方在框住的範圍之外', () => {
+  const cluster = [A, east(A, 100), east(A, 200), offsetNorth(A, 150)]
+  const far1 = east(A, 9000)
+  const far2 = offsetNorth(A, 8000)
+
+  it('outside counts the circles that the focused frame leaves out', () => {
+    expect(fogView([far1, ...cluster, far2])!.outside).toBe(2)
+    expect(fogView([far1, ...cluster])!.outside).toBe(1)
+  })
+
+  it('nothing is outside when everything is framed', () => {
+    expect(fogView(cluster)!.outside).toBe(0)
+    expect(fogView([A])!.outside).toBe(0)
+  })
+
+  it('fogAllView frames every circle', () => {
+    const all = [far1, ...cluster, far2]
+    expect(fogAllView(all)!.bounds).toEqual(clearedBounds(all))
+    expect(fogAllView([])).toBeNull()
+  })
+
+  it('actions: 「還有 N 處走過的地方 ›」 only when there is something outside', () => {
+    const v = fogView([far1, ...cluster, far2])!
+    expect(fogActions('focus', v)).toEqual([
+      { to: 'all', label: '還有 2 處走過的地方 ›' },
+      { to: 'city', label: '看全市' },
+    ])
+    expect(fogActions('focus', fogView(cluster)!)).toEqual([{ to: 'city', label: '看全市' }])
+    expect(fogActions('all', v).map((a) => a.to)).toEqual(['focus', 'city'])
+    expect(fogActions('city', v)).toEqual([{ to: 'focus', label: '回到我走過的地方' }])
+    expect(fogActions('city', fogView(cluster)!)).toEqual([{ to: 'focus', label: '回到探索範圍' }])
   })
 })

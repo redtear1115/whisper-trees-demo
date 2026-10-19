@@ -16,7 +16,7 @@ interface SpeciesRow {
 
 const SHOWN = 40
 
-/** 樹的圖鑑（放在 /explore）。真的捲到畫面上時記 viewedCodexAt。 */
+/** 樹的圖鑑（放在集章冊的「探索」）。真的捲到畫面上時記 viewedCodexAt。 */
 export function CodexSection() {
   const [rows, setRows] = useState<SpeciesRow[]>([])
   const [q, setQ] = useState('')
@@ -103,13 +103,12 @@ export function CodexSection() {
               <strong>{r.species}</strong>
               <span className="small muted">全市 {r.count.toLocaleString()} 棵</span>
               {c ? (
-                <span className="small">
-                  {formatDate(c.at)} 遇見
-                  <br />
-                  <Link className="mono" to={`/tree/${c.treeId}`}>
-                    {c.treeId}
+                <>
+                  <span className="small">{formatDate(c.at)} 遇見</span>
+                  <Link className="tile-tree-link" to={`/tree/${c.treeId}`} aria-label={`看這棵樹：${r.species}，${c.treeId}`}>
+                    看這棵樹 ›
                   </Link>
-                </span>
+                </>
               ) : (
                 <span className="small muted">還沒遇見</span>
               )}
@@ -131,9 +130,7 @@ export function CodexSection() {
       )}
       {!query && (
         <details className="about">
-          <summary>
-            還有 {rows.length - met.size} 種等你遇見 <span className="muted small">台北最常見的幾種</span>
-          </summary>
+          <summary>台北最常見的樹</summary>
           <p className="small">
             {common.slice(0, 20).map((r) => `${r.species}（${r.count.toLocaleString()}）`).join('、')}…
           </p>

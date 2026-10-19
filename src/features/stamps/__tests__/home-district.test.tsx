@@ -1,0 +1,100 @@
+import { describe, expect, it } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { MemoryRouter } from 'react-router-dom'
+import { TAIPEI_DISTRICTS, type Checkin } from '../../../store/types'
+import type { Village } from '../../../lib/villages'
+import { stampBook } from '../../game/districts'
+import { WAITING_INVITATION, asDistrict, isWaiting, selectedDistrict, villageCountText, villageUntouched } from '../home'
+import { KEEP_MAP_PX, revealDelta } from '../reveal'
+import { DistrictCard } from '../DistrictCard'
+
+const ck = (i: number): Checkin => ({ treeId: `DA${String(i).padStart(10, '0')}`, result: 'success', at: 1_700_000_000_000 + i })
+
+describe('home district', () => {
+  it('accepts only the 12 real district names', () => {
+    for (const d of TAIPEI_DISTRICTS) expect(asDistrict(d)).toBe(d)
+    expect(asDistrict(undefined)).toBeNull()
+    expect(asDistrict('其他')).toBeNull()
+    expect(asDistrict('大安')).toBeNull()
+    expect(asDistrict(42)).toBeNull()
+  })
+
+  it('the atlas opens on the home district; nothing set keeps the blank city', () => {
+    expect(selectedDistrict(null, '大安區')).toBe('大安區')
+    expect(selectedDistrict(null, undefined)).toBeNull()
+    expect(selectedDistrict(null, 'garbage')).toBeNull()
+  })
+
+  it('a district the user tapped wins over the home district', () => {
+    expect(selectedDistrict('信義區', '大安區')).toBe('信義區')
+  })
+})
+
+describe('zero state of a district', () => {
+  const book = stampBook([])
+  const bookWith = stampBook([ck(1), ck(2)])
+  const da = (b: typeof book) => b.find((x) => x.district === '大安區')!
+
+  it('waiting means no distinct tree yet', () => {
+    expect(isWaiting(da(book))).toBe(true)
+    expect(isWaiting(da(bookWith))).toBe(false)
+    expect(isWaiting(undefined)).toBe(false)
+  })
+
+  it('an empty district shows the invitation, the scan action and the village map, not six zeros', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <DistrictCard b={da(book)} light={undefined} onEnter={() => {}} />
+      </MemoryRouter>,
+    )
+    expect(html).toContain(WAITING_INVITATION)
+    expect(html).toContain('這一區還是一張白紙。走到任何一棵樹旁掃樹牌，就會蓋上第一個章。')
+    expect(html).toContain('data-waiting="true"')
+    expect(html).toContain('href="/scan"')
+    expect(html).toContain('去掃樹牌')
+    expect(html).toContain('進入里地圖')
+    expect(html).not.toContain('district-count')
+    expect(html).not.toContain('district-light-total')
+    expect(html).not.toContain('未開始')
+    expect(html).not.toContain('還沒有章')
+  })
+
+  it('a district with a stamp keeps the numbers', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <DistrictCard b={da(bookWith)} light={undefined} onEnter={() => {}} />
+      </MemoryRouter>,
+    )
+    expect(html).toContain('district-count')
+    expect(html).not.toContain('data-waiting')
+  })
+})
+
+describe('untouched villages', () => {
+  const v = (id: string, name: string, total: number): Village => ({ id, name, total, bbox: [0, 0, 1, 1], geometry: { type: 'Polygon', coordinates: [] } }) as Village
+
+  it('helpers: no 0／N for untouched, no-tree villages still say so', () => {
+    expect(villageUntouched(v('a', 'A里', 100), 0)).toBe(true)
+    expect(villageUntouched(v('a', 'A里', 100), 3)).toBe(false)
+    expect(villageUntouched(v('b', 'B里', 0), 0)).toBe(false)
+    expect(villageCountText(v('a', 'A里', 100), 0)).toBe('')
+    expect(villageCountText(v('a', 'A里', 100), 3)).toBe('3／100 棵')
+    expect(villageCountText(v('b', 'B里', 0), 0)).toBe('沒有樹木資料')
+  })
+})
+
+describe('reveal scroll', () => {
+  it('does not scroll when the card header is already visible', () => {
+    expect(revealDelta({ headingBottom: 500, viewBottom: 700, anchorBottom: 400 })).toBe(0)
+  })
+
+  it('scrolls just enough to show the header row', () => {
+    expect(revealDelta({ headingBottom: 760, viewBottom: 700, anchorBottom: 600 })).toBe(60)
+  })
+
+  it('never scrolls the map’s lower edge out of view', () => {
+    const d = revealDelta({ headingBottom: 1400, viewBottom: 700, anchorBottom: 300 })
+    expect(300 - d).toBeGreaterThanOrEqual(KEEP_MAP_PX)
+    expect(revealDelta({ headingBottom: 1400, viewBottom: 700, anchorBottom: 30 })).toBe(0)
+  })
+})

@@ -2709,12 +2709,13 @@ body.has-offline .gov {
   stroke-width: 2.25;
 }
 
-/* 中間的大按鈕：浮出導覽列的圓。首頁時是「掃樹牌」（實心綠），其他分頁是「回首頁」（白底綠框） */
+/* 中間的大按鈕：浮出導覽列的實心綠圓，每個分頁都是「掃樹牌」。字用和其他分頁一樣的次要色，
+   只有「目前的分頁」才是綠色加粗，所以不會兩個分頁同時看起來像選中 */
 .bottom-cta {
   justify-content: flex-end;
   padding-bottom: 6px;
-  color: var(--green-ink);
-  font-weight: 700;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .cta-disc {
@@ -4312,12 +4313,17 @@ body.has-offline .gov {
   position: static;
 }
 
-/* 地圖左下角的「看全市／回到我走過的地方」：右下角是縮放鈕與署名 */
-.fog-view-toggle {
+/* 地圖左下角的按鈕（「還有 N 處走過的地方 ›」「看全市」「回到我走過的地方」）：右下角是縮放鈕與署名 */
+.fog-actions {
   position: absolute;
   left: 10px;
   bottom: 10px;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: calc(100% - 70px);
 }
 
 /* 空狀態與錯誤的卡片：繪本的手繪邊（四角不一樣圓）、柔光陰影 */
@@ -4430,11 +4436,7 @@ body.has-offline .gov {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* 選了區或里之後，狀態卡捲進來時留出上緣，底下讓出導覽列與浮動的切換鈕 */
-.atlas-reveal {
-  scroll-margin-top: 12px;
-  scroll-margin-bottom: calc(var(--nav-h) + 36px + 44px + 20px);
-}
+/* 選了區或里之後，狀態卡的標題列捲進畫面（只捲到剛好看得到，見 reveal.ts），不需要額外的 scroll-margin */
 
 /* 蓋上去的章，每枚微微歪一點 */
 .stamp-tier .icon,
@@ -4446,36 +4448,6 @@ body.has-offline .gov {
 .stamp-tier:nth-child(even) .icon,
 .stamp-list li:nth-child(even) .icon {
   transform: rotate(3deg);
-}
-
-/* 地圖／依取得時間：浮在底部導覽上方（比中間凸出的按鈕高一點），單手拇指點得到 */
-.stamps-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  min-height: 100svh;
-}
-
-.stamps-switch {
-  position: sticky;
-  z-index: 3;
-  bottom: calc(var(--nav-h) + 36px);
-  display: flex;
-  justify-content: center;
-  /* 內容很短（依取得時間）時，切換鈕也留在底部，不要跳到頁面中間 */
-  margin-top: auto;
-  padding-top: 16px;
-  pointer-events: none;
-}
-
-.stamps-switch .segmented {
-  pointer-events: auto;
-  border: 1px solid var(--line);
-  box-shadow: 0 4px 14px rgba(44, 58, 46, 0.2);
-}
-
-.stamps-switch .segmented button {
-  min-height: 44px;
 }
 
 /* 里列表 */
@@ -4803,6 +4775,234 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   padding: 10px 16px max(20px, env(safe-area-inset-bottom));
   background: var(--card);
   box-shadow: 0 -8px 10px -8px rgba(44, 58, 46, 0.2);
+}
+
+/* ---------- 光點規則與樹況回報（第三輪 C） ---------- */
+
+/* 回報類別：五個一鍵選，一欄排開，方便單手點 */
+.report .kind-pick {
+  grid-template-columns: 1fr;
+}
+
+.report .kind {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.report .kind-no {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.8rem;
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+
+.report .kind.on .kind-no {
+  background: var(--amber);
+  color: #fff;
+}
+
+.kind-tag.pest {
+  background: #f6e1de;
+  color: var(--red-ink);
+}
+
+.kind-tag.shade {
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+
+.kind-tag.sprout {
+  background: #e4ecd9;
+  color: #3f5a2a;
+}
+
+.kind-tag.other {
+  background: #eee9dc;
+  color: #5a5444;
+}
+
+/* GM 光點規則：分組小標與每項的說明 */
+.gm-rules h3 {
+  margin: 14px 0 4px;
+  font-size: 1rem;
+}
+
+.gm-rules table td:last-child {
+  white-space: nowrap;
+}
+
+.gm-rules .rule-note {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted, #6b6455);
+}
+
+/* ---------- 導覽與集章冊（第三輪 A） ---------- */
+
+/* 集章冊頂端的「集章／探索」：比下面的「地圖／依取得時間」重，是整個頁面的兩個區 */
+.stamps-page > .segmented {
+  margin: 4px 0 12px;
+}
+
+.stamps-panel {
+  outline: none;
+}
+
+.stamps-panel:focus-visible {
+  outline: 3px solid var(--green-ink);
+  outline-offset: 4px;
+  border-radius: var(--radius);
+}
+
+/* 地圖／依取得時間：在地圖上面，淡一點（只是換看法），不浮在畫面上 */
+.stamps-view {
+  display: flex;
+  margin: 4px 0 8px;
+}
+
+.stamps-view .segmented {
+  box-shadow: none;
+  background: transparent;
+}
+
+.stamps-view .segmented button {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.stamps-view .segmented button.on {
+  background: var(--green-soft);
+  color: var(--green-ink);
+  font-weight: 700;
+}
+
+/* 一區還沒有章：虛線的空章加一句邀請，不排一整列 0 */
+.stamp-waiting {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 4px;
+}
+
+.stamp-waiting p {
+  margin: 0;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.stamp-ghost {
+  position: relative;
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border: 2px dashed var(--stamp-edge);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+/* 內圈：像章面的圈線，等著被蓋上 */
+.stamp-ghost::after {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1.5px dashed var(--stamp-rim);
+  border-radius: 50%;
+}
+
+.atlas-card.waiting .btn.block + .btn.block {
+  margin-top: 0;
+}
+
+.atlas-card .ledger a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* 還沒點亮的里：只有名字和一格淡虛線框，不寫「0／N 棵」 */
+.village-row.untouched .village-row-name {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.village-row-bar.empty {
+  background: transparent;
+  border: 1px dashed var(--stamp-rim);
+}
+
+/* 新手任務：整列是一個連結（≥ 44 px），不是只有字是連結 */
+.tasks li a.task-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 8px 4px;
+  margin: 0 -4px;
+  border-radius: 10px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.tasks li a.task-row:hover {
+  background: var(--green-soft);
+}
+
+.tasks li a.task-row:focus-visible {
+  outline: 3px solid var(--green-ink);
+  outline-offset: 0;
+}
+
+.tasks li[data-done='true'] a.task-row {
+  color: var(--muted);
+}
+
+.task-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.task-label {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(43, 94, 56, 0.35);
+  text-underline-offset: 4px;
+}
+
+.task-hint {
+  display: block;
+}
+
+/* 圖鑑卡的「看這棵樹 ›」：一整列 44 px */
+.tile-tree-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 -6px -6px;
+  padding: 0 6px;
+  color: var(--green-ink);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.tile-tree-link:hover {
+  background: var(--green-soft);
+}
+
+.tile-tree-link:focus-visible {
+  outline: 3px solid var(--green-ink);
+  outline-offset: 0;
 }
 
 /* ---------- 光點規則與樹況回報（第三輪 C） ---------- */

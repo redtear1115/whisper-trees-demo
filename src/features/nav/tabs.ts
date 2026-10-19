@@ -1,6 +1,6 @@
-// 市民端底部導覽：5 個分頁的順序與「現在在哪一頁」。純函式，方便測試。
+// 市民端底部導覽：4 個分頁加中間的「掃樹牌」，以及「現在在哪一頁」。純函式，方便測試。
 
-export type TabId = 'stamps' | 'explore' | 'home' | 'journal' | 'me'
+export type TabId = 'home' | 'stamps' | 'journal' | 'me'
 
 export interface Tab {
   id: TabId
@@ -8,14 +8,16 @@ export interface Tab {
   label: string
 }
 
-/** 由左到右；首頁（地圖）在中間 */
+/** 4 個分頁（首頁就是普通的一頁，在最左） */
 export const TABS: readonly Tab[] = [
-  { id: 'stamps', to: '/stamps', label: '集章冊' },
-  { id: 'explore', to: '/explore', label: '探索' },
   { id: 'home', to: '/', label: '首頁' },
+  { id: 'stamps', to: '/stamps', label: '集章冊' },
   { id: 'journal', to: '/journal', label: '樹洞' },
   { id: 'me', to: '/me', label: '我的' },
 ]
+
+/** 導覽列由左到右 5 格：首頁・集章冊・［掃樹牌］・樹洞・我的 */
+export const NAV_SLOTS: readonly (TabId | 'scan')[] = ['home', 'stamps', 'scan', 'journal', 'me']
 
 /**
  * 目前路徑屬於哪個分頁；不是分頁根頁面（例如 /tree/:id、/shop、/wishes）回傳 null，
@@ -26,16 +28,27 @@ export function activeTab(pathname: string): TabId | null {
   return TABS.find((t) => t.to === path)?.id ?? null
 }
 
-/** 中間的大按鈕：在首頁是「掃樹牌」，在其他分頁是「回首頁」 */
+/** 中間的大按鈕：每個分頁都是「掃樹牌」，直接到掃描頁（2026-10-20 決定） */
 export interface CenterAction {
-  kind: 'scan' | 'home'
-  to: '/scan' | '/'
+  kind: 'scan'
+  to: '/scan'
   label: string
 }
 
-export function centerAction(active: TabId | null): CenterAction {
-  return active === 'home' ? { kind: 'scan', to: '/scan', label: '掃樹牌' } : { kind: 'home', to: '/', label: '首頁' }
+export function centerAction(): CenterAction {
+  return { kind: 'scan', to: '/scan', label: '掃樹牌' }
 }
+
+/**
+ * 按「掃樹牌」時要帶去掃描頁的 state：只有在首頁（地圖）、而且地圖上選了樹，才帶那棵樹當提示；
+ * 其他分頁沒有「選了哪棵樹」這件事，不帶。
+ */
+export function scanState(active: TabId | null, hintTreeId: string | null): { hintTreeId: string } | undefined {
+  return active === 'home' && hintTreeId ? { hintTreeId } : undefined
+}
+
+/** 掃描頁關閉後一律回首頁地圖（不是上一頁：從哪個分頁來都一樣） */
+export const SCAN_CLOSE_TO = '/'
 
 /** 這個路徑要不要顯示底部導覽 */
 export function showNav(pathname: string): boolean {

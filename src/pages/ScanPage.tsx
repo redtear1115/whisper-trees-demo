@@ -9,6 +9,7 @@ import { locate } from '../lib/locate'
 import { DATA_VERSION } from '../config'
 import { isDemoMode, recordCheckin } from '../store'
 import { awardCheckin, isDaytime } from '../features/game/ledger'
+import { SCAN_CLOSE_TO } from '../features/nav/tabs'
 
 type Step = { kind: 'scan' } | { kind: 'working'; text: string } | { kind: 'error'; text: string }
 
@@ -56,7 +57,7 @@ export default function ScanPage() {
     navigate(`/tree/${id}`, { replace: true, state: { checkin, glow } satisfies CheckinState })
   }
 
-  if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(-1)} hint={hint} hintId={hintTreeId} />
+  if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(SCAN_CLOSE_TO, { replace: true })} hint={hint} hintId={hintTreeId} />
 
   return (
     <div className="scan-status">
@@ -66,7 +67,7 @@ export default function ScanPage() {
           <button className="btn primary" onClick={() => setStep({ kind: 'scan' })}>
             再掃一次
           </button>
-          <button className="btn" onClick={() => navigate('/')}>
+          <button className="btn" onClick={() => navigate(SCAN_CLOSE_TO, { replace: true })}>
             回地圖
           </button>
         </div>

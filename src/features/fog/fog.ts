@@ -95,6 +95,8 @@ export interface FogView {
   maxZoom: number
   /** true：圓散得很開，只框了最密的一帶（畫面上提供「看全市」） */
   focused: boolean
+  /** 框住的範圍之外還有幾處走過的樹（focused 才可能大於 0；畫面上「還有 N 處走過的地方」） */
+  outside: number
 }
 
 /**
@@ -109,14 +111,14 @@ export function fogView(centers: readonly LngLat[]): FogView | null {
   const midLat = (all[1] + all[3]) / 2
   const span = Math.max((all[2] - all[0]) * mPerDegLon(midLat), (all[3] - all[1]) * M_PER_DEG_LAT)
   if (span <= FOG_FIT_SPAN_M) {
-    return { bounds: clearedBounds(centers)!, maxZoom: FOG_FIT_MAX_ZOOM, focused: false }
+    return { bounds: clearedBounds(centers)!, maxZoom: FOG_FIT_MAX_ZOOM, focused: false, outside: 0 }
   }
   let best: LngLat[] = []
   for (const a of centers) {
     const group = centers.filter((b) => distanceMeters(a, b) <= FOG_CLUSTER_M)
     if (group.length >= best.length) best = group
   }
-  return { bounds: clearedBounds(best)!, maxZoom: FOG_FIT_MAX_ZOOM, focused: true }
+  return { bounds: clearedBounds(best)!, maxZoom: FOG_FIT_MAX_ZOOM, focused: true, outside: centers.length - best.length }
 }
 
 export interface FogStat {
@@ -140,4 +142,32 @@ export const MIN_CLEAR_PX = 9
 
 export function clearPixelRadius(meterRadius: number, metersPerPixel: number, minPx = MIN_CLEAR_PX): number {
   return Math.max(meterRadius / metersPerPixel, minPx)
+}
+
+/** 「還有 N 處走過的地方 ›」：把所有清出的範圍都框進來（不是看全市，而是剛好框住自己走過的地方） */
+export function fogAllView(centers: readonly LngLat[]): { bounds: [number, number, number, number]; maxZoom: number } | null {
+  const bounds = clearedBounds(centers)
+  return bounds ? { bounds, maxZoom: FOG_FIT_MAX_ZOOM } : null
+}
+
+/** 看哪裡：我走過的地方（密集的一帶）、全部走過的地方、全市 */
+export type FogMode = 'focus' | 'all' | 'city'
+
+export interface FogAction {
+  to: FogMode
+  label: string
+}
+
+/**
+ * 地圖左下角的按鈕：依目前看哪裡、框住的範圍外還有沒有走過的地方。
+ * 散得很開時，「還有 N 處走過的地方 ›」把全部走過的地方框進來；「看全市」另外保留。
+ */
+export function fogActions(mode: FogMode, view: Pick<FogView, 'focused' | 'outside'> | null): FogAction[] {
+  const back = view?.focused ? '回到我走過的地方' : '回到探索範圍'
+  if (mode === 'city') return [{ to: 'focus', label: back }]
+  if (mode === 'all') return [{ to: 'focus', label: back }, { to: 'city', label: '看全市' }]
+  const out: FogAction[] = []
+  if (view && view.outside > 0) out.push({ to: 'all', label: `還有 ${view.outside} 處走過的地方 ›` })
+  out.push({ to: 'city', label: '看全市' })
+  return out
 }

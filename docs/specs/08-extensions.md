@@ -2,7 +2,7 @@
 
 2026-10-19 決定：主線 Demo 能在 2 分鐘內走完後，再加上以下功能。**全部是前端可操作的示意**：同一個靜態站、資料存在 store（localStorage）、畫面標「模擬」。美術一律用佔位檔，清單見 [docs/ui-assets.md](../ui-assets.md)。
 
-現場 2 分鐘 Demo 不走這些畫面；評審或票選民眾可以從底部導覽（集章冊、探索、樹洞、我的）進去看；後台示範是獨立頁面 `/demo-control`（見 §11）。
+現場 2 分鐘 Demo 不走這些畫面；評審或票選民眾可以從底部導覽（首頁、集章冊、樹洞、我的）進去看；後台示範是獨立頁面 `/demo-control`（見 §11）。
 
 ## 設計原則（沿用 00 的語氣）
 
@@ -52,7 +52,7 @@
 
 商品、價格、上下架由 GM 後台管理。
 
-## 3. 圖鑑（`/explore` 下半部；`/codex` 轉址到 `/explore`）
+## 3. 圖鑑（集章冊「探索」區的下半部；`/explore`、`/codex` 轉址到 `/stamps?tab=explore`，2026-10-20 起探索併進集章冊）
 
 - 列出台北數量最多的樹種（真實資料：`public/data/species.json`，由 `build_web_data.py` 產生），每種顯示全市棵數。
 - 在那個樹種的樹打卡過，就「收集」到，顯示第一次遇見的日期與樹籍編號。
@@ -174,7 +174,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 - 「我的 API 用戶端」：看承辦人發給這家廠商的 OAuth 用戶端（client_id、scope、狀態、最近呼叫），**沒有 secret**；用戶端用 API 接單、施工、完工的規則見 §7。以「目前廠商身分（模擬）」選單切換廠商。
 - 頁首標「示範：廠商視角」；寫入限白名單帳號（同 [06](06-gov-console.md)）。
 
-## 9. 新手引導 `/`、`/explore` 與 `/me`
+## 9. 新手引導 `/`、集章冊「探索」區（原 `/explore`）與 `/me`
 
 2026-10-19 使用者決定，屬 P1 延伸功能（不擋主線）。分三個切片：S1 資料與徽章（已做）、S2 引導一的畫面與加入主畫面（已做，實機待測）、S3 新手任務卡（已做，實機待測）。
 
@@ -235,8 +235,8 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 
 ### 新手任務卡（S3）
 
-- **/explore 任務卡**（`TasksCard`；2026-10-19 起從 `/me` 搬到 `/explore`，`/me` 不再放，避免重複）（，清單 `tasks-list`、每項 `task-<id>` 帶 `data-done`、`tasks-count`、`tasks-toggle`）：拿到第一道光後出現，4 項依 `tasks()` 推算打勾，順序不拘、可收合（`tasksCollapsed` 存在 `onboarding`）。「在樹洞留一句話」說明「到地圖點一棵樹，進樹的頁面」，「在空樹穴許願」說明「到地圖點一個空樹穴」，連結都回地圖。4 項做完卡片換成一行小字（`tasks-card-done`），不再有按鈕。
-- **看過旗標**（`useViewedFlag`）：`/explore` 的圖鑑區（`data-testid="codex-section"`）真的出現在畫面上時記 `viewedCodexAt`（IntersectionObserver）；`/me` 的徽章區（`data-testid="badges-section"`）真的出現在畫面上時記 `viewedBadgesAt`（IntersectionObserver，不支援就在載入時記）。只在使用者文件載入完成、旗標還沒有時寫一次。
+- **任務卡**（`TasksCard`，在集章冊「探索」區；2026-10-19 起從 `/me` 搬到 `/explore`，2026-10-20 探索併進集章冊，`/me` 不再放，避免重複；每項是**整列連結、≥ 44 px 高**（`task-row`），不是只有字是連結）（，清單 `tasks-list`、每項 `task-<id>` 帶 `data-done`、`tasks-count`、`tasks-toggle`）：拿到第一道光後出現，4 項依 `tasks()` 推算打勾，順序不拘、可收合（`tasksCollapsed` 存在 `onboarding`）。「在樹洞留一句話」說明「到地圖點一棵樹，進樹的頁面」，「在空樹穴許願」說明「到地圖點一個空樹穴」，連結都回地圖。4 項做完卡片換成一行小字（`tasks-card-done`），不再有按鈕。
+- **看過旗標**（`useViewedFlag`）：集章冊「探索」區的圖鑑區（`data-testid="codex-section"`）真的出現在畫面上時記 `viewedCodexAt`（IntersectionObserver）；`/me` 的徽章區（`data-testid="badges-section"`）真的出現在畫面上時記 `viewedBadgesAt`（IntersectionObserver，不支援就在載入時記）。只在使用者文件載入完成、旗標還沒有時寫一次。
 - **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/explore`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在地圖頁首左上、和右上的光點餘額同一排（2026-10-20 起；原本在左下，緊貼導覽中間大按鈕旁的拇指弧線）。判斷是純函式 `showTasksChip`。
 - **A3**：`OnboardingEffects` 在使用者文件載入後、4 項都完成、沒有 `newcomerCelebratedAt` 時記下時間並跳出「城市的新朋友」慶祝，只一次（`shouldCelebrateNewcomer`）。早就完成過的舊使用者會在下次開啟時看到一次。
 - 雲端不用改：`onboarding` 本來就是 `users/{uid}` 的一個 map 欄位，新旗標照逐欄合併。
@@ -334,6 +334,18 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
   2. **依取得時間**（`stamp-list`，每枚 `stamp-item`）：所有已得到的章，新的在前，顯示區名、章、日期；沒有章時顯示說明（`stamp-list-empty`）。
 - 點區卡開底部抽屜（`district-detail`，`role="dialog"`，可按「關閉」或 Esc）：已得到的各級章與日期、進度（`district-progress`，例如「7／10，再 3 棵拿銅章」；金章後「已集滿金章」）、該區累計光點（`district-light-total`）、可展開的光點明細（`district-ledger-toggle`、`district-ledger`；每筆日期、樹籍編號或許願路名、行為名稱、+N）。
 
+### 頁面結構、我的區與零狀態（第三輪 A，2026-10-20 使用者決定）
+
+- **探索併進集章冊**：`/stamps` 頂端是「集章／探索」兩區（`Segmented`，`mode="tabs"`，真正的 tablist／tabpanel；`stamps-seg`、`stamps-seg-stamps`、`stamps-seg-explore`；面板 `stamps-panel`、`explore-panel`）。選哪一區放在網址 `?tab=explore`（沒有 `tab` 就是集章；換區用 `replace`，不堆歷史）。「探索」區 = 探索地圖（迷霧，見 [09](09-fog.md)）、新手任務卡、樹的圖鑑（`src/features/stamps/ExploreSection.tsx`）；舊網址 `/explore`、`/codex` 轉址到 `/stamps?tab=explore`（`src/features/nav/redirects.ts`）。
+- **「地圖／依取得時間」不再浮在畫面上**（批評 P1：它蓋住圖例、點兩下的提示和出處）：放在地圖**上面**一般排版（DOM 順序也在地圖之前，讀屏先遇到），樣式比頂端的「集章／探索」淡（只是換看法）；「依取得時間」下面不再有一塊空白。
+- **我的區**：新手引導選的 `ext.onboarding.homeDistrict`（中文區名，如「大安區」）。集章冊打開時就選好這一區、狀態卡已經在地圖下面（不捲動、不搶焦點）；使用者自己點了別區就以點的為準；沒有「我的區」（沒選過、舊資料）或存的值不是 12 區之一，就維持原本空白的全市（純函式 `selectedDistrict`、`asDistrict`）。
+- **零狀態是邀請，不是缺憾**：
+  - 一區一棵不同的樹都還沒打卡（`isWaiting`）：狀態卡（`data-waiting="true"`）不排一整排 0，只有區名、虛線的空章、一句「這一區還是一張白紙。走到任何一棵樹旁掃樹牌，就會蓋上第一個章。」（`district-invitation`）、主要動作「去掃樹牌」（`district-scan`，到 `/scan`）、次要動作「進入里地圖」；光點紀錄只在真的有紀錄時才出現。沒有「未開始」「還沒有章」。
+  - 里列表裡還沒點亮的里只有名字與一格淡虛線框，不寫「0／N 棵」（`villageUntouched`、`villageCountText`）；沒有樹的里仍寫「沒有樹木資料」。里卡片還沒點亮時是「這一里有 N 棵樹，走到任何一棵旁邊掃樹牌，就會點亮第一棵。」，沒有進度條。
+  - 頂端說明在還沒有章時不寫「已集到 0 枚章」。圖鑑頁尾「還有 N 種等你遇見」拿掉，改成「台北最常見的樹」。
+- **點一區之後只捲到剛好看得到標題列**：不再把整張卡捲進來；標題下緣超出導覽列上方多少才捲多少（已看得到就不捲），而且不讓地圖下緣捲出畫面（`revealDelta`）；焦點仍移到卡片標題、aria-live 照報。保留「點兩下進里地圖」。
+- **≥ 44 px**：新手任務列整列、圖鑑卡的「看這棵樹 ›」整列（取代 16 px 的樹籍編號連結）、光點紀錄裡的樹籍編號連結；區的點擊圈（大同、萬華）照舊。
+
 ### 驗收
 
 - [x] 單元測試：前綴對照（含讀 `public/data/trees` 驗證）、不同的樹只算一次、鐵／銅／銀／金門檻、`earnedAt`（重複打卡與亂序不影響）、key 解析、光點歸區（含許願與澆水走許願的行政區、排除無 key／花費／GM 補發／查不到的）。
@@ -344,22 +356,25 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 - [x] `npm test`、`npm run test:rules`、`npm run build` 通過。
 - [x] 批評修正 S（2026-10-20，Playwright 390×844 與 360×740，行動裝置模擬、觸控，本機 Demo 模式、種入大安 14 棵與大同 1 棵）：點大安後狀態卡標題整個在導覽列上方、不用手動捲動；焦點在卡片標題；aria-live 有報；`prefers-reduced-motion` 下用鍵盤 Enter 選區也移焦點；連點兩下進里地圖；里地圖 0 個 Tab 停靠點；「用列表選里」列出 53 個里、每列 52 px 高、點第一列出卡片且在畫面內；切換鈕在畫面下方、每個鈕 44 px；大同、萬華各有 44 px 點擊圈；三種畫面都沒有水平捲動。單元測試（`stamps-map.test.ts`）：新配色對比與可分辨、色階逐格、點擊圈（含真實 12 區）、里列表排序（含真實 `DA.json`）、出處文字。**沒有在實機（iPhone 觸控、VoiceOver）驗過；SVG 濾鏡的紙感只在 Chromium 看過，Safari 與低階手機沒驗。**
 
+- [x] 第三輪 A（2026-10-20，Playwright 390×844 與 360×740，Demo，本機無 Firebase，種入 `homeDistrict: '大安區'`）：大安沒有章時打開就選中大安、狀態卡是虛線空章加邀請、「去掃樹牌」到 `/scan`；大安有 14 棵時是一般的卡；沒有 `homeDistrict` 時沒有選區；「地圖／依取得時間」在地圖的 DOM 之前；圖例、出處與狀態卡在畫面中央取點時沒有被任何東西蓋住；點文山（390 px 只捲 72 px、360 px 捲 132 px）：卡片標題在導覽上方、地圖下緣仍在畫面內、焦點在標題、aria-live「已選取文山區…」；里列表 53 列，還沒點亮的只有名字與虛線框、整張列表沒有「0／」；里卡片「這一里有 509 棵樹…」；「依取得時間」沒有空白；「探索」區：網址 `?tab=explore`、迷霧地圖、任務列 44 px 以上、圖鑑頁尾「台北最常見的樹」、沒有「還有 N 種」；三種畫面沒有水平捲動；除了區地圖上大同、萬華的形狀本身（有 44 px 點擊圈）之外，沒有小於 44 px 的可點元件。單元測試：`homeDistrict` 選取、零狀態卡（SSR 渲染）、里零狀態輔助函式、`revealDelta`。**沒有在實機（iPhone 觸控、VoiceOver）驗過。**
+
 ## 11. 導覽、探索、樹洞、示範後台（S4）
 
 2026-10-19 使用者決定。取代原本地圖右上角的「我的許願」「選單」與 `/more` 選單頁。
 
 ### 底部導覽
 
-- 5 個分頁，順序固定：集章冊 `/stamps`、探索 `/explore`、首頁 `/`（地圖）、樹洞 `/journal`、我的 `/me`。分頁清單與「目前在哪一頁」是純函式（`src/features/nav/tabs.ts`：`TABS`、`activeTab`、`showNav`），有單元測試。
-- 只顯示在這 5 個**分頁根頁面**（`TabLayout`）；`/tree/:id`、`/shop`、`/scan`、`/wishes` 是子頁面，沒有導覽、用返回連結；`/gov`、`/vendor`、`/gm`、`/developers`、`/demo-control` 也沒有。桌機閘門（`MobileOnly`）不變。
-- 每個分頁 ≥ 44 px 高（56 px + 底部安全區 `safe-area-inset-bottom`），目前的分頁 `aria-current="page"`、字加粗、圖示加粗；沒有紅點或數字。360 px 寬 5 等分（各 72 px）。`data-testid`：`bottom-nav`、`tab-stamps`、`tab-explore`、`tab-home`、`tab-journal`、`tab-me`。
+- 5 格，順序固定：首頁 `/`（地圖）、集章冊 `/stamps`、**［掃樹牌］**、樹洞 `/journal`、我的 `/me`（2026-10-20 決定；探索併進集章冊，不再是分頁）。分頁清單、五格順序、「目前在哪一頁」、掃樹牌帶什麼 state 都是純函式（`src/features/nav/tabs.ts`：`TABS`、`NAV_SLOTS`、`activeTab`、`showNav`、`centerAction`、`scanState`、`SCAN_CLOSE_TO`），有單元測試。
+- **首頁是普通的一頁**：在 `/` 時 `aria-current="page"`、字加粗，和其他分頁一樣。**中間的大圓鈕每個分頁都是「掃樹牌」**（掃描框圖示、實心綠）：從任何一頁按都到 `/scan`；只有在首頁、地圖上選了樹時才帶 `hintTreeId`（`scanState`），其他分頁不帶。它的字是次要色，不是綠色加粗，所以不會和「目前的分頁」同時像選中（批評 P1）。**關閉掃描頁（返回鈕、「回地圖」）一律用 `replace` 回首頁 `/`**，不是上一頁；掃成功照舊進樹的頁面。
+- 只顯示在這 4 個**分頁根頁面**（`TabLayout`）；`/tree/:id`、`/shop`、`/scan`、`/wishes` 是子頁面，沒有導覽、用返回連結；`/gov`、`/vendor`、`/gm`、`/developers`、`/demo-control` 也沒有。桌機閘門（`MobileOnly`）不變。
+- 每格 ≥ 44 px 高（56 px + 底部安全區 `safe-area-inset-bottom`），目前的分頁 `aria-current="page"`、字加粗、圖示加粗；沒有紅點或數字。360 px 寬 5 等分（各 72 px）。`data-testid`：`bottom-nav`、`tab-home`、`tab-stamps`、`tab-scan`、`tab-journal`、`tab-me`。
 - 右上角光點餘額（`BalanceChip`，`data-testid="balance-chip"`，「✦ N 光點」，`aria-label`「光點 N，前往商店」）連到 `/shop`；每個分頁頁首（`TabHeader`）與地圖右上都有。
 - 地圖頁的浮動元件（右側工具、圖層面板、署名）全部排在導覽上面（CSS 變數 `--nav-h`、`--map-base`；任務小入口在左上頁首）；點樹／許願的抽屜與新手引導抽屜也坐在導覽上面，導覽一直看得到。集章冊的區抽屜（`position: fixed`）會蓋過導覽，關閉就回來。
 - 從樹洞點進樹的頁面，返回回到樹洞（路由 state `from`）；其他來源回地圖。
 
-### 探索 `/explore`
+### 探索（集章冊的「探索」區）
 
-由上到下：「探索地圖」區（`data-testid="fog-slot"`，放迷霧地圖 `FogMap`；打開時看你走過的地方、還沒打卡時是附「去找一棵樹」的空狀態卡、載入失敗有重試，見 [09 迷霧](09-fog.md)）、新手任務卡（`TasksCard`）、樹的圖鑑（`CodexSection`，從原 `CodexPage` 抽出；搜尋、遇見的樹種、`data-testid="codex-section"`）。`/codex` 轉址到 `/explore`。
+2026-10-20 起不是獨立分頁，是 `/stamps?tab=explore`（見 [§10 頁面結構](#頁面結構我的區與零狀態第三輪-a2026-10-20-使用者決定)）。由上到下：「探索地圖」區（`data-testid="fog-slot"`，放迷霧地圖 `FogMap`；打開時看你走過的地方、框外還有走過的地方時有「還有 N 處走過的地方 ›」、還沒打卡時是附「去找一棵樹」的空狀態卡、載入失敗有重試，見 [09 迷霧](09-fog.md)）、新手任務卡（`TasksCard`）、樹的圖鑑（`CodexSection`；搜尋、遇見的樹種、`data-testid="codex-section"`；遇見的樹種卡有一整列「看這棵樹 ›」）。`/explore`、`/codex` 轉址到 `/stamps?tab=explore`。
 
 ### 樹洞 `/journal`
 
@@ -394,13 +409,14 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 ### 驗收
 
-- [x] 單元測試：分頁順序與標籤、`activeTab`／`showNav`（子頁面與後台沒有導覽）、`journalEntries`（跨樹合併、新到舊、排除示範）。
+- [x] 單元測試（2026-10-20 更新）：4 個分頁加中間掃樹牌的五格順序、`activeTab`（首頁 `/` 是普通分頁）／`showNav`（子頁面與後台沒有導覽）、`centerAction` 永遠是掃樹牌、`scanState` 只在首頁帶樹、關閉掃描頁回 `/`、`/explore`／`/codex` 轉址與 `?tab=`、`journalEntries`（跨樹合併、新到舊、排除示範）。
 - [x] 瀏覽器（Playwright 360 px 行動模擬，本機後端，2026-10-19）：5 個分頁都顯示導覽、只有目前的分頁 `aria-current`、點分頁會切換；每個分頁都有餘額晶片且連到 `/shop`；沒有水平捲動；分頁 ≥ 44 px；地圖頁掃樹牌浮鈕在導覽上面、各浮動元件不重疊；點樹的抽屜與新手引導抽屜都在導覽上面；`/shop`、`/demo-control` 沒有導覽；探索頁有佔位、任務卡、圖鑑，捲到圖鑑記下 `viewedCodexAt`；樹洞頁依新到舊列出、點進樹頁、返回回到樹洞；`/codex`→`/explore`、`/more`→`/me`、不認得的網址→`/`；`/me` 有設定區與示範後台連結、沒有任務卡。**沒有在實機（含 iOS 安全區）、雲端模式驗過；`safe-area-inset-bottom` 只在 CSS 裡，桌機模擬下是 0。**
 - [x] 第三輪 D（2026-10-20，Playwright 390／360 px、Demo）：附近的樹 3 列各不相同（「茄苳・信義路二段・往西南・約 1 公尺・樹牌 #211045」、「…往西・約 5 公尺・樹牌 #211044」、「…往東・約 5 公尺・樹牌 #211046」），「公尺」不被拆行；單元測試 `bearingTo`／`compassLabel`／`treeNumberTail`。
 - [x] 批評修正 E（2026-10-20，Playwright 390／360 px、本機後端、Demo 模式，截圖在 scratchpad `fixE-*.png`）：樹洞分頁 44 px 高、`tabindex` 0／-1、→ 切到我的許願且焦點跟著移、再 → 繞回、End／Home 跳頭尾、選中分頁的 `aria-controls` 與 panel 的 `aria-labelledby` 對得上；附近的樹 8 列只有第一列是 `btn primary`、按鈕 44 px 高、Demo 在範圍內寫「掃樹牌留言」、真實定位（遠處）寫「怎麼走」；「查看樹木」44 px 高、箭頭跟在字後；集章冊分段 44 px、360 px 無水平捲動。**「走過去」列沒有在畫面上走過（Demo 位置旁的 8 棵都在感應圈內），只有單元測試；沒有在實機、雲端模式驗過。**
 - [x] `npm test`、`npm run test:rules`、`npm run build` 通過。
 - [x] `/me` 批評修正 P（2026-10-20，Playwright 390 與 360 px、本機後端、新使用者與有紀錄的使用者）：動物與小芽在頂部、沒有重複的餘額；「換一隻」就地展開選動物並立刻換、設定區沒有動物選項；進度條有 `role=progressbar` 與 `aria-valuenow／min／max／valuetext`；換裝選項與所有按鈕、連結、單選 ≥ 44 px；光點紀錄預設 3 筆、「看全部」展開 7 筆；有樹的列顯示「樹種・路名」、許願列顯示「路名的願望」、點了到 `/tree/<id>`；2025 年的紀錄顯示年份；徽章區標題下說明為什麼（新使用者「做到一件小事就會亮起」，有紀錄者列出名字）；沒有水平捲動；沒有主控台錯誤。**沒有在實機驗；`TreePage` 返回回地圖（見上）。**
 - [x] 批評修正 M（2026-10-20，Playwright 390 與 360 px，Demo，本機無 Firebase）：Demo 細條全寬 34 px、各分頁與地圖的光點餘額在它下面（y 44 px），沒有重疊；掃描頁返回鈕讓開；字型：`/me`、`/shop`、`/explore`、`/journal` 量過上面列的元素都是楷體、沒有任何一個小於 14 px，360 px 沒有水平捲動。遷移提示（用 `setSession({ migration })` 在集章冊上觸發）：不是對話框、頁面後面可以切分頁（點「探索」成功、小卡留著）、在導覽上方、不蓋中間大按鈕、360 px 沒有水平捲動。單元測試（`migrationPrompt.test.tsx`）：沒有遷移就不畫、不是 dialog／modal、內容與動作不變、沒有樹洞就沒有勾選、存放中與錯誤。**遷移提示沒有接 Firebase emulator 實際搬過一次（搬資料的邏輯沒動）；楷體在實機 iOS 小字的粗細沒看過。**
+- [x] 第三輪 A 導覽（2026-10-20，Playwright 390 與 360 px，Demo，本機）：導覽依序「首頁（目前）・集章冊・掃樹牌・樹洞・我的」，在集章冊時只有集章冊是目前；從 `/journal`、`/me`、`/stamps` 按掃樹牌都到 `/scan`，按返回都回 `/`；`/explore`、`/codex` 轉址到 `/stamps?tab=explore` 且「探索」被選中、迷霧區在；沒有 console 錯誤。**掃描頁在無頭瀏覽器沒有相機，只驗了關閉；沒有掃成功路徑的新驗證（程式沒動）。**
 
 ## 不做
 

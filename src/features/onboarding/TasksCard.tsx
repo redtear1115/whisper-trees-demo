@@ -4,7 +4,7 @@ import { Card } from '../../components/ui'
 import { firstLightEarned, onboarding, patchOnboarding, tasks } from '../game/onboarding'
 import { useMemo } from 'react'
 
-/** /explore 的新手任務卡：拿到第一道光後出現，順序不拘，可以收合；全做完變成一行小字。 */
+/** 集章冊「探索」裡的新手任務卡：拿到第一道光後出現，順序不拘，可以收合；全做完變成一行小字。 */
 export function TasksCard() {
   const state = useStore((s) => s) // tasks() 每次回新陣列，不能直接當 selector（會無限重繪）
   const list = useMemo(() => tasks(state), [state])
@@ -38,12 +38,14 @@ export function TasksCard() {
         <ul id="tasks-list" className="tasks" data-testid="tasks-list">
           {list.map((t) => (
             <li key={t.id} data-testid={`task-${t.id}`} data-done={t.done}>
-              <span className="task-mark" aria-hidden>{t.done ? '✓' : '○'}</span>
-              <div>
-                <Link to={t.to}>{t.label}</Link>
-                <span className="sr-only">{t.done ? '（已完成）' : '（還沒做）'}</span>
-                {!t.done && t.hint && <div className="muted small">{t.hint}</div>}
-              </div>
+              <Link className="task-row" to={t.to}>
+                <span className="task-mark" aria-hidden>{t.done ? '✓' : '○'}</span>
+                <span className="task-text">
+                  <span className="task-label">{t.label}</span>
+                  <span className="sr-only">{t.done ? '（已完成）' : '（還沒做）'}</span>
+                  {!t.done && t.hint && <span className="muted small task-hint">{t.hint}</span>}
+                </span>
+              </Link>
             </li>
           ))}
         </ul>
