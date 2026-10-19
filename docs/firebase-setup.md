@@ -13,7 +13,7 @@
 | Auth：匿名、Google、授權網域 | 完成 | 使用者在 console 開啟；授權網域含 `whisper-trees.pages.dev`；匿名登入已在正式專案以 REST 實測（測試帳號已刪） |
 | 註冊配額（每 IP 每小時） | 完成 | 500，2026-10-24 07:00（台北）起 3 天，之後回到預設 100 |
 | 白名單 `admins/{uid}` | 完成 | 2026-10-19 使用者在 console 加入 1 筆（政府端示範帳號）；Google 綁定已在本機 localhost 對正式專案實測 |
-| API key 的 HTTP referrer 限制 | 待 S6 | 見下方 |
+| API key 的 HTTP referrer 限制 | 完成 | 2026-10-19 用 `gcloud services api-keys update` 設定；原本的 API 限制（27 個服務）保留；實測其他網域被擋、允許的網域可用 |
 
 ### 已部署的規則
 
@@ -56,7 +56,9 @@ curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whis
 ## API key 限制（S6）
 
 GCP console › API 和服務 › 憑證 › 瀏覽器金鑰：應用程式限制選 HTTP referrer，允許
-`https://whisper-trees.pages.dev/*`、`http://localhost:5173/*`、`http://127.0.0.1:5173/*`、`http://localhost:4173/*`。
+`https://whisper-trees.pages.dev/*`、`https://whisper-trees-demo.firebaseapp.com/*`、`http://localhost:5173/*`、`http://127.0.0.1:5173/*`、`http://localhost:4173/*`。
+
+`whisper-trees-demo.firebaseapp.com` 一定要留：Google 登入的彈窗頁在這個網域，也用同一把 key，拿掉 Google 登入就會壞。
 
 ## 本機開發
 
