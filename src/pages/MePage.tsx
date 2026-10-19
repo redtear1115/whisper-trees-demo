@@ -1,4 +1,4 @@
-import { Art, Card, MockTag } from '../components/ui'
+import { Art, Card } from '../components/ui'
 import { equip, useInventory } from '../features/game/inventory'
 import { useGameConfig } from '../features/game/config'
 import { TabHeader } from '../features/nav/TabLayout'
@@ -49,9 +49,6 @@ export default function MePage() {
   return (
     <div className="page me-page">
       <TabHeader title="我的" />
-      <p className="muted small">
-        <MockTag title="光點、角色、徽章都存在你的裝置上，是示意功能" /> 小芽、光點與徽章是示意功能
-      </p>
       <EventBar />
 
       <MeHero />

@@ -1,7 +1,10 @@
 import { useId, useState } from 'react'
 import { Art } from '../../components/ui'
-import { useEarned } from '../game/ledger'
-import { growthCopy, stageOf } from '../game/character'
+import { useStore } from '../../store'
+import { balance, ledger, useEarned } from '../game/ledger'
+import { growthCopy, shouldReassureSpend, stageOf } from '../game/character'
+import { homeDistrictOf, useOnboarding } from '../game/onboarding'
+import { DistrictPicker } from '../onboarding/DistrictPicker'
 import { useInventory } from '../game/inventory'
 import { useGameConfig } from '../game/config'
 import { AnimalPicker } from '../avatar/AnimalPicker'
@@ -13,10 +16,14 @@ export function MeHero() {
   const earned = useEarned()
   const inv = useInventory()
   const cfg = useGameConfig()
+  const district = homeDistrictOf(useOnboarding())
+  const reassure = useStore((s) => shouldReassureSpend({ balance: balance(s), spent: ledger(s).some((e) => e.delta < 0) }))
   const [picking, setPicking] = useState(false)
+  const [pickingDistrict, setPickingDistrict] = useState(false)
   const pickId = useId()
+  const districtId = useId()
   const { stage } = stageOf(earned)
-  const grow = growthCopy(earned)
+  const grow = growthCopy(earned, reassure)
   const outfit = cfg.shop.find((i) => i.id === inv.equipped.outfit)
 
   return (
@@ -62,6 +69,24 @@ export function MeHero() {
       </div>
       <div id={pickId} hidden={!picking}>
         {picking && <AnimalPicker name="me-animal" />}
+      </div>
+      <div className="me-swap me-district" data-testid="me-district" data-value={district ?? ''}>
+        <span className="me-district-text">
+          我的區：<strong>{district ?? '還沒選'}</strong>
+        </span>
+        <button
+          type="button"
+          className="btn me-swap-btn"
+          aria-expanded={pickingDistrict}
+          aria-controls={districtId}
+          onClick={() => setPickingDistrict((v) => !v)}
+          data-testid="swap-district"
+        >
+          {pickingDistrict ? '收起' : district ? '換一區' : '選一區'}
+        </button>
+      </div>
+      <div id={districtId} hidden={!pickingDistrict}>
+        {pickingDistrict && <DistrictPicker name="me-district" />}
       </div>
     </section>
   )

@@ -37,8 +37,19 @@ export interface GrowthCopy {
   valuetext: string
 }
 
-/** 小芽的成長文案。溫和往前看：不說「再 N 光點」，也不放壓力。earned 是累計獲得（花掉不會變少）。 */
-export function growthCopy(earned: number): GrowthCopy {
+/** 該放安心話嗎：手上還有光點，或流水帳裡有花掉的紀錄（買過東西、捐過） */
+export function shouldReassureSpend(a: { balance: number; spent: boolean }): boolean {
+  return a.balance > 0 || a.spent
+}
+
+const SPEND_NOTE = '光點花掉了，小芽也不會變小。'
+
+/**
+ * 小芽的成長文案。溫和往前看：不說「再 N 光點」，也不放壓力。earned 是累計獲得（花掉不會變少）。
+ * spendNote：要不要放「光點花掉了，小芽也不會變小」這句安心話。只對手上有光點、或花過光點的人說
+ * （0 光點又沒買過東西的人看到會困惑：我什麼都沒花）；預設不放。
+ */
+export function growthCopy(earned: number, spendNote = false): GrowthCopy {
   const { stage, next, progress } = stageOf(earned)
   const headline = `小芽・${stage.name}`
   if (!next) {
@@ -55,7 +66,7 @@ export function growthCopy(earned: number): GrowthCopy {
     return {
       headline,
       line: '還是一顆安靜的種子。收集到第一道光，牠就會慢慢醒來。',
-      note: '光點花掉了，小芽也不會變小。',
+      note: spendNote ? SPEND_NOTE : '',
       percent,
       valuetext: `小芽是${stage.name}，等著第一道光`,
     }
@@ -63,7 +74,7 @@ export function growthCopy(earned: number): GrowthCopy {
   return {
     headline,
     line: `一路收集了 ${earned} 光點，小芽正慢慢長向「${next.name}」。`,
-    note: '光點花掉了，小芽也不會變小。',
+    note: spendNote ? SPEND_NOTE : '',
     percent,
     valuetext: `小芽是${stage.name}，正長向${next.name}，已走了 ${percent}%`,
   }

@@ -3,11 +3,19 @@
 
 import { getExt, getState, setExt, useStore, userReady, type State } from '../../store'
 import { inventory } from './inventory'
+import { TAIPEI_DISTRICTS } from '../../store/types'
 import { baseLedger } from './ledger'
 
 export interface Onboarding {
-  /** 陪你的動物（地圖上代表你）：'blue-magpie' | 'night-heron' | 'squirrel' | 'pangolin'；沒選過就是臺灣藍鵲，見 features/avatar/animals.ts */
+  /** 陪你的動物（地圖上代表你）：'pangolin' | 'blue-magpie' | 'night-heron' | 'squirrel'；沒選過就是穿山甲，見 features/avatar/animals.ts */
   animal?: string
+  /** 我的區：和 TAIPEI_DISTRICTS／PREFIX_DISTRICT 一模一樣的中文區名（如「大安區」）。沒設過就是沒有；讀請用 homeDistrict()。 */
+  homeDistrict?: string
+  /**
+   * 這個區是怎麼來的：'other' = 選了「其他（不在台北市）」，由定位或亂數決定；'pick' = 自己點選的。
+   * 雲端是逐欄合併、欄位清不掉，所以從「其他」改成自己點選時寫 'pick'，不寫 undefined。
+   */
+  homeDistrictChoice?: 'other' | 'pick'
   /** 「收集光點」引導目前停在第幾步，從「我的」接著看。0 = 選動物、1–4 = 其餘步驟、5 = 走完 */
   tourStep?: number
   /** 按了「之後再說」 */
@@ -34,6 +42,16 @@ export function onboarding(s?: State): Onboarding {
 
 export function useOnboarding() {
   return useStore((s) => onboarding(s))
+}
+
+/** 我的區（中文區名，如「大安區」）；沒設過、或存的值不是台北市 12 區之一就是 undefined */
+export function homeDistrict(s?: State): string | undefined {
+  return homeDistrictOf(onboarding(s))
+}
+
+/** 同上，但直接讀一份 Onboarding（元件用 useOnboarding() 拿到的值） */
+export function homeDistrictOf(ob: Onboarding): string | undefined {
+  return (TAIPEI_DISTRICTS as readonly string[]).includes(ob.homeDistrict as string) ? ob.homeDistrict : undefined
 }
 
 /** 唯一的寫入口：和目前的值合併，不會寫出只含局部欄位的新物件 */

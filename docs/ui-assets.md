@@ -54,10 +54,10 @@
 | `stamp-bronze` | 120×120 | 240×240 | `public/assets/ph/stamp-bronze.svg` | 集章冊 | `src/features/game/districts.ts:53` | 行政區集章：銅章（10 棵）。同一組造型，材質不同 |
 | `stamp-silver` | 120×120 | 240×240 | `public/assets/ph/stamp-silver.svg` | 集章冊 | `src/features/game/districts.ts:54` | 行政區集章：銀章（50 棵） |
 | `stamp-gold` | 120×120 | 240×240 | `public/assets/ph/stamp-gold.svg` | 集章冊 | `src/features/game/districts.ts:55` | 行政區集章：金章（200 棵） |
-| `avatar-blue-magpie` | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:16` | 地圖人物：臺灣藍鵲（預設）。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點） |
-| `avatar-night-heron` | 96×96 | 192×192 | `public/assets/ph/avatar-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:17` | 地圖人物：黑冠麻鷺。規格同上（2.5D 繪本風、站著、正面、透明背景、腳底在下緣中央） |
-| `avatar-squirrel` | 96×96 | 192×192 | `public/assets/ph/avatar-squirrel.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:18` | 地圖人物：赤腹松鼠。規格同上 |
-| `avatar-pangolin` | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：穿山甲。規格同上 |
+| `avatar-blue-magpie` | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:17` | 地圖人物：臺灣藍鵲。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點）。四隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17）。 |
+| `avatar-night-heron` | 96×96 | 192×192 | `public/assets/ph/avatar-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:18` | 地圖人物：夜鷺（原黑冠麻鷺，簡報 v17 改名）。規格同上（2.5D 繪本風、站著、正面、透明背景、腳底在下緣中央）。四隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17）。 |
+| `avatar-squirrel` | 96×96 | 192×192 | `public/assets/ph/avatar-squirrel.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：赤腹松鼠。規格同上。四隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17）。 |
+| `avatar-pangolin` | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:16` | 地圖人物：穿山甲（預設）。規格同上。四隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17）。 |
 | `action-scan` | 64×64 | 128×128 | `public/assets/ph/action-scan.svg` | 點樹後的行動圈 | （尚未使用） | 圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理 |
 | `action-whisper` | 64×64 | 128×128 | `public/assets/ph/action-whisper.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:74` | 圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上 |
 | `action-info` | 64×64 | 128×128 | `public/assets/ph/action-info.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:75` | 圖示：樹的資料（樹牌或葉子加一個 i）。規格同上 |

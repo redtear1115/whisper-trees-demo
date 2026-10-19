@@ -5,13 +5,14 @@ import { Art } from '../../components/ui'
 import { isDemoMode, useStore, useUserReady } from '../../store'
 import { externalBrowserUrl, inAppBrowser, useAuth } from '../../lib/firebase'
 import { CHECKIN } from '../../config'
-import { useGameConfig } from '../game/config'
+import { pointRows, useGameConfig } from '../game/config'
 import { firstLightEarned, patchOnboarding, useOnboarding } from '../game/onboarding'
 import { Celebration } from './Celebration'
 import { promptInstall, useCanInstall } from './install'
 import { defaultInstallGuide, installPlatform, isStandalone, type InstallGuide, STEP_ANIMAL, STEP_CELEBRATE, STEP_DONE, STEP_HOME, STEP_INTRO, STEP_SCAN, tourView } from './tour'
 import { useGoogleLink } from './useGoogleLink'
 import { AnimalPicker } from '../avatar/AnimalPicker'
+import { DistrictPicker } from './DistrictPicker'
 import { useAnimal } from '../avatar/useAnimal'
 
 /** 地圖頁用：引導要不要開、在哪一步（開著但還沒存過步驟時，補存第 0 步「選動物」） */
@@ -69,10 +70,13 @@ function StepAnimal() {
   return (
     <>
       <h2>選一隻陪你的動物</h2>
-      <p>牠會在地圖上代表你，走到哪裡都跟著。之後可以在「我的」換。</p>
+      <p>牠會在地圖上代表你，走到哪裡都跟著。</p>
       <AnimalPicker name="tour-animal" />
-      <div className="tour-actions">
-        {/* 沒點過也把目前的（預設臺灣藍鵲）存下來，下一步起 tourStep 才算開始過 */}
+      <h3 className="tour-sub">你在哪一區？</h3>
+      <DistrictPicker name="tour-district" />
+      <p className="muted small">動物和所在的區，之後都可以在「我的」改，不選區也可以。</p>
+      <div className="tour-actions sticky">
+        {/* 沒點過也把目前的（預設穿山甲）存下來，下一步起 tourStep 才算開始過 */}
         <button className="btn primary" onClick={() => patchOnboarding({ animal: animal.id, tourStep: STEP_INTRO })}>
           就牠了
         </button>
@@ -84,14 +88,7 @@ function StepAnimal() {
 
 function StepIntro() {
   const cfg = useGameConfig()
-  const p = cfg.points
-  const rows: [string, string][] = [
-    ['在樹旁打卡', `+${p.checkin}（白天再 +${p.sun}）`],
-    ['遠觀模式打卡', `+${p.farView}`],
-    ['在樹洞留一句話', `+${p.whisper}`],
-    ['在空樹穴許願', `+${p.wish}`],
-    ['幫別人的願望澆水', `+${p.water}`],
-  ]
+  const rows = pointRows(cfg)
   return (
     <>
       <h2>收集光點</h2>

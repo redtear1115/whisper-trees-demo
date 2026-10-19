@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { exitDemoMode, isDemoMode, resetAll, signOutAccount, useSession } from '../../store'
+import { MockTag } from '../../components/ui'
 import { externalBrowserUrl, inAppBrowser, useAuth } from '../../lib/firebase'
 import { onboarding, patchOnboarding } from '../game/onboarding'
 import { reopenPatch } from '../onboarding/tour'
@@ -100,7 +101,8 @@ export function SettingsSection() {
         )}
 
         <p className="muted small me-data-note">
-          樹籍資料為臺北市政府 2026-10-16 開放資料；許願、澆水、微光人數、案件進度是示範用的模擬資料。
+          樹籍資料為臺北市政府 2026-10-16 開放資料。<MockTag />{' '}
+          小芽、光點與徽章（存在你的裝置上）、許願、澆水、微光人數、案件進度，都是示範用的模擬資料。
         </p>
 
         <button

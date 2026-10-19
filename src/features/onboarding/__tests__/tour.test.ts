@@ -27,7 +27,7 @@ describe('tourView', () => {
     expect(tourView({ ob: { tourStep: 3 }, firstLight: true, ready: true }).step).toBe(STEP_CELEBRATE)
     expect(tourView({ ob: { tourStep: STEP_DONE }, firstLight: false, ready: true }).open).toBe(false)
   })
-  it('does not pull someone already past step 0 back to pick an animal (they get 臺灣藍鵲 and can change it in 我的)', () => {
+  it('does not pull someone already past step 0 back to pick an animal (they get 穿山甲 and can change it in 我的)', () => {
     expect(tourView({ ob: { tourStep: 1 }, firstLight: false, ready: true }).step).toBe(STEP_INTRO)
   })
   it('first light jumps from the animal step to the celebration too', () => {

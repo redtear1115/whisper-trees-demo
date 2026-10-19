@@ -4713,3 +4713,94 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 .nearby-dist {
   white-space: nowrap;
 }
+
+/* ---------- 新手引導與我的（第三輪 B） ---------- */
+
+.tour-sub {
+  margin: 10px 0 2px;
+  font-size: 1rem;
+  font-family: var(--font-voice);
+}
+
+/* 12 區 3 欄、每格 44 px 高；「其他」整排。360 px 寬下每格約 100 px，「萬華區」「其他（不在台北市）」都放得下 */
+.district-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.district-chip,
+.district-other {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: center;
+}
+
+.district-chip.on {
+  border-color: var(--green);
+  background: var(--green-soft);
+  box-shadow: inset 0 0 0 1px var(--green);
+  font-weight: 600;
+  color: var(--green-ink);
+}
+
+.district-chip:has(input:focus-visible),
+.district-other:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+}
+
+.district-other {
+  grid-column: 1 / -1;
+  border-style: dashed;
+}
+
+.district-other:disabled {
+  cursor: progress;
+  color: var(--muted);
+}
+
+.district-note {
+  min-height: 1.4em;
+  margin: 6px 0 0;
+}
+
+.me-district {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.me-district-text {
+  min-width: 0;
+  flex: 1 1 8rem;
+}
+
+.me-hero .district-picker {
+  margin-top: 10px;
+}
+
+/* 第 0 步比較高（動物 + 12 區）：按鈕固定在抽屜底部，不用捲到最下面才找得到「就牠了」 */
+.tour-actions.sticky {
+  position: sticky;
+  bottom: -20px;
+  z-index: 1;
+  margin: 8px -16px -20px;
+  padding: 10px 16px max(20px, env(safe-area-inset-bottom));
+  background: var(--card);
+  box-shadow: 0 -8px 10px -8px rgba(44, 58, 46, 0.2);
+}
