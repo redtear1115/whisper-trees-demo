@@ -10,10 +10,16 @@ interface Props {
   onClose: () => void
   /** 從地圖上某棵樹的行動圈過來：提示要掃的樹；Demo 的示範按鈕也掃這一棵 */
   hint?: Tree | null
+  /**
+   * 要掃的樹的編號（一進頁面就有）。樹種、路名要等 hint 載入，但 Demo 按鈕不能等：
+   * 不然載入前按下去會掃到預設示範樹，人已經走到別棵樹旁就變成「太遠」。
+   */
+  hintId?: string
 }
 
 /** 在網頁裡開後鏡頭掃樹牌 QR Code；也可以從相簿選照片。 */
-export function Scanner({ onResult, onClose, hint }: Props) {
+export function Scanner({ onResult, onClose, hint, hintId }: Props) {
+  const demoTreeId = hint?.id ?? hintId
   const video = useRef<HTMLVideoElement>(null)
   const done = useRef(false)
   const [error, setError] = useState<string | null>(null)
@@ -128,8 +134,8 @@ export function Scanner({ onResult, onClose, hint }: Props) {
               輸入編號
             </button>
             {demo && (
-              <button className="btn primary demo-scan" onClick={() => finish(hint ? `http://trees.gov.taipei/show/?treeid=${hint.id}` : DEMO.qrText)}>
-                {hint ? '掃這棵樹的樹牌（Demo）' : '掃示範樹牌（Demo）'}
+              <button className="btn primary demo-scan" onClick={() => finish(demoTreeId ? `http://trees.gov.taipei/show/?treeid=${demoTreeId}` : DEMO.qrText)}>
+                {demoTreeId ? '掃這棵樹的樹牌（Demo）' : '掃示範樹牌（Demo）'}
               </button>
             )}
           </div>

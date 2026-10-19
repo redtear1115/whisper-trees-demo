@@ -56,7 +56,7 @@ export default function ScanPage() {
     navigate(`/tree/${id}`, { replace: true, state: { checkin, glow } satisfies CheckinState })
   }
 
-  if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(-1)} hint={hint} />
+  if (step.kind === 'scan') return <Scanner onResult={handle} onClose={() => navigate(-1)} hint={hint} hintId={hintTreeId} />
 
   return (
     <div className="scan-status">
