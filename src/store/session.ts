@@ -35,6 +35,21 @@ export function setSession(patch: Partial<Session>) {
 /** 自動寫入（偵測桌面圖示、新手禮）要等這個為 true，避免用還沒載入的空資料去寫 */
 export const userReady = () => session.userReady
 
+/** 等使用者文件載入（最多 timeoutMs）；回傳是否已載入。打卡的掉落要先等它，不然會用空的 inventory 蓋掉雲端的造型 */
+export function whenUserReady(timeoutMs = 8000): Promise<boolean> {
+  if (session.userReady) return Promise.resolve(true)
+  return new Promise((resolve) => {
+    const done = (ok: boolean) => {
+      listeners.delete(check)
+      clearTimeout(timer)
+      resolve(ok)
+    }
+    const check = () => session.userReady && done(true)
+    const timer = setTimeout(() => done(session.userReady), timeoutMs)
+    listeners.add(check)
+  })
+}
+
 export function useSession(): Session {
   return useSyncExternalStore(
     (l) => {

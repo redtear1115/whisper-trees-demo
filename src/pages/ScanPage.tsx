@@ -8,6 +8,7 @@ import { currentDemoPosition } from '../lib/demoPosition'
 import { locate } from '../lib/locate'
 import { DATA_VERSION } from '../config'
 import { getState, isDemoMode, recordCheckin } from '../store'
+import { whenUserReady } from '../store/session'
 import { dayKey } from '../lib/seed'
 import { awardCheckin, isDaytime } from '../features/game/ledger'
 import { loadProtectedTrees } from '../features/game/protectedTrees'
@@ -57,12 +58,14 @@ export default function ScanPage() {
     let glow: number | undefined
     let drops: CheckinDrops | undefined
     if (checkin.kind === 'success' || checkin.kind === 'farView') {
+      // 使用者文件還沒載入就寫，會拿空的 inventory 蓋掉雲端的造型；等不到就這次不掉落
+      const ready = await whenUserReady()
       const today = dayKey()
       const firstToday = !getState().checkins.some((c) => c.treeId === id && c.result === 'success' && dayKey(new Date(c.at)) === today)
       recordCheckin(id, checkin.kind, { species: tree.species, night: !isDaytime() })
       await loadProtectedTrees() // 名冊還沒讀完就掃的話，等它，受保護的樹才會拿到 20
       glow = awardCheckin(id, checkin.kind)
-      drops = checkinDrops(id, checkin.kind, firstToday)
+      if (ready) drops = checkinDrops(id, checkin.kind, firstToday)
     }
     navigate(`/tree/${id}`, { replace: true, state: { checkin, glow, drops } satisfies CheckinState })
   }
