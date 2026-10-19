@@ -3191,6 +3191,8 @@ body.has-offline .gov {
   stroke-width: 1.5;
   stroke-linejoin: round;
   cursor: pointer;
+  /* 連點兩下進里地圖，不要被當成放大頁面 */
+  touch-action: manipulation;
   transition: filter 0.15s;
 }
 

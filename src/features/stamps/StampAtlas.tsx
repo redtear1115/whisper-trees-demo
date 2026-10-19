@@ -90,14 +90,23 @@ export function StampAtlas({
       {level === 'city' && (
         <>
           {outline ? (
-            <CityMap outline={outline} book={book} picked={district} onPick={setDistrict} />
+            <CityMap
+              outline={outline}
+              book={book}
+              picked={district}
+              onPick={setDistrict}
+              onEnter={(d) => {
+                setDistrict(d)
+                goDistrict()
+              }}
+            />
           ) : (
             <p className="atlas-note">正在載入地圖…</p>
           )}
           {b ? (
             <DistrictCard b={b} light={light.get(b.district)} onEnter={goDistrict} />
           ) : (
-            <p className="muted small">點一區看進度與光點。顏色越亮，集到的章越高。</p>
+            <p className="muted small">點一區看進度與光點，點兩下直接進里地圖。顏色越亮，集到的章越高。</p>
           )}
           {outline && (
             <p className="muted small outline-credit" data-testid="outline-credit">

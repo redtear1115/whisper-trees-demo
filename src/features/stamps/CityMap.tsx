@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import type { Outline } from '../../lib/outline'
 import { PREFIX_DISTRICT, shortName, type District, type DistrictStamps } from '../game/districts'
 import { NEIGHBOUR_FILL, PANEL_BG, TIER_TONES, toneOf } from './colors'
@@ -31,18 +31,40 @@ export function useCityGeometry(outline: Outline) {
 /**
  * 全市地圖：12 區是可以點的形狀，依集章等級上色（未開始最暗，鐵、銅、銀、金漸亮）。
  * 每一區是一個按鈕（鍵盤可操作，有 aria-label）；區名畫在形狀中央。
+ * 點一下選取（看狀態卡），點兩下（或對已選的區再按 Enter）直接進里地圖。
  */
+/** 兩次點擊算「點兩下」：同一區、間隔不超過 DOUBLE_TAP_MS */
+export const DOUBLE_TAP_MS = 350
+export function isDoubleTap(prev: { name: string; at: number } | null, name: string, now: number): boolean {
+  return !!prev && prev.name === name && now - prev.at <= DOUBLE_TAP_MS
+}
+
 export function CityMap({
   outline,
   book,
   picked,
   onPick,
+  onEnter,
 }: {
   outline: Outline
   book: readonly DistrictStamps[]
   picked: District | null
   onPick: (d: District) => void
+  /** 點兩下：進入這一區的里地圖 */
+  onEnter: (d: District) => void
 }) {
+  // 自己判斷「點兩下」：iPhone 上連點兩下不一定會觸發 dblclick
+  const lastTap = useRef<{ name: string; at: number } | null>(null)
+  const tap = (name: District) => {
+    const now = Date.now()
+    const prev = lastTap.current
+    lastTap.current = { name, at: now }
+    onPick(name)
+    if (isDoubleTap(prev, name, now)) {
+      lastTap.current = null
+      onEnter(name)
+    }
+  }
   const geo = useCityGeometry(outline)
   const [vx, vy, vw, vh] = geo.viewBox
   const fs = (LABEL_PX * vw) / 360
@@ -73,11 +95,12 @@ export function CityMap({
               data-testid={prefix ? `district-${prefix}` : undefined}
               data-tier={b?.top?.id ?? 'none'}
               data-count={b?.distinct ?? 0}
-              onClick={() => onPick(name as District)}
+              onClick={() => tap(name as District)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
-                  onPick(name as District)
+                  if (on) onEnter(name as District)
+                  else onPick(name as District)
                 }
               }}
             />

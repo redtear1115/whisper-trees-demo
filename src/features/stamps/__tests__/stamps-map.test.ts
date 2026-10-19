@@ -206,3 +206,13 @@ describe('village trees and route candidates', () => {
     expect(Object.keys(PREFIX_DISTRICT)).toHaveLength(12)
   })
 })
+
+describe('isDoubleTap', () => {
+  it('needs the same district within DOUBLE_TAP_MS', async () => {
+    const { isDoubleTap, DOUBLE_TAP_MS } = await import('../CityMap')
+    expect(isDoubleTap(null, '大安區', 1000)).toBe(false)
+    expect(isDoubleTap({ name: '大安區', at: 1000 }, '大安區', 1000 + DOUBLE_TAP_MS)).toBe(true)
+    expect(isDoubleTap({ name: '大安區', at: 1000 }, '大安區', 1001 + DOUBLE_TAP_MS)).toBe(false)
+    expect(isDoubleTap({ name: '信義區', at: 1000 }, '大安區', 1100)).toBe(false)
+  })
+})
