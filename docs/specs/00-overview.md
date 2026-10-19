@@ -16,6 +16,8 @@
 
 **市民端只能用手機開**（2026-10-19 決定）：判斷依據是觸控為主的裝置（`pointer: coarse`，手機與平板）。桌機開市民端頁面會看到「曦語要用手機開」與該頁的 QR Code；網址加 `?demo=1` 進 Demo 模式才能在桌機試玩；桌機上市民端一律維持手機寬度（最寬 430 px）、置中顯示（`.phone-shell`，寬 600 px 以上才生效，手機上不影響）。政府端、發包商、GM、開放 API 是桌機工具，不受限制。
 
+**App 內建瀏覽器**（2026-10-20 決定）：從 LINE、Threads、Instagram、Facebook、Messenger、微信、TikTok、X 點連結打開，或任何認不出名字的內建 WebView（iPhone 上沒有「Safari/」、Android 上有「; wv)」），市民端頂端都會出現提醒「請改用 Safari（Android：Chrome）打開曦語」，說明掃樹牌、定位、加到主畫面、Google 登入可能不能用，並依 App 給做法：LINE 有直接跳轉的按鈕（`openExternalBrowser=1`），其他是「右上角「⋯」→ 在 Safari 中開啟」加「複製網址」。可以關掉，這次瀏覽不再出現（`src/features/device/InAppNotice.tsx`，判斷在 `inAppBrowser()`）。
+
 兩端共用同一份資料庫（Firestore，跨裝置即時同步；沒有設定 Firebase 時退回 localStorage，同一台電腦開兩個分頁會同步）。
 
 ### 市民端導覽（2026-10-19 決定）

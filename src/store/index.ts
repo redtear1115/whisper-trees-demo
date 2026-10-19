@@ -449,6 +449,26 @@ export function dismissDemoHint() {
   }
 }
 
+// ---------- App 內建瀏覽器的提醒（這次瀏覽關掉就不再出現） ----------
+
+const IN_APP_NOTICE_KEY = 'whisper-trees:in-app-notice'
+
+export function inAppNoticeDismissed(): boolean {
+  try {
+    return sessionStorage.getItem(IN_APP_NOTICE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function dismissInAppNotice() {
+  try {
+    sessionStorage.setItem(IN_APP_NOTICE_KEY, '1')
+  } catch {
+    // ignore
+  }
+}
+
 // ---------- 雲端帳號 ----------
 
 /** 使用者同意後，把這台裝置舊的本機紀錄搬到雲端 */

@@ -166,12 +166,37 @@ export function linkGoogle(): Promise<GoogleResult> {
     })
 }
 
-/** LINE／Facebook／Instagram 內建瀏覽器擋 Google 登入 */
-export function inAppBrowser(ua = typeof navigator === 'undefined' ? '' : navigator.userAgent): 'line' | 'facebook' | 'instagram' | null {
+export type InAppBrowser = 'line' | 'threads' | 'instagram' | 'messenger' | 'facebook' | 'wechat' | 'tiktok' | 'x' | 'webview'
+
+/**
+ * App 內建瀏覽器（LINE、Threads、IG、FB…）：擋 Google 登入，相機、定位、加到主畫面也常常不能用，要請使用者改用 Safari／Chrome。
+ * 先認名字；認不出名字的，用通用規則：iPhone 上沒有「Safari/」字樣、Android 上有「; wv)」都是內建的 WebView。
+ */
+export function inAppBrowser(ua = typeof navigator === 'undefined' ? '' : navigator.userAgent): InAppBrowser | null {
   if (/\bLine\//i.test(ua)) return 'line'
-  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'facebook'
+  if (/Barcelona/i.test(ua)) return 'threads' // Threads App 的內建瀏覽器代號
   if (/Instagram/i.test(ua)) return 'instagram'
+  if (/MicroMessenger/i.test(ua)) return 'wechat' // 要排在 Messenger 前面：字串裡也有 Messenger
+  if (/Messenger/i.test(ua)) return 'messenger'
+  if (/FBAN|FBAV|FB_IAB/i.test(ua)) return 'facebook'
+  if (/musical_ly|BytedanceWebview|TikTok/i.test(ua)) return 'tiktok'
+  if (/Twitter/i.test(ua)) return 'x'
+  const ios = /iPhone|iPad|iPod/i.test(ua)
+  if (ios && !/Safari\//i.test(ua)) return 'webview'
+  if (/Android/i.test(ua) && /; wv\)/i.test(ua)) return 'webview'
   return null
+}
+
+export const IN_APP_NAME: Record<InAppBrowser, string> = {
+  line: 'LINE',
+  threads: 'Threads',
+  instagram: 'Instagram',
+  messenger: 'Messenger',
+  facebook: 'Facebook',
+  wechat: '微信',
+  tiktok: 'TikTok',
+  x: 'X',
+  webview: 'App',
 }
 
 /** LINE 加 openExternalBrowser=1 可以直接跳到系統瀏覽器 */

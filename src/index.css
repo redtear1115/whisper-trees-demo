@@ -3417,3 +3417,29 @@ body.has-offline .gov {
   width: 100%;
   height: 100%;
 }
+
+/* ---------- App 內建瀏覽器提醒 ---------- */
+
+/* 貼在頂端、蓋在頁面上（地圖頁也看得到）；桌機在手機框內 */
+.in-app-notice {
+  position: fixed;
+  z-index: 60;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.in-app-notice p {
+  margin: 0 0 6px;
+}
+
+.in-app-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BrowserQRCodeSvgWriter } from '@zxing/browser'
 import { isDemoMode } from '../../store'
+import { InAppNotice } from './InAppNotice'
 
 /** 手機或平板（觸控為主的裝置）。桌機加了觸控螢幕仍算桌機。 */
 export function isTouchDevice(): boolean {
@@ -31,6 +32,7 @@ export function MobileOnly({ children }: { children: ReactNode }) {
   if (touch || isDemoMode()) {
     return (
       <div className="phone-shell">
+        <InAppNotice />
         <div className="phone-scroll">{children}</div>
       </div>
     )

@@ -249,7 +249,7 @@ function InstallHelp({ platform, canInstall, appName }: { platform: ReturnType<t
       {platform === 'in-app' && (
         <div className="tour-note" role="note" data-testid="tour-install-in-app">
           <p className="small">
-            你現在在 LINE／Facebook／Instagram 的內建瀏覽器，這裡加不到主畫面。請先用 Safari（iPhone）或 Chrome（Android）打開這個網址，再照下面做。
+            你現在在 App 的內建瀏覽器，這裡加不到主畫面。請先用 Safari（iPhone）或 Chrome（Android）打開這個網址，再照下面做（頂端的提醒有做法）。
           </p>
           {appName === 'line' && (
             <a className="btn" href={externalBrowserUrl()}>
