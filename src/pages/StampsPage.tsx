@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TabHeader } from '../features/nav/TabLayout'
 import { Art, Card, formatDate } from '../components/ui'
+import { OutlineBackdrop, useOutline } from '../features/game/OutlineBackdrop'
 import { useStore, useWishes } from '../store'
 import { baseLedger } from '../features/game/ledger'
 import { ACTION_LABEL } from '../features/game/config'
@@ -28,6 +29,7 @@ export default function StampsPage() {
   const wishes = useWishes()
   const [view, setView] = useState<View>('map')
   const [picked, setPicked] = useState<District | null>(null)
+  const outline = useOutline()
 
   const book = useMemo(() => stampBook(checkins), [checkins])
   const light = useMemo(() => lightByDistrict(ledger, wishes), [ledger, wishes])
@@ -54,12 +56,20 @@ export default function StampsPage() {
 
       {view === 'map' ? (
         <>
-          <div className="stamp-map" data-testid="stamp-map" role="list">
-            {book.map((b) => (
-              <DistrictCard key={b.district} b={b} on={picked === b.district} onPick={() => setPicked(b.district)} />
-            ))}
+          <div className="stamp-map-wrap">
+            {outline && <OutlineBackdrop outline={outline} />}
+            <div className="stamp-map" data-testid="stamp-map" role="list">
+              {book.map((b) => (
+                <DistrictCard key={b.district} b={b} on={picked === b.district} onPick={() => setPicked(b.district)} />
+              ))}
+            </div>
           </div>
           <p className="muted small">位置是示意，不是精確的地圖。點一區看進度與光點。</p>
+          {outline && (
+            <p className="muted small outline-credit" data-testid="outline-credit">
+              行政區界：© OpenStreetMap contributors（ODbL）
+            </p>
+          )}
         </>
       ) : stamps.length === 0 ? (
         <p className="muted" data-testid="stamp-list-empty">

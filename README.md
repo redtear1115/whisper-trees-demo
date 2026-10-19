@@ -85,6 +85,8 @@
 
 `material/raw/osm/` 為 2026-10-16 透過 Overpass API 下載的 OpenStreetMap 資料（公園範圍、具名道路），© OpenStreetMap contributors，依 [ODbL 1.0](https://opendatacommons.org/licenses/odbl/) 授權。
 
+`material/raw/osm/admin_boundaries_osm.json` 為 2026-10-19 透過 Overpass API 下載的 OpenStreetMap 行政區界（臺北市、新北市、基隆市 `admin_level=4`，臺北市 12 區 `admin_level=7`），© OpenStreetMap contributors，依 ODbL 1.0 授權；由 `scripts/fetch_admin_osm.py` 下載，只用在集章冊示意地圖的背景。
+
 **樹牌 QR Code**：公園處樹牌上的 QR Code 內容為 `http://trees.gov.taipei/show/?treeid=<樹籍編號>`（以實拍樹牌 `SL0560111023` 解碼確認，照片在 `material/samples/`）。`treeid` 就是上表樹木資料的 `TreeID`，所以掃到樹牌就能查到這棵樹的座標、樹種、樹高與胸徑。
 
 ### 處理後的資料（由真實資料推算）
@@ -94,6 +96,7 @@
 | `material/processed/treepits_merged.geojson` | 兩份樹穴合併，57,548 個；`has_tree: false` 為候選空樹穴 | `scripts/merge_treepits.py` |
 | `material/processed/parks_osm_match.csv`、`parks_boundary.geojson` | 公園處 813 座公園對上 OSM 範圍，622 座有範圍 | `scripts/match_parks_osm.py` |
 | `public/data/` | 網頁用的樹木點位（向量圖磚）、樹籍查詢表、空樹穴、行政區與樹種統計 | `scripts/build_web_data.py`，見 [01-data-pipeline](docs/specs/01-data-pipeline.md) |
+| `public/data/taipei-outline.json` | 集章冊示意地圖的背景：台北市輪廓、12 區界、鄰近的新北與基隆（已投影成 SVG 路徑，約 11 KB）；OSM 資料，© OpenStreetMap contributors（ODbL），畫面上有出處 | `scripts/build_admin_outline.py` |
 | `public/api/v1/` | 開放 API 的靜態 JSON（行政區、樹種、端點清單；許願為模擬） | 同上 |
 
 推算的限制：
@@ -175,6 +178,8 @@
 uv run scripts/merge_treepits.py
 uv run scripts/match_parks_osm.py
 uv run scripts/build_web_data.py   # 需要 tippecanoe（brew install tippecanoe）
+uv run scripts/fetch_admin_osm.py  # 重新下載行政區界到 material/raw/osm/（Overpass 偶爾忙線，腳本會重試）
+uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json，順便做 --check
 ```
 
 ## 開發

@@ -55,6 +55,8 @@ Python 腳本用 uv 執行：
 uv run scripts/merge_treepits.py
 uv run scripts/match_parks_osm.py
 uv run scripts/build_web_data.py   # 產生 public/data/，需要 tippecanoe
+uv run scripts/fetch_admin_osm.py  # 下載 OSM 行政區界到 material/raw/osm/admin_boundaries_osm.json（只在要更新時跑）
+uv run scripts/build_admin_outline.py   # 產生 public/data/taipei-outline.json（集章冊背景）；加 --check 只檢查
 ```
 
 前端：

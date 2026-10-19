@@ -194,6 +194,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
   - `wish`／`water`：key 是許願 id，依該許願的 `district` 歸區（用 `allWishes()` 查）。
   - 沒有 key 的（花費、GM 補發）、查不到樹區或許願的一律不算。
   - key 解析：action 取第一個 `:` 前、日期取最後一個 `:` 後、中間整段是 key（目前樹籍編號與許願 id 都不含 `:`，但中間含 `:` 也不會切壞）。action 不在 `ACTION_LABEL` 內的不算。
+- **示意地圖的背景（2026-10-19 使用者決定）**：區卡後面畫台北市輪廓與 12 區界（淡線），外圍的新北市、基隆市用較深的色塊，區卡的格子排法不變。資料用 OSM 行政區界（ODbL，同既有的 OSM 資料）：`scripts/fetch_admin_osm.py` 經 Overpass 下載到 `material/raw/osm/admin_boundaries_osm.json`（2026-10-19；臺北市、新北市、基隆市 `admin_level=4`，臺北市各區在 OSM 是 `admin_level=7`），`scripts/build_admin_outline.py` 組成多邊形、投影到 TWD97、把新北與基隆裁到「台北市外框＋4 公里」、簡化（25～60 公尺）後輸出已投影的 SVG 路徑 `public/data/taipei-outline.json`（約 11 KB，含出處欄位）。畫面是一張靜態 SVG（不用 MapLibre），`meet` 置中貼合格子容器，`aria-hidden`、不接受點擊；鄰近縣市在裁切邊緣淡出；區卡背景微透明（82%）讓區界透出來。載入失敗（404、格式不對）就不畫背景、也不顯示出處，其餘照常。地圖下方一行出處「行政區界：© OpenStreetMap contributors（ODbL）」。這是示意背景，區卡位置仍不精確對應地理位置。
 - 語氣沿用設計原則：沒有紅點、排行、催促；文案「不用急」。章的美術是佔位檔 `stamp-iron`／`stamp-bronze`／`stamp-silver`／`stamp-gold`（清單見 [ui-assets](../ui-assets.md)），畫面用 `<Art id>`。
 
 ### 畫面
@@ -207,6 +208,7 @@ S3 新手任務（已做；本機後端 360 px Playwright 驗過）
 
 - [x] 單元測試：前綴對照（含讀 `public/data/trees` 驗證）、不同的樹只算一次、鐵／銅／銀／金門檻、`earnedAt`（重複打卡與亂序不影響）、key 解析、光點歸區（含許願與澆水走許願的行政區、排除無 key／花費／GM 補發／查不到的）。
 - [x] 瀏覽器（Playwright 360 px，本機後端，2026-10-19）：種入打卡與流水帳後，示意地圖與依時間兩種檢視沒有水平捲動；區卡章與棵數正確；抽屜的進度、光點、明細（含許願與澆水歸到許願所在的區）與 Esc／關閉可用；沒有章時顯示說明；入口當時是 `/me` 與選單，現在是底部導覽。**沒有走真實掃碼打卡，也沒有在雲端模式或實機驗過。**
+- [x] 背景（2026-10-19）：`uv run scripts/build_admin_outline.py --check` 確認 12 區名稱與 `districts.ts` 一致、檔案 < 60 KB；單元測試（`outline.test.ts`）檢查解析、12 區、大小；瀏覽器（Playwright 360 px，本機）：背景有畫、沒有水平捲動、擋掉資料檔（404）時沒有背景與出處、其餘照常。**沒有在實機與雲端模式驗過。**
 - [x] `npm test`、`npm run test:rules`、`npm run build` 通過。
 
 ## 11. 導覽、探索、樹洞、示範後台（S4）
