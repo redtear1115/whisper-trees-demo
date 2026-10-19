@@ -6,7 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, loadDistricts, type District, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
-import { allWishes, totalWater, useStore, useWishes, wishByPit } from '../store'
+import { allWishes, totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
@@ -16,6 +16,7 @@ import { distanceMeters } from '../lib/geo'
 import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
 import { EventBar } from '../features/game/EventBar'
+import { firstLightEarned, newcomerDone, showTasksChip, tasks } from '../features/game/onboarding'
 import { TourSheet, useTourView } from '../features/onboarding/TourSheet'
 import { useAnchor } from '../features/map/useAnchor'
 import { boundsAround, circleRing } from '../lib/nearby'
@@ -73,6 +74,10 @@ export default function MapPage() {
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
   const wishes = useWishes()
   const tour = useTourView()
+  const userReady = useUserReady()
+  const firstLight = useStore((s) => firstLightEarned(s))
+  const tasksDone = useStore((s) => tasks(s).filter((t) => t.done).length) // 回數字才不會每次都是新值
+  const allTasksDone = useStore((s) => newcomerDone(s))
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
     const w = allWishes(s).find((x) => x.id === id)
     return w && s.seen[id] !== undefined && s.seen[id] < w.history.length
@@ -567,6 +572,12 @@ export default function MapPage() {
       )}
 
       {tour.open && !sheet && <TourSheet step={tour.step} />}
+
+      {!sheet && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
+        <Link className="tasks-chip" to="/me" data-testid="tasks-chip">
+          新手任務 {tasksDone}/4
+        </Link>
+      )}
 
       {!sheet && !tour.open && (
         <div className="map-tools" role="group" aria-label="地圖工具">

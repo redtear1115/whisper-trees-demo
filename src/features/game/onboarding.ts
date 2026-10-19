@@ -16,6 +16,10 @@ export interface Onboarding {
   viewedBadgesAt?: number
   /** 新手禮（草帽）送出的時間；擁有權由 inventory() 推算 */
   giftAt?: number
+  /** 收合 /me 的新手任務卡 */
+  tasksCollapsed?: boolean
+  /** 「城市的新朋友」慶祝過的時間，只慶祝一次 */
+  newcomerCelebratedAt?: number
 }
 
 const EMPTY: Onboarding = {}
@@ -53,6 +57,8 @@ export type TaskId = 'shop' | 'codex' | 'whisper' | 'wish'
 export interface Task {
   id: TaskId
   label: string
+  /** 去哪裡做的一句說明（連到地圖的任務才有） */
+  hint?: string
   to: string
   done: boolean
 }
@@ -73,13 +79,24 @@ export function tasks(s?: State): Task[] {
     {
       id: 'whisper',
       label: '在樹洞留一句話',
+      hint: '到地圖點一棵樹，進樹的頁面',
       to: '/',
       done: Object.values(st.whispers).some((l) => l.length > 0),
     },
-    { id: 'wish', label: '在空樹穴許願', to: '/', done: st.myWishIds.length > 0 },
+    { id: 'wish', label: '在空樹穴許願', hint: '到地圖點一個空樹穴', to: '/', done: st.myWishIds.length > 0 },
   ]
 }
 
 export function newcomerDone(s?: State): boolean {
   return tasks(s).every((t) => t.done)
+}
+
+/** 地圖上的「新手任務 n/4」小入口：拿到第一道光、引導已收起或走完、任務還沒全做完才出現 */
+export function showTasksChip(a: { ready: boolean; firstLight: boolean; tourOpen: boolean; allDone: boolean }): boolean {
+  return a.ready && a.firstLight && !a.tourOpen && !a.allDone
+}
+
+/** 該慶祝「城市的新朋友」嗎：使用者文件已載入、4 項都完成、還沒慶祝過 */
+export function shouldCelebrateNewcomer(a: { ready: boolean; done: boolean; celebratedAt?: number }): boolean {
+  return a.ready && a.done && !a.celebratedAt
 }

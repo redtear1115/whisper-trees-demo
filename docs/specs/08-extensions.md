@@ -97,7 +97,7 @@
 
 ## 9. 新手引導 `/` 與 `/me`
 
-2026-10-19 使用者決定，屬 P1 延伸功能（不擋主線）。分三個切片：S1 資料與徽章（已做）、S2 引導一的畫面與加入主畫面（已做，實機待測）、S3 新手任務卡（待做）。
+2026-10-19 使用者決定，屬 P1 延伸功能（不擋主線）。分三個切片：S1 資料與徽章（已做）、S2 引導一的畫面與加入主畫面（已做，實機待測）、S3 新手任務卡（已做，實機待測）。
 
 ### 決定
 
@@ -120,7 +120,7 @@
 
 ### 資料與新手禮的規則
 
-- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`。
+- 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`tourStep`、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）。
 - 只能用 `patchOnboarding(partial)` 寫：以目前的值為底合併，雲端以 map 逐欄合併，所以不會蓋掉另一台裝置或舊快取寫的欄位。
 - 新手禮**只記 `onboarding.giftAt`**。擁有權由 `inventory()` 推算（`giftAt` 有值就把 `hat-straw` 算進 `owned`，不重複）；`buy('hat-straw')` 回傳「已擁有」。換上草帽走原本的 `equip`，由使用者操作。**不會自動寫入 `ext.inventory` 或 `ext.ledger`**，光點與餘額都不動。
 - 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式與退回本機時一律 ready。`grantStarterGift()` 在 ready 之前什麼都不做。
@@ -144,6 +144,14 @@
 - **慶祝元件**（`Celebration`／`CelebrationDialog`）：徽章圖（`<Art id="badge-…">`）、名稱、一句話，輕輕發光（尊重減少動態），可按「好」或 Esc 收起；不加紅點、不計時。
 - **PWA**：`public/manifest.webmanifest`（名稱「曦語 Whisper Trees」、短名「曦語」、`display: standalone`、主題色 `#3f7d4e`）、`index.html` 的 manifest／`apple-touch-icon`／`apple-mobile-web-app-capable`／`mobile-web-app-capable`／`apple-mobile-web-app-title`；`public/_headers` 讓 manifest 以 `application/manifest+json` 提供。圖示是 PNG 佔位檔（192、512、180），由 `node scripts/make_placeholders.mjs` 依 `src/assets.ts` 的 `PWA_ICONS` 產生，清單在 [docs/ui-assets.md](../ui-assets.md)。沒有 service worker，不做離線。
 
+### 新手任務卡（S3）
+
+- **/me 任務卡**（`TasksCard`，清單 `tasks-list`、每項 `task-<id>` 帶 `data-done`、`tasks-count`、`tasks-toggle`）：拿到第一道光後出現，4 項依 `tasks()` 推算打勾，順序不拘、可收合（`tasksCollapsed` 存在 `onboarding`）。「在樹洞留一句話」說明「到地圖點一棵樹，進樹的頁面」，「在空樹穴許願」說明「到地圖點一個空樹穴」，連結都回地圖。4 項做完卡片換成一行小字（`tasks-card-done`），不再有按鈕。
+- **看過旗標**（`useViewedFlag`）：進 `/codex` 記 `viewedCodexAt`；`/me` 的徽章區（`data-testid="badges-section"`）真的出現在畫面上時記 `viewedBadgesAt`（IntersectionObserver，不支援就在載入時記）。只在使用者文件載入完成、旗標還沒有時寫一次。
+- **地圖小入口**（`data-testid="tasks-chip"`，「新手任務 n/4」，連到 `/me`）：拿到第一道光、引導已收起或走完、任務還沒全做完才出現；平靜的小膠囊，沒有紅點或數量徽章。位置在左下「附近／全市」切換上方，不和右側地圖工具重疊。判斷是純函式 `showTasksChip`。
+- **A3**：`OnboardingEffects` 在使用者文件載入後、4 項都完成、沒有 `newcomerCelebratedAt` 時記下時間並跳出「城市的新朋友」慶祝，只一次（`shouldCelebrateNewcomer`）。早就完成過的舊使用者會在下次開啟時看到一次。
+- 雲端不用改：`onboarding` 本來就是 `users/{uid}` 的一個 map 欄位，新旗標照逐欄合併。
+
 ### 驗收
 
 S1 資料與徽章
@@ -166,7 +174,7 @@ S2 引導一與加入主畫面（已做；桌機 360 px 與單元測試驗過，
 
 S3 新手任務（待做）
 
-- [ ] /me 的任務卡：4 項各自在真實操作後打勾，重新整理後仍在，可以收合；進 `/codex` 與 `/me` 徽章區會記下看過。
+- [ ] /me 的任務卡（單元測試已過，瀏覽器流程待 Playwright 驗）：4 項各自在真實操作後打勾，重新整理後仍在，可以收合；進 `/codex` 與 `/me` 徽章區會記下看過。
 - [ ] 完成 4 項只慶祝「城市的新朋友」一次。
 
 ## 不做

@@ -2302,3 +2302,60 @@ body.has-offline .gov {
     }
   }
 }
+
+/* 新手任務：地圖上的小入口（左下，在「附近／全市」切換的上方，不和右側地圖工具重疊）與 /me 的任務卡 */
+.tasks-chip {
+  position: absolute;
+  z-index: 2;
+  left: 12px;
+  bottom: calc(max(36px, env(safe-area-inset-bottom)) + 196px);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.96);
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(44, 58, 46, 0.15);
+}
+
+.tasks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tasks-head h2 {
+  margin: 0;
+}
+
+.tasks {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.tasks li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tasks li[data-done='true'] a {
+  color: var(--muted);
+}
+
+.task-mark {
+  width: 1.4em;
+  text-align: center;
+  color: var(--green);
+}
+
+.tasks-done {
+  text-align: center;
+}

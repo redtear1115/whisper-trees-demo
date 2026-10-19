@@ -3,6 +3,7 @@ import { IconBack } from '../components/icons'
 import { Link } from 'react-router-dom'
 import { Art, formatDate } from '../components/ui'
 import { useStore } from '../store'
+import { useViewedFlag } from '../features/onboarding/viewed'
 import type { Checkin } from '../store/types'
 
 interface SpeciesRow {
@@ -18,6 +19,7 @@ export default function CodexPage() {
   const [rows, setRows] = useState<SpeciesRow[]>([])
   const [q, setQ] = useState('')
   const checkins = useStore((s) => s.checkins)
+  useViewedFlag('viewedCodexAt')
 
   useEffect(() => {
     fetch(`${import.meta.env.BASE_URL}data/species.json`)

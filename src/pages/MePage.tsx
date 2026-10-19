@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { IconBack } from '../components/icons'
 import { Art, Card, MockTag, formatDate } from '../components/ui'
@@ -7,6 +8,8 @@ import { stageOf } from '../features/game/character'
 import { badges } from '../features/game/badges'
 import { equip, useInventory } from '../features/game/inventory'
 import { useGameConfig } from '../features/game/config'
+import { TasksCard } from '../features/onboarding/TasksCard'
+import { useViewedFlag } from '../features/onboarding/viewed'
 import { EventBar } from '../features/game/EventBar'
 
 export default function MePage() {
@@ -16,6 +19,8 @@ export default function MePage() {
   const inv = useInventory()
   const cfg = useGameConfig()
   const state = useStore((s) => s)
+  const badgesRef = useRef<HTMLDetailsElement>(null)
+  useViewedFlag('viewedBadgesAt', badgesRef)
   const { stage, next, progress } = stageOf(earned)
   const list = badges(state)
   const outfit = cfg.shop.find((i) => i.id === inv.equipped.outfit)
@@ -69,6 +74,8 @@ export default function MePage() {
           </Link>
         </div>
       </Card>
+
+      <TasksCard />
 
       {(ownedOutfits.length > 0 || ownedFrames.length > 0) && (
         <Card>
@@ -127,7 +134,7 @@ export default function MePage() {
           </ul>
         )}
       </Card>
-      <details className="about badges">
+      <details className="about badges" ref={badgesRef} data-testid="badges-section">
         <summary>
           成長徽章 <span className="muted small">已得到 {list.filter((b) => b.earned).length} / {list.length}，不用急</span>
         </summary>
