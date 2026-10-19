@@ -613,16 +613,24 @@ export function waterWish(wishId: string) {
   void awaitUid().then((u) => {
     const batch = writeBatch(db)
     batch.set(doc(db, 'wishes', wishId, 'waterings', `${u}_${day}`), { at: serverTimestamp() })
-    batch.set(doc(db, 'wishStats', wishId), { water: increment(1) })
+    // 一定要 merge：沒有 merge 的 set 會把整份文件換掉，increment 從 0 起算，第二個人起都會被規則擋下
+    batch.set(doc(db, 'wishStats', wishId), { water: increment(1) }, { merge: true })
     batch.set(doc(db, 'users', u), { watered: { [wishId]: arrayUnion(day) } }, { merge: true })
-    return batch.commit().catch((e) => {
-      // permission-denied：多半是另一台裝置今天已經澆過；畫面維持「已澆好」，計數以伺服器為準
-      if ((e as { code?: string }).code === 'permission-denied') {
-        forcedWatered.add(`${wishId}|${day}`)
-        rebuildUser()
-        commit()
-      }
+    return batch.commit().catch(async (e) => {
       onWriteError('waterWish', e)
+      if ((e as { code?: string }).code !== 'permission-denied') return
+      // 伺服器拒絕：如果自己今天真的澆過（例如另一台裝置），畫面維持「已澆好」；
+      // 否則撤回剛才的樂觀更新，並告訴使用者沒有存到
+      const mine = await getDoc(doc(db, 'wishes', wishId, 'waterings', `${u}_${day}`)).catch(() => null)
+      if (mine?.exists()) {
+        forcedWatered.add(`${wishId}|${day}`)
+      } else {
+        const days = (userDoc.watered[wishId] ?? []).filter((d) => d !== day)
+        userDoc = { ...userDoc, watered: { ...userDoc.watered, [wishId]: days } }
+        window.dispatchEvent(new CustomEvent('wt:write-failed', { detail: '澆水沒有存到雲端，請再試一次。' }))
+      }
+      rebuildUser()
+      commit()
     })
   })
 }

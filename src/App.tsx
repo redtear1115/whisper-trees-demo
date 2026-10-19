@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { isDemoMode } from './store'
 import MorePage from './pages/MorePage'
 import { MobileOnly } from './features/device/MobileOnly'
-import { FallbackBanner, MigrationPrompt } from './features/cloud/Banners'
+import { FallbackBanner, MigrationPrompt, WriteFailedToast } from './features/cloud/Banners'
 
 const MapPage = lazy(() => import('./pages/MapPage'))
 const ScanPage = lazy(() => import('./pages/ScanPage'))
@@ -51,6 +51,7 @@ export default function App() {
       <DemoBadge />
       <FallbackBanner />
       <MigrationPrompt />
+      <WriteFailedToast />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<MobileOnly><MapPage /></MobileOnly>} />

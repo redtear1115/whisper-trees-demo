@@ -16,6 +16,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   limit,
   query,
   serverTimestamp,
@@ -410,6 +411,39 @@ describe('watering', () => {
   it('allows two different users to water the same wish on the same day', async () => {
     await assertSucceeds(waterBatch(alice(), 'alice', 'pit-TP-0001', 1).commit())
     await assertSucceeds(waterBatch(bob(), 'bob', 'pit-TP-0001', 2).commit())
+  })
+
+  // 與 app（src/store/cloud.ts waterWish）完全相同的寫法：increment(1) 搭配 merge
+  function appWaterBatch(fs: Firestore, uid: string, wishId: string, merge = true) {
+    const b = writeBatch(fs)
+    b.set(doc(fs, `wishes/${wishId}/waterings/${uid}_${taipeiDay()}`), { at: serverTimestamp() })
+    if (merge) b.set(doc(fs, `wishStats/${wishId}`), { water: increment(1) }, { merge: true })
+    else b.set(doc(fs, `wishStats/${wishId}`), { water: increment(1) })
+    return b
+  }
+
+  it('allows two different users to water with the app write (increment + merge), counting 2', async () => {
+    await assertSucceeds(appWaterBatch(alice(), 'alice', 'pit-TP-0001').commit())
+    await assertSucceeds(appWaterBatch(bob(), 'bob', 'pit-TP-0001').commit())
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const snap = await getDoc(doc(ctx.firestore(), 'wishStats/pit-TP-0001'))
+      expect(snap.data()?.water).toBe(2)
+    })
+  })
+
+  it('allows a second user on a demo wish with the app write', async () => {
+    await assertSucceeds(appWaterBatch(alice(), 'alice', 'mock-3').commit())
+    await assertSucceeds(appWaterBatch(bob(), 'bob', 'mock-3').commit())
+  })
+
+  it('denies the non-merge increment write once wishStats exists (regression guard)', async () => {
+    await assertSucceeds(appWaterBatch(alice(), 'alice', 'pit-TP-0001').commit())
+    await assertFails(appWaterBatch(bob(), 'bob', 'pit-TP-0001', false).commit())
+  })
+
+  it('denies a second app-style watering by the same user on the same day', async () => {
+    await assertSucceeds(appWaterBatch(alice(), 'alice', 'pit-TP-0001').commit())
+    await assertFails(appWaterBatch(alice(), 'alice', 'pit-TP-0001').commit())
   })
 
   it('allows watering the demo wish mock-2', async () => {

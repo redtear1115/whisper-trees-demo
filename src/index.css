@@ -2114,3 +2114,17 @@ body.has-offline .gov {
 .modal h2 {
   margin-top: 0;
 }
+
+.write-failed {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(max(36px, env(safe-area-inset-bottom)) + 120px);
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  box-shadow: var(--shadow);
+}

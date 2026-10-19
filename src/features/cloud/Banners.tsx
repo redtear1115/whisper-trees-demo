@@ -17,6 +17,30 @@ export function FallbackBanner() {
   )
 }
 
+/** 雲端寫入被拒、已撤回畫面上的變更時，短暫提示 */
+export function WriteFailedToast() {
+  const [msg, setMsg] = useState<string | null>(null)
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined
+    const on = (e: Event) => {
+      setMsg((e as CustomEvent<string>).detail)
+      clearTimeout(t)
+      t = setTimeout(() => setMsg(null), 5000)
+    }
+    window.addEventListener('wt:write-failed', on)
+    return () => {
+      window.removeEventListener('wt:write-failed', on)
+      clearTimeout(t)
+    }
+  }, [])
+  if (!msg) return null
+  return (
+    <p className="write-failed" role="alert">
+      {msg}
+    </p>
+  )
+}
+
 /** 第一次進雲端模式、這台裝置有舊的本機紀錄：問要不要搬 */
 export function MigrationPrompt() {
   const { migration } = useSession()
@@ -40,7 +64,7 @@ export function MigrationPrompt() {
         {s.whispers > 0 && (
           <label className="check">
             <input type="checkbox" checked={whispers} onChange={(e) => setWhispers(e.target.checked)} />
-            也把我的 {s.whispers} 則樹洞存上去（只有我看得到）
+            也把我的 {s.whispers} 則樹洞存上去（其他人看不到）
           </label>
         )}
         <p className="muted small">示範資料與後台的設定不會搬。不搬的紀錄會在備份裡留到 2026-10-31。</p>
