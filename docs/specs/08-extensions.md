@@ -129,12 +129,12 @@
 
 S1 資料與徽章
 
-- [ ] 流水帳只有 GM 補發（`adjust()`）時，「第一道光」不亮；`award()` 之後才亮。
-- [ ] 新手禮重複呼叫不會重複送，餘額不變，不寫 `ext.inventory`；`inventory()` 的 `hat-straw` 只出現一次；送出後 `buy(hat-straw)` 回傳已擁有。
-- [ ] `patchOnboarding` 不會洗掉原有欄位；4 項任務的判斷各有測試；新使用者依序做完（不靠 GM 補發）會拿到「城市的新朋友」；徽章共 12 枚。
-- [ ] 雲端（模擬器）：伺服器上已有 `inventory.owned = ['frame-spring']` 時，沒收到該資料的舊用戶端送新手禮，伺服器的 `owned` 不變，`inventory()` 兩件都有。
-- [ ] 雲端（模擬器）：旗標寫入後重啟雲端 store，`getExt('onboarding')` 一樣；伺服器已有 `tourDismissedAt` 時，再寫 `homeScreenAt` 兩個欄位都在。
-- [ ] `npm test`、`npm run test:rules`（含 `tests/cloud/`）、`npm run build` 通過。
+- [x] 流水帳只有 GM 補發（`adjust()`）時，「第一道光」不亮；`award()` 之後才亮。
+- [x] 新手禮重複呼叫不會重複送，餘額不變，不寫 `ext.inventory`；`inventory()` 的 `hat-straw` 只出現一次；送出後 `buy(hat-straw)` 回傳已擁有。
+- [x] `patchOnboarding` 不會洗掉原有欄位；4 項任務的判斷各有測試；新使用者依序做完（不靠 GM 補發）會拿到「城市的新朋友」；徽章共 12 枚。
+- [x] 雲端（模擬器）：伺服器上已有 `inventory.owned = ['frame-spring']` 時，沒收到該資料的舊用戶端送新手禮，伺服器的 `owned` 不變，`inventory()` 兩件都有。
+- [x] 雲端（模擬器）：旗標寫入後重啟雲端 store，`getExt('onboarding')` 一樣；伺服器已有 `tourDismissedAt` 時，再寫 `homeScreenAt` 兩個欄位都在。
+- [x] `npm test`、`npm run test:rules`（含 `tests/cloud/`）、`npm run build` 通過。
 
 S2 引導一與加入主畫面（待做）
 
