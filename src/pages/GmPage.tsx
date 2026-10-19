@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { AdminNav } from '../components/AdminNav'
 import { MockTag, formatDate } from '../components/ui'
 import players from '../mock/players.json'
 import { dayKey } from '../lib/seed'
@@ -26,14 +26,7 @@ export default function GmPage() {
           <h1>遊戲營運後台（GM）</h1>
           <p className="muted small">示範：營運人員視角・不需登入・改動即時套用到市民端</p>
         </div>
-        <nav className="row gap">
-          <Link className="btn small" to="/">
-            市民端
-          </Link>
-          <Link className="btn small" to="/more">
-            更多後台
-          </Link>
-        </nav>
+        <AdminNav />
       </header>
       <Overview />
       <Rules />

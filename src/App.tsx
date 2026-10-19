@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { isDemoMode } from './store'
 import MorePage from './pages/MorePage'
+import { MobileOnly } from './features/device/MobileOnly'
 
 const MapPage = lazy(() => import('./pages/MapPage'))
 const ScanPage = lazy(() => import('./pages/ScanPage'))
@@ -30,20 +31,33 @@ function DemoBadge() {
   )
 }
 
+/** 頁面載入中：掃描頁先放黑底和取景框，不閃一下白畫面 */
+function RouteFallback() {
+  const { pathname } = useLocation()
+  if (pathname.endsWith('/scan'))
+    return (
+      <div className="scanner" aria-busy="true">
+        <div className="scanner-frame" aria-hidden />
+        <p className="scanner-loading">正在打開相機…</p>
+      </div>
+    )
+  return <div className="page center muted">載入中…</div>
+}
+
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <DemoBadge />
-      <Suspense fallback={<div className="page center muted">載入中…</div>}>
+      <Suspense fallback={<RouteFallback />}>
         <Routes>
-          <Route path="/" element={<MapPage />} />
-          <Route path="/scan" element={<ScanPage />} />
-          <Route path="/tree/:treeId" element={<TreePage />} />
-          <Route path="/wishes" element={<MyWishesPage />} />
+          <Route path="/" element={<MobileOnly><MapPage /></MobileOnly>} />
+          <Route path="/scan" element={<MobileOnly><ScanPage /></MobileOnly>} />
+          <Route path="/tree/:treeId" element={<MobileOnly><TreePage /></MobileOnly>} />
+          <Route path="/wishes" element={<MobileOnly><MyWishesPage /></MobileOnly>} />
           <Route path="/gov" element={<GovPage />} />
-          <Route path="/me" element={<MePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/codex" element={<CodexPage />} />
+          <Route path="/me" element={<MobileOnly><MePage /></MobileOnly>} />
+          <Route path="/shop" element={<MobileOnly><ShopPage /></MobileOnly>} />
+          <Route path="/codex" element={<MobileOnly><CodexPage /></MobileOnly>} />
           <Route path="/gm" element={<GmPage />} />
           <Route path="/vendor" element={<VendorPage />} />
           <Route path="/developers" element={<DevelopersPage />} />

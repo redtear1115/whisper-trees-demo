@@ -45,8 +45,8 @@ export function WishCard({ wish, compact }: { wish: Wish; compact?: boolean }) {
               className="btn primary"
               onClick={() => {
                 if (!waterWish(wish.id)) return setMsg('今天已經澆過了。')
-                const glow = award('water', wish.id)
-                setMsg(glow ? `謝謝你。光點 +${glow}` : '謝謝你。')
+                award('water', wish.id)
+                setMsg('謝謝你，它喝到水了。')
               }}
             >
               幫它澆水

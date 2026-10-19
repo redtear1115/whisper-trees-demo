@@ -95,3 +95,10 @@ export const IconHeading = () => (
     <path d="M12 6.5l2.6 7.5L12 12.6 9.4 14z" fill="currentColor" stroke="none" />
   </Svg>
 )
+
+export const IconNorth = () => (
+  <Svg>
+    <path d="M12 3l4 9h-8z" fill="currentColor" stroke="none" />
+    <path d="M12 21l-4-9h8z" />
+  </Svg>
+)

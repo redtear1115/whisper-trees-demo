@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { IconBack } from '../components/icons'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Art, MockTag } from '../components/ui'
 import { useBalance } from '../features/game/ledger'
 import { buy, useInventory, type BuyResult } from '../features/game/inventory'
@@ -22,6 +22,7 @@ const RESULT_TEXT: Record<BuyResult, string> = {
 }
 
 export default function ShopPage() {
+  const navigate = useNavigate()
   const cfg = useGameConfig()
   const balance = useBalance()
   const inv = useInventory()
@@ -35,9 +36,9 @@ export default function ShopPage() {
   return (
     <div className="page">
       <header className="topbar">
-        <Link className="btn ghost back" to="/me">
-          <IconBack /> 小芽
-        </Link>
+        <button className="btn ghost back" onClick={() => navigate(-1)}>
+          <IconBack /> 返回
+        </button>
         <span className="topbar-title">商店</span>
         <MockTag />
       </header>

@@ -1,5 +1,5 @@
 import { Fragment, lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { AdminNav } from '../components/AdminNav'
 import { loadDistricts, type District } from '../lib/trees'
 import { DEFAULT_WEIGHTS, scoreAll, type Weights } from '../lib/score'
 import { setWishStatus, totalWater, useReports, useWishes, wishStatus } from '../store'
@@ -20,6 +20,13 @@ const WEIGHT_LABEL: Record<keyof Weights, string> = {
 }
 
 const STATUSES = Object.keys(STATUS_LABEL) as WishStatus[]
+
+/** 一鍵切換的權重組合，Demo 時看得出排序明顯改變 */
+const PRESETS: [string, Weights][] = [
+  ['平均', DEFAULT_WEIGHTS],
+  ['重視市民聲音', { demand: 70, shade: 10, feasibility: 10, fairness: 10 }],
+  ['重視缺蔭地區', { demand: 10, shade: 45, feasibility: 10, fairness: 35 }],
+]
 /** 模擬：計畫開始前已種回的數量 */
 const PLANTED_BASE = 412
 
@@ -67,17 +74,7 @@ export default function GovPage() {
           <h1>補種優先排序</h1>
           <p className="muted small">示範：承辦人視角（公園處）・不需登入</p>
         </div>
-        <nav className="row gap">
-          <Link className="btn small" to="/">
-            市民端
-          </Link>
-          <Link className="btn small" to="/vendor">
-            發包商
-          </Link>
-          <Link className="btn small" to="/more">
-            更多後台
-          </Link>
-        </nav>
+        <AdminNav />
       </header>
 
       <div className="progress">
@@ -104,13 +101,18 @@ export default function GovPage() {
               min={0}
               max={100}
               value={weights[k]}
+              aria-valuetext={`${WEIGHT_LABEL[k]}佔 ${share(weights, k)}%`}
               onChange={(e) => setWeights((w) => ({ ...w, [k]: Number(e.target.value) }))}
             />
           </label>
         ))}
-        <button className="btn small" onClick={() => setWeights(DEFAULT_WEIGHTS)}>
-          重設
-        </button>
+        <div className="presets" role="group" aria-label="快速設定">
+          {PRESETS.map(([label, w]) => (
+            <button key={label} className="btn small" onClick={() => setWeights(w)}>
+              {label}
+            </button>
+          ))}
+        </div>
       </section>
 
       <div className="row gap wrap center-v" style={{ marginBottom: 8 }}>
@@ -152,7 +154,7 @@ export default function GovPage() {
       {showMap && (
         <Suspense fallback={<div className="gov-map muted">地圖載入中…</div>}>
           <GovMap
-            rows={mapRows}
+            rows={onlyNew ? mapRows.filter((r) => !r.wish.mock) : mapRows}
             onPick={(id) => {
               setOpen(id)
               document.querySelector(`[data-flip="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })

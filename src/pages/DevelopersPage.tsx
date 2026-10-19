@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { AdminNav } from '../components/AdminNav'
 import { MockTag } from '../components/ui'
 import { DEMO } from '../config'
 
@@ -67,11 +67,7 @@ export default function DevelopersPage() {
           <h1>開放資料 API</h1>
           <p className="muted small">靜態 JSON，免金鑰、可跨網域讀取。版本 v1・資料日期 2026-10-16</p>
         </div>
-        <nav className="row gap">
-          <Link className="btn small" to="/more">
-            更多
-          </Link>
-        </nav>
+        <AdminNav />
       </header>
 
       <section>

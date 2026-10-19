@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { AdminNav } from '../components/AdminNav'
 import { MockTag, formatDate, relativeDays } from '../components/ui'
 import { useReports, useWishes, wishStatus } from '../store'
 import { REPORT_KINDS } from '../store/types'
@@ -28,14 +28,7 @@ export default function VendorPage() {
           <h1>發包商後台</h1>
           <p className="muted small">示範：植栽養護廠商視角・不需登入</p>
         </div>
-        <nav className="row gap">
-          <Link className="btn small" to="/gov">
-            政府端
-          </Link>
-          <Link className="btn small" to="/more">
-            更多後台
-          </Link>
-        </nav>
+        <AdminNav />
       </header>
 
       <div className="row gap">

@@ -10,7 +10,7 @@ export default function MorePage() {
         <Link className="btn ghost back" to="/">
           <IconBack /> 地圖
         </Link>
-        <span className="topbar-title">更多</span>
+        <h1 className="topbar-title">選單</h1>
       </header>
 
       <h2 className="section-title">市民</h2>

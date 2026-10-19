@@ -11,7 +11,9 @@ import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
-import { IconChevron, IconHeading, IconLamp, IconLayers, IconMore, IconTrash } from '../components/icons'
+import { IconChevron, IconHeading, IconLamp, IconLayers, IconMore, IconNorth, IconTrash } from '../components/icons'
+import { distanceMeters } from '../lib/geo'
+import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
 import { EventBar } from '../features/game/EventBar'
 import { useAnchor } from '../features/map/useAnchor'
@@ -22,7 +24,8 @@ type Sheet =
   | { kind: 'tree'; tree: Tree }
   | { kind: 'pit'; pit: PitInfo; justWished?: boolean }
   | { kind: 'spot'; pit: PitInfo }
-  | { kind: 'wish'; wishId: string; glow?: number }
+  | { kind: 'wish'; wishId: string; fresh?: boolean }
+  | { kind: 'list' }
   | { kind: 'dlc'; which: 'trash' | 'light' }
   | null
 
@@ -65,6 +68,7 @@ export default function MapPage() {
   const focus = navState?.focus
   const anchor = useAnchor(mode === 'near')
   const [follow, setFollow] = useState(false)
+  const [bearing, setBearing] = useState(0)
   const [headingMsg, setHeadingMsg] = useState<string | null>(null)
   const wishes = useWishes()
   const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
@@ -101,8 +105,9 @@ export default function MapPage() {
         customAttribution: '樹木與樹穴：臺北市政府開放資料｜公園範圍：© OpenStreetMap contributors',
       }),
     )
-    // 指北針：顯示目前方向，點一下轉回北方（保留 45° 俯角）
-    m.addControl(new maplibregl.NavigationControl({ showZoom: false, showCompass: true, visualizePitch: false }), 'bottom-right')
+    // 指北針是右側工具列自己的按鈕（和圖層、跟著方向放在一起）
+    m.on('rotate', () => setBearing(m.getBearing()))
+    m.once('load', () => setBearing(m.getBearing()))
     // 手動轉動地圖就停止「跟著方向」
     m.on('rotatestart', (e) => {
       if ((e as { originalEvent?: Event }).originalEvent) setFollow(false)
@@ -182,8 +187,11 @@ export default function MapPage() {
         paint: {
           'circle-color': 'rgba(255,255,255,0.6)',
           'circle-stroke-color': '#b36b2c',
-          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 12, 0.8, 17, 2],
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1.5, 17, 6, 19, 10],
+          // 拉遠時淡一點、小一點：不要讓城市看起來全是坑
+          'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 12, 0.6, 15, 1.2, 17, 2],
+          'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0.35, 15, 0.9],
+          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, 1],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3.5, 17, 6, 19, 10],
         },
       })
       m.addLayer({
@@ -255,7 +263,7 @@ export default function MapPage() {
         })
       }
     })
-    // 長按（或右鍵）任意位置許願：不是樹穴，初審為「需會勘」
+    // 長按（或右鍵）任意位置許願：不是樹穴，初步判斷為「需會勘」
     const wishAt = (point: maplibregl.Point, lngLat: maplibregl.LngLat) => {
       select(m, [lngLat.lng, lngLat.lat])
       const near = m
@@ -452,7 +460,7 @@ export default function MapPage() {
         <EventBar />
       </div>
 
-      {gap && !gapHidden && (
+      {gap && !gapHidden && mode === 'city' && (
         <div className={`gap-card ${gapOpen ? 'open' : ''}`}>
           <button className="gap-toggle" onClick={() => setGapOpen((o) => !o)} aria-expanded={gapOpen}>
             <span>
@@ -477,10 +485,13 @@ export default function MapPage() {
 
       {panel && (
         <div className="layer-panel" id="layer-panel">
+          <button className="btn small block-left" onClick={() => setSheet({ kind: 'list' })}>
+            列出附近的許願
+          </button>
           {(
             [
               ['trees', '樹木', 'legend-tree'],
-              ['pits', '候選空樹穴', 'legend-pit'],
+              ['pits', '空樹穴（可以許願）', 'legend-pit'],
               ['wishes', '許願', 'legend-wish'],
               ['parks', '公園範圍（OSM）', 'legend-park'],
             ] as const
@@ -513,15 +524,15 @@ export default function MapPage() {
               <div className="row gap center-v">
                 <Art id="empty-pit" alt="" className="icon" />
                 <div>
-                  <h2>候選空樹穴</h2>
+                  <h2>這裡可以種一棵樹</h2>
                   <p className="muted small">
                     {sheet.pit.district} {sheet.pit.road}
                   </p>
                 </div>
               </div>
-              <p className="small">在這裡許願種樹。之後你和路過的人，每天都可以幫它澆水。</p>
+              <p className="small">這是一個空的樹穴：資料顯示這裡沒有登錄的樹。在這裡許願，之後你和路過的人都可以幫它澆水。</p>
               <p className="muted small">其他位置想要一棵樹？在地圖上長按就能許願。</p>
-              <WishForm pit={sheet.pit} onDone={(w, glow) => setSheet({ kind: 'wish', wishId: w.id, glow })} />
+              <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id, fresh: true })} />
             </div>
           )}
           {sheet.kind === 'spot' && (
@@ -530,16 +541,26 @@ export default function MapPage() {
               <p className="muted small">
                 {sheet.pit.district || '這個位置'} {sheet.pit.road}・不是既有樹穴，市府要先會勘
               </p>
-              <WishForm pit={sheet.pit} onDone={(w, glow) => setSheet({ kind: 'wish', wishId: w.id, glow })} />
+              <WishForm pit={sheet.pit} onDone={(w) => setSheet({ kind: 'wish', wishId: w.id, fresh: true })} />
             </div>
           )}
           {sheet.kind === 'wish' && sheetWish && (
             <div>
-              {sheet.glow !== undefined && <FeasibilityResult wish={sheetWish} glow={sheet.glow} />}
+              {sheet.fresh && <FeasibilityResult wish={sheetWish} />}
               <WishCard wish={sheetWish} />
             </div>
           )}
           {sheet.kind === 'dlc' && <DlcCard which={sheet.which} />}
+          {sheet.kind === 'list' && (
+            <NearbyWishes
+              wishes={wishes}
+              center={map.current ? [map.current.getCenter().lng, map.current.getCenter().lat] : DEMO.center}
+              onPick={(w) => {
+                if (map.current) select(map.current, w.lngLat)
+                setSheet({ kind: 'wish', wishId: w.id })
+              }}
+            />
+          )}
         </Sheet>
       )}
 
@@ -554,6 +575,19 @@ export default function MapPage() {
           >
             <IconLayers />
             <span>圖層</span>
+          </button>
+          <button
+            className="tool"
+            aria-label={`指北針：目前朝向 ${Math.round((bearing + 360) % 360)} 度，點一下轉回北方`}
+            onClick={() => {
+              setFollow(false)
+              map.current?.easeTo({ bearing: 0, duration: 500 })
+            }}
+          >
+            <span className="needle" style={{ transform: `rotate(${-bearing}deg)` }} aria-hidden>
+              <IconNorth />
+            </span>
+            <span>北</span>
           </button>
           {mode === 'near' && (
             <button
@@ -581,7 +615,7 @@ export default function MapPage() {
           {mode === 'city' && (
             <p className="legend-row" aria-label="圖例">
               <span className="legend legend-tree" aria-hidden /> 樹
-              <span className="legend legend-pit" aria-hidden /> 候選空樹穴
+              <span className="legend legend-pit" aria-hidden /> 空樹穴
               <span className="legend legend-wish" aria-hidden /> 許願
             </p>
           )}
@@ -595,14 +629,8 @@ export default function MapPage() {
           </div>
           {headingMsg && <span className="mode-note">{headingMsg}</span>}
           {follow && <span className="mode-note">畫面上方就是你面向的方向</span>}
-          {mode === 'near' && !follow && !headingMsg && (
-            <span className="mode-note">
-              {anchor.source === 'gps'
-                ? `你周圍 ${NEAR.radiusMeters} 公尺`
-                : anchor.source === 'demo'
-                  ? '示範樹周圍（Demo）'
-                  : '沒有定位：示範樹周圍'}
-            </span>
+          {mode === 'near' && anchor.source === 'fallback' && !follow && !headingMsg && (
+            <span className="mode-note">沒有定位：先看示範樹周圍</span>
           )}
         </div>
       )}
@@ -676,13 +704,15 @@ function sheetLabel(sheet: NonNullable<Sheet>, wish?: Wish): string {
     case 'tree':
       return `${sheet.tree.species}・${sheet.tree.place}`
     case 'pit':
-      return `候選空樹穴・${sheet.pit.road || sheet.pit.district}`
+      return `空樹穴・${sheet.pit.road || sheet.pit.district}`
     case 'spot':
       return '在這裡許願種樹'
     case 'wish':
       return wish ? `許願・${wish.district} ${wish.road}` : '許願'
     case 'dlc':
       return sheet.which === 'trash' ? '垃圾桶（即將推出）' : '路燈（即將推出）'
+    case 'list':
+      return '附近的許願'
   }
 }
 
@@ -723,6 +753,36 @@ function Sheet({ onClose, children, label }: { onClose: () => void; children: Re
         關閉
       </button>
       {children}
+    </div>
+  )
+}
+
+/** 附近的許願清單：給鍵盤與螢幕閱讀器使用者，也方便找鄰居的願望澆水 */
+function NearbyWishes({ wishes, center, onPick }: { wishes: Wish[]; center: LngLat; onPick: (w: Wish) => void }) {
+  const near = wishes
+    .map((w) => ({ w, d: distanceMeters(center, w.lngLat) }))
+    .filter((x) => x.d <= 1500)
+    .sort((a, b) => a.d - b.d)
+  return (
+    <div>
+      <h2>附近的許願</h2>
+      {near.length === 0 && <p className="muted">1.5 公里內還沒有人許願。點空樹穴就能許第一個願。</p>}
+      <ul className="nearby-list">
+        {near.map(({ w, d }) => (
+          <li key={w.id}>
+            <button className="nearby-item" onClick={() => onPick(w)}>
+              <span>
+                <strong>{w.road || w.district}</strong>
+                <span className="muted small">
+                  {' '}
+                  {Math.round(d)} 公尺・{STATUS_LABEL[w.history[w.history.length - 1].status]}
+                </span>
+              </span>
+              <span className="muted small">{w.reasons.join('、')}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

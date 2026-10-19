@@ -5,7 +5,7 @@ import { seededInt, weekKey } from '../lib/seed'
 import type { CheckinResult } from '../lib/geo'
 import { addWhisper, recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
 import { Art, MockTag, formatDate, relativeDays } from '../components/ui'
-import { IconBack, IconSpark } from '../components/icons'
+import { IconBack } from '../components/icons'
 import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
 import { award, isDaytime } from '../features/game/ledger'
@@ -18,7 +18,6 @@ export default function TreePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
-  const freshGlow = (location.state as CheckinState | null)?.glow
   const night = !isDaytime()
   const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
@@ -66,7 +65,7 @@ export default function TreePage() {
       {/* 打卡的結果和樹放在一起，是這一頁唯一的主角 */}
       <section className={`hero-wrap ${frame ? `frame ${frame}` : ''} ${onSite ? 'met' : ''}`} aria-label="這棵樹">
         <Art id={night ? 'tree-hero-night' : 'tree-hero'} alt={`${tree.species}的插畫`} className="hero" />
-        <CheckinStrip fresh={fresh} onSite={onSite} glow={freshGlow} />
+        <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
@@ -74,7 +73,9 @@ export default function TreePage() {
 
       <div className="glow-line">
         <Art id="glow" alt="" className="icon sm" />
-        這棵樹本週有 <strong>{glow}</strong> 道微光陪伴
+        <span className="glow-sentence">
+          這棵樹本週有 <strong>{glow}</strong> 道微光陪伴
+        </span>
         <MockTag />
         <GlowHelp />
       </div>
@@ -160,22 +161,15 @@ function GlowHelp() {
 function CheckinStrip({
   fresh,
   onSite,
-  glow,
 }: {
   fresh?: CheckinResult
   onSite: string | null
-  glow?: number
 }) {
   if (onSite)
     return (
       <div className="checkin-strip ok" role="status">
         <strong>{onSite === 'success' ? '你在這棵樹旁邊。' : '遠遠陪著它。'}</strong>
         {onSite === 'farView' && <span>這棵樹在安全島上，在人行道看著它就好。</span>}
-        {glow ? (
-          <span className="glow-pop">
-            <IconSpark /> 光點 +{glow}
-          </span>
-        ) : null}
       </div>
     )
   if (fresh?.kind === 'tooFar')
