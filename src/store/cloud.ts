@@ -40,7 +40,7 @@ import { getAuthSnap, getFirebase, signOutAndWipe, startAuth, subscribeAuth } fr
 import { emptyOverlay, loadOverlay, OVERLAY_KEY, saveOverlay, type Overlay } from './overlay'
 import { SEED } from './seedData'
 import { getSession, setSession } from './session'
-import { REPORT_KINDS, TAIPEI_DISTRICTS, WISH_REASONS, type Checkin, type StatusEvent, type TreeReport, type Whisper, type Wish } from './types'
+import { LEGACY_REPORT_DETAILS, TAIPEI_DISTRICTS, WISH_REASONS, type Checkin, type StatusEvent, type TreeReport, type Whisper, type Wish } from './types'
 import type { State } from './index'
 import { checkMigration, runMigration } from './migrate'
 
@@ -710,7 +710,7 @@ export function addWhisper(treeId: string, text: string) {
   )
 }
 
-const ALLOWED_DETAILS = new Set(Object.values(REPORT_KINDS).flatMap((k) => k.details))
+const ALLOWED_DETAILS = new Set(LEGACY_REPORT_DETAILS)
 
 export function addReport(r: Omit<TreeReport, 'id' | 'at'>): TreeReport {
   if (!uid) throw new Error('not-ready')

@@ -2,9 +2,12 @@
 
 import * as SunCalcNs from 'suncalc'
 import { DEMO } from '../../config'
-import { getExt, setExt, useStore, type State } from '../../store'
+import { getExt, getState, setExt, useStore, type State } from '../../store'
 import { dayKey } from '../../lib/seed'
-import { ACTION_LABEL, activeEvent, gameConfig, type Action } from './config'
+import { ACTION_LABEL, activeEvent, gameConfig, TREE_ACTIONS, type Action } from './config'
+import { calcTreePoints, reasonOf, type TreeAction } from './points'
+import { isProtectedTree } from './protectedTrees'
+import { daysSinceVisit } from './visits'
 
 export interface Entry {
   at: number
@@ -66,27 +69,75 @@ export function isDaytime(now = new Date()): boolean {
 }
 
 /**
- * 依 GM 規則發光點。key 重複就不發，回傳實際發出的點數（0 代表今天已經拿過）。
+ * 日照倍率：日出到日落之間像一座小山，日出與日落是 ×1，正午前後最高 ×max（預設 1.5）；夜間 ×1。
+ * 例：台北 10 月中午約 ×1.5，上午 8 點約 ×1.3。
  */
-export function award(action: Action, key: string, now = new Date()): number {
-  const fullKey = `${action}:${key}:${dayKey(now)}`
-  const list = ledger()
-  if (list.some((e) => e.key === fullKey)) return 0
+export function daylightFactor(now = new Date(), max = 1.5): number {
+  const t = SunCalc.getTimes(now, DEMO.center[1], DEMO.center[0])
+  if (!t.sunrise || !t.sunset) return 1
+  const span = t.sunset.getTime() - t.sunrise.getTime()
+  const at = now.getTime() - t.sunrise.getTime()
+  if (span <= 0 || at <= 0 || at >= span) return 1
+  return 1 + Math.max(0, max - 1) * Math.sin((Math.PI * at) / span)
+}
+
+/** 今天（台北日曆日）這棵樹已經記過幾個互動、這是今天第幾棵不同的樹打卡 */
+function treeDayCounts(treeId: string, day: string): { done: number; order: number } {
+  const trees = new Set<string>()
+  let done = 0
+  for (const e of ledger()) {
+    if (!e.key?.endsWith(`:${day}`)) continue
+    const first = e.key.indexOf(':')
+    const action = e.key.slice(0, first)
+    const id = e.key.slice(first + 1, e.key.lastIndexOf(':'))
+    if (action === 'checkin' || action === 'farView') trees.add(id)
+    if (id === treeId && (TREE_ACTIONS as readonly string[]).includes(action)) done++
+  }
+  return { done, order: trees.has(treeId) ? [...trees].indexOf(treeId) + 1 : trees.size + 1 }
+}
+
+/**
+ * 依 GM 規則發光點。key 重複就不發，回傳實際發出的點數（0 代表今天已經拿過，或這棵樹今天的互動已經超過 3 個）。
+ * 在樹旁的互動（打卡、遠觀、樹洞、回報）依 points.ts 算：同棵樹第幾個互動、日照、寂寞樹、受保護、每日減半；
+ * 許願與澆水是固定點數。
+ */
+export function award(action: Action, key: string, now = new Date(), opts: { protectedTree?: boolean } = {}): number {
+  const day = dayKey(now)
+  const fullKey = `${action}:${key}:${day}`
+  if (ledger().some((e) => e.key === fullKey)) return 0
   const cfg = gameConfig()
-  const event = activeEvent(cfg, dayKey(now))
-  const mult = cfg.multiplier * (event?.multiplier ?? 1)
-  const delta = Math.round(cfg.points[action] * mult)
+  const event = activeEvent(cfg, day)
+  let delta: number
+  let reason: string
+  if ((TREE_ACTIONS as readonly string[]).includes(action)) {
+    const { done, order } = treeDayCounts(key, day)
+    const r = calcTreePoints(
+      {
+        action: action as TreeAction,
+        slot: done + 1,
+        treeOrder: order,
+        daylight: daylightFactor(now, cfg.sunMax),
+        lonelyDays: daysSinceVisit(key, getState().checkins, now).days,
+        protectedTree: opts.protectedTree ?? isProtectedTree(key),
+        eventMult: event?.multiplier ?? 1,
+      },
+      cfg,
+    )
+    delta = r.delta
+    reason = reasonOf(action as TreeAction, r.parts, event?.name)
+  } else {
+    const pts = cfg.points[action as keyof typeof cfg.points] ?? 0
+    delta = Math.round(pts * cfg.multiplier * (event?.multiplier ?? 1))
+    reason = event ? `${ACTION_LABEL[action]}（${event.name}）` : ACTION_LABEL[action]
+  }
   if (delta <= 0) return 0
-  const reason = event ? `${ACTION_LABEL[action]}（${event.name}）` : ACTION_LABEL[action]
   setExt('ledger', [...baseLedger(), { at: now.getTime(), delta, reason, key: fullKey }])
   return delta
 }
 
-/** 打卡的光點：基本 + 白天的日照加成 */
+/** 打卡的光點（日照、寂寞樹等加成都已經算在裡面，原因寫在流水帳） */
 export function awardCheckin(treeId: string, kind: 'success' | 'farView', now = new Date()): number {
-  const base = award(kind === 'success' ? 'checkin' : 'farView', treeId, now)
-  if (base === 0) return 0
-  return base + (isDaytime(now) ? award('sun', treeId, now) : 0)
+  return award(kind === 'success' ? 'checkin' : 'farView', treeId, now)
 }
 
 export function spend(amount: number, reason: string): boolean {

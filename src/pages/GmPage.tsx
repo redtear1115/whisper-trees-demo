@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { AdminNav } from '../components/AdminNav'
 import { MockTag, formatDate } from '../components/ui'
 import players from '../mock/players.json'
@@ -9,8 +9,8 @@ import {
   resetGameConfig,
   saveGameConfig,
   useGameConfig,
-  type Action,
   type GameEvent,
+  type PointAction,
 } from '../features/game/config'
 import { adjust, useBalance, useLedger } from '../features/game/ledger'
 import { useInventory } from '../features/game/inventory'
@@ -84,37 +84,125 @@ function Overview() {
   )
 }
 
+/** 一格數字欄位：改了就存進 GM 設定 */
+function NumRow({
+  label,
+  note,
+  value,
+  min = 0,
+  max = 100,
+  step = 1,
+  onChange,
+}: {
+  label: string
+  note?: string
+  value: number
+  min?: number
+  max?: number
+  step?: number
+  onChange: (n: number) => void
+}) {
+  return (
+    <tr>
+      <td>
+        {label}
+        {note && <span className="rule-note">{note}</span>}
+      </td>
+      <td>
+        <input
+          className="input num-input"
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          aria-label={label}
+          onChange={(e) => onChange(Math.min(max, Math.max(min, Number(e.target.value) || 0)))}
+        />
+      </td>
+    </tr>
+  )
+}
+
 function Rules() {
   const cfg = useGameConfig()
-  return (
-    <section>
-      <h2>光點規則</h2>
+  const setPoint = (a: PointAction, n: number) => saveGameConfig({ points: { ...cfg.points, [a]: n } })
+  const table = (title: string, rows: ReactNode) => (
+    <>
+      <h3>{title}</h3>
       <table>
         <thead>
           <tr>
-            <th>行為</th>
-            <th>光點</th>
+            <th>項目</th>
+            <th>數值</th>
           </tr>
         </thead>
-        <tbody>
-          {(Object.keys(ACTION_LABEL) as Action[]).map((a) => (
-            <tr key={a}>
-              <td>{ACTION_LABEL[a]}</td>
-              <td>
-                <input
-                  className="input num-input"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={cfg.points[a]}
-                  aria-label={`${ACTION_LABEL[a]}的光點`}
-                  onChange={(e) =>
-                    saveGameConfig({ points: { ...cfg.points, [a]: Math.max(0, Number(e.target.value) || 0) } })
-                  }
-                />
-              </td>
-            </tr>
-          ))}
+        <tbody>{rows}</tbody>
+      </table>
+    </>
+  )
+  return (
+    <section className="gm-rules">
+      <h2>光點規則</h2>
+      <p className="muted small">依團隊簡報 v17「能量單位：光點」。這裡是示範用的模擬經濟，數值都可以調。</p>
+      {table(
+        '基礎點數',
+        <>
+          <NumRow label={`${ACTION_LABEL.checkin}（靠近一棵樹）`} value={cfg.points.checkin} onChange={(n) => setPoint('checkin', n)} />
+          <NumRow label={ACTION_LABEL.farView} value={cfg.points.farView} onChange={(n) => setPoint('farView', n)} />
+          <NumRow label={`${ACTION_LABEL.report}（不含社區複驗的 +5）`} value={cfg.points.report} onChange={(n) => setPoint('report', n)} />
+          <NumRow label={ACTION_LABEL.wish} value={cfg.points.wish} onChange={(n) => setPoint('wish', n)} />
+          <NumRow label="見縫插樹澆水支持（每人每天 1 次）" value={cfg.points.water} onChange={(n) => setPoint('water', n)} />
+        </>,
+      )}
+      {table(
+        '同一棵樹的後續互動',
+        <>
+          <NumRow
+            label="第 2 個互動"
+            note="打卡、遠觀、樹洞、樹況回報各算一個；樹況回報固定發基礎點數，只佔一格"
+            value={cfg.ladder2}
+            onChange={(n) => saveGameConfig({ ladder2: n })}
+          />
+          <NumRow label="第 3 個互動" note="第 4 個起不再發光點" value={cfg.ladder3} onChange={(n) => saveGameConfig({ ladder3: n })} />
+          <NumRow
+            label="每天第幾棵樹起，打卡光點減半"
+            note="一天裡不同的樹，從這一棵起打卡光點 ×0.5，避免整天專門刷"
+            value={cfg.halveFrom}
+            min={1}
+            onChange={(n) => saveGameConfig({ halveFrom: n })}
+          />
+        </>,
+      )}
+      {table(
+        '倍率',
+        <>
+          <NumRow
+            label="日照加成最高倍率"
+            note="日出日落 ×1、正午前後最高；夜間 ×1。乘在打卡與同棵樹的互動上"
+            value={cfg.sunMax}
+            min={1}
+            max={3}
+            step={0.1}
+            onChange={(n) => saveGameConfig({ sunMax: n })}
+          />
+          <NumRow
+            label="寂寞樹：幾天沒人拜訪"
+            note="上次拜訪是模擬資料（依樹籍編號固定產生），自己更近的拜訪優先"
+            value={cfg.lonelyDays}
+            min={1}
+            max={365}
+            onChange={(n) => saveGameConfig({ lonelyDays: n })}
+          />
+          <NumRow label="寂寞樹：最低倍率" value={cfg.lonelyMin} min={1} max={10} onChange={(n) => saveGameConfig({ lonelyMin: n, lonelyMax: Math.max(n, cfg.lonelyMax) })} />
+          <NumRow label="寂寞樹：最高倍率" value={cfg.lonelyMax} min={1} max={10} onChange={(n) => saveGameConfig({ lonelyMax: n, lonelyMin: Math.min(n, cfg.lonelyMin) })} />
+          <NumRow label="寂寞樹：每多幾天加 ×1" value={cfg.lonelyStepDays} min={1} max={365} onChange={(n) => saveGameConfig({ lonelyStepDays: n })} />
+          <NumRow
+            label="受保護樹木：打卡基礎光點"
+            note="取代「打卡成功」的基礎點數。開放資料目前沒有受保護樹木名冊，這條規則先不會觸發"
+            value={cfg.protectedBase}
+            onChange={(n) => saveGameConfig({ protectedBase: n })}
+          />
           <tr>
             <td>
               <strong>全域倍率</strong>
@@ -132,9 +220,11 @@ function Rules() {
               />
             </td>
           </tr>
-        </tbody>
-      </table>
-      <p className="muted small">同一棵樹每天只算一次；白天打卡另加日照加成。</p>
+        </>,
+      )}
+      <p className="muted small">
+        每一筆都會把用到的規則寫進玩家的光點紀錄，例如「打卡成功・寂寞樹 ×3（模擬）」。同一個行為同一棵樹每天只發一次。
+      </p>
     </section>
   )
 }

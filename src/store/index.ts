@@ -17,7 +17,7 @@ import { OVERLAY_KEY } from './overlay'
 import { LOCAL_KEY, pruneBackup } from './migrate'
 import { capsuleSeed, DAY, SEED, seedNow, SEED_REPORTS } from './seedData'
 import { setSession, useSession } from './session'
-import type { Checkin, ReportKind, StatusEvent, TreeReport, Whisper, Wish, WishStatus } from './types'
+import { normalizeReportKind, type Checkin, type ReportKind, type StatusEvent, type TreeReport, type Whisper, type Wish, type WishStatus } from './types'
 
 export { useSession, canWriteAdmin, inDemoOverlay, userReady } from './session'
 export { clearActiveTour, getActiveTour, parseActiveTour, setActiveTour, useActiveTour } from './activeTour'
@@ -331,7 +331,10 @@ let reportsCache: { src: TreeReport[]; list: TreeReport[] } | null = null
 /** 示範回報 + 這台裝置的回報（新到舊） */
 export function allReports(s: State = state): TreeReport[] {
   if (reportsCache?.src === s.reports) return reportsCache.list
-  const list = [...SEED_REPORTS, ...s.reports].sort((a, b) => b.at - a.at)
+  // 舊資料（本機存的、雲端舊文件、示範資料）的類別換成新的五類
+  const list = [...SEED_REPORTS, ...s.reports]
+    .map((r) => ({ ...r, kind: normalizeReportKind(r.kind, r.details) }))
+    .sort((a, b) => b.at - a.at)
   reportsCache = { src: s.reports, list }
   return list
 }

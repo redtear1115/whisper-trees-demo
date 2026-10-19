@@ -2,16 +2,24 @@
 
 import { getExt, setExt, useStore, type State } from '../../store'
 
-export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'wish' | 'water'
+/** `sun` 是舊版的獨立日照加成（2026-10-20 前的流水帳還有），現在日照是倍率，不再單獨發 */
+export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'report' | 'wish' | 'water'
 
 export const ACTION_LABEL: Record<Action, string> = {
   checkin: '打卡成功',
   farView: '遠觀模式打卡',
   sun: '白天打卡的日照加成',
   whisper: '留樹洞',
+  report: '樹況回報',
   wish: '許願',
   water: '澆水',
 }
+
+/** 有固定點數、GM 可以直接改的行為。樹洞與同一棵樹的後續互動看 `ladder2`／`ladder3`。 */
+export type PointAction = 'checkin' | 'farView' | 'report' | 'wish' | 'water'
+
+/** 「在一棵樹旁」做的互動：每棵樹每天依序算第 1、2、3 個（見 points.ts） */
+export const TREE_ACTIONS: readonly Action[] = ['checkin', 'farView', 'whisper', 'report']
 
 export interface GameEvent {
   id: string
@@ -36,7 +44,22 @@ export interface ShopItem {
 }
 
 export interface GameConfig {
-  points: Record<Action, number>
+  points: Record<PointAction, number>
+  /** 同一棵樹當天的第 2、第 3 個互動（打卡、遠觀、樹洞、回報各算一個）；第 4 個起不再發 */
+  ladder2: number
+  ladder3: number
+  /** 日照加成的最高倍率：正午前後最高，日出與日落是 ×1，夜間 ×1 */
+  sunMax: number
+  /** 寂寞樹：超過幾天沒人拜訪才算 */
+  lonelyDays: number
+  /** 剛達門檻時的倍率、以及上限；之間每多 lonelyStepDays 天加 ×1 */
+  lonelyMin: number
+  lonelyMax: number
+  lonelyStepDays: number
+  /** 受保護樹木打卡的基礎光點（取代 points.checkin） */
+  protectedBase: number
+  /** 一天裡從第幾棵不同的樹起，打卡光點減半 */
+  halveFrom: number
   multiplier: number
   events: GameEvent[]
   shop: ShopItem[]
@@ -53,7 +76,16 @@ export const DEFAULT_SHOP: ShopItem[] = [
 ]
 
 export const DEFAULT_CONFIG: GameConfig = {
-  points: { checkin: 10, farView: 5, sun: 2, whisper: 3, wish: 5, water: 2 },
+  points: { checkin: 10, farView: 5, report: 15, wish: 5, water: 3 },
+  ladder2: 2,
+  ladder3: 1,
+  sunMax: 1.5,
+  lonelyDays: 30,
+  lonelyMin: 2,
+  lonelyMax: 5,
+  lonelyStepDays: 20,
+  protectedBase: 20,
+  halveFrom: 11,
   multiplier: 1,
   events: [{ id: 'ev-arbor', name: '植樹節雙倍光點', start: '2027-03-12', end: '2027-03-14', multiplier: 2 }],
   shop: DEFAULT_SHOP,
@@ -85,4 +117,17 @@ export function activeEvent(cfg: GameConfig, today: string): GameEvent | undefin
   return cfg.events
     .filter((e) => e.start <= today && today <= e.end)
     .sort((a, b) => b.multiplier - a.multiplier)[0]
+}
+
+/** 光點規則一覽（新手引導與說明用）：行為與點數的文字 */
+export function pointRows(cfg: GameConfig): [string, string][] {
+  const p = cfg.points
+  return [
+    ['在樹旁打卡', `+${p.checkin}（白天最高 ×${cfg.sunMax}）`],
+    ['同一棵樹的第 2、第 3 個互動', `+${cfg.ladder2}、+${cfg.ladder3}`],
+    ['遠觀模式打卡', `+${p.farView}`],
+    ['樹況回報', `+${p.report}`],
+    ['在空樹穴許願', `+${p.wish}`],
+    ['幫別人的願望澆水', `+${p.water}`],
+  ]
 }

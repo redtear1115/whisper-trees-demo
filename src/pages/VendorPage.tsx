@@ -77,7 +77,7 @@ export default function VendorPage() {
               key={r.id}
               id={`report:${r.id}`}
               title={`${r.district} ${r.road}・${r.species}（${r.treeId}）`}
-              detail={`${REPORT_KINDS[r.kind].label}：${r.details.join('、') || '未選細項'}${r.note && (canSeeNotes || r.mock || r.mine) ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報・承包：${vendorOfDistrict(r.district).name}`}
+              detail={`${REPORT_KINDS[r.kind].label}${r.details.length > 0 ? `（${r.details.join('、')}）` : ''}${r.note && (canSeeNotes || r.mock || r.mine) ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報・承包：${vendorOfDistrict(r.district).name}`}
               stage={stageOf(`report:${r.id}`, orders)}
               at={orders[`report:${r.id}`]?.at}
               doneNote={orders[`report:${r.id}`]?.note}

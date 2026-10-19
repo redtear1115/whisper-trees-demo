@@ -370,7 +370,7 @@ function useFlip(order: string) {
   return ref
 }
 
-/** 樹況回報依路段彙整：每段幾筆、兩類各幾筆 */
+/** 樹況回報依路段彙整：每段幾筆、五類各幾筆（沒有的類別不列） */
 function ReportsByRoad() {
   const reports = useReports()
   const orders = useOrders()
@@ -391,21 +391,22 @@ function ReportsByRoad() {
       {rows.length === 0 && <p className="muted">目前沒有回報。</p>}
       <div className="report-list">
         {rows.map(([road, list]) => {
-          const count = (k: TreeReport['kind']) => list.filter((r) => r.kind === k).length
+          const counts = (Object.keys(REPORT_KINDS) as TreeReport['kind'][])
+            .map((k) => [k, list.filter((r) => r.kind === k).length] as const)
+            .filter(([, n]) => n > 0)
           return (
             <div key={road} className="report-road">
               <div className="row between center-v">
                 <strong>{road}</strong>
                 <span className="small">
-                  共 {list.length} 筆・{REPORT_KINDS.pruning.label} {count('pruning')}・{REPORT_KINDS.sick.label}{' '}
-                  {count('sick')}
+                  共 {list.length} 筆・{counts.map(([k, n]) => `${REPORT_KINDS[k].label} ${n}`).join('・')}
                 </span>
               </div>
               <ul>
                 {list.map((r) => (
                   <li key={r.id} className="small">
                     <span className={`kind-tag ${r.kind}`}>{REPORT_KINDS[r.kind].label}</span>
-                    {r.species}（<span className="mono">{r.treeId}</span>）{r.details.join('、')}
+                    {r.species}（<span className="mono">{r.treeId}</span>）{r.details.length > 0 && `（${r.details.join('、')}）`}
                     {r.note && (canSeeNotes || r.mock || r.mine) && `：${r.note}`}
                     {r.hasPhoto && (
                       <span className="has-photo" aria-label="附照片">

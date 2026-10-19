@@ -1,7 +1,7 @@
 // 把 store 的資料轉成 API 回應的形狀（欄位用 snake_case、時間用 ISO 8601）。
 
 import { DEFAULT_WEIGHTS, scoreAll, type ScoreParts, type Weights } from '../../lib/score'
-import { REPORT_KINDS, STATUS_LABEL, type TreeReport, type Wish, type WishStatus } from '../../store/types'
+import { normalizeReportKind, REPORT_KINDS, STATUS_LABEL, type TreeReport, type Wish, type WishStatus } from '../../store/types'
 import type { OrderStage } from '../vendor/orders'
 import type { DataSource, DistrictStat, ReportReview } from './types'
 import { vendorOfDistrict } from './vendors'
@@ -106,14 +106,15 @@ export function hotspots(wishes: Wish[]) {
 }
 
 export function reportResource(r: TreeReport, review: ReportReview | undefined, orderStage: OrderStage | undefined) {
+  const kind = normalizeReportKind(r.kind, r.details)
   return {
     id: r.id,
     tree_id: r.treeId,
     species: r.species,
     road: r.road,
     district: r.district,
-    kind: r.kind,
-    kind_label: REPORT_KINDS[r.kind].label,
+    kind,
+    kind_label: REPORT_KINDS[kind].label,
     details: r.details,
     note: r.note,
     has_photo: r.hasPhoto,

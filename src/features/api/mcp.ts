@@ -112,10 +112,10 @@ export const MCP_TOOLS: McpTool[] = [
   },
   {
     name: 'list_reports',
-    description: '列出市民的樹況回報（修剪有問題、樹木生病）。',
+    description: '列出市民的樹況回報（樹木修剪問題、病蟲害、遮蔭太多或修剪過度、新長枝芽擋路、其他）。',
     inputSchema: {
       type: 'object',
-      properties: { kind: { type: 'string', enum: ['pruning', 'sick'] }, district, limit, offset },
+      properties: { kind: { type: 'string', enum: ['pruning', 'pest', 'shade', 'sprout', 'other'] }, district, limit, offset },
       additionalProperties: false,
     },
     scopes: ['reports:read'],

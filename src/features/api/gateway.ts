@@ -3,7 +3,7 @@
 // 錯誤依 RFC 6749（token 端點）與 RFC 6750（Bearer）。
 
 import { DEFAULT_WEIGHTS, normalizedWeights, CLOSED, caseDetail, caseResource, hotspots, reportResource, scoreCases, workOrderResource, workOrderRows, type WorkOrderRow } from './resources'
-import { STATUS_LABEL, type WishStatus } from '../../store/types'
+import { REPORT_KINDS, STATUS_LABEL, type WishStatus } from '../../store/types'
 import type { Weights } from '../../lib/score'
 import type { ApiClient } from './clients'
 import { verifySecret } from './secret'
@@ -311,7 +311,7 @@ const ROUTES: Route[] = [
     scopes: ['reports:read'],
     run: async ({ deps, query }) => {
       const kind = query.get('kind')
-      if (kind && kind !== 'pruning' && kind !== 'sick') return fail(400, 'invalid_request', 'kind must be pruning or sick')
+      if (kind && !(kind in REPORT_KINDS)) return fail(400, 'invalid_request', `kind must be one of ${Object.keys(REPORT_KINDS).join(', ')}`)
       const orders = deps.data.orders()
       const reviews = deps.data.reviews()
       let rows = deps.data.reports().map((r) => reportResource(r, reviews[r.id], orders[`report:${r.id}`]?.stage))

@@ -1,8 +1,9 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { getState, recordCheckin, resetAll } from '../../../store'
+import { getState, recordCheckin, resetAll, setExt } from '../../../store'
 import { TAIPEI_DISTRICTS, type Checkin, type Wish } from '../../../store/types'
 import { award, adjust, baseLedger, spend } from '../ledger'
+import { saveGameConfig } from '../config'
 import {
   PREFIX_DISTRICT,
   districtOfTreeId,
@@ -137,9 +138,13 @@ describe('lightByDistrict', () => {
     { id: 'w-bad', district: '火星區', road: '？' },
   ]
 
+  // 這裡只測歸屬，不測點數：關掉日照與寂寞樹倍率，數字才固定
+  beforeEach(() => saveGameConfig({ sunMax: 1, lonelyDays: 100_000 }))
+
   it('attributes tree actions by prefix and wish/water by the wish district', () => {
     award('checkin', 'DA0000000001', noon)
-    award('sun', 'DA0000000001', noon)
+    // 2026-10-20 前的流水帳有獨立的 sun 紀錄（現在日照是倍率，不再單獨發）；舊資料仍要歸到行政區
+    setExt('ledger', [...baseLedger(), { at: noon.getTime(), delta: 2, reason: '白天打卡的日照加成', key: 'sun:DA0000000001:2026-10-19' }])
     award('whisper', 'SL0000000001-001', noon)
     award('wish', 'w-1', noon)
     award('water', 'w-1', noon)
@@ -147,9 +152,9 @@ describe('lightByDistrict', () => {
     expect(m.get('大安區')?.total).toBe(12)
     expect(m.get('大安區')?.items.map((i) => i.action).sort()).toEqual(['checkin', 'sun'])
     expect(m.get('大安區')?.items[0].treeId).toBe('DA0000000001')
-    expect(m.get('士林區')?.total).toBe(3)
+    expect(m.get('士林區')?.total).toBe(2)
     expect(m.get('士林區')?.items[0].treeId).toBe('SL0000000001-001')
-    expect(m.get('文山區')?.total).toBe(7)
+    expect(m.get('文山區')?.total).toBe(8)
     expect(m.get('文山區')?.items.every((i) => i.wishRoad === '木新路' && i.treeId === undefined)).toBe(true)
   })
 

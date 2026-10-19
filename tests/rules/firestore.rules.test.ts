@@ -114,8 +114,8 @@ function validReport() {
     species: '樟樹',
     road: '敦化南路一段',
     district: '大安區',
-    kind: 'pruning',
-    details: ['修剪過度', '枝葉擋路'],
+    kind: 'shade',
+    details: [] as string[],
     hasPhoto: false,
     at: serverTimestamp(),
   }
@@ -604,6 +604,25 @@ describe('reports', () => {
     await assertFails(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), kind: 'fire' }))
   })
 
+  it.each(['pruning', 'pest', 'shade', 'sprout', 'other'])('allows the new category %s', async (kind) => {
+    await assertSucceeds(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), kind }))
+  })
+
+  it('denies the old kind sick on create (existing documents stay readable)', async () => {
+    await assertFails(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), kind: 'sick' }))
+    await seed({ 'reports/old': { ...validReport(), kind: 'sick', details: ['病蟲害'], at: Timestamp.now() } })
+    await assertSucceeds(getDoc(doc(alice(), 'reports/old')))
+  })
+
+  it('still accepts legacy details on a new kind (migrated local reports keep them)', async () => {
+    await assertSucceeds(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), kind: 'shade', details: ['修剪過度', '枝葉擋路'] }))
+  })
+
+  it('denies a photo field (photos are never uploaded; only the hasPhoto flag exists)', async () => {
+    await assertFails(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), photo: 'data:image/jpeg;base64,AAAA' }))
+    await assertFails(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), photoUrl: 'https://example.com/a.jpg' }))
+  })
+
   it('denies details outside the list', async () => {
     await assertFails(setDoc(doc(alice(), 'reports/r1'), { ...validReport(), details: ['修剪過度', '很醜'] }))
   })
@@ -669,13 +688,13 @@ describe('reports', () => {
 
   it('denies a non-admin updating or deleting a report', async () => {
     await assertSucceeds(setDoc(doc(alice(), 'reports/r1'), validReport()))
-    await assertFails(updateDoc(doc(alice(), 'reports/r1'), { kind: 'sick' }))
+    await assertFails(updateDoc(doc(alice(), 'reports/r1'), { kind: 'other' }))
     await assertFails(deleteDoc(doc(alice(), 'reports/r1')))
   })
 
   it('allows an admin to update and delete a report', async () => {
     await assertSucceeds(setDoc(doc(alice(), 'reports/r1'), validReport()))
-    await assertSucceeds(updateDoc(doc(admin(), 'reports/r1'), { kind: 'sick' }))
+    await assertSucceeds(updateDoc(doc(admin(), 'reports/r1'), { kind: 'other' }))
     await assertSucceeds(deleteDoc(doc(admin(), 'reports/r1')))
   })
 })

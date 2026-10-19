@@ -4804,3 +4804,73 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   background: var(--card);
   box-shadow: 0 -8px 10px -8px rgba(44, 58, 46, 0.2);
 }
+
+/* ---------- 光點規則與樹況回報（第三輪 C） ---------- */
+
+/* 回報類別：五個一鍵選，一欄排開，方便單手點 */
+.report .kind-pick {
+  grid-template-columns: 1fr;
+}
+
+.report .kind {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 14px;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.report .kind-no {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.8rem;
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+
+.report .kind.on .kind-no {
+  background: var(--amber);
+  color: #fff;
+}
+
+.kind-tag.pest {
+  background: #f6e1de;
+  color: var(--red-ink);
+}
+
+.kind-tag.shade {
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+
+.kind-tag.sprout {
+  background: #e4ecd9;
+  color: #3f5a2a;
+}
+
+.kind-tag.other {
+  background: #eee9dc;
+  color: #5a5444;
+}
+
+/* GM 光點規則：分組小標與每項的說明 */
+.gm-rules h3 {
+  margin: 14px 0 4px;
+  font-size: 1rem;
+}
+
+.gm-rules table td:last-child {
+  white-space: nowrap;
+}
+
+.gm-rules .rule-note {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted, #6b6455);
+}

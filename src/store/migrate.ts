@@ -14,7 +14,7 @@ import {
   type Firestore,
 } from 'firebase/firestore'
 import { getSession, setSession, type MigrationSummary } from './session'
-import { REPORT_KINDS, TAIPEI_DISTRICTS, WISH_REASONS, type Checkin, type TreeReport, type Whisper, type Wish } from './types'
+import { LEGACY_REPORT_DETAILS, normalizeReportKind, TAIPEI_DISTRICTS, WISH_REASONS, type Checkin, type TreeReport, type Whisper, type Wish } from './types'
 
 export const LOCAL_KEY = 'whisper-trees:v1'
 const BACKUP_KEY = 'whisper-trees:v1-backup'
@@ -110,7 +110,7 @@ export function declineMigration() {
 }
 
 const validDistrict = (d: string) => (TAIPEI_DISTRICTS as readonly string[]).includes(d)
-const ALLOWED_DETAILS = new Set(Object.values(REPORT_KINDS).flatMap((k) => k.details))
+const ALLOWED_DETAILS = new Set(LEGACY_REPORT_DETAILS)
 
 export async function runMigration(db: Firestore, uid: string, withWhispers: boolean) {
   const m = getSession().migration
@@ -147,7 +147,7 @@ export async function runMigration(db: Firestore, uid: string, withWhispers: boo
 
     // 回報
     for (const r of (l.reports ?? []).filter((x) => !x.mock)) {
-      if (!validDistrict(r.district) || !(r.kind in REPORT_KINDS)) continue
+      if (!validDistrict(r.district)) continue
       const ref = doc(collection(db, 'reports'))
       const b = writeBatch(db)
       b.set(ref, {
@@ -155,8 +155,9 @@ export async function runMigration(db: Firestore, uid: string, withWhispers: boo
         species: r.species.slice(0, 20),
         road: r.road.slice(0, 40),
         district: r.district,
-        kind: r.kind,
-        details: r.details.filter((d) => ALLOWED_DETAILS.has(d)).slice(0, 3),
+        // 舊的本機回報（pruning／sick 加細項）搬到雲端時換成新的五類，細項照舊保留
+        kind: normalizeReportKind(r.kind, r.details ?? []),
+        details: (r.details ?? []).filter((d) => ALLOWED_DETAILS.has(d)).slice(0, 3),
         hasPhoto: !!r.hasPhoto,
         at: serverTimestamp(),
       })
