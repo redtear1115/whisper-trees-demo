@@ -1,6 +1,4 @@
 import { useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { IconBack } from '../components/icons'
 import { Art, Card, MockTag, formatDate } from '../components/ui'
 import { useStore } from '../store'
 import { useBalance, useEarned, useLedger } from '../features/game/ledger'
@@ -8,7 +6,8 @@ import { stageOf } from '../features/game/character'
 import { badges } from '../features/game/badges'
 import { equip, useInventory } from '../features/game/inventory'
 import { useGameConfig } from '../features/game/config'
-import { TasksCard } from '../features/onboarding/TasksCard'
+import { TabHeader } from '../features/nav/TabLayout'
+import { SettingsSection } from '../features/account/SettingsSection'
 import { useViewedFlag } from '../features/onboarding/viewed'
 import { EventBar } from '../features/game/EventBar'
 
@@ -29,13 +28,10 @@ export default function MePage() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <Link className="btn ghost back" to="/">
-          <IconBack /> 地圖
-        </Link>
-        <span className="topbar-title">我的小芽</span>
-        <MockTag title="光點、角色、徽章都存在你的裝置上，是示意功能" />
-      </header>
+      <TabHeader title="我的" />
+      <p className="muted small">
+        <MockTag title="光點、角色、徽章都存在你的裝置上，是示意功能" /> 小芽、光點與徽章是示意功能
+      </p>
       <EventBar />
 
       <Card>
@@ -65,20 +61,7 @@ export default function MePage() {
             )}
           </div>
         </div>
-        <div className="row gap" style={{ marginTop: 12, flexWrap: 'wrap' }}>
-          <Link className="btn small" to="/shop">
-            商店
-          </Link>
-          <Link className="btn small" to="/codex">
-            圖鑑
-          </Link>
-          <Link className="btn small" to="/stamps">
-            集章冊
-          </Link>
-        </div>
       </Card>
-
-      <TasksCard />
 
       {(ownedOutfits.length > 0 || ownedFrames.length > 0) && (
         <Card>
@@ -153,6 +136,8 @@ export default function MePage() {
       </details>
 
       <p className="muted small">光點只能在樹旁或幫城市得到，不能用錢買。沒有排行榜，也不用每天來。</p>
+
+      <SettingsSection />
     </div>
   )
 }

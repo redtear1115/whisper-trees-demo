@@ -6,12 +6,12 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, loadDistricts, type District, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
-import { allWishes, totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
+import { totalWater, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { Wish } from '../store/types'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
-import { IconChevron, IconHeading, IconLamp, IconLayers, IconMore, IconNorth, IconTrash } from '../components/icons'
+import { IconChevron, IconHeading, IconLamp, IconLayers, IconNorth, IconTrash } from '../components/icons'
 import { distanceMeters } from '../lib/geo'
 import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
@@ -24,6 +24,7 @@ import { angleDiff, requestHeadingPermission, watchHeading } from '../features/m
 import { ringRadius, treesInRing } from '../features/map/ring'
 import { hasFinePointer } from '../features/map/rotation'
 import { RotationControl } from '../features/map/RotationControl'
+import { BalanceChip } from '../features/nav/BalanceChip'
 
 type Sheet =
   | { kind: 'tree'; tree: Tree }
@@ -85,10 +86,6 @@ export default function MapPage() {
   const firstLight = useStore((s) => firstLightEarned(s))
   const tasksDone = useStore((s) => tasks(s).filter((t) => t.done).length) // 回數字才不會每次都是新值
   const allTasksDone = useStore((s) => newcomerDone(s))
-  const unseen = useStore((s) => s.myWishIds.concat(Object.keys(s.watered)).some((id) => {
-    const w = allWishes(s).find((x) => x.id === id)
-    return w && s.seen[id] !== undefined && s.seen[id] < w.history.length
-  }))
 
   useEffect(() => {
     loadDistricts().then((ds) => {
@@ -352,7 +349,7 @@ export default function MapPage() {
     }
   }, [])
 
-  // 從「我的許願」點「在地圖上看」：切到全市，飛到那個許願
+  // 從「樹洞」的我的許願點「在地圖上看」：切到全市，飛到那個許願
   useEffect(() => {
     if (!focus || !ready || !map.current) return
     setMode('city')
@@ -499,7 +496,7 @@ export default function MapPage() {
       node.style.width = node.style.height = `${size}px`
       node.style.backgroundImage = `url(${assetUrl('sapling')})`
       node.setAttribute('aria-label', `${w.road} 的許願`)
-      // 地圖外的標記不進 Tab 順序；鍵盤使用者從「我的許願」進入
+      // 地圖外的標記不進 Tab 順序；鍵盤使用者從「樹洞」的我的許願進入
       node.tabIndex = -1
       node.onclick = (ev) => {
         ev.stopPropagation()
@@ -530,14 +527,7 @@ export default function MapPage() {
       {/* 頁首放在地圖前面：鍵盤 Tab 先到導覽，再到地圖 */}
       <header className="map-top">
         <h1 className="brand">曦語</h1>
-        <nav className="row gap" aria-label="主要">
-          <Link className="btn small light" to="/wishes">
-            我的許願{unseen && <span className="dot-badge" aria-label="有新進度" />}
-          </Link>
-          <Link className="btn small light" to="/more" aria-label="選單：小芽、商店、圖鑑、後台">
-            <IconMore /> 選單
-          </Link>
-        </nav>
+        <BalanceChip />
       </header>
       <div ref={el} className="map" aria-label="樹木地圖" role="region" />
 
@@ -652,7 +642,7 @@ export default function MapPage() {
       {tour.open && !sheet && <TourSheet step={tour.step} />}
 
       {!sheet && showTasksChip({ ready: userReady, firstLight, tourOpen: tour.open, allDone: allTasksDone }) && (
-        <Link className="tasks-chip" to="/me" data-testid="tasks-chip">
+        <Link className="tasks-chip" to="/explore" data-testid="tasks-chip">
           新手任務 {tasksDone}/4
         </Link>
       )}

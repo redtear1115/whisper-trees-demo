@@ -49,7 +49,7 @@ describe('tourView in Demo mode', () => {
     expect(tourView({ ob: {}, firstLight: false, ready: true, demo: true }).open).toBe(false)
     expect(tourView({ ob: { tourStep: 2 }, firstLight: false, ready: true, demo: true }).open).toBe(false)
   })
-  it('opens in Demo mode after 選單「新手引導」(tourDismissedAt = 0)', () => {
+  it('opens in Demo mode after 「我的」的「新手引導」(tourDismissedAt = 0)', () => {
     expect(tourView({ ob: { tourStep: 2, tourDismissedAt: 0 }, firstLight: false, ready: true, demo: true })).toEqual({ open: true, step: STEP_SCAN, needsInit: false })
     expect(tourView({ ob: reopenPatch({}), firstLight: false, ready: true, demo: true }).open).toBe(true)
   })

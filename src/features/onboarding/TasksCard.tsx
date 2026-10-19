@@ -4,7 +4,7 @@ import { Card } from '../../components/ui'
 import { firstLightEarned, onboarding, patchOnboarding, tasks } from '../game/onboarding'
 import { useMemo } from 'react'
 
-/** /me 的新手任務卡：拿到第一道光後出現，順序不拘，可以收合；全做完變成一行小字。 */
+/** /explore 的新手任務卡：拿到第一道光後出現，順序不拘，可以收合；全做完變成一行小字。 */
 export function TasksCard() {
   const state = useStore((s) => s) // tasks() 每次回新陣列，不能直接當 selector（會無限重繪）
   const list = useMemo(() => tasks(state), [state])

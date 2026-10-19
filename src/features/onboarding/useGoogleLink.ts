@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { linkGoogle } from '../../lib/firebase'
 
-/** 「用 Google 保留紀錄」：選單的帳號卡與新手引導共用。linkGoogle 要在 click 事件裡同步呼叫（popup 不被擋）。 */
+/** 「用 Google 保留紀錄」：「我的」的帳號卡與新手引導共用。linkGoogle 要在 click 事件裡同步呼叫（popup 不被擋）。 */
 export function useGoogleLink() {
   const [msg, setMsg] = useState<string | null>(null)
   const link = () => {

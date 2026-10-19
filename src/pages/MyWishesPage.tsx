@@ -6,7 +6,8 @@ import { WishCard } from '../features/wish/WishCard'
 import { Card } from '../components/ui'
 import type { Wish } from '../store/types'
 
-export default function MyWishesPage() {
+/** 我的許願內容：/wishes 與 /journal 共用 */
+export function MyWishes({ sub = false }: { sub?: boolean }) {
   const wishes = useWishes()
   const myIds = useStore((s) => s.myWishIds)
   const watered = useStore((s) => s.watered)
@@ -15,25 +16,36 @@ export default function MyWishesPage() {
   const wateredOnly = wishes.filter((w) => !myIds.includes(w.id) && watered[w.id])
 
   return (
+    <div data-testid="my-wishes">
+      <Section sub={sub} title="我許的願" list={mine} seen={seen} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
+      <Section sub={sub} title="我澆過水的別人的願" list={wateredOnly} seen={seen} empty="還沒有幫別人的願望澆過水。" />
+    </div>
+  )
+}
+
+/** /wishes：舊連結仍可用，和樹洞頁的「我的許願」是同一份內容 */
+export default function MyWishesPage() {
+  return (
     <div className="page">
       <header className="topbar">
-        <Link className="btn ghost back" to="/">
-          <IconBack /> 地圖
+        <Link className="btn ghost back" to="/journal">
+          <IconBack /> 樹洞
         </Link>
-        <span className="topbar-title">我的許願</span>
+        <h1 className="topbar-title">我的許願</h1>
       </header>
-      <Section title="我許的願" list={mine} seen={seen} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
-      <Section title="我澆過水的別人的願" list={wateredOnly} seen={seen} empty="還沒有幫別人的願望澆過水。" />
+      <MyWishes />
     </div>
   )
 }
 
 function Section({
+  sub,
   title,
   list,
   seen,
   empty,
 }: {
+  sub: boolean
   title: string
   list: Wish[]
   seen: Record<string, number>
@@ -41,7 +53,7 @@ function Section({
 }) {
   return (
     <>
-      <h2 className="section-title">{title}</h2>
+      {sub ? <h3 className="section-title">{title}</h3> : <h2 className="section-title">{title}</h2>}
       {list.length === 0 && <p className="muted">{empty}</p>}
       {list.map((w) => (
         <SeenCard key={w.id} wish={w} changed={seen[w.id] !== undefined && seen[w.id] < w.history.length} />

@@ -6,7 +6,7 @@ import { inventory } from './inventory'
 import { baseLedger } from './ledger'
 
 export interface Onboarding {
-  /** 「收集光點」引導目前停在第幾步，從選單接著看 */
+  /** 「收集光點」引導目前停在第幾步，從「我的」接著看 */
   tourStep?: number
   /** 按了「之後再說」 */
   tourDismissedAt?: number
@@ -16,7 +16,7 @@ export interface Onboarding {
   viewedBadgesAt?: number
   /** 新手禮（草帽）送出的時間；擁有權由 inventory() 推算 */
   giftAt?: number
-  /** 收合 /me 的新手任務卡 */
+  /** 收合 /explore 的新手任務卡 */
   tasksCollapsed?: boolean
   /** 「城市的新朋友」慶祝過的時間，只慶祝一次 */
   newcomerCelebratedAt?: number
@@ -77,7 +77,13 @@ export function tasks(s?: State): Task[] {
       to: '/shop',
       done: !!(inv.equipped.outfit || inv.equipped.frame) || Object.values(inv.civic).some((n) => n > 0),
     },
-    { id: 'codex', label: '看看圖鑑與成就', to: '/codex', done: !!(ob.viewedCodexAt && ob.viewedBadgesAt) },
+    {
+      id: 'codex',
+      label: '看看圖鑑與成就',
+      hint: '圖鑑在「探索」，成就徽章在「我的」',
+      to: '/explore',
+      done: !!(ob.viewedCodexAt && ob.viewedBadgesAt),
+    },
     {
       id: 'whisper',
       label: '在樹洞留一句話',

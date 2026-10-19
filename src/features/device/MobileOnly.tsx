@@ -57,7 +57,7 @@ function DesktopNotice() {
         <Link className="btn" to="/gov">
           政府端（桌機）
         </Link>
-        <Link className="btn" to="/more">
+        <Link className="btn" to="/demo-control">
           其他後台
         </Link>
       </div>

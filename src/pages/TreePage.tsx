@@ -19,6 +19,9 @@ export default function TreePage() {
   const navigate = useNavigate()
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
+  // 從樹洞或圖鑑點進來，返回就回到那一頁；其他（掃碼、地圖）回地圖
+  const fromTab = (location.state as { from?: string } | null)?.from
+  const back = fromTab === '/journal' ? { to: '/journal', label: '樹洞' } : { to: '/', label: '地圖' }
   const night = !isDaytime()
   const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
@@ -57,8 +60,8 @@ export default function TreePage() {
   return (
     <div className="page tree-page">
       <header className="topbar">
-        <button className="btn ghost back" onClick={() => navigate('/')}>
-          <IconBack /> 地圖
+        <button className="btn ghost back" onClick={() => navigate(back.to)}>
+          <IconBack /> {back.label}
         </button>
         <h1 className="topbar-title">{tree.species}</h1>
       </header>

@@ -109,7 +109,7 @@ function StepScan() {
         ) : (
           <>
             <p className="small">
-              可以開 Demo 模式：用模擬定位，不用站在樹旁邊也能打卡。想離開，到「選單 → Demo 工具」。
+              可以開 Demo 模式：用模擬定位，不用站在樹旁邊也能打卡。想離開，到「我的 → 設定與其他 → Demo 工具」。
             </p>
             <a className="btn" href={`${import.meta.env.BASE_URL}?demo=1`}>
               開啟 Demo 模式

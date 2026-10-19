@@ -67,14 +67,6 @@ export const IconLayers = () => (
   </Svg>
 )
 
-export const IconMore = () => (
-  <Svg>
-    <circle cx="5.5" cy="12" r="1.2" />
-    <circle cx="12" cy="12" r="1.2" />
-    <circle cx="18.5" cy="12" r="1.2" />
-  </Svg>
-)
-
 export const IconSprout = () => (
   <Svg>
     <path d="M12 20v-8" />
@@ -100,5 +92,48 @@ export const IconNorth = () => (
   <Svg>
     <path d="M12 3l4 9h-8z" fill="currentColor" stroke="none" />
     <path d="M12 21l-4-9h8z" />
+  </Svg>
+)
+
+// ---- 底部導覽 ----
+
+/** 集章冊：一枚圓章 */
+export const IconStamp = () => (
+  <Svg>
+    <path d="M9 4h6v6l2.5 3H6.5L9 10z" />
+    <path d="M5 20h14M7 16.5h10V20H7z" />
+  </Svg>
+)
+
+/** 探索：羅盤 */
+export const IconCompass = () => (
+  <Svg>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M15.5 8.5l-2 5-5 2 2-5z" />
+  </Svg>
+)
+
+/** 首頁（地圖）：地圖上的定位點 */
+export const IconMapPin = () => (
+  <Svg>
+    <path d="M12 21s-6.5-5.6-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z" />
+    <circle cx="12" cy="10.5" r="2.4" />
+  </Svg>
+)
+
+/** 樹洞：樹幹上的一個洞 */
+export const IconHollow = () => (
+  <Svg>
+    <path d="M7 20V9a5 5 0 0 1 10 0v11" />
+    <path d="M5 20h14" />
+    <ellipse cx="12" cy="13.5" rx="2" ry="3" />
+  </Svg>
+)
+
+/** 我的：小芽的頭像（圓＋肩線） */
+export const IconPerson = () => (
+  <Svg>
+    <circle cx="12" cy="8.5" r="3.6" />
+    <path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" />
   </Svg>
 )

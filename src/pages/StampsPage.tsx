@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { IconBack } from '../components/icons'
+import { TabHeader } from '../features/nav/TabLayout'
 import { Art, Card, formatDate } from '../components/ui'
 import { useStore, useWishes } from '../store'
 import { baseLedger } from '../features/game/ledger'
@@ -37,12 +37,7 @@ export default function StampsPage() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <Link className="btn ghost back" to="/me">
-          <IconBack /> 小芽
-        </Link>
-        <h1 className="topbar-title">集章冊</h1>
-      </header>
+      <TabHeader title="集章冊" />
       <p>
         在各區的樹旁掃樹牌，每棵不同的樹算一次。已集到 <strong data-testid="stamp-count">{stamps.length}</strong> 枚章。
       </p>

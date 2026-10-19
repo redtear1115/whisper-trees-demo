@@ -15,7 +15,7 @@ export interface TourInput {
   firstLight: boolean
   /** 這個 uid 的使用者文件已載入；沒載入前不知道有沒有按過「之後再說」，所以先不顯示 */
   ready: boolean
-  /** Demo 模式（?demo=1）：現場展示不自動跳引導，要看從選單打開 */
+  /** Demo 模式（?demo=1）：現場展示不自動跳引導，要看從「我的」打開 */
   demo?: boolean
 }
 
@@ -31,9 +31,9 @@ export interface TourView {
  * 引導要不要開、停在哪一步。
  * - 還沒拿到第一道光：沒按過「之後再說」就開（只會在第 1、2 步）。
  * - 已拿到第一道光：只有「開始過」（tourStep 有存）的人才接著看，直接到第 3 步慶祝；
- *   舊使用者（早就有光點、沒看過引導）不會被打擾，要看可以從選單進。
+ *   舊使用者（早就有光點、沒看過引導）不會被打擾，要看可以從「我的」進。
  * - 走完（tourStep = 5）或按過「之後再說」就收起。
- * - Demo 模式不自動打開；從選單打開過（tourDismissedAt 被設成 0）才顯示。
+ * - Demo 模式不自動打開；從「我的」打開過（tourDismissedAt 被設成 0）才顯示。
  */
 export function tourView({ ob, firstLight, ready, demo }: TourInput): TourView {
   const stored = ob.tourStep
@@ -48,7 +48,7 @@ export function tourView({ ob, firstLight, ready, demo }: TourInput): TourView {
 }
 
 /**
- * 從選單「新手引導」重新打開要寫的欄位。
+ * 從「我的」的「新手引導」重新打開要寫的欄位。
  * 「之後再說」用 0 表示沒收起（雲端是逐欄合併，欄位寫 undefined 不會清掉）；已走完就從第 1 步重看。
  */
 export function reopenPatch(ob: Onboarding): Pick<Onboarding, 'tourDismissedAt' | 'tourStep'> {

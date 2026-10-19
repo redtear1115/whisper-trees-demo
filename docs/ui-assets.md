@@ -37,7 +37,7 @@
 | `item-frame-autumn` | 160×160 | 320×320 | `public/assets/ph/item-frame-autumn.svg` | 商店 | `src/features/game/config.ts:50` | 樹的頁面相框：秋楓（同上） |
 | `item-fund` | 160×160 | 320×320 | `public/assets/ph/item-fund.svg` | 商店 | `src/features/game/config.ts:51` | 回到城市：捐給補種基金 |
 | `item-water-bag` | 160×160 | 320×320 | `public/assets/ph/item-water-bag.svg` | 商店 | `src/features/game/config.ts:52` | 回到城市：認養新植樹苗的澆水袋 |
-| `species-card` | 160×160 | 320×320 | `public/assets/ph/species-card.svg` | 圖鑑 | `src/pages/CodexPage.tsx:73` | 樹種卡通用底圖；正式版每個樹種一張（先做前 40 名，清單見 public/data/species.json） |
+| `species-card` | 160×160 | 320×320 | `public/assets/ph/species-card.svg` | 圖鑑 | `src/features/codex/CodexSection.tsx:70` | 樹種卡通用底圖；正式版每個樹種一張（先做前 40 名，清單見 public/data/species.json） |
 | `badge-first` | 120×120 | 240×240 | `public/assets/ph/badge-first.svg` | 成長徽章 | `src/features/game/badges.ts:38（動態）` | 第一次相遇 |
 | `badge-species-3` | 120×120 | 240×240 | `public/assets/ph/badge-species-3.svg` | 成長徽章 | `src/features/game/badges.ts:38（動態）` | 認識三種樹 |
 | `badge-species-10` | 120×120 | 240×240 | `public/assets/ph/badge-species-10.svg` | 成長徽章 | `src/features/game/badges.ts:38（動態）` | 樹的朋友（10 種） |
