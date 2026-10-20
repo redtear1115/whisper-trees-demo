@@ -178,11 +178,20 @@ describe('step 0 split into two sub-steps (animal → district), same tourStep',
     ob = apply(ob, { animal: 'pangolin', tourSub: 'district' }) // 「就牠了」
     expect(view(ob)).toMatchObject({ step: STEP_ANIMAL, needsInit: false })
     expect(tourSub(ob)).toBe('district')
-    ob = apply(ob, { tourStep: STEP_INTRO }) // 「好了，出發」或「先跳過」
+    ob = apply(ob, { tourStep: STEP_INTRO }) // 「好了，出發」
     expect(view(ob).step).toBe(STEP_INTRO)
     ob = apply(ob, { tourStep: STEP_ANIMAL, tourSub: 'district' }) // 上一步
     expect(view(ob).step).toBe(STEP_ANIMAL)
     expect(tourSub(ob)).toBe('district')
+  })
+
+  it('上一步 on the district step goes back to the animal step and stays on step 0', () => {
+    let ob: Record<string, unknown> = { tourStep: STEP_ANIMAL, animal: 'pangolin', tourSub: 'district' }
+    expect(tourSub(ob)).toBe('district')
+    ob = apply(ob, { tourSub: 'animal' })
+    expect(view(ob)).toMatchObject({ open: true, step: STEP_ANIMAL, needsInit: false })
+    expect(tourSub(ob)).toBe('animal')
+    expect(ob.animal).toBe('pangolin') // 選過的動物還在
   })
 
   it('people already past step 0 are not dragged back, whatever tourSub says (or does not say)', () => {

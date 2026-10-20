@@ -6,7 +6,8 @@
 // 第 0 步在畫面上拆成兩個小步驟（2026-10-20，第四輪 Y）：先選動物，再「你在哪一區？」。
 // 沒有改編號、不搬資料：兩個小步驟都是 tourStep = 0，用另一個欄位 tourSub（'animal' | 'district'，沒有就是 'animal'）分。
 //   - 「就牠了」：寫 { tourSub: 'district' }，tourStep 仍是 0。
-//   - 「好了，出發」或「先跳過」：寫 { tourStep: 1 }（tourSub 不用清，tourStep ≠ 0 時不看它）。
+//   - 「好了，出發」：寫 { tourStep: 1 }（tourSub 不用清，tourStep ≠ 0 時不看它）。
+//   - 區這一步的「上一步」：寫 { tourSub: 'animal' }，回到選動物。「之後再說」跟每一步一樣收起整個引導（第五輪統一：全程只有「之後再說」一種略過，沒有「先跳過」）。
 //   - 第 1 步的「上一步」：寫 { tourStep: 0, tourSub: 'district' }。
 //   - 重看（reopenPatch）走完或沒開始過的人：從頭，寫 { tourStep: 0, tourSub: 'animal' }（雲端欄位清不掉，所以寫值不寫 undefined）。
 // 已存 tourStep ≥ 1 的人完全不受影響；舊版用戶端不認得 tourSub，會把第 0 步畫成原本的樣子，不會空白。

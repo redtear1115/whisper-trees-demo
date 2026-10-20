@@ -77,7 +77,6 @@ function StepAnimal() {
       <h2>選一隻陪你的動物</h2>
       <p>牠會在地圖上代表你，走到哪裡都跟著。</p>
       <AnimalPicker name="tour-animal" />
-      <p className="muted small">之後可以在「我的」換。</p>
       <div className="tour-actions sticky">
         {/* 沒點過也把目前的（預設臺灣黑狗）存下來，再進「你在哪一區？」 */}
         <button className="btn primary" onClick={() => patchOnboarding({ animal: animal.id, tourSub: 'district' })}>
@@ -102,9 +101,10 @@ function StepDistrict() {
         <button className="btn primary" disabled={!chosen} onClick={() => go(STEP_INTRO)}>
           好了，出發
         </button>
-        <button className="btn" onClick={() => go(STEP_INTRO)}>
-          先跳過
+        <button className="btn" onClick={() => patchOnboarding({ tourSub: 'animal' })}>
+          上一步
         </button>
+        <Later />
       </div>
     </>
   )
