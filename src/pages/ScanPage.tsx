@@ -14,7 +14,6 @@ import { awardCheckin, isDaytime } from '../features/game/ledger'
 import { loadProtectedTrees } from '../features/game/protectedTrees'
 import { checkinDrops, type CheckinDrops } from '../features/game/drops'
 import { SCAN_CLOSE_TO } from '../features/nav/tabs'
-import { shouldAskMoodNow } from '../features/mood/mood'
 
 type Step = { kind: 'scan' } | { kind: 'working'; text: string } | { kind: 'error'; text: string }
 
@@ -24,7 +23,7 @@ export interface CheckinState {
   glow?: number
   /** 這次打卡掉落的稀有配件與樹上住戶（模擬），樹的頁面顯示一次 */
   drops?: CheckinDrops
-  /** 這次打卡後要問「現在的心情？」（距離上次詢問夠久、使用者文件已載入）；樹的頁面還會再確認一次 */
+  /** 這次打卡後要展開「現在的心情？」（使用者文件已載入才問，太早寫會蓋掉雲端的日記） */
   askMood?: boolean
 }
 
@@ -70,8 +69,7 @@ export default function ScanPage() {
       await loadProtectedTrees() // 名冊還沒讀完就掃的話，等它，受保護的樹才會拿到 20
       glow = awardCheckin(id, checkin.kind)
       if (ready) drops = checkinDrops(id, checkin.kind, firstToday)
-      // 文件還沒載入就看不到上次問的時間，寧可這次不問
-      askMood = ready && shouldAskMoodNow()
+      askMood = ready
     }
     navigate(`/tree/${id}`, { replace: true, state: { checkin, glow, drops, askMood } satisfies CheckinState })
   }

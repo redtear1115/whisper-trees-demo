@@ -1,11 +1,11 @@
 // 打卡後的心情（團隊簡報 v20 p15，使用者決定 2026-10-20）。規格：docs/specs/04-tree-page.md「打卡後的心情」。
 // 原則：玩家自己選（系統不猜）、隨時可以換、不評價情緒、臉部留白（emoji 只出現在選擇介面）、選心情沒有光點。
 // 2026-10-21 第五輪：心情併進樹洞卡裡（樹洞卡上方一列可以不選的小按鈕，點了就存），不再是獨立的詢問卡。
-// 存在使用者自己的資料：ext.mood（雲端是 users/{uid}.mood 的 map 欄位），只存最新一次的選擇與上次詢問的時間。
+// 2026-10-21：每一種跟樹的互動（打卡、摸摸樹、回報、樹洞）都可以加心情，每次都問、沒有間隔；
+// 每一次的心情存在日記（features/journal/diary.ts）。這裡的 ext.mood（雲端 users/{uid}.mood）只留「現在的心情」：最新一次的選擇。
 
 import { getExt, setExt, useStore, type State } from '../../store'
 import { whenUserReady } from '../../store/session'
-import { gameConfig } from '../game/config'
 
 export type MoodId = 'calm' | 'happy' | 'tired' | 'sad' | 'anxious' | 'angry' | 'unsure'
 
@@ -41,12 +41,11 @@ export function moodById(id: unknown): Mood | undefined {
 export interface MoodState {
   /** 最新一次選的心情；清除時是 null（雲端是逐欄合併，欄位寫 undefined 清不掉） */
   current?: { id: string; at: number } | null
-  /** 上次詢問的時間（那一列顯示出來、或選了，都算） */
+  /** 舊資料：上次詢問的時間（2026-10-21 起不再有詢問間隔，不再寫） */
   askedAt?: number
 }
 
 const EMPTY: MoodState = {}
-export const DEFAULT_MOOD_INTERVAL_HOURS = 8
 
 export function moodState(s?: State): MoodState {
   return getExt<MoodState>('mood', EMPTY, s)
@@ -61,23 +60,6 @@ export function currentMoodOf(ms: MoodState): { mood: Mood; at: number } | null 
 
 export function currentMood(s?: State) {
   return currentMoodOf(moodState(s))
-}
-
-/**
- * 這次打卡後要不要問心情：從沒問過就問；距離上次詢問（那一列顯示出來，選或不選都算）滿 intervalHours 小時才再問。
- * 間隔 0 = 每次打卡都問。上次時間在未來（時鐘被調過）當作沒問過，不會因此永遠不問。純函式。
- */
-export function shouldAskMood(now: number, lastAskedAt: number | undefined, intervalHours: number = DEFAULT_MOOD_INTERVAL_HOURS): boolean {
-  if (lastAskedAt === undefined || !Number.isFinite(lastAskedAt)) return true
-  const elapsed = now - lastAskedAt
-  if (elapsed < 0) return true
-  const hours = Number.isFinite(intervalHours) && intervalHours > 0 ? intervalHours : 0
-  return elapsed >= hours * 3_600_000
-}
-
-/** 現在該不該問（讀 store 與 GM 設定的間隔） */
-export function shouldAskMoodNow(now = Date.now(), s?: State): boolean {
-  return shouldAskMood(now, moodState(s).askedAt, gameConfig(s).moodIntervalHours)
 }
 
 /** 「現在的心情」旁邊的相對時間：剛剛、N 分鐘前、N 小時前、昨天、N 天前 */
@@ -96,26 +78,14 @@ export function useMood() {
 }
 
 /**
- * 唯一的寫入口，和目前的值合併。除了 `noteMoodAsked`（那一列顯示的那一刻），都在使用者按下去之後才呼叫，寫入前先等使用者文件載入（雲端模式），
+ * 唯一的寫入口，和目前的值合併。都在使用者按下去之後才呼叫，寫入前先等使用者文件載入（雲端模式），
  * 和打卡的掉落一樣：太早寫會用空的資料蓋掉雲端的。等不到（離線逾時）仍然寫，欄位是逐欄合併，不會動到別的欄位。
  */
 function patchMood(partial: Partial<MoodState>) {
   setExt('mood', { ...moodState(), ...partial })
 }
 
-/** 打卡後那一列顯示出來的那一刻：記下詢問時間（不選也算問過，間隔內不再問） */
-export async function noteMoodAsked(now = Date.now()) {
-  await whenUserReady()
-  patchMood({ askedAt: now })
-}
-
-/** 打卡後的那一列：點一個心情就存（可以再點別的來換），同時記下詢問時間 */
-export async function answerMood(id: MoodId, now = Date.now()) {
-  await whenUserReady()
-  patchMood({ current: { id, at: now }, askedAt: now })
-}
-
-/** 我的：換心情（不算一次詢問，不動詢問時間） */
+/** 換「現在的心情」：我的頁面，以及每次在互動後選心情（diary.pickMood） */
 export async function changeMood(id: MoodId, now = Date.now()) {
   await whenUserReady()
   patchMood({ current: { id, at: now } })

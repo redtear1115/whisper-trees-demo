@@ -134,3 +134,24 @@ describe('onboarding in the cloud store', () => {
     expect(tourView({ ob: a.ob.onboarding(), firstLight: false, ready: true })).toMatchObject({ open: true, step: 2 })
   })
 })
+
+describe('diary (moods on interactions) in the cloud store', () => {
+  it('saves to users/{uid}.diary, survives a restart, and clearing a mood removes the entry on the server', async () => {
+    const a = await boot()
+    const d = await import('../../src/features/journal/diary')
+    await d.pickMood('checkin', 'T1', 1000, 'calm')
+    await d.recordTouch('T1', 'hug', 2000)
+    await vi.waitFor(async () => expect((await serverDoc(a.uid))?.diary?.entries).toHaveLength(2), { timeout: 10000 })
+    await d.pickMood('checkin', 'T1', 1000, null)
+    await vi.waitFor(
+      async () => expect((await serverDoc(a.uid))?.diary?.entries).toEqual([{ kind: 'touch', treeId: 'T1', at: 2000, touch: 'hug' }]),
+      { timeout: 10000 },
+    )
+    await shutdown()
+
+    const b = await boot()
+    const d2 = await import('../../src/features/journal/diary')
+    await vi.waitFor(() => expect(d2.diary().entries).toEqual([{ kind: 'touch', treeId: 'T1', at: 2000, touch: 'hug' }]), { timeout: 10000 })
+    expect(b.uid).toBe(a.uid)
+  })
+})

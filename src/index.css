@@ -3116,6 +3116,26 @@ html:has(.tab-shell) {
   white-space: pre-wrap;
 }
 
+/* 日記一列：做了什麼（粗）＋當時的心情（小膠囊） */
+.journal-what {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.journal-mood {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  font-size: 0.875rem;
+}
+.interaction-mood {
+  margin: 8px 0;
+}
+
 /* 地圖頁的抽屜（點樹、許願、新手引導）坐在底部導覽上面，導覽一直看得到、點得到 */
 .map-page .sheet {
   bottom: var(--nav-h);

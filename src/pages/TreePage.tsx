@@ -17,8 +17,7 @@ import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
 import { DropCards } from '../features/game/DropCards'
-import { MoodAsk, MoodCollapsed, MoodLine } from '../features/mood/MoodCards'
-import { currentMoodOf, noteMoodAsked, shouldAskMoodNow, useMood } from '../features/mood/mood'
+import { InteractionMood } from '../features/journal/InteractionMood'
 import { useCelebrationBlocking } from '../features/onboarding/celebrationGate'
 import { PhotoCarousel } from '../features/species/PhotoCarousel'
 import { photoIndexForTree } from '../features/species/carousel'
@@ -93,28 +92,12 @@ export default function TreePage() {
   const whispers = useMemo(() => whispersOf(treeId), [treeId, myWhispers])
   const capsule = onSite ? whispers.find((w) => w.at < sessionStart) : undefined
   const thisVisit = whispers.filter((w) => w.at >= sessionStart && !w.mock)
-  // 打卡後的心情（第五輪起併進樹洞卡）：剛打卡成功（或遠觀）、距離上次詢問夠久、沒有慶祝視窗開著，才在樹洞卡上方問。
-  // 那一列顯示出來的那一刻就記下詢問時間（不選也算問過）；記下之後 shouldAskMoodNow 變 false，所以用 state 把
-  // 「這一頁問過了」記住，這一列才不會一點就消失。重新整理後不再問，只剩選過的那一句回應。
-  const moodStored = useMood()
+  // 跟樹互動時的心情（2026-10-21）：打卡是預設的那一次互動，剛掃完就展開「現在的心情？」，其他時候縮成一行。
+  // 有慶祝視窗開著時先不出現，等它關掉。樹洞的心情在樹洞卡裡（每一句話各自一個）。
   const celebrating = useCelebrationBlocking()
-  const askMood = askMoodState && onSite !== null && !celebrating && shouldAskMoodNow()
-  const [askedFor, setAskedFor] = useState<string | null>(null)
-  useEffect(() => {
-    if (!askMood) return
-    setAskedFor(treeId)
-    void noteMoodAsked()
-  }, [askMood, treeId])
-  const asking = askMood || askedFor === treeId
-  const mood = currentMoodOf(moodStored)
-  const moodThisVisit = onSite && recent && mood && mood.at >= recent.at ? mood.mood : null
-  const moodSlot: ReactNode = asking ? (
-    <MoodAsk selected={moodThisVisit?.id ?? null} />
-  ) : moodThisVisit ? (
-    <MoodLine id={moodThisVisit.id} />
-  ) : null
-  // 留完樹洞後，剛問過的那一列縮成一行「心情：疲憊・改」
-  const moodSlotAfter: ReactNode = asking ? <MoodCollapsed selected={moodThisVisit?.id ?? null} /> : moodSlot
+  const checkinMood =
+    onSite && recent && !celebrating ? <InteractionMood kind="checkin" treeId={treeId} at={recent.at} open={askMoodState} /> : null
+  const lastWhisperAt = thisVisit.length ? thisVisit[thisVisit.length - 1].at : null
   const glow = seededInt(`${treeId}:${weekKey()}`, 0, 30) + (visitedThisWeek(treeId) ? 1 : 0)
 
   if (tree === undefined) return <div className="page center muted">正在找這棵樹…</div>
@@ -170,6 +153,7 @@ export default function TreePage() {
         />
       </section>
       <DropCards drops={drops} />
+      {checkinMood}
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
       {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}
@@ -193,7 +177,11 @@ export default function TreePage() {
 
       <div id="whisper" className="anchor-target">
         {onSite ? (
-          <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} mood={moodSlot} moodAfter={moodSlotAfter} />
+          <WhisperBox
+            treeId={treeId}
+            said={thisVisit.map((w) => w.text)}
+            mood={(open) => (lastWhisperAt !== null ? <InteractionMood kind="whisper" treeId={treeId} at={lastWhisperAt} open={open} /> : null)}
+          />
         ) : (
           <section className="card">
             <p>{nearTree ? '你已經在樹旁邊了。掃一下樹幹上的樹牌，就能對它說句話。' : '想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。'}</p>
@@ -333,7 +321,8 @@ function CheckinStrip({
   )
 }
 
-function WhisperBox({ treeId, said, mood, moodAfter }: { treeId: string; said: string[]; mood?: ReactNode; moodAfter?: ReactNode }) {
+/** mood：留完話之後那一句的心情（剛說完展開，之後縮成一行） */
+function WhisperBox({ treeId, said, mood }: { treeId: string; said: string[]; mood: (open: boolean) => ReactNode }) {
   const cloud = useSession().backend === 'cloud'
   const [text, setText] = useState('')
   const [writing, setWriting] = useState(said.length === 0)
@@ -357,7 +346,7 @@ function WhisperBox({ treeId, said, mood, moodAfter }: { treeId: string; said: s
         >
           再說一句
         </button>
-        {moodAfter && <div className="whisper-mood">{moodAfter}</div>}
+        <div className="whisper-mood">{mood(!!justSaid)}</div>
       </section>
     )
 
@@ -365,7 +354,6 @@ function WhisperBox({ treeId, said, mood, moodAfter }: { treeId: string; said: s
     <section className="whisper" aria-labelledby="whisper-title">
       <h2 id="whisper-title">樹洞</h2>
       <p className="muted small">{cloud ? '其他人看不到。存在曦語的雲端，不公開。' : '只有你看得到。不會上傳，也不公開。'}</p>
-      {mood && <div className="whisper-mood">{mood}</div>}
       <form
         onSubmit={(e) => {
           e.preventDefault()

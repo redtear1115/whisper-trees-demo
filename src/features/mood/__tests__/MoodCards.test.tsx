@@ -5,10 +5,11 @@ import { MoodAsk, MoodLine } from '../MoodCards'
 import { MoodRowView } from '../MoodRow'
 import { MOODS } from '../mood'
 
+const noop = () => {}
 const render = (el: React.ReactElement) => renderToStaticMarkup(<MemoryRouter>{el}</MemoryRouter>)
 
-describe('樹洞卡上方的心情列（第五輪）', () => {
-  const html = render(<MoodAsk selected={null} />)
+describe('互動後的心情列', () => {
+  const html = render(<MoodAsk selected={null} onPick={noop} onClear={noop} />)
   it('標題「現在的心情？」加「可以不選」，七個選項是 aria-pressed 的按鈕（不是 radio），每個有 emoji 與名稱', () => {
     expect(html).toContain('現在的心情？')
     expect(html).toContain('可以不選')
@@ -29,7 +30,7 @@ describe('樹洞卡上方的心情列（第五輪）', () => {
     expect(html).toContain('data-value=""')
   })
   it('選了：那個按鈕 aria-pressed、有勾（實心樣式 .on），其他不是；只出現一句回應', () => {
-    const out = render(<MoodAsk selected="tired" />)
+    const out = render(<MoodAsk selected="tired" onPick={noop} onClear={noop} />)
     expect(out.match(/aria-pressed="true"/g)).toHaveLength(1)
     expect(out).toMatch(/class="mood-chip on"[^>]*aria-pressed="true"/)
     expect(out).toContain('mood-chip-check') // 勾
@@ -42,7 +43,7 @@ describe('樹洞卡上方的心情列（第五輪）', () => {
 describe('森林的回應：一句，沒有「你的光」也沒有建議', () => {
   it('每種心情都寫出自己的那一句，不顯示光與姿態', () => {
     for (const m of MOODS) {
-      const out = render(<MoodAsk selected={m.id} />)
+      const out = render(<MoodAsk selected={m.id} onPick={noop} onClear={noop} />)
       expect(out).toContain(m.response.replace(/"/g, '&quot;'))
       expect(out).not.toContain(m.light)
       expect(out).not.toMatch(/你的光|建議/)

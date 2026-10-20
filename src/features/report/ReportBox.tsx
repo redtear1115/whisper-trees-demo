@@ -7,6 +7,7 @@ import { Card } from '../../components/ui'
 import { award } from '../game/ledger'
 import { gameConfig } from '../game/config'
 import { reportPointsLine } from '../game/checkinLine'
+import { InteractionMood } from '../journal/InteractionMood'
 
 /** 樹況回報：五個類別一鍵選（團隊簡報 v17 第 22 頁）。只有在現場（打卡或遠觀）才能送出。送出得光點（GM 可調，預設 +15）。 */
 export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSite: boolean; openForm?: boolean }) {
@@ -15,7 +16,8 @@ export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSi
   const [kind, setKind] = useState<ReportKind | null>(null)
   const [note, setNote] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
-  const [sent, setSent] = useState(false)
+  /** 送出的那一筆的時間（心情對回這一次回報）；null = 還沒送 */
+  const [sent, setSent] = useState<number | null>(null)
   const [glow, setGlow] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const cloud = useSession().backend === 'cloud'
@@ -38,7 +40,7 @@ export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSi
       </Card>
     )
 
-  if (sent)
+  if (sent !== null)
     return (
       <Card>
         <h2>樹況回報</h2>
@@ -46,10 +48,11 @@ export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSi
         <p className="muted small">
           {cloud ? '回報會送到公園處，補充說明只有承辦人看得到。' : '這是示範：回報只存在這台裝置，不會真的送出。'}
         </p>
+        <InteractionMood kind="report" treeId={tree.id} at={sent} open />
         <button
           className="btn small"
           onClick={() => {
-            setSent(false)
+            setSent(null)
             setKind(null)
             setNote('')
             setPhoto(null)
@@ -77,8 +80,9 @@ export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSi
           onSubmit={(e) => {
             e.preventDefault()
             if (!kind) return
+            let at: number
             try {
-              addReport({
+              at = addReport({
                 treeId: tree.id,
                 species: tree.species,
                 road: tree.place,
@@ -87,13 +91,13 @@ export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSi
                 details: [],
                 note,
                 hasPhoto: !!photo,
-              })
+              }).at
             } catch {
               return setError('還沒連上雲端，請稍等一下再送出。')
             }
             setError(null)
             setGlow(award('report', tree.id))
-            setSent(true)
+            setSent(at)
             setOpen(false)
           }}
         >

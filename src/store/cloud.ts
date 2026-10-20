@@ -77,10 +77,12 @@ interface UserDoc {
   onboarding: unknown | undefined
   /** 打卡後的心情：{ current: { id, at } | null, askedAt }；map 欄位，逐欄合併 */
   mood: unknown | undefined
+  /** 跟樹的互動與當時的心情（我的日記）：{ entries: [...] }，整份取代 */
+  diary: unknown | undefined
 }
 
 const emptyUser = (): UserDoc => ({
-  checkins: [], watered: {}, myWishIds: [], myReportIds: [], ledger: undefined, inventory: undefined, onboarding: undefined, mood: undefined,
+  checkins: [], watered: {}, myWishIds: [], myReportIds: [], ledger: undefined, inventory: undefined, onboarding: undefined, mood: undefined, diary: undefined,
 })
 
 // ---------- 模型 ----------
@@ -195,6 +197,7 @@ function rebuildExt() {
     inventory: userDoc.inventory,
     onboarding: userDoc.onboarding,
     mood: userDoc.mood,
+    diary: userDoc.diary,
     opinions,
     ledgerOverlay: overlay.ledger,
     ...overlay.ext,
@@ -381,6 +384,7 @@ function startUser(forUid: string) {
           inventory: x.inventory,
           onboarding: x.onboarding,
           mood: x.mood,
+          diary: x.diary,
         }
         // 文件載入了（來自伺服器，或快取裡真的有）才算 ready；自動寫入靠它擋掉「還沒載入的空資料」
         if (!snap.metadata.fromCache || snap.exists()) setSession({ userReady: true })
@@ -545,7 +549,7 @@ function fallback(reason: string) {
 interface Pending {
   checkins: Checkin[]
   myWishIds: string[]
-  replace: Partial<Record<'ledger' | 'inventory' | 'onboarding' | 'mood', unknown>>
+  replace: Partial<Record<'ledger' | 'inventory' | 'onboarding' | 'mood' | 'diary', unknown>>
 }
 let pending: Pending | null = null
 
@@ -752,6 +756,7 @@ export function setExt(key: string, value: unknown) {
     case 'inventory':
     case 'onboarding':
     case 'mood':
+    case 'diary':
       userDoc = { ...userDoc, [key]: value }
       rebuildExt()
       commit()
