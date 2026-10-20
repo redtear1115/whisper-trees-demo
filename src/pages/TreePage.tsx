@@ -1,15 +1,16 @@
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { findTree, type Tree } from '../lib/trees'
 import { seededInt, weekKey } from '../lib/seed'
 import type { CheckinResult } from '../lib/geo'
-import { useSession } from '../store'
-import { addWhisper, recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
+import { recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
 import { Art, MockTag, formatDate, relativeDays } from '../components/ui'
 import { IconBack, IconCapsule, IconGlow } from '../components/icons'
 import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
-import { award, isDaytime } from '../features/game/ledger'
+import { WhisperBox } from '../features/whisper/WhisperBox'
+import { TreeFacts } from '../features/tree/TreeFacts'
+import { isDaytime } from '../features/game/ledger'
 import { useIsProtectedTree } from '../features/game/protectedTrees'
 import { checkinPointsLine } from '../features/game/checkinLine'
 import { gameConfig } from '../features/game/config'
@@ -211,24 +212,7 @@ export default function TreePage() {
         <summary>
           關於這棵樹 <span className="muted small">樹種、樹高、樹籍編號、樹況回報</span>
         </summary>
-        <dl className="facts">
-          <dt>樹種</dt>
-          <dd>{tree.species}</dd>
-          <dt>樹高</dt>
-          <dd>{tree.height ?? '—'} 公尺</dd>
-          <dt>胸徑</dt>
-          <dd>{tree.diameter ?? '—'} 公分</dd>
-          <dt>{tree.kind === 'park' ? '公園' : '路段'}</dt>
-          <dd>
-            {tree.district} {tree.place}
-            {tree.remark && <span className="muted">（{tree.remark}）</span>}
-          </dd>
-          <dt>調查日期</dt>
-          <dd>{tree.surveyDate || '—'}</dd>
-          <dt>樹籍編號</dt>
-          <dd className="num">{tree.id}</dd>
-        </dl>
-        <p className="muted small">資料來源：臺北市政府工務局公園路燈工程管理處開放資料</p>
+        <TreeFacts tree={tree} />
         <div id="report" className="anchor-target">
           <ReportBox tree={tree} onSite={!!onSite} openForm={hash === 'report'} />
         </div>
@@ -318,70 +302,6 @@ function CheckinStrip({
     <div className="checkin-strip">
       <span>從地圖點進來，只能看。要留話，請到樹旁掃樹牌。</span>
     </div>
-  )
-}
-
-/** mood：留完話之後那一句的心情（剛說完展開，之後縮成一行） */
-function WhisperBox({ treeId, said, mood }: { treeId: string; said: string[]; mood: (open: boolean) => ReactNode }) {
-  const cloud = useSession().backend === 'cloud'
-  const [text, setText] = useState('')
-  const [writing, setWriting] = useState(said.length === 0)
-  const [justSaid, setJustSaid] = useState<string | null>(null)
-  const last = justSaid ?? said[said.length - 1]
-
-  if (!writing && last)
-    return (
-      <section className="whisper received" aria-live="polite">
-        <p className={`whisper-sent ${justSaid ? 'drift' : ''}`}>「{last}」</p>
-        <p className="whisper-ack">樹收到了。</p>
-        <p className="muted small">
-          {cloud ? '其他人看不到。存在曦語的雲端，不公開。下次回來，它會記得。' : '只有你看得到，不會上傳。下次回來，它會記得。'}
-        </p>
-        <button
-          className="btn ghost again"
-          onClick={() => {
-            setJustSaid(null)
-            setWriting(true)
-          }}
-        >
-          再說一句
-        </button>
-        <div className="whisper-mood">{mood(!!justSaid)}</div>
-      </section>
-    )
-
-  return (
-    <section className="whisper" aria-labelledby="whisper-title">
-      <h2 id="whisper-title">樹洞</h2>
-      <p className="muted small">{cloud ? '其他人看不到。存在曦語的雲端，不公開。' : '只有你看得到。不會上傳，也不公開。'}</p>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          if (!text.trim()) return
-          addWhisper(treeId, text)
-          award('whisper', treeId)
-          setJustSaid(text.trim().slice(0, 140))
-          setText('')
-          setWriting(false)
-        }}
-      >
-        <textarea
-          className="input"
-          value={text}
-          maxLength={140}
-          rows={3}
-          placeholder="對這棵樹說一句話"
-          onChange={(e) => setText(e.target.value)}
-          aria-label="對這棵樹說一句話"
-        />
-        <div className="row between center-v">
-          <span className="muted small">{text.length} / 140</span>
-          <button className="btn primary" disabled={!text.trim()}>
-            留在樹洞
-          </button>
-        </div>
-      </form>
-    </section>
   )
 }
 

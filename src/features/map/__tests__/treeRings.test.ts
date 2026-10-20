@@ -51,34 +51,27 @@ describe('focusActions（拉近畫面的圈）', () => {
   const on = (list: ReturnType<typeof focusActions>) => list.filter((a) => a.enabled).map((a) => a.id)
 
   it('three main rings (摸摸樹, 回報, 留言在樹洞) and two small ones, in a fixed order', () => {
-    const list = focusActions('T1', near, true)
+    const list = focusActions(near, true)
     expect(ids(list)).toEqual(['touch', 'report', 'whisper', 'info', 'adopt'])
     expect(list.map((a) => a.label)).toEqual(['摸摸樹', '回報', '留言在樹洞', '樹的資料', '認養'])
     expect(list.map((a) => a.size)).toEqual(['main', 'main', 'main', 'small', 'small'])
   })
   it('after check-in the three interactions open; 認養 never does', () => {
-    expect(on(focusActions('T1', near, true))).toEqual(['touch', 'report', 'whisper', 'info'])
-    expect(on(focusActions('T1', far, true))).toEqual(['touch', 'report', 'whisper', 'info'])
-    const adopt = focusActions('T1', near, true).find((a) => a.id === 'adopt')!
+    expect(on(focusActions(near, true))).toEqual(['touch', 'report', 'whisper', 'info'])
+    expect(on(focusActions(far, true))).toEqual(['touch', 'report', 'whisper', 'info'])
+    const adopt = focusActions(near, true).find((a) => a.id === 'adopt')!
     expect(adopt.why).toBe(ADOPT_NOTE)
     expect(adopt.aria).toContain('即將開放')
   })
   it('in range but not checked in: say scan first', () => {
-    const list = focusActions('T1', near, false)
+    const list = focusActions(near, false)
     expect(on(list)).toEqual(['info'])
     expect(list[0].why).toBe(SCAN_FIRST_NOTE)
     expect(list[0].aria).toContain('暫時不能用')
   })
   it('out of range: say how far; no position: say so', () => {
-    expect(focusActions('T1', far, false)[1].why).toBe('走近一點，還有約 25 公尺')
-    expect(focusActions('T1', none, false)[2].why).toContain('位置')
-  })
-  it('report and whisper land on page anchors; touch and adopt do not change page', () => {
-    const list = focusActions('T1', near, true)
-    expect(list.find((a) => a.id === 'report')).toMatchObject({ to: '/tree/T1', hash: 'report' })
-    expect(list.find((a) => a.id === 'whisper')).toMatchObject({ to: '/tree/T1', hash: 'whisper' })
-    expect(list.find((a) => a.id === 'info')).toMatchObject({ to: '/tree/T1' })
-    expect(list.find((a) => a.id === 'touch')?.to).toBe('')
+    expect(focusActions(far, false)[1].why).toBe('走近一點，還有約 25 公尺')
+    expect(focusActions(none, false)[2].why).toContain('位置')
   })
 })
 

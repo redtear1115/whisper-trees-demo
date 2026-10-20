@@ -6,7 +6,8 @@ import { IconActionAdopt, IconActionInfo, IconActionReport, IconActionRoute, Ico
 import { BalanceChip } from '../nav/BalanceChip'
 import type { Animal } from '../avatar/animals'
 import { TouchPanel } from '../touch/TouchPanel'
-import { focusActions, focusButtons, type FocusAction, type FocusActionId, type RangeInfo } from './treeRings'
+import { focusActions, focusButtons, type FocusActionId, type RangeInfo } from './treeRings'
+import { InfoCard, ReportCard, WhisperCard } from './FocusCards'
 
 const ICON: Record<FocusActionId, ReactNode> = {
   touch: <IconActionTouch />,
@@ -24,8 +25,6 @@ interface Props {
   animal: Animal
   demo: boolean
   onClose: () => void
-  /** 回報、留言在樹洞、樹的資料：去樹的頁面 */
-  onGo: (a: FocusAction) => void
   onScan: () => void
   onRoute: () => void
   onWalk: () => void
@@ -35,18 +34,20 @@ interface Props {
  * 點樹之後的拉近畫面（2026-10-21，依使用者給的「拉近的介面」設計圖）：蓋住地圖與底部導覽，
  * 中間一棵大樹，樹冠上是三個互動的大圈（摸摸樹、回報、留言在樹洞）和兩個小圈（樹的資料、認養），
  * 你的動物站在右下角，左下是「返回」；旁邊依情況是「掃樹牌」或「怎麼走」「走過去」。
+ * 底部導覽留著（第二版）；點圈在畫面裡打開一張卡，不換頁。
  * 是對話框（role=dialog）：焦點移到第一個圈、Esc 關閉。
  */
-export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, onGo, onScan, onRoute, onWalk }: Props) {
+export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, onScan, onRoute, onWalk }: Props) {
   const root = useRef<HTMLDivElement>(null)
   const [note, setNote] = useState('')
-  const [touching, setTouching] = useState(false)
-  const actions = focusActions(tree.id, range, checkedIn)
+  /** 打開的卡（摸摸樹、回報、留言在樹洞、樹的資料）；null = 看得到圈 */
+  const [card, setCard] = useState<Exclude<FocusActionId, 'adopt'> | null>(null)
+  const actions = focusActions(range, checkedIn)
   const buttons = focusButtons(range, checkedIn, demo)
 
   // 換一棵樹、走進感應圈、打了卡，就清掉上一個提醒
   useEffect(() => setNote(''), [tree.id, range.inRange, checkedIn])
-  useEffect(() => setTouching(false), [tree.id])
+  useEffect(() => setCard(null), [tree.id])
 
   useEffect(() => {
     root.current?.querySelector<HTMLElement>('.focus-ring')?.focus()
@@ -55,12 +56,12 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      if (touching) setTouching(false)
+      if (card) setCard(null)
       else onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose, touching])
+  }, [onClose, card])
 
   // 掛在手機框（.phone-shell）上：地圖頁自己的層疊順序蓋不過底部導覽；桌機 Demo 時也維持手機寬度
   return createPortal(
@@ -75,7 +76,7 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
 
       <div className="tree-focus-stage">
         <Art id="tree-focus" alt="" className="tree-focus-art" />
-        {!touching &&
+        {!card &&
           actions.map((a) => (
             <button
               key={a.id}
@@ -86,9 +87,8 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
               aria-label={a.aria}
               aria-disabled={!a.enabled}
               onClick={() => {
-                if (!a.enabled) return setNote(a.why)
-                if (a.id === 'touch') return setTouching(true)
-                onGo(a)
+                if (!a.enabled || a.id === 'adopt') return setNote(a.why)
+                setCard(a.id)
               }}
             >
               <span className="focus-ring-icon" aria-hidden>
@@ -99,9 +99,17 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
           ))}
       </div>
 
-      {touching && (
-        <div className="tree-focus-sheet">
-          <TouchPanel treeId={tree.id} onClose={() => setTouching(false)} />
+      {card && (
+        <div className="tree-focus-sheet" data-testid={`focus-sheet-${card}`}>
+          {card !== 'touch' && (
+            <button type="button" className="btn ghost small focus-card-close" data-testid="focus-card-close" onClick={() => setCard(null)}>
+              收起
+            </button>
+          )}
+          {card === 'touch' && <TouchPanel treeId={tree.id} onClose={() => setCard(null)} />}
+          {card === 'whisper' && <WhisperCard treeId={tree.id} />}
+          {card === 'report' && <ReportCard tree={tree} onClose={() => setCard(null)} />}
+          {card === 'info' && <InfoCard tree={tree} />}
         </div>
       )}
 

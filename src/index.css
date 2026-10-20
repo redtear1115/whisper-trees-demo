@@ -3383,14 +3383,19 @@ html:has(.tab-shell) {
 /* 蓋住地圖與底部導覽（導覽 z-index 4）；頂端一列、中間的大樹與圈、右下的動物、底部「返回」 */
 .tree-focus {
   position: fixed;
-  inset: 0;
+  inset: 0 0 var(--nav-h) 0;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
   background: radial-gradient(ellipse at 50% 40%, #f4f8ef 0%, #e6efe0 62%, #dbe7d4 100%);
   overflow: hidden;
   animation: focus-in 0.35s ease-out;
+}
+
+/* 拉近畫面開著時導覽留在最上面：中間的「掃樹牌」大按鈕凸出導覽，不能被拉近畫面切掉 */
+.phone-shell:has(.tree-focus) .bottom-nav {
+  z-index: 21;
 }
 
 @keyframes focus-in {
@@ -3555,7 +3560,7 @@ html:has(.tab-shell) {
 .tree-focus-animal {
   position: absolute;
   right: 12px;
-  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  bottom: 8px;
   width: 96px;
   height: auto;
   pointer-events: none;
@@ -3567,7 +3572,7 @@ html:has(.tab-shell) {
   align-items: center;
   gap: 10px;
   margin-top: auto;
-  min-height: 96px;
+  min-height: 88px;
   padding-right: 104px;
 }
 
@@ -3581,18 +3586,59 @@ html:has(.tab-shell) {
   color: #173f33;
 }
 
-/* 摸摸樹：從底部升起的一張卡，蓋在樹與圈上面 */
+/* 拉近畫面的卡（摸摸樹、回報、留言在樹洞、樹的資料）：從底部升起，蓋在樹與圈上面，留出「返回」那一列 */
 .tree-focus-sheet {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
-  max-height: calc(100% - 140px);
+  bottom: 76px;
+  max-height: calc(100% - 136px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: 22px;
   background: var(--card);
   box-shadow: var(--shadow);
   z-index: 1;
+  animation: sheet-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+.focus-card-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  min-height: 44px;
+}
+
+.focus-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+/* 卡片裡的樹洞、回報不要再一層框 */
+.focus-card-body .card,
+.focus-card-body .whisper {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.focus-card-body h2 {
+  padding-right: 64px;
+}
+
+.focus-card-title {
+  margin: 0;
 }
 
 .touch-panel {
@@ -3734,7 +3780,8 @@ html:has(.tab-shell) {
 
 @media (prefers-reduced-motion: reduce) {
   .tree-focus,
-  .focus-ring {
+  .focus-ring,
+  .tree-focus-sheet {
     animation: none;
   }
   .touch-breath {

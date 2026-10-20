@@ -10,8 +10,8 @@ import { reportPointsLine } from '../game/checkinLine'
 import { InteractionMood } from '../journal/InteractionMood'
 
 /** 樹況回報：五個類別一鍵選（團隊簡報 v17 第 22 頁）。只有在現場（打卡或遠觀）才能送出。送出得光點（GM 可調，預設 +15）。 */
-export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSite: boolean; openForm?: boolean }) {
-  // openForm：從地圖的「樹況回報」圈、#report 連結來，直接把表單展開
+export function ReportBox({ tree, onSite, openForm = false, onCancel }: { tree: Tree; onSite: boolean; openForm?: boolean; onCancel?: () => void }) {
+  // openForm：從拉近畫面的「回報」卡、#report 連結來，直接把表單展開；onCancel：拉近畫面的卡片按「取消」就收起整張卡
   const [open, setOpen] = useState(openForm)
   const [kind, setKind] = useState<ReportKind | null>(null)
   const [note, setNote] = useState('')
@@ -158,7 +158,7 @@ export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSi
             <button className="btn primary" disabled={!kind}>
               送出回報
             </button>
-            <button type="button" className="btn" onClick={() => setOpen(false)}>
+            <button type="button" className="btn" onClick={() => (onCancel ? onCancel() : setOpen(false))}>
               取消
             </button>
           </div>

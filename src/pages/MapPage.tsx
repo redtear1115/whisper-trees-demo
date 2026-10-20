@@ -1034,8 +1034,6 @@ export default function MapPage() {
           animal={animal}
           demo={demo}
           onClose={() => unfocusTree.current()}
-          // nearTree：從拉近畫面來而且在感應圈內，樹的頁面可以說「你已經在樹旁邊了」；打卡仍然要掃樹牌
-          onGo={(a) => navigate({ pathname: a.to, hash: a.hash ? `#${a.hash}` : undefined }, { state: { nearTree: focusRange.inRange } })}
           onScan={() => navigate('/scan', { state: { hintTreeId: treeFocus.tree.id } })}
           // 怎麼走：拉近畫面先收起，地圖上畫出步行路線；下面的小列可以回到這棵樹
           onRoute={() => {

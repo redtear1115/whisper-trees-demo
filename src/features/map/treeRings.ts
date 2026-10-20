@@ -52,10 +52,6 @@ export interface FocusAction {
   aria: string
   /** 點灰色的圈時顯示的一句（能用的是空字串） */
   why: string
-  /** 要去哪（router 路徑）；摸摸樹、認養不換頁，是空字串 */
-  to: string
-  /** 樹的頁面上的錨點（id，不含 #） */
-  hash?: string
 }
 
 /** 在範圍內、還沒打卡時，三個互動灰掉的原因：掃樹牌是每棵樹預設的互動，打卡之後才打開其他的 */
@@ -66,10 +62,11 @@ export const ADOPT_NOTE = '認養即將開放'
  * 拉近畫面的圈（2026-10-21 使用者決定，依「拉近的介面」設計圖）。順序固定。
  * 三個互動（摸摸樹、回報、留言在樹洞）要先在這棵樹打卡（30 分鐘內，和樹的頁面一樣，見 recentCheckin）才能用；
  * 還沒打卡：在範圍內說「先掃樹牌」，範圍外說「走近一點」。樹的資料永遠能用；認養永遠是灰的（即將開放）。
+ * 點了都在拉近畫面裡打開一張卡，不換頁（2026-10-21 第二版）。
  */
-export function focusActions(treeId: string, range: RangeInfo, checkedIn: boolean): FocusAction[] {
+export function focusActions(range: RangeInfo, checkedIn: boolean): FocusAction[] {
   const why = checkedIn ? '' : range.inRange ? SCAN_FIRST_NOTE : farNote(range)
-  const main = (a: Pick<FocusAction, 'id' | 'label' | 'to' | 'hash'>, desc: string): FocusAction => ({
+  const main = (a: Pick<FocusAction, 'id' | 'label'>, desc: string): FocusAction => ({
     ...a,
     size: 'main',
     enabled: checkedIn,
@@ -77,11 +74,11 @@ export function focusActions(treeId: string, range: RangeInfo, checkedIn: boolea
     aria: checkedIn ? desc : `${desc}（暫時不能用：${why}）`,
   })
   return [
-    main({ id: 'touch', label: '摸摸樹', to: '' }, '摸摸樹：呼吸、冥想或擁抱'),
-    main({ id: 'report', label: '回報', to: `/tree/${treeId}`, hash: 'report' }, '樹況回報'),
-    main({ id: 'whisper', label: '留言在樹洞', to: `/tree/${treeId}`, hash: 'whisper' }, '樹洞：對這棵樹說一句話'),
-    { id: 'info', label: '樹的資料', size: 'small', enabled: true, why: '', aria: '樹的資料', to: `/tree/${treeId}` },
-    { id: 'adopt', label: '認養', size: 'small', enabled: false, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）`, to: '' },
+    main({ id: 'touch', label: '摸摸樹' }, '摸摸樹：呼吸、冥想或擁抱'),
+    main({ id: 'report', label: '回報' }, '樹況回報'),
+    main({ id: 'whisper', label: '留言在樹洞' }, '樹洞：對這棵樹說一句話'),
+    { id: 'info', label: '樹的資料', size: 'small', enabled: true, why: '', aria: '樹的資料' },
+    { id: 'adopt', label: '認養', size: 'small', enabled: false, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）` },
   ]
 }
 
