@@ -79,7 +79,7 @@ function StepAnimal() {
       <AnimalPicker name="tour-animal" />
       <p className="muted small">之後可以在「我的」換。</p>
       <div className="tour-actions sticky">
-        {/* 沒點過也把目前的（預設穿山甲）存下來，再進「你在哪一區？」 */}
+        {/* 沒點過也把目前的（預設臺灣黑狗）存下來，再進「你在哪一區？」 */}
         <button className="btn primary" onClick={() => patchOnboarding({ animal: animal.id, tourSub: 'district' })}>
           就牠了
         </button>
@@ -128,7 +128,7 @@ function StepIntro() {
           ))}
         </tbody>
       </table>
-      <p className="muted small">光點可以換小芽的造型，也能捐給城市（示意）。</p>
+      <p className="muted small">光點可以換小芽的造型和樹的頁面相框。</p>
       <div className="tour-actions">
         <button className="btn primary" onClick={() => go(STEP_SCAN)}>
           下一步
