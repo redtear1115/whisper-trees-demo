@@ -98,8 +98,9 @@ function StepDistrict() {
       </p>
       <DistrictPicker name="tour-district" />
       <div className="tour-actions sticky">
-        <button className="btn primary" disabled={!chosen} onClick={() => go(STEP_INTRO)}>
-          好了，出發
+        {/* 不選區也可以往下走（2026-10-20 使用者決定）：沒選時按鈕寫「先不選，出發」 */}
+        <button className="btn primary" onClick={() => go(STEP_INTRO)} data-testid="district-go">
+          {chosen ? '好了，出發' : '先不選，出發'}
         </button>
         <button className="btn" onClick={() => patchOnboarding({ tourSub: 'animal' })}>
           上一步
