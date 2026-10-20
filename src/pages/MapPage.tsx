@@ -60,6 +60,16 @@ const motionMs = (ms: number) => (window.matchMedia?.('(prefers-reduced-motion: 
 
 // 市民端地圖只有「附近」：45° 俯視、街景、只能在目前位置半徑內移動（2026-10-19 決定，全市模式已移除）
 
+/**
+ * 地圖上緣被頂端列蓋住的高度（px）：Demo 細條 34 + 光點餘額晶片（44 px 高、離細條 10 px）。
+ * 用 `map.setPadding({ top })`，鏡頭置中與框選都以這條下面為準；Demo 外沒有細條，仍留同樣的高度（餘額晶片還在）。
+ */
+const MAP_TOP_INSET = 90
+/** 往上抬 `px`（畫面像素）的 easeTo／flyTo offset。padding 讓中心下移 MAP_TOP_INSET / 2，扣回去，原本的構圖位置不變 */
+function liftOffset(px: number): number {
+  return -px - MAP_TOP_INSET / 2
+}
+
 export default function MapPage() {
   const el = useRef<HTMLDivElement>(null)
   const map = useRef<MLMap | null>(null)
@@ -131,6 +141,9 @@ export default function MapPage() {
       locale: MAP_LOCALE,
     })
     map.current = m
+    // 上緣留白：Demo 細條與光點餘額、新手任務晶片蓋在地圖上，被它們蓋住的許願點點不到。
+    // 地圖的 padding 讓鏡頭置中、框選都以「頂端列下面」為準；下面各處的 offset 同步扣掉一半，已經調好的構圖不動
+    m.setPadding({ top: MAP_TOP_INSET, bottom: 0, left: 0, right: 0 })
     toneBasemap(m) // 底圖改成繪本的暖紙色（樣式載入後套用）
     ;(window as unknown as { __map: MLMap }).__map = m // 給自動化測試用
     m.addControl(
@@ -395,7 +408,7 @@ export default function MapPage() {
     if (!focus || !ready || !map.current) return
     const m = map.current
     const t = setTimeout(() => {
-      m.flyTo({ center: focus, zoom: 17.5, duration: 1200, offset: [0, -window.innerHeight * 0.2] })
+      m.flyTo({ center: focus, zoom: 17.5, duration: 1200, offset: [0, liftOffset(window.innerHeight * 0.2)] })
       select(m, focus, false)
       if (navState?.wishId) setSheet({ kind: 'wish', wishId: navState.wishId })
     }, 300)
@@ -567,7 +580,7 @@ export default function MapPage() {
       center: tree.lngLat,
       zoom: TREE_FOCUS.zoom,
       pitch: TREE_FOCUS.pitch,
-      offset: [0, -m.getCanvas().clientHeight * TREE_FOCUS.offsetY],
+      offset: [0, liftOffset(m.getCanvas().clientHeight * TREE_FOCUS.offsetY)],
       duration,
     })
     const show = () => setTreeFocus((f) => (f && f.tree.id === tree.id ? { ...f, shown: true } : f))
@@ -1082,7 +1095,7 @@ function select(m: MLMap, at: LngLat, pan = true) {
     geometry: { type: 'Point', coordinates: at },
     properties: {},
   })
-  if (pan) m.easeTo({ center: at, offset: [0, -window.innerHeight * 0.22], duration: 500 })
+  if (pan) m.easeTo({ center: at, offset: [0, liftOffset(window.innerHeight * 0.22)], duration: 500 })
 }
 
 function sheetLabel(sheet: NonNullable<Sheet>, wish?: Wish): string {
