@@ -66,3 +66,16 @@ export function badges(s: State): Badge[] {
   ]
   return list.map((b) => ({ ...b, art: `badge-${b.id}`, note: EARNED_NOTE[b.id] ?? b.hint }))
 }
+
+/** 這三枚有自己的慶祝（引導或專屬視窗），通用的「獲得徽章」視窗不跳 */
+export const OWN_CELEBRATION: readonly string[] = ['first-light', 'newcomer', 'home-screen']
+
+/**
+ * 該跳哪幾枚「獲得徽章」：已得到、還沒跳過、不是自己有慶祝的那三枚。
+ * celebrated 是 undefined（舊使用者第一次載入）時不跳，只把已經有的記下來（seed），免得一次跳一堆。
+ */
+export function badgesToCelebrate(earnedIds: readonly string[], celebrated: readonly string[] | undefined): { show: string[]; record: string[] } {
+  if (!celebrated) return { show: [], record: [...earnedIds] }
+  const show = earnedIds.filter((id) => !celebrated.includes(id) && !OWN_CELEBRATION.includes(id))
+  return { show, record: show.length ? [...celebrated, ...show] : [...celebrated] }
+}

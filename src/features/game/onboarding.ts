@@ -34,6 +34,8 @@ export interface Onboarding {
   newcomerCelebratedAt?: number
   /** 「第一道光」慶祝過了（引導第 3 步或略過引導後的慶祝視窗，只跳一次） */
   firstLightCelebratedAt?: number
+  /** 跳過「獲得徽章」視窗的徽章 id（每枚只跳一次）；沒有這個欄位的舊使用者，第一次載入時把已經有的全記進來、不跳 */
+  badgesCelebrated?: string[]
 }
 
 const EMPTY: Onboarding = {}

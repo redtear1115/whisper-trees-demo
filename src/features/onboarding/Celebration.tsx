@@ -13,7 +13,7 @@ export function Celebration({ badgeId, children }: { badgeId: string; children?:
       <p className="celebrate-kicker">獲得徽章</p>
       <Art id={badge.art} alt={badge.name} className="celebrate-art" />
       <h3 className="celebrate-name">{badge.name}</h3>
-      <p className="muted small celebrate-hint">{badge.hint}</p>
+      <p className="muted small celebrate-hint">{badge.note}</p>
       {children}
     </div>
   )
