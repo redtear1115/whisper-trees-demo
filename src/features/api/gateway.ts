@@ -384,7 +384,7 @@ export async function handleRequest(req: GatewayRequest, deps: GatewayDeps): Pro
   const method = req.method.toUpperCase()
   let url: URL
   try {
-    url = new URL(req.url, 'https://whisper-trees.pages.dev')
+    url = new URL(req.url, 'https://whisper-trees-demo.southern-light.dev')
   } catch {
     return fail(400, 'invalid_request', 'Malformed URL')
   }

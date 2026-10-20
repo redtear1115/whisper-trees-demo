@@ -2,7 +2,7 @@
 
 [台北市政 debug 松](https://puma.taipei/hackathon) 題目 #1「把三千棵樹種回來」的參賽作品 Demo。
 
-**網址：[https://whisper-trees.pages.dev](https://whisper-trees.pages.dev)**（市民端只能用手機開；桌機請加 `?demo=1` 進 Demo 模式：模擬定位（可以拖曳地圖上的人物、或點樹按「走過去」移動，離樹太遠一樣會被判「太遠」）、可掃示範樹牌。政府端 `/gov` 用桌機開）
+**網址：[https://whisper-trees-demo.southern-light.dev](https://whisper-trees-demo.southern-light.dev)**（市民端只能用手機開；桌機請加 `?demo=1` 進 Demo 模式：模擬定位（可以拖曳地圖上的人物、或點樹按「走過去」移動，離樹太遠一樣會被判「太遠」）、可掃示範樹牌。政府端 `/gov` 用桌機開）
 
 台北每年移除約 3,164 棵樹。曦語把 16 萬棵行道樹與公園樹變成市民可以停下來、對它說話的「樹洞」；同時讓市民在空樹穴許願、澆水，政府依市民需求與樹蔭缺口排出補種順序，並公開進度。
 
@@ -35,7 +35,7 @@
 | 樹洞 | `/journal` | 我在各棵樹留下的話、我的許願 |
 | 我的 | `/me` | 小芽（樹精，三階）、光點紀錄、徽章、設定（我的區、帳號、新手引導、關於曦語、Demo 工具）；陪你的動物（預設臺灣黑狗，另有石虎、臺灣藍鵲、黑冠麻鷺、穿山甲）與「現在的心情」（換心情、清除）在頂部 |
 
-右上角是光點餘額，點了去商店 `/shop`。樹的頁面、掃描、商店是子頁面。Demo 切換台 [`/demo-control?demo=1`](https://whisper-trees.pages.dev/demo-control?demo=1)：只在 Demo 模式顯示，在市民端（手機版）與各後台（政府端、發包商、GM、開放 API）之間切換；不從市民端連過去。
+右上角是光點餘額，點了去商店 `/shop`。樹的頁面、掃描、商店是子頁面。Demo 切換台 [`/demo-control?demo=1`](https://whisper-trees-demo.southern-light.dev/demo-control?demo=1)：只在 Demo 模式顯示，在市民端（手機版）與各後台（政府端、發包商、GM、開放 API）之間切換；不從市民端連過去。
 
 ### 延伸功能（主線之後的示意）
 

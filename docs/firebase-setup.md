@@ -10,7 +10,7 @@
 | Firestore | 完成 | `gcloud firestore databases create --location=asia-east1`（Native） |
 | Web app `whisper-trees-web` | 完成 | Management API（appId `1:724757846221:web:83db19ea8c8326e434b184`）；設定寫入本機 `.env.local`（不進版控） |
 | Security Rules | 已部署 | Rules API 建 ruleset 並發佈到 `cloud.firestore` |
-| Auth：匿名、Google、授權網域 | 完成 | 使用者在 console 開啟；授權網域含 `whisper-trees.pages.dev`；匿名登入已在正式專案以 REST 實測（測試帳號已刪） |
+| Auth：匿名、Google、授權網域 | 完成 | 使用者在 console 開啟；授權網域含 `whisper-trees.pages.dev`、`whisper-trees-demo.southern-light.dev`（2026-10-20 換正式網域時加）；匿名登入已在正式專案以 REST 實測（測試帳號已刪） |
 | 註冊配額（每 IP 每小時） | 完成 | 500，2026-10-24 07:00（台北）起 3 天，之後回到預設 100 |
 | 白名單 `admins/{uid}` | 完成 | 2026-10-19 使用者在 console 加入 1 筆（政府端示範帳號）；Google 綁定已在本機 localhost 對正式專案實測 |
 | API key 的 HTTP referrer 限制 | 完成 | 2026-10-19 用 `gcloud services api-keys update` 設定；原本的 API 限制（27 個服務）保留；實測其他網域被擋、允許的網域可用 |
@@ -37,11 +37,15 @@ curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whis
   -d '{"release":{"name":"projects/whisper-trees-demo/releases/cloud.firestore","rulesetName":"<ruleset name>"}}'
 ```
 
+## 網域
+
+正式網址 `https://whisper-trees-demo.southern-light.dev`（2026-10-20 在 Cloudflare Pages `whisper-trees` 綁定，DNS 由 Cloudflare 自動加 CNAME → `whisper-trees.pages.dev`）。`whisper-trees.pages.dev` 仍可用。換網域要同時加 Firebase 授權網域與 API key 的 HTTP referrer，否則新網域上匿名登入、Google 登入、Firestore 都會失敗。
+
 ## Auth 設定（console）
 
 1. https://console.firebase.google.com/project/whisper-trees-demo/authentication →「開始使用」。
 2. 登入方式：啟用「匿名」與「Google」（支援信箱選專案擁有者）。
-3. 設定 › 授權網域：新增 `whisper-trees.pages.dev`（`localhost` 預設已有）。
+3. 設定 › 授權網域：新增 `whisper-trees-demo.southern-light.dev` 與 `whisper-trees.pages.dev`（`localhost` 預設已有）。
 4. 不要升級到 Identity Platform（免費方案會有每日 3,000 名活躍使用者上限）。
 5. 10/24 前：把「每個 IP 每小時可建立的帳號數」暫時調高，避免會場 Wi-Fi 共用 IP 時匿名登入失敗。
 
@@ -57,7 +61,7 @@ curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whis
 ## API key 限制（S6）
 
 GCP console › API 和服務 › 憑證 › 瀏覽器金鑰：應用程式限制選 HTTP referrer，允許
-`https://whisper-trees.pages.dev/*`、`https://whisper-trees-demo.firebaseapp.com/*`、`http://localhost:5173/*`、`http://127.0.0.1:5173/*`、`http://localhost:4173/*`。
+`https://whisper-trees-demo.southern-light.dev/*`、`https://whisper-trees.pages.dev/*`、`https://whisper-trees-demo.firebaseapp.com/*`、`http://localhost:5173/*`、`http://127.0.0.1:5173/*`、`http://localhost:4173/*`。
 
 `whisper-trees-demo.firebaseapp.com` 一定要留：Google 登入的彈窗頁在這個網域，也用同一把 key，拿掉 Google 登入就會壞。
 

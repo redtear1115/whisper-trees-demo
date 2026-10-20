@@ -109,7 +109,7 @@
 
 2026-10-19 決定做法，2026-10-20 改成 OAuth 2.0 並補上角色、用戶端管理與 MCP。目的：**政府端（公園處既有系統）與承包廠商不用進我們的網站，直接呼叫 API 讀寫**，不是給大眾下載資料。
 
-- **層級：文件＋前端模擬**。沒有伺服器；`https://whisper-trees.pages.dev/api/v1/…`、`/oauth/token`、`/mcp` 都只是示意網址。`/developers` 的試打與 MCP 試用由瀏覽器裡的模擬閘道處理（`src/features/api/`），畫面標「模擬」。`/developers` 是桌機工具，不在 `MobileOnly` 裡，360 px 仍可讀。
+- **層級：文件＋前端模擬**。沒有伺服器；`https://whisper-trees-demo.southern-light.dev/api/v1/…`、`/oauth/token`、`/mcp` 都只是示意網址。`/developers` 的試打與 MCP 試用由瀏覽器裡的模擬閘道處理（`src/features/api/`），畫面標「模擬」。`/developers` 是桌機工具，不在 `MobileOnly` 裡，360 px 仍可讀。
 - **範圍：讀寫全部**。寫入走和畫面同一組 store 函式（`setWishStatus`、`saveOrder` 經 `advance`、回報處理），所以 `/gov`、`/vendor`、市民端「我的許願」即時更新。
 - **授權：OAuth 2.0 client credentials**（取代原本的 API key）。
 
@@ -159,7 +159,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 
 ### MCP（文件＋模擬）
 
-- MCP server 的網址是 `https://whisper-trees.pages.dev/mcp`（Streamable HTTP）。**示意，並沒有真的服務**；`/developers` 的「MCP 試用」用同一個模擬閘道跑 JSON-RPC（`initialize`、`notifications/initialized`、`ping`、`tools/list`、`tools/call`）。
+- MCP server 的網址是 `https://whisper-trees-demo.southern-light.dev/mcp`（Streamable HTTP）。**示意，並沒有真的服務**；`/developers` 的「MCP 試用」用同一個模擬閘道跑 JSON-RPC（`initialize`、`notifications/initialized`、`ping`、`tools/list`、`tools/call`）。
 - 授權與 REST 相同：`Authorization: Bearer <access_token>`。`tools/list` 只列出 token 的 scope 用得到的工具（政府 token 8 個，廠商 token 只有 `list_work_orders`、`update_work_order`）；呼叫沒權限的工具回「Unknown tool」（-32602），不透露它存在。`tools/call` 轉成對應的 REST 請求，權限與廠商篩選的邏輯因此完全一致；錯誤回 `isError: true`。
 - 工具（各附 JSON Schema，見 `src/features/api/mcp.ts`）：`list_hotspots`、`get_priorities`、`list_cases`、`update_case_status`、`list_reports`、`update_report`、`list_work_orders`、`update_work_order`（`action`: accept｜progress｜complete）。
 - 文件頁附 Claude Code（`.mcp.json`，`type: http`＋`headers`）、Claude Desktop（`mcp-remote`）與一般 HTTP MCP 用戶端的設定範例。
