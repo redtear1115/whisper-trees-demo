@@ -7,10 +7,10 @@ import { Segmented, segmentedPanelProps } from '../components/Segmented'
 
 const TABS = [
   { value: 'diary', label: '我的日記', testId: 'journal-tab-diary' },
-  { value: 'wishes', label: '我的許願', testId: 'journal-tab-wishes' },
+  { value: 'wishes', label: '許願', testId: 'journal-tab-wishes' },
 ] as const
 
-/** 樹洞：我的日記／我的許願在上，附近的樹在下（留言要先走到樹旁、再掃樹牌打卡） */
+/** 樹洞：我的日記／許願在上，附近的樹在下（留言要先走到樹旁、再掃樹牌打卡） */
 export default function JournalPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]['value']>('diary')
 
