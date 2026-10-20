@@ -1,6 +1,6 @@
 // 依 src/assets.ts 的清單產生佔位 SVG（public/assets/ph/）與給設計的清單 docs/ui-assets.md。
 // Run: node scripts/make_placeholders.mjs
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { deflateSync } from 'node:zlib'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -94,7 +94,11 @@ const delivered = new Set(
     .map((a) => a.id),
 )
 for (const a of assets) {
-  if (delivered.has(a.id)) continue
+  // 已交件的除錯版直接用正式美術，免得 ?debug=1 還看到佔位
+  if (delivered.has(a.id)) {
+    copyFileSync(join(outDir, `${a.id}.svg`), join(debugDir, `${a.id}.svg`))
+    continue
+  }
   const small = Math.min(a.w, a.h) <= 120
   const fs = Math.max(8, Math.min(small ? Math.round(a.w / 7) : 18, Math.floor((a.w * 1.6) / a.id.length)))
   const h = hue(a.id)
