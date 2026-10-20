@@ -74,7 +74,7 @@ npm run dev     # 加 ?demo=1 進 Demo 模式
 npm test        # vitest
 npm run test:rules   # 本機 Firestore emulator 跑規則測試（tests/rules）與雲端 store 測試（tests/cloud），需要 brew install openjdk；改 firestore.rules 一定要跑
 npm run build   # tsc + vite build
-npm run deploy  # 部署到 Cloudflare Pages：https://whisper-trees-demo.southern-light.dev（部署前先問；舊網址 whisper-trees.pages.dev 仍可用）
+npm run deploy  # 部署到 Cloudflare Pages：https://whisper-trees-demo.southern-light.dev（部署前先問）
 node scripts/make_placeholders.mjs   # 佔位美術，清單在 src/assets.ts
 ```
 
