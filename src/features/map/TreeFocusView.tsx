@@ -62,7 +62,7 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose, touching])
 
-  // 掛在 body 上：地圖頁自己的層疊順序蓋不過底部導覽
+  // 掛在手機框（.phone-shell）上：地圖頁自己的層疊順序蓋不過底部導覽；桌機 Demo 時也維持手機寬度
   return createPortal(
     <div ref={root} className="tree-focus" role="dialog" aria-modal="true" aria-labelledby="tree-focus-name" data-testid="tree-focus" data-tree-id={tree.id}>
       <div className="tree-focus-top">
@@ -132,6 +132,6 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
         )}
       </div>
     </div>,
-    document.body,
+    document.querySelector('.phone-shell') ?? document.body,
   )
 }
