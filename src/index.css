@@ -5643,9 +5643,9 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   display: grid;
   gap: 0;
   padding: 8px 14px;
-  border-left: 3px solid var(--glow);
+  border: 1px solid var(--line);
   background: var(--card);
-  border-radius: 4px 14px 14px 4px;
+  border-radius: 14px;
 }
 
 .about-twoway strong {
