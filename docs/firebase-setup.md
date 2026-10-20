@@ -39,7 +39,7 @@ curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "X-Goog-User-Project: whis
 
 ## 網域
 
-正式網址 `https://whisper-trees-demo.southern-light.dev`（2026-10-20 在 Cloudflare Pages `whisper-trees` 綁定，DNS 由 Cloudflare 自動加 CNAME → `whisper-trees.pages.dev`）。`whisper-trees.pages.dev` 仍可用。換網域要同時加 Firebase 授權網域與 API key 的 HTTP referrer，否則新網域上匿名登入、Google 登入、Firestore 都會失敗。
+正式網址 `https://whisper-trees-demo.southern-light.dev`（2026-10-20 在 Cloudflare Pages `whisper-trees` 綁定，DNS 由 Cloudflare 自動加 CNAME → `whisper-trees.pages.dev`）。`whisper-trees.pages.dev` 仍可用。2026-10-20 已用 `gcloud`／Identity Toolkit admin API 把新網域加進 Firebase 授權網域與瀏覽器 API key 的 referrer（只加不刪，API 限制 27 個服務保留），並在新網域實測匿名登入（`accounts:signUp` 200）與 Firestore Listen 200、沒有「離線示範模式」。換網域要同時加 Firebase 授權網域與 API key 的 HTTP referrer，否則新網域上匿名登入、Google 登入、Firestore 都會失敗。
 
 ## Auth 設定（console）
 
