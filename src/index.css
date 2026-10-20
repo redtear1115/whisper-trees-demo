@@ -86,8 +86,9 @@ p {
   margin: 0.3em 0;
 }
 
+/* 連結預設用深綠：--green 在紙色上只有 4.46:1、在淡綠底上 4.07:1，小字連結不到 4.5:1（第五輪） */
 a {
-  color: var(--green);
+  color: var(--green-ink);
 }
 
 button {
@@ -829,7 +830,7 @@ textarea.input {
   padding: 10px 6px 3px;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0));
   color: #fff;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   text-align: left;
   overflow: hidden;
@@ -2908,7 +2909,8 @@ body.has-offline .gov {
   gap: 2px;
   min-height: 56px;
   color: var(--muted);
-  font-size: 0.75rem;
+  /* 13 px（原本 12）：5 個分頁在 360 寬各 72 px，最長的標籤「集章冊」「掃樹牌」不折行 */
+  font-size: 0.8125rem;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -3014,7 +3016,7 @@ html:has(.tab-shell) {
 }
 
 .balance-pill span {
-  color: #a87a00;
+  color: #8a6400; /* 4.9:1（原本 #a87a00 只有 3.5:1） */
 }
 
 .fog-slot {
@@ -5666,6 +5668,31 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   text-align: left;
 }
 
+/* 矮螢幕（360×640 一類）：第一屏的三列（動物、區、心情）要整個在導覽中間浮出的掃樹牌圓鈕上面，
+   不能被它蓋掉一半。小圖、列距收一點，省下約 50 px（第五輪） */
+@media (max-height: 700px) {
+  .me-scene {
+    min-height: 108px;
+  }
+  .me-companion,
+  .me-sprout {
+    width: 80px;
+    height: 80px;
+  }
+  .me-hero .me-swap {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+  .me-hero .me-hero-line {
+    margin-bottom: 6px;
+  }
+}
+
+
+/* 地圖署名連結：深綠（--green 在淡底上只有約 4.2:1） */
+.maplibregl-ctrl-attrib a {
+  color: var(--green-ink);
+}
 
 /* ---------- 關於曦語 ---------- */
 

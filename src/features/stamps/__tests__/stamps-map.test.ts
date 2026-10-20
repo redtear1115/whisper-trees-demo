@@ -236,13 +236,12 @@ describe('projection', () => {
     expect(labelFits('永康里', null, 11)).toBe(false)
   })
 
-  it('a lit village always gets its name, even when it is too small for it; unlit small ones stay unnamed', () => {
+  it('a village too small for its name gets no name at all (lit or not): no shrinking, the list names it', () => {
     const tiny = { x: 0, y: 0, w: 12, h: 12 }
-    expect(villageNameMode('永康里', tiny, 11, 0)).toBe('none')
-    expect(villageNameMode('永康里', tiny, 11, 3)).toBe('forced')
-    expect(villageNameMode('永康里', { x: 0, y: 0, w: 40, h: 20 }, 11, 0)).toBe('fit')
-    expect(villageNameMode('永康里', { x: 0, y: 0, w: 40, h: 20 }, 11, 2)).toBe('fit')
-    expect(villageNameMode('永康里', null, 11, 5)).toBe('none')
+    expect(villageNameMode('永康里', tiny, 11)).toBe(false)
+    expect(villageNameMode('永康里', { x: 0, y: 0, w: 40, h: 20 }, 11)).toBe(true)
+    expect(villageNameMode('永康里', { x: 0, y: 0, w: 40, h: 20 }, 24)).toBe(false) // 字級換算成 SVG 單位後變大，就放不下
+    expect(villageNameMode('永康里', null, 11)).toBe(false)
   })
 
   it('projects every real 大安 village into the canvas', () => {

@@ -16,8 +16,8 @@ const MARGIN = 70
 export const CITY_MAP_VH = 0.36
 /** 區名字級（手機上約 12 px：viewBox 寬度換算） */
 const LABEL_PX = 14
-/** 區名在畫面上最小的字級（CSS px） */
-const LABEL_MIN_PX = 10
+/** 區名在畫面上最小的字級（CSS px；第五輪由 10 改 12） */
+const LABEL_MIN_PX = 12
 
 /** 一區的 SVG 形狀、名字位置。純資料，隨 outline 算一次。 */
 export function useCityGeometry(outline: Outline) {

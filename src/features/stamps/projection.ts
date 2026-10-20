@@ -82,11 +82,10 @@ export function labelFits(name: string, label: VillageLabel | null, fontSize: nu
 }
 
 /**
- * 里名要不要畫在地圖上：放得下就畫；放不下的，點亮過的（lit > 0）也要畫——
- * 點亮的里是使用者走過的地方，不能是一塊沒有名字的色塊。放不下的標籤字級縮小一點、疊在最上面。
+ * 里名要不要畫在地圖上：放得下才畫；放不下就不畫，**不縮小字級、也不因為點亮過而硬畫**
+ * （第五輪，使用者決定：縮到 10 px 以下讀不到，名字改由旁邊的里列表負責）。`fontSize` 是 SVG 單位，
+ * 呼叫的人用 12 CSS px ÷ 每單位的螢幕像素換算，所以放不下的判斷就是「在畫面上放不放得下 12 px 的字」。
  */
-export function villageNameMode(name: string, label: VillageLabel | null, fontSize: number, lit: number): 'fit' | 'forced' | 'none' {
-  if (!label) return 'none'
-  if (labelFits(name, label, fontSize)) return 'fit'
-  return lit > 0 ? 'forced' : 'none'
+export function villageNameMode(name: string, label: VillageLabel | null, fontSize: number): boolean {
+  return labelFits(name, label, fontSize)
 }

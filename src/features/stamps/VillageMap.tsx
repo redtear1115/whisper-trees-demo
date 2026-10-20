@@ -4,16 +4,17 @@ import { PANEL_BG, RAMP_STEPS, villageFill, villageText } from './colors'
 import { CrayonDefs } from './Crayon'
 import { fitProjection, unionBBox, villageLabel, villageNameMode, villagePath, type BBox } from './projection'
 
-/** 里名字級（SVG 單位；畫布寬 360，手機上約 1:1 px） */
-const LABEL_FS = 11
-/** 里太小放不下名字、但已經點亮時，名字用這個字級畫在最上面 */
-const FORCED_FS = 10
+/** 里名在畫面上至少幾個螢幕像素（CSS px）。第五輪：原本 SVG 單位 11，地圖被 36svh 夾住縮小後實際只剩約 6–10 px */
+const LABEL_MIN_PX = 12
+/** 里地圖最多佔螢幕高度的幾成（CSS 的 .atlas-panel svg 同步） */
+const VILLAGE_MAP_VH = 0.36
 
 /**
  * 里的完成度地圖：以該區範圍投影，每個里依「點亮的樹 ÷ 里內的樹」像印泥一樣上色（0 棵是空白紙格，有 1 棵就看得出變化）。
  * 里很小（有的不到 20 px），所以地圖是給「看」和「用手點」的；鍵盤與讀屏走旁邊的里列表（VillageList），
- * 地圖本身不進 Tab 順序，也對讀屏隱藏，避免 50 幾個停靠點。名字放得下才顯示；
- * 放不下但已經點亮的里也要有名字（縮小字級、疊在最上面，見 villageNameMode）。
+ * 地圖本身不進 Tab 順序，也對讀屏隱藏，避免 50 幾個停靠點。名字在畫面上至少 12 px，
+ * 放得下才顯示；太小放不下的里**不畫名字、也不縮小字級**（第五輪：縮到 10 px 以下讀不到），
+ * 名字在旁邊的里列表裡找得到（含點亮與否），點那一塊地圖也會開卡片（見 villageNameMode）。
  */
 export function VillageMap({
   data,
@@ -44,11 +45,11 @@ export function VillageMap({
   if (!shapes) return null
   // 選到的里畫在最上面
   const items = [...shapes.items].sort((a, b) => Number(a.v.id === pickedId) - Number(b.v.id === pickedId))
-  const names = items
-    .map(({ v, label }) => ({ v, label, mode: villageNameMode(v.name, label, LABEL_FS, lit.get(v.id) ?? 0) }))
-    .filter((x) => x.mode !== 'none' && x.label)
-    // 放不下的（forced）最後畫，疊在別人的名字上面
-    .sort((a, b) => Number(a.mode === 'forced') - Number(b.mode === 'forced'))
+  // 畫面上 1 個 SVG 單位約幾個螢幕像素：寬度 ≈ 容器 340 px，高度被 36svh 夾住（和 CityMap 同一種估法）
+  const vh0 = typeof window === 'undefined' ? 800 : window.innerHeight
+  const pxPerUnit = Math.min(340 / shapes.proj.width, (vh0 * VILLAGE_MAP_VH) / shapes.proj.height)
+  const fs = LABEL_MIN_PX / pxPerUnit // SVG 單位；換回螢幕就是 12 px
+  const names = items.filter(({ v, label }) => label && villageNameMode(v.name, label, fs))
 
   return (
     <div className="atlas-panel village-map" data-testid="village-map">
@@ -73,16 +74,16 @@ export function VillageMap({
             )
           })}
         </g>
-        {names.map(({ v, label, mode }) => (
+        {names.map(({ v, label }) => (
           <text
             key={v.id}
             x={label!.x}
             y={label!.y}
-            className={`atlas-label ${mode === 'forced' ? 'forced' : ''}`}
+            className="atlas-label"
             style={{
-              fontSize: mode === 'forced' ? FORCED_FS : LABEL_FS,
+              fontSize: fs,
               fill: villageText(lit.get(v.id) ?? 0, v.total),
-              strokeWidth: mode === 'forced' ? 3 : 2,
+              strokeWidth: 2 / pxPerUnit,
               stroke: villageFill(lit.get(v.id) ?? 0, v.total),
             }}
             textAnchor="middle"
