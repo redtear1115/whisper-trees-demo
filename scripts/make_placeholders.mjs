@@ -80,7 +80,21 @@ const outDir = join(root, 'public/assets/ph')
 const debugDir = join(root, 'public/assets/ph-debug')
 mkdirSync(outDir, { recursive: true })
 mkdirSync(debugDir, { recursive: true })
+// 已交件的素材（ph/ 裡不是這支腳本產生的檔案，例如設計交的動物美術）不覆蓋：只認這支腳本寫出的開頭（2026-10-21）
+const placeholderHead = (a) => `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">\n`
+const delivered = new Set(
+  assets
+    .filter((a) => {
+      try {
+        return !readFileSync(join(outDir, `${a.id}.svg`), 'utf8').startsWith(placeholderHead(a))
+      } catch {
+        return false
+      }
+    })
+    .map((a) => a.id),
+)
 for (const a of assets) {
+  if (delivered.has(a.id)) continue
   const small = Math.min(a.w, a.h) <= 120
   const fs = Math.max(8, Math.min(small ? Math.round(a.w / 7) : 18, Math.floor((a.w * 1.6) / a.id.length)))
   const h = hue(a.id)
@@ -228,7 +242,7 @@ const md = `# UI 美術素材清單（交給 UX/UI）
 ## 交件方式
 
 - 目前畫面上的都是佔位檔，位置是 \`public/assets/ph/<id>.svg\`（公民看到的版本，沒有標示文字）。網址帶 \`?debug=1\` 時改載入 \`public/assets/ph-debug/<id>.svg\`（多一行「id 佔位」「尺寸 佔位」，給設計與開發對照）；交件時只要覆蓋 \`ph/\` 的檔案，\`ph-debug/\` 可以不管。
-- 交件時用**同名檔案**覆蓋同一個位置即可，程式不用改。
+- 交件時用**同名檔案**覆蓋同一個位置即可，程式不用改。重跑這支腳本不會蓋掉已交件的檔案（不是腳本產生的就跳過），清單上標「（已交件）」。
 - 若改成 .webp／.png，副檔名不同，要同步改 \`src/assets.ts\` 的 \`assetUrl\`（全部素材要用同一種格式）。
 - 尺寸是畫面上的 @1x 大小；請另交 @2x（寬高各乘 2），透明背景的素材請保留透明。
 
@@ -236,7 +250,7 @@ const md = `# UI 美術素材清單（交給 UX/UI）
 
 | ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
 |---|---|---|---|---|---|---|
-${assets.map((a) => `| \`${a.id}\` | ${a.w}×${a.h} | ${a.w * 2}×${a.h * 2} | \`public/assets/ph/${a.id}.svg\` | ${a.where} | ${refCell(a.id)} | ${a.brief} |`).join('\n')}
+${assets.map((a) => `| \`${a.id}\`${delivered.has(a.id) ? '（已交件）' : ''} | ${a.w}×${a.h} | ${a.w * 2}×${a.h * 2} | \`public/assets/ph/${a.id}.svg\` | ${a.where} | ${refCell(a.id)} | ${a.brief} |`).join('\n')}
 
 共 ${assets.length} 項。
 
