@@ -65,6 +65,8 @@ export interface GameConfig {
   insectChance: number
   /** 樹上住戶出現時的額外光點 */
   insectBonus: number
+  /** 打卡後多久才再問一次心情（小時，選了或略過都算）；0 = 每次打卡都問 */
+  moodIntervalHours: number
   multiplier: number
   events: GameEvent[]
   shop: ShopItem[]
@@ -132,6 +134,7 @@ export const DEFAULT_CONFIG: GameConfig = {
   halveFrom: 11,
   insectChance: 0.15,
   insectBonus: 3,
+  moodIntervalHours: 8,
   multiplier: 1,
   events: [{ id: 'ev-arbor', name: '植樹節雙倍光點', start: '2027-03-12', end: '2027-03-14', multiplier: 2 }],
   shop: DEFAULT_SHOP,

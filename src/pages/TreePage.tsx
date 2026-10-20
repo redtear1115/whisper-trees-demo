@@ -16,6 +16,9 @@ import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
 import { DropCards } from '../features/game/DropCards'
+import { MoodPrompt, MoodResponse } from '../features/mood/MoodCards'
+import { currentMoodOf, shouldAskMoodNow, useMood } from '../features/mood/mood'
+import { useCelebrationBlocking } from '../features/onboarding/celebrationGate'
 import { PhotoCarousel } from '../features/species/PhotoCarousel'
 import { photoIndexForTree } from '../features/species/carousel'
 import { useSpeciesPhotos } from '../lib/speciesPhotos'
@@ -26,6 +29,7 @@ export default function TreePage() {
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
   const drops = (location.state as CheckinState | null)?.drops
+  const askMoodState = (location.state as CheckinState | null)?.askMood === true
   // 從某個分頁點進來（樹洞、我的光點紀錄、探索、集章冊），返回就回到那一頁；其他（掃碼、地圖）回地圖
   const fromTab = (location.state as { from?: string } | null)?.from
   const back = backTarget(fromTab)
@@ -68,6 +72,12 @@ export default function TreePage() {
   const whispers = useMemo(() => whispersOf(treeId), [treeId, myWhispers])
   const capsule = onSite ? whispers.find((w) => w.at < sessionStart) : undefined
   const thisVisit = whispers.filter((w) => w.at >= sessionStart && !w.mock)
+  // 打卡後的心情：剛打卡成功（或遠觀）、距離上次詢問夠久、沒有慶祝視窗開著才問；選好後這次造訪顯示森林的回應
+  const moodStored = useMood()
+  const celebrating = useCelebrationBlocking()
+  const askMood = askMoodState && onSite !== null && !celebrating && shouldAskMoodNow()
+  const mood = currentMoodOf(moodStored)
+  const moodThisVisit = onSite && recent && mood && mood.at >= recent.at ? mood.mood : null
   const glow = seededInt(`${treeId}:${weekKey()}`, 0, 30) + (visitedThisWeek(treeId) ? 1 : 0)
 
   if (tree === undefined) return <div className="page center muted">正在找這棵樹…</div>
@@ -115,6 +125,8 @@ export default function TreePage() {
         <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
       <DropCards drops={drops} />
+      {askMood && <MoodPrompt />}
+      {moodThisVisit && !askMood && <MoodResponse mood={moodThisVisit} />}
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
       {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}

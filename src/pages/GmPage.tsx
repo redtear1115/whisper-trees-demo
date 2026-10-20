@@ -208,6 +208,13 @@ function Rules() {
             value={cfg.insectBonus}
             onChange={(n) => saveGameConfig({ insectBonus: n })}
           />
+          <NumRow
+            label="打卡後問心情的間隔（小時）"
+            note="只在打卡成功或遠觀之後問「現在的心情？」，選了或略過都從那一刻起算；0 = 每次打卡都問。選心情沒有光點，心情只有玩家自己看得到"
+            value={cfg.moodIntervalHours}
+            max={168}
+            onChange={(n) => saveGameConfig({ moodIntervalHours: n })}
+          />
           <tr>
             <td>
               <strong>全域倍率</strong>

@@ -1089,9 +1089,9 @@ textarea.input {
 .protected-note {
   margin: 0 0 8px;
   padding: 8px 12px;
-  border-left: 3px solid var(--red-ink);
-  border-radius: 0 10px 10px 0;
-  background: rgba(180, 72, 60, 0.06);
+  border: 1px dashed rgba(180, 72, 60, 0.35);
+  border-radius: 10px;
+  background: rgba(180, 72, 60, 0.05);
 }
 
 .protected-note p {
@@ -5461,4 +5461,143 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+
+/* ---------- 打卡後的心情（只有選擇介面出現 emoji） ---------- */
+
+.mood-card {
+  margin: 12px 0 0;
+}
+
+.mood-title {
+  margin: 0 0 2px;
+  font-size: 1.2rem;
+}
+
+.mood-privacy {
+  margin: 0 0 10px;
+}
+
+.mood-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.mood-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 64px;
+  padding: 6px 2px;
+  border: 1px solid var(--line);
+  border-radius: 16px 12px 16px 12px / 12px 16px 12px 16px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+}
+
+.mood-option.on {
+  border-color: var(--green);
+  background: var(--green-soft);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+
+.mood-option:has(input:focus-visible) {
+  outline: 3px solid var(--green-ink);
+  outline-offset: 2px;
+}
+
+.mood-emoji {
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.mood-name {
+  font-size: 0.8rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.mood-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mood-response {
+  background: var(--green-soft);
+  border-color: #bcd6bc;
+}
+
+.mood-forest {
+  margin: 0;
+  font-family: var(--font-voice);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.mood-light {
+  margin: 4px 0 0;
+}
+
+.mood-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed #bcd6bc;
+}
+
+.mood-suggest-tag {
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--glow);
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+
+.mood-suggest .muted {
+  flex-basis: 100%;
+}
+
+.mood-change {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--green-ink);
+  font-size: 0.9rem;
+}
+
+/* 我的：心情列接在動物、區的下面，同一種虛線分隔 */
+.me-mood {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.me-mood-text {
+  min-width: 0;
+  flex: 1 1 8rem;
+}
+
+.me-mood-text strong,
+.me-mood-age {
+  white-space: nowrap;
+}
+
+.me-mood-box {
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mood-response {
+    animation: drop-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }

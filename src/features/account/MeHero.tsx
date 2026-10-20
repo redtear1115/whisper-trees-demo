@@ -9,6 +9,7 @@ import { useInventory } from '../game/inventory'
 import { allItems, useGameConfig } from '../game/config'
 import { AnimalPicker } from '../avatar/AnimalPicker'
 import { useAnimal } from '../avatar/useAnimal'
+import { MoodRow } from '../mood/MoodRow'
 
 /** /me 的頂部：陪你的動物（地圖上的那一隻）守著小芽，下面是小芽的成長；「換一隻」就在這裡 */
 export function MeHero() {
@@ -98,6 +99,7 @@ export function MeHero() {
       <div id={districtId} ref={districtBox} className="me-district-box" hidden={!pickingDistrict}>
         {pickingDistrict && <DistrictPicker name="me-district" where="me" />}
       </div>
+      <MoodRow />
     </section>
   )
 }

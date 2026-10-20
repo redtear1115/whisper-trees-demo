@@ -7,7 +7,7 @@
 //   whispers          ← users/{uid}/whispers
 //   checkins/watered/myWishIds ← users/{uid}
 //   ext.gm            ← config/gm        ext.vendor ← vendorOrders
-//   ext.ledger/inventory/onboarding ← users/{uid}   ext.opinions ← notices/notice-1/opinions/{uid}
+//   ext.ledger/inventory/onboarding/mood ← users/{uid}   ext.opinions ← notices/notice-1/opinions/{uid}
 // `seen` 只留在本機（index.ts 管），不上雲端。
 // 非承辦人在後台的改動只寫 overlay（本機），見 overlay.ts。
 
@@ -75,10 +75,12 @@ interface UserDoc {
   inventory: unknown | undefined
   /** 新手引導旗標；map 欄位，setDoc merge 會逐欄合併 */
   onboarding: unknown | undefined
+  /** 打卡後的心情：{ current: { id, at } | null, askedAt }；map 欄位，逐欄合併 */
+  mood: unknown | undefined
 }
 
 const emptyUser = (): UserDoc => ({
-  checkins: [], watered: {}, myWishIds: [], myReportIds: [], ledger: undefined, inventory: undefined, onboarding: undefined,
+  checkins: [], watered: {}, myWishIds: [], myReportIds: [], ledger: undefined, inventory: undefined, onboarding: undefined, mood: undefined,
 })
 
 // ---------- 模型 ----------
@@ -192,6 +194,7 @@ function rebuildExt() {
     ledger: userDoc.ledger,
     inventory: userDoc.inventory,
     onboarding: userDoc.onboarding,
+    mood: userDoc.mood,
     opinions,
     ledgerOverlay: overlay.ledger,
     ...overlay.ext,
@@ -377,6 +380,7 @@ function startUser(forUid: string) {
           ledger: x.ledger,
           inventory: x.inventory,
           onboarding: x.onboarding,
+          mood: x.mood,
         }
         // 文件載入了（來自伺服器，或快取裡真的有）才算 ready；自動寫入靠它擋掉「還沒載入的空資料」
         if (!snap.metadata.fromCache || snap.exists()) setSession({ userReady: true })
@@ -541,7 +545,7 @@ function fallback(reason: string) {
 interface Pending {
   checkins: Checkin[]
   myWishIds: string[]
-  replace: Partial<Record<'ledger' | 'inventory' | 'onboarding', unknown>>
+  replace: Partial<Record<'ledger' | 'inventory' | 'onboarding' | 'mood', unknown>>
 }
 let pending: Pending | null = null
 
@@ -747,6 +751,7 @@ export function setExt(key: string, value: unknown) {
     case 'ledger':
     case 'inventory':
     case 'onboarding':
+    case 'mood':
       userDoc = { ...userDoc, [key]: value }
       rebuildExt()
       commit()

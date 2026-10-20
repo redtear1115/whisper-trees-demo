@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Art } from '../../components/ui'
-import { isDemoMode, useStore, useUserReady } from '../../store'
+import { useStore, useUserReady } from '../../store'
 import { useAuth } from '../../lib/firebase'
 import { firstLightEarned, grantStarterGift, newcomerDone, onboarding, patchOnboarding, shouldCelebrateNewcomer } from '../game/onboarding'
 import { CelebrationDialog } from './Celebration'
-import { firstLightCelebration, isStandalone, shouldRecordHomeScreen, STEP_CELEBRATE, tourView } from './tour'
+import { firstLightCelebration, isStandalone, shouldRecordHomeScreen } from './tour'
+import { setCelebrationOpen, useTourOnCelebrate } from './celebrationGate'
 
 /**
  * 整個 App 一份、不畫東西（除了慶祝視窗）的自動動作：
@@ -19,13 +20,17 @@ export function OnboardingEffects() {
   const { uid } = useAuth()
   const firstLight = useStore((s) => firstLightEarned(s))
   const allDone = useStore((s) => newcomerDone(s))
-  const tourOnCelebrate = useStore((s) => {
-    const v = tourView({ ob: onboarding(s), firstLight: firstLightEarned(s), ready, demo: isDemoMode() })
-    return v.open && v.step === STEP_CELEBRATE
-  })
+  const tourOnCelebrate = useTourOnCelebrate()
   const [firstLightDialog, setFirstLightDialog] = useState(false)
   const [homeCelebration, setHomeCelebration] = useState(false)
   const [newcomerCelebration, setNewcomerCelebration] = useState(false)
+
+  // 讓其他要提問的畫面（例如打卡後的心情）知道現在有慶祝視窗，等它關掉
+  const showingDialog = firstLightDialog || homeCelebration || newcomerCelebration
+  useEffect(() => {
+    setCelebrationOpen(showingDialog)
+  }, [showingDialog])
+  useEffect(() => () => setCelebrationOpen(false), [])
 
   useEffect(() => {
     if (ready && firstLight) grantStarterGift()
@@ -35,13 +40,17 @@ export function OnboardingEffects() {
     const how = firstLightCelebration({ ready, firstLight, celebratedAt: onboarding().firstLightCelebratedAt, tourOnCelebrate })
     if (how === 'none') return
     patchOnboarding({ firstLightCelebratedAt: Date.now() })
-    if (how === 'dialog') setFirstLightDialog(true)
+    if (how === 'dialog') {
+      setCelebrationOpen(true) // 先設訊號，等的人下一次畫面就看得到，不會閃一下
+      setFirstLightDialog(true)
+    }
   }, [ready, firstLight, tourOnCelebrate, uid])
 
   useEffect(() => {
     // 讀當下的值而不是 render 時的值：重複執行（StrictMode、換 uid）也不會記兩次
     if (shouldRecordHomeScreen({ standalone: isStandalone(), ready, homeScreenAt: onboarding().homeScreenAt })) {
       patchOnboarding({ homeScreenAt: Date.now() })
+      setCelebrationOpen(true)
       setHomeCelebration(true)
     }
   }, [ready, uid])
@@ -50,6 +59,7 @@ export function OnboardingEffects() {
     // 一樣讀當下的值，只慶祝一次
     if (shouldCelebrateNewcomer({ ready, done: allDone, celebratedAt: onboarding().newcomerCelebratedAt })) {
       patchOnboarding({ newcomerCelebratedAt: Date.now() })
+      setCelebrationOpen(true)
       setNewcomerCelebration(true)
     }
   }, [ready, allDone, uid])
