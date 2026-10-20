@@ -3,7 +3,7 @@ import { IconBack } from '../components/icons'
 import { Link } from 'react-router-dom'
 import { markSeen, useStore, useWishes } from '../store'
 import { WishCard } from '../features/wish/WishCard'
-import { Card } from '../components/ui'
+import { Card, EmptyCard } from '../components/ui'
 import type { Wish } from '../store/types'
 
 /** 我的許願內容：/wishes 與 /journal 共用 */
@@ -17,8 +17,25 @@ export function MyWishes({ sub = false }: { sub?: boolean }) {
 
   return (
     <div data-testid="my-wishes">
-      <Section sub={sub} title="我許的願" list={mine} seen={seen} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
-      <Section sub={sub} title="我澆過水的別人的願" list={wateredOnly} seen={seen} empty="還沒有幫別人的願望澆過水。" />
+      {mine.length === 0 && wateredOnly.length === 0 ? (
+        <EmptyCard
+          art="wish-empty"
+          title="還沒有願望"
+          testId="wishes-empty"
+          action={
+            <Link className="btn primary" to="/" data-testid="wishes-empty-go">
+              去地圖找空樹穴
+            </Link>
+          }
+        >
+          在地圖上點一個空樹穴（空心圓），或長按想種樹的地方，就能許一個願。
+        </EmptyCard>
+      ) : (
+        <>
+          <Section sub={sub} title="我許的願" list={mine} seen={seen} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
+          <Section sub={sub} title="我澆過水的別人的願" list={wateredOnly} seen={seen} empty="還沒有幫別人的願望澆過水。" />
+        </>
+      )}
     </div>
   )
 }

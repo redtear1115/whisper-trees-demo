@@ -5,6 +5,7 @@ import { IconChevron } from '../../components/icons'
 import { formatDayTime } from '../../lib/datetime'
 import { findTree } from '../../lib/trees'
 import { useStore } from '../../store'
+import { EmptyCard } from '../../components/ui'
 import { journalEntries } from './journal'
 
 const formatAt = formatDayTime
@@ -33,9 +34,18 @@ export function DiaryList() {
 
   if (rows.length === 0)
     return (
-      <p className="muted" data-testid="journal-empty">
-        還沒有留過話。到樹旁掃樹牌，在樹洞留一句話，就會收在這裡。
-      </p>
+      <EmptyCard
+        art="journal-empty"
+        title="日記還是空白的"
+        testId="journal-empty"
+        action={
+          <Link className="btn primary" to="/" data-testid="journal-empty-go">
+            去地圖找一棵樹
+          </Link>
+        }
+      >
+        走到樹旁掃樹牌，在樹洞留一句話，就會收在這裡。
+      </EmptyCard>
     )
   return (
     <ul className="journal-list" data-testid="journal-list">

@@ -17,8 +17,8 @@
 | ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
 |---|---|---|---|---|---|---|
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
-| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:158` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
-| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:158` | 同上夜間版，「樹木休息中」的氣氛 |
+| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:160` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
+| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:160` | 同上夜間版，「樹木休息中」的氣氛 |
 | `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:506`<br>`src/pages/MapPage.tsx:831` | 小樹苗；地圖上依澆水數放大 |
 | `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
 | `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:925` | 空的樹穴（方形土坑） |
@@ -57,9 +57,11 @@
 | `avatar-blue-magpie` | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
 | `avatar-malayan-night-heron` | 96×96 | 192×192 | `public/assets/ph/avatar-malayan-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:20` | 地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
 | `avatar-pangolin` | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:21` | 地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
+| `journal-empty` | 240×160 | 480×320 | `public/assets/ph/journal-empty.svg` | 樹洞頁「我的日記」空狀態 | （尚未使用） | 繪本風：一本攤開的空白小日記本靠在樹根旁，一片發光葉子當書籤；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
+| `wish-empty` | 240×160 | 480×320 | `public/assets/ph/wish-empty.svg` | 樹洞頁「許願」空狀態 | （尚未使用） | 繪本風：一個空的方形樹穴，旁邊插著一張小小的許願卡，一隻小鳥停在上面；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 | `fog-empty` | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:81` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 
-共 42 項。
+共 44 項。
 
 ## PWA 圖示（加到手機主畫面）
 
@@ -103,6 +105,7 @@
 | `public/assets/ph-debug/item-frame-spring.svg` | （尚未使用） |
 | `public/assets/ph-debug/item-hat-acorn.svg` | （尚未使用） |
 | `public/assets/ph-debug/item-hat-ancient.svg` | （尚未使用） |
+| `public/assets/ph-debug/journal-empty.svg` | （尚未使用） |
 | `public/assets/ph-debug/logo.svg` | （尚未使用） |
 | `public/assets/ph-debug/sapling.svg` | （尚未使用） |
 | `public/assets/ph-debug/scan-tag.svg` | （尚未使用） |
@@ -117,4 +120,5 @@
 | `public/assets/ph-debug/tree-hero-night.svg` | （尚未使用） |
 | `public/assets/ph-debug/tree-hero.svg` | （尚未使用） |
 | `public/assets/ph-debug/watering.svg` | （尚未使用） |
+| `public/assets/ph-debug/wish-empty.svg` | （尚未使用） |
 | `public/assets/photo/tree-tag.jpg` | `src/features/checkin/Scanner.tsx:96` |

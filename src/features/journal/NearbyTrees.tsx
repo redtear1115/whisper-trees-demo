@@ -39,8 +39,9 @@ export function NearbyTrees() {
   const onSite = useMemo(() => new Set((rows ?? []).filter((r) => recentCheckin(r.id)).map((r) => r.id)), [rows, checkins])
 
   return (
-    <section data-testid="journal-nearby" aria-labelledby="journal-nearby-title">
+    <section className="journal-nearby" data-testid="journal-nearby" aria-labelledby="journal-nearby-title">
       <h2 className="section-title" id="journal-nearby-title">附近的樹</h2>
+      <p className="muted small journal-nearby-lead">你身邊的樹，和上面看哪一頁無關。走過去掃樹牌，就能留話。</p>
       {!located ? (
         <p className="muted">還沒有你的位置。打開定位，或用 Demo 模式。</p>
       ) : rows === null ? (

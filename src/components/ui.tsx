@@ -16,6 +16,20 @@ export function Art({ id, alt, className }: { id: string; alt: string; className
   return <img className={`art ${className ?? ''}`} src={assetUrl(id)} alt={alt} />
 }
 
+/** 空狀態：插圖、標題、一句說明、一顆往下一步的按鈕（樣式和探索頁的霧卡共用 .fog-card） */
+export function EmptyCard({ art, title, children, action, testId }: { art: string; title: string; children: ReactNode; action?: ReactNode; testId?: string }) {
+  return (
+    <div className="fog-card empty-card" data-testid={testId}>
+      <Art id={art} alt="" className="fog-card-art" />
+      <div className="fog-card-body">
+        <h3 className="fog-card-title">{title}</h3>
+        <p>{children}</p>
+        {action}
+      </div>
+    </div>
+  )
+}
+
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return <section className={`card ${className ?? ''}`}>{children}</section>
 }

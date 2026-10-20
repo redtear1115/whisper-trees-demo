@@ -3589,6 +3589,21 @@ html:has(.tab-shell) {
 .journal-tabs {
   margin: 20px 0 12px;
 }
+/* 附近的樹不屬於上面的分頁：用虛線隔開，切分頁時才不會像是同一份內容 */
+.journal-nearby {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 2px dashed var(--line);
+}
+.journal-nearby .section-title {
+  margin-top: 0;
+}
+.journal-nearby-lead {
+  margin: -4px 0 12px;
+}
+.empty-card {
+  margin-bottom: 8px;
+}
 .journal-item {
   display: grid;
   gap: 6px;
