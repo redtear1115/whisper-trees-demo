@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
 <rect x="1" y="1" width="158" height="158" rx="12" fill="hsl(203 45% 90%)" stroke="hsl(203 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="16" fill="hsl(203 30% 30%)">item-hat-ancient</text>
-<text x="50%" y="58%" text-anchor="middle" font-family="sans-serif" font-size="13" fill="hsl(203 20% 40%)">160×160 佔位</text>
+<g transform="translate(52.8 52.8) scale(0.5666666666666668)" fill="hsl(203 35% 82%)" stroke="hsl(203 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 8C74 22 80 54 48 88C16 54 22 22 48 8Z"/><path d="M48 24V80" fill="none"/></g>
 </svg>

@@ -7,7 +7,7 @@
 
 ## 交件方式
 
-- 目前畫面上的都是佔位檔，位置是 `public/assets/ph/<id>.svg`。
+- 目前畫面上的都是佔位檔，位置是 `public/assets/ph/<id>.svg`（公民看到的版本，沒有標示文字）。網址帶 `?debug=1` 時改載入 `public/assets/ph-debug/<id>.svg`（多一行「id 佔位」「尺寸 佔位」，給設計與開發對照）；交件時只要覆蓋 `ph/` 的檔案，`ph-debug/` 可以不管。
 - 交件時用**同名檔案**覆蓋同一個位置即可，程式不用改。
 - 若改成 .webp／.png，副檔名不同，要同步改 `src/assets.ts` 的 `assetUrl`（全部素材要用同一種格式）。
 - 尺寸是畫面上的 @1x 大小；請另交 @2x（寬高各乘 2），透明背景的素材請保留透明。
@@ -17,23 +17,23 @@
 | ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
 |---|---|---|---|---|---|---|
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
-| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:99` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
-| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:99` | 同上夜間版，「樹木休息中」的氣氛 |
-| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/ShopPage.tsx:46`<br>`src/pages/TreePage.tsx:114` | 一道微光／光點的圖示，柔和發光 |
-| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:124`<br>`src/pages/TreePage.tsx:150` | 時空膠囊（信封或種子膠囊） |
-| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:505`<br>`src/pages/MapPage.tsx:818` | 小樹苗；地圖上依澆水數放大 |
+| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:137` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
+| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:137` | 同上夜間版，「樹木休息中」的氣氛 |
+| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/ShopPage.tsx:46`<br>`src/pages/TreePage.tsx:147` | 一道微光／光點的圖示，柔和發光 |
+| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:157`<br>`src/pages/TreePage.tsx:183` | 時空膠囊（信封或種子膠囊） |
+| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:505`<br>`src/pages/MapPage.tsx:831` | 小樹苗；地圖上依澆水數放大 |
 | `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
-| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:912` | 空的樹穴（方形土坑） |
+| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:925` | 空的樹穴（方形土坑） |
 | `scan-tag` | 240×160 | 480×320 | `public/assets/ph/scan-tag.svg` | 掃樹牌說明 | （尚未使用） | 公園處樹牌與 QR Code 的位置示意 |
 | `sprout-0` | 240×240 | 480×480 | `public/assets/ph/sprout-0.svg` | 我的小芽 | `src/features/game/character.ts:12` | 角色「小芽」＝樹精（團隊簡報 v20 p14），第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景 |
 | `sprout-1` | 240×240 | 480×480 | `public/assets/ph/sprout-1.svg` | 我的小芽 | `src/features/game/character.ts:13` | 角色「小芽」第 2 階：茁壯樹精。同一個角色長大了，身形變穩、枝葉變多，樹皮紋路出現（規格同上） |
 | `sprout-2` | 240×240 | 480×480 | `public/assets/ph/sprout-2.svg` | 我的小芽 | `src/features/game/character.ts:14` | 角色「小芽」第 3 階：智慧老樹精。同一個角色的老年樣子，樹冠茂密、鬍鬚般的垂枝與苔蘚，神情溫和（規格同上） |
-| `item-hat-acorn` | 160×160 | 320×320 | `public/assets/ph/item-hat-acorn.svg` | 商店、小芽換裝、新手禮 | `src/features/game/config.ts:75`<br>`src/features/onboarding/OnboardingEffects.tsx:62`<br>`src/features/onboarding/TourSheet.tsx:182` | 造型：橡實帽（疊在五隻動物與小芽身上，透明背景）。新手禮 |
-| `item-crown-feather` | 160×160 | 320×320 | `public/assets/ph/item-crown-feather.svg` | 商店、小芽換裝 | `src/features/game/config.ts:76` | 造型：花冠羽毛（花環插一根羽毛，疊在五隻動物與小芽身上，透明背景） |
-| `item-cape-moss` | 160×160 | 320×320 | `public/assets/ph/item-cape-moss.svg` | 商店、小芽換裝 | `src/features/game/config.ts:77` | 造型：苔蘚斗篷（披在肩上，疊在五隻動物與小芽身上，透明背景） |
-| `item-hat-ancient` | 160×160 | 320×320 | `public/assets/ph/item-hat-ancient.svg` | 小芽換裝、打卡後的稀有配件卡 | `src/features/game/DropCards.tsx:12`<br>`src/features/game/config.ts:114` | 稀有配件：古木紋理頭飾，木紋年輪，疊在角色上，透明背景（只能在受保護樹木掉落，不在商店賣） |
-| `item-frame-spring` | 160×160 | 320×320 | `public/assets/ph/item-frame-spring.svg` | 商店 | `src/features/game/config.ts:78` | 樹的頁面相框：春櫻（商品縮圖；實際相框另需 720×400 外框） |
-| `item-frame-autumn` | 160×160 | 320×320 | `public/assets/ph/item-frame-autumn.svg` | 商店 | `src/features/game/config.ts:79` | 樹的頁面相框：秋楓（同上） |
+| `item-hat-acorn` | 160×160 | 320×320 | `public/assets/ph/item-hat-acorn.svg` | 商店、小芽換裝、新手禮 | `src/features/game/config.ts:77`<br>`src/features/onboarding/OnboardingEffects.tsx:72`<br>`src/features/onboarding/TourSheet.tsx:185` | 造型：橡實帽（疊在五隻動物與小芽身上，透明背景）。新手禮 |
+| `item-crown-feather` | 160×160 | 320×320 | `public/assets/ph/item-crown-feather.svg` | 商店、小芽換裝 | `src/features/game/config.ts:78` | 造型：花冠羽毛（花環插一根羽毛，疊在五隻動物與小芽身上，透明背景） |
+| `item-cape-moss` | 160×160 | 320×320 | `public/assets/ph/item-cape-moss.svg` | 商店、小芽換裝 | `src/features/game/config.ts:79` | 造型：苔蘚斗篷（披在肩上，疊在五隻動物與小芽身上，透明背景） |
+| `item-hat-ancient` | 160×160 | 320×320 | `public/assets/ph/item-hat-ancient.svg` | 小芽換裝、打卡後的稀有配件卡 | `src/features/game/DropCards.tsx:12`<br>`src/features/game/config.ts:116` | 稀有配件：古木紋理頭飾，木紋年輪，疊在角色上，透明背景（只能在受保護樹木掉落，不在商店賣） |
+| `item-frame-spring` | 160×160 | 320×320 | `public/assets/ph/item-frame-spring.svg` | 商店 | `src/features/game/config.ts:80` | 樹的頁面相框：春櫻（商品縮圖；實際相框另需 720×400 外框） |
+| `item-frame-autumn` | 160×160 | 320×320 | `public/assets/ph/item-frame-autumn.svg` | 商店 | `src/features/game/config.ts:81` | 樹的頁面相框：秋楓（同上） |
 | `insect-ladybug` | 120×120 | 240×240 | `public/assets/ph/insect-ladybug.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:28` | 樹上住戶：瓢蟲，蠟筆繪本風，小、透明背景 |
 | `insect-beetle` | 120×120 | 240×240 | `public/assets/ph/insect-beetle.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:29` | 樹上住戶：獨角仙，蠟筆繪本風，小、透明背景 |
 | `insect-cicada` | 120×120 | 240×240 | `public/assets/ph/insect-cicada.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:30` | 樹上住戶：蟬（只在 5～9 月出現），蠟筆繪本風，小、透明背景 |
@@ -83,4 +83,54 @@
 
 | 檔案位置 | 程式參照 |
 |---|---|
-| `public/assets/photo/tree-tag.jpg` | `src/features/checkin/Scanner.tsx:93` |
+| `public/assets/ph-debug/action-info.svg` | （尚未使用） |
+| `public/assets/ph-debug/action-report.svg` | （尚未使用） |
+| `public/assets/ph-debug/action-route.svg` | （尚未使用） |
+| `public/assets/ph-debug/action-scan.svg` | （尚未使用） |
+| `public/assets/ph-debug/action-walk.svg` | （尚未使用） |
+| `public/assets/ph-debug/action-whisper.svg` | （尚未使用） |
+| `public/assets/ph-debug/avatar-blue-magpie.svg` | （尚未使用） |
+| `public/assets/ph-debug/avatar-leopard-cat.svg` | （尚未使用） |
+| `public/assets/ph-debug/avatar-malayan-night-heron.svg` | （尚未使用） |
+| `public/assets/ph-debug/avatar-pangolin.svg` | （尚未使用） |
+| `public/assets/ph-debug/avatar-taiwan-dog.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-capsule.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-far-view.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-first-light.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-first.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-home-screen.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-newcomer.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-night.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-reporter.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-species-10.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-species-3.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-waterer.svg` | （尚未使用） |
+| `public/assets/ph-debug/badge-wisher.svg` | （尚未使用） |
+| `public/assets/ph-debug/capsule.svg` | （尚未使用） |
+| `public/assets/ph-debug/empty-pit.svg` | （尚未使用） |
+| `public/assets/ph-debug/fog-empty.svg` | （尚未使用） |
+| `public/assets/ph-debug/glow.svg` | （尚未使用） |
+| `public/assets/ph-debug/insect-beetle.svg` | （尚未使用） |
+| `public/assets/ph-debug/insect-cicada.svg` | （尚未使用） |
+| `public/assets/ph-debug/insect-ladybug.svg` | （尚未使用） |
+| `public/assets/ph-debug/item-cape-moss.svg` | （尚未使用） |
+| `public/assets/ph-debug/item-crown-feather.svg` | （尚未使用） |
+| `public/assets/ph-debug/item-frame-autumn.svg` | （尚未使用） |
+| `public/assets/ph-debug/item-frame-spring.svg` | （尚未使用） |
+| `public/assets/ph-debug/item-hat-acorn.svg` | （尚未使用） |
+| `public/assets/ph-debug/item-hat-ancient.svg` | （尚未使用） |
+| `public/assets/ph-debug/logo.svg` | （尚未使用） |
+| `public/assets/ph-debug/sapling.svg` | （尚未使用） |
+| `public/assets/ph-debug/scan-tag.svg` | （尚未使用） |
+| `public/assets/ph-debug/species-card.svg` | （尚未使用） |
+| `public/assets/ph-debug/sprout-0.svg` | （尚未使用） |
+| `public/assets/ph-debug/sprout-1.svg` | （尚未使用） |
+| `public/assets/ph-debug/sprout-2.svg` | （尚未使用） |
+| `public/assets/ph-debug/stamp-bronze.svg` | （尚未使用） |
+| `public/assets/ph-debug/stamp-gold.svg` | （尚未使用） |
+| `public/assets/ph-debug/stamp-iron.svg` | （尚未使用） |
+| `public/assets/ph-debug/stamp-silver.svg` | （尚未使用） |
+| `public/assets/ph-debug/tree-hero-night.svg` | （尚未使用） |
+| `public/assets/ph-debug/tree-hero.svg` | （尚未使用） |
+| `public/assets/ph-debug/watering.svg` | （尚未使用） |
+| `public/assets/photo/tree-tag.jpg` | `src/features/checkin/Scanner.tsx:96` |

@@ -1,3 +1,5 @@
+import { isDebugMode } from './lib/debug'
+
 // UX/UI 美術素材清單。目前全部用佔位檔（public/assets/ph/<id>.svg），
 // 由 `node scripts/make_placeholders.mjs` 依這份清單產生，同時輸出 docs/ui-assets.md 交給設計。
 // 設計交件時用同名檔案（建議 .webp / .svg）取代即可。
@@ -66,7 +68,8 @@ export const ASSETS: AssetSpec[] = [
 ]
 
 export function assetUrl(id: string): string {
-  return `${import.meta.env.BASE_URL}assets/ph/${id}.svg`
+  // 公民看到的佔位檔沒有任何標示文字；?debug=1 才改載入帶「id 佔位」標示的版本（public/assets/ph-debug/）
+  return `${import.meta.env.BASE_URL}assets/${isDebugMode() ? 'ph-debug' : 'ph'}/${id}.svg`
 }
 
 /** PWA 圖示（加到手機主畫面用）。佔位檔是 PNG，由 make_placeholders 產生到 public/assets/pwa/；設計交件後用同名檔案取代。 */

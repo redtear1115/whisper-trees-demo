@@ -20,13 +20,10 @@ const icons = [...src.matchAll(/\{ file: '([^']+)', size: (\d+), brief: '([^']+)
 const hue = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7)
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
-// 地圖人物與行動圈圖示：佔位檔多放一個 emoji 讓畫面看得出是什麼（正式美術取代後就不需要了）
+// 行動圈圖示：佔位檔放一個意思對的 emoji，讓畫面看得出是什麼（正式美術取代後就不需要了）。
+// 五隻動物沒有任何一個 emoji 是對的（穿山甲被當成刺蝟、石虎不是家貓、黑冠麻鷺不是黑鳥），所以不用 emoji，
+// 只畫一片中性的葉子剪影（名字由畫面上的標題、選擇器自己寫；第五輪，2026-10-21）。
 const GLYPH = {
-  'avatar-taiwan-dog': '🐕',
-  'avatar-leopard-cat': '🐈',
-  'avatar-blue-magpie': '🐦',
-  'avatar-malayan-night-heron': '🐦‍⬛',
-  'avatar-pangolin': '🦔',
   'action-scan': '📷',
   'action-whisper': '💬',
   'action-info': '🌳',
@@ -34,26 +31,58 @@ const GLYPH = {
   'action-route': '🧭',
   'action-walk': '👣',
 }
+const ANIMAL_NAME = {
+  'avatar-taiwan-dog': '臺灣黑狗',
+  'avatar-leopard-cat': '石虎',
+  'avatar-blue-magpie': '臺灣藍鵲',
+  'avatar-malayan-night-heron': '黑冠麻鷺',
+  'avatar-pangolin': '穿山甲',
+}
 
+// 中性的葉子剪影（單位座標 0..96，置中），沒有 emoji 的占位用
+const leaf = (cx, cy, size, h) => {
+  const k = size / 96
+  return `<g transform="translate(${cx - 48 * k} ${cy - 48 * k}) scale(${k})" fill="hsl(${h} 35% 82%)" stroke="hsl(${h} 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 8C74 22 80 54 48 88C16 54 22 22 48 8Z"/><path d="M48 24V80" fill="none"/></g>`
+}
+// 小芽的剪影：一根莖、兩片葉子
+const sprout = (cx, cy, size, h) => {
+  const k = size / 96
+  return `<g transform="translate(${cx - 48 * k} ${cy - 48 * k}) scale(${k})" fill="hsl(${h} 35% 82%)" stroke="hsl(${h} 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 88V44" fill="none"/><path d="M48 50C48 30 32 20 14 22C14 42 28 54 48 50Z"/><path d="M48 44C48 26 62 14 82 16C82 36 68 48 48 44Z"/></g>`
+}
+
+// 兩種版本：public/assets/ph/<id>.svg 是公民看得到的（沒有任何標示文字）；public/assets/ph-debug/<id>.svg 多一行
+// 「id 佔位」「尺寸 佔位」給設計與開發對照，只在網址帶 ?debug=1 時才載入（src/lib/debug.ts）。
 const outDir = join(root, 'public/assets/ph')
+const debugDir = join(root, 'public/assets/ph-debug')
 mkdirSync(outDir, { recursive: true })
+mkdirSync(debugDir, { recursive: true })
 for (const a of assets) {
   const small = Math.min(a.w, a.h) <= 120
   const fs = Math.max(8, Math.min(small ? Math.round(a.w / 7) : 18, Math.floor((a.w * 1.6) / a.id.length)))
+  const h = hue(a.id)
   const glyph = GLYPH[a.id]
-  const svg = glyph
-    ? `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">
-<text x="50%" y="${Math.round(a.h * 0.62)}" text-anchor="middle" font-size="${Math.round(a.h * 0.62)}">${glyph}</text>
-<text x="50%" y="${a.h - 3}" text-anchor="middle" font-family="sans-serif" font-size="7" fill="hsl(${hue(a.id)} 30% 30%)">${esc(a.id)} 佔位</text>
-</svg>
-`
-    : `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">
-<rect x="1" y="1" width="${a.w - 2}" height="${a.h - 2}" rx="${small ? 14 : 12}" fill="hsl(${hue(a.id)} 45% 90%)" stroke="hsl(${hue(a.id)} 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="50%" y="${small ? '50%' : '46%'}" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="${fs}" fill="hsl(${hue(a.id)} 30% 30%)">${esc(a.id)}</text>
-${small ? '' : `<text x="50%" y="58%" text-anchor="middle" font-family="sans-serif" font-size="13" fill="hsl(${hue(a.id)} 20% 40%)">${a.w}×${a.h} 佔位</text>`}
-</svg>
-`
-  writeFileSync(join(outDir, `${a.id}.svg`), svg)
+  const animal = ANIMAL_NAME[a.id]
+  const isSprout = a.id.startsWith('sprout-')
+  const head = `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">`
+  const cap = (y, size, text, fill) => `<text x="50%" y="${y}" text-anchor="middle" font-family="sans-serif" font-size="${size}" fill="${fill}">${esc(text)}</text>\n`
+  let body // 公民版
+  let debug // 除錯版多出來的字
+  if (glyph) {
+    body = `<text x="50%" y="${Math.round(a.h * 0.7)}" text-anchor="middle" font-size="${Math.round(a.h * 0.62)}">${glyph}</text>\n`
+    debug = cap(a.h - 3, 7, `${a.id} 佔位`, `hsl(${h} 30% 30%)`)
+  } else if (animal) {
+    body = `${leaf(a.w / 2, a.h / 2, a.h * 0.7, 135)}\n`
+    debug = cap(a.h - 1, 7, `${a.id} ${animal} 佔位`, `hsl(${h} 30% 30%)`)
+  } else if (isSprout) {
+    // 小芽：只有剪影，沒有框，視覺重量跟旁邊的動物差不多
+    body = `${sprout(a.w / 2, a.h / 2, a.h * 0.62, 135)}\n`
+    debug = cap(a.h - 6, 12, `${a.id} ${a.w}×${a.h} 佔位`, `hsl(${h} 30% 30%)`)
+  } else {
+    body = `<rect x="1" y="1" width="${a.w - 2}" height="${a.h - 2}" rx="${small ? 14 : 12}" fill="hsl(${h} 45% 90%)" stroke="hsl(${h} 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>\n${leaf(a.w / 2, a.h / 2, Math.min(a.w, a.h) * 0.34, h)}\n`
+    debug = `${cap(small ? '50%' : '46%', fs, a.id, `hsl(${h} 30% 30%)`).replace('<text ', '<text dominant-baseline="middle" ')}${small ? '' : cap('58%', 13, `${a.w}×${a.h} 佔位`, `hsl(${h} 20% 40%)`)}`
+  }
+  writeFileSync(join(outDir, `${a.id}.svg`), `${head}\n${body}</svg>\n`)
+  writeFileSync(join(debugDir, `${a.id}.svg`), `${head}\n${body}${debug}</svg>\n`)
 }
 
 
@@ -175,7 +204,7 @@ const md = `# UI 美術素材清單（交給 UX/UI）
 
 ## 交件方式
 
-- 目前畫面上的都是佔位檔，位置是 \`public/assets/ph/<id>.svg\`。
+- 目前畫面上的都是佔位檔，位置是 \`public/assets/ph/<id>.svg\`（公民看到的版本，沒有標示文字）。網址帶 \`?debug=1\` 時改載入 \`public/assets/ph-debug/<id>.svg\`（多一行「id 佔位」「尺寸 佔位」，給設計與開發對照）；交件時只要覆蓋 \`ph/\` 的檔案，\`ph-debug/\` 可以不管。
 - 交件時用**同名檔案**覆蓋同一個位置即可，程式不用改。
 - 若改成 .webp／.png，副檔名不同，要同步改 \`src/assets.ts\` 的 \`assetUrl\`（全部素材要用同一種格式）。
 - 尺寸是畫面上的 @1x 大小；請另交 @2x（寬高各乘 2），透明背景的素材請保留透明。
@@ -201,4 +230,4 @@ ${icons.map((i) => `| \`${i.file}\` | ${i.size}×${i.size} | \`public/assets/pwa
 ${others.length ? `| 檔案位置 | 程式參照 |\n|---|---|\n${others.map((o) => `| \`public/${o.path}\` | ${o.refs.map((r) => `\`${r}\``).join('<br>') || '（尚未使用）'} |`).join('\n')}` : '（無）'}
 `
 writeFileSync(join(root, 'docs/ui-assets.md'), md)
-console.log(`${assets.length} placeholders → public/assets/ph, ${icons.length} PWA icons → public/assets/pwa, docs/ui-assets.md`)
+console.log(`${assets.length} placeholders → public/assets/ph (+ ph-debug), ${icons.length} PWA icons → public/assets/pwa, docs/ui-assets.md`)

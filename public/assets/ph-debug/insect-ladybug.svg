@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+<rect x="1" y="1" width="118" height="118" rx="14" fill="hsl(332 45% 90%)" stroke="hsl(332 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
+<g transform="translate(39.599999999999994 39.599999999999994) scale(0.42500000000000004)" fill="hsl(332 35% 82%)" stroke="hsl(332 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 8C74 22 80 54 48 88C16 54 22 22 48 8Z"/><path d="M48 24V80" fill="none"/></g>
+<text dominant-baseline="middle" x="50%" y="50%" text-anchor="middle" font-family="sans-serif" font-size="13" fill="hsl(332 30% 30%)">insect-ladybug</text>
+</svg>

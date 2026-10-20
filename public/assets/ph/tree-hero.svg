@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="400" viewBox="0 0 720 400">
 <rect x="1" y="1" width="718" height="398" rx="12" fill="hsl(194 45% 90%)" stroke="hsl(194 35% 55%)" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="50%" y="46%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="18" fill="hsl(194 30% 30%)">tree-hero</text>
-<text x="50%" y="58%" text-anchor="middle" font-family="sans-serif" font-size="13" fill="hsl(194 20% 40%)">720×400 佔位</text>
+<g transform="translate(292 132) scale(1.4166666666666667)" fill="hsl(194 35% 82%)" stroke="hsl(194 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 8C74 22 80 54 48 88C16 54 22 22 48 8Z"/><path d="M48 24V80" fill="none"/></g>
 </svg>

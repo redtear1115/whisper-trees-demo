@@ -222,6 +222,6 @@ node scripts/make_placeholders.mjs   # 依 src/assets.ts 重新產生佔位美�
 
 Firebase 設定與部署紀錄見 [docs/firebase-setup.md](docs/firebase-setup.md)。
 
-美術目前都是佔位檔，交給設計的清單見 [docs/ui-assets.md](docs/ui-assets.md)。
+美術目前都是佔位檔，交給設計的清單見 [docs/ui-assets.md](docs/ui-assets.md)。佔位檔畫面上**不寫任何標示文字**（公民看到的只是淡色框或一片葉子剪影；五隻動物沒有任何一個 emoji 是對的，所以只用葉子剪影）；網址帶 `?debug=1` 才改載入 `public/assets/ph-debug/` 的版本（多一行「id 佔位」「尺寸 佔位」，給設計與開發對照），`?debug=0` 關掉，同一個分頁內換頁維持。
 
 比對規則（公園範圍、樹穴合併）見 [01-data-pipeline](docs/specs/01-data-pipeline.md)。

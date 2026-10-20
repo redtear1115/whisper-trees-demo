@@ -4285,8 +4285,9 @@ html:has(.tab-shell) {
 }
 
 .me-sprout {
-  width: 116px;
-  height: 116px;
+  /* 和旁邊的動物（96 px）一樣大：佔位的小芽不能比動物大一圈（第五輪） */
+  width: 96px;
+  height: 96px;
 }
 
 .me-companion .art,
