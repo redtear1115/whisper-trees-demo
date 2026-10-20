@@ -5785,3 +5785,22 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   margin: 4px 0 0;
   overflow-wrap: anywhere;
 }
+
+/* 內文裡的連結用深綠（--green 在紙色上只有 4.46:1，不到 4.5:1） */
+.about-link {
+  color: var(--green-ink);
+  text-decoration: underline;
+}
+
+/* 頁尾溫和的下一步：一顆主要、一顆次要，不催促 */
+.about-next {
+  margin: 28px 0 24px;
+  text-align: center;
+}
+
+.about-next-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}

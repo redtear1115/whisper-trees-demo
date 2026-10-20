@@ -61,9 +61,7 @@ export default function AboutPage() {
               <div className="team-body">
                 <h3 className="team-name">{m.name}</h3>
                 <p className="team-title">{m.title}</p>
-                <p className="team-role">
-                  <span className="muted small">本案</span> {m.role}
-                </p>
+                <p className="team-role">{m.role}</p>
                 <p className="muted small team-skills">{m.skills}</p>
               </div>
             </li>
@@ -76,8 +74,23 @@ export default function AboutPage() {
         <p>台北市政 Debug 松・題目 #1 把樹種回來。</p>
         <p className="muted small">
           樹籍資料是臺北市政府的開放資料，其餘（光點、微光人數、許願進度…）是示範用的模擬資料，畫面上都標了「模擬」。詳細的來源與授權說明在
-          <Link to="/me">「我的」</Link>最下面的「設定與其他」。
+          <Link className="about-link" to="/me">
+            「我的」
+          </Link>
+          最下面的「設定與其他」。
         </p>
+      </section>
+
+      <section className="about-next" aria-label="接下來">
+        <p className="about-lead">看完了，就去樹旁邊坐一下吧。</p>
+        <div className="about-next-actions">
+          <Link className="btn primary" to="/scan" data-testid="about-scan">
+            去掃一棵樹
+          </Link>
+          <Link className="btn" to="/" data-testid="about-map">
+            回地圖
+          </Link>
+        </div>
       </section>
     </div>
   )
