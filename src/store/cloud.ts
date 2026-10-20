@@ -18,6 +18,7 @@ import {
   doc,
   documentId,
   getDoc,
+  getDocFromServer,
   getDocs,
   increment,
   limit,
@@ -43,15 +44,16 @@ import { getSession, setSession } from './session'
 import { LEGACY_REPORT_DETAILS, TAIPEI_DISTRICTS, WISH_REASONS, type Checkin, type StatusEvent, type TreeReport, type Whisper, type Wish } from './types'
 import type { State } from './index'
 import { checkMigration, runMigration } from './migrate'
+import { connectionAfter, probeResultOf, retryDelay, UNAVAILABLE_GRACE_MS, unavailableStep, type Connection } from './unavailable'
 
 const LIMIT = 500
 /** 規則只接受這些公告的意見 */
 const NOTICE_IDS = ['notice-1']
-const UNAVAILABLE_GRACE_MS = 30_000
 
 export interface Host {
   onState(s: State): void
-  onFallback(reason: string): void
+  /** 頂端的連線狀態（2026-10-21 起不再退回本機模式，連不上就顯示狀態、一直重連） */
+  onConnection(c: Connection): void
 }
 
 interface CloudWish {
@@ -95,6 +97,14 @@ let uidWaiters: ((uid: string) => void)[] = []
 let shared: Unsubscribe[] = []
 let userSubs: Unsubscribe[] = []
 let unavailableTimer: ReturnType<typeof setTimeout> | undefined
+/** 正在等 Firestore 連回來（計時中，或在背景等回到前景） */
+let unavailableWatch = false
+let probeTries = 0
+/** 每一輪問伺服器的編號：重新計時或清掉等待時加一，比它舊的問法回來就不算 */
+let probeSeq = 0
+let connection: Connection = 'ok'
+/** 監聽因為額度用完被 Firestore 關掉了：連回來時要重新開 */
+let listenersBroken = false
 
 let wishDocs: Record<string, CloudWish> = {}
 let overrides: Record<string, StatusEvent[]> = {}
@@ -216,38 +226,113 @@ function rebuildAll() {
 
 // ---------- 監聽 ----------
 
+function setConnection(c: Connection) {
+  if (connection === c) return
+  connection = c
+  host.onConnection(c)
+}
+
 /**
- * 長時間連不上 Firestore（上線卻一直沒有來自伺服器的快照）就退回本機模式。
- * 真的離線（navigator.onLine === false）不算：離線時照常用快取，留言先存著、恢復後同步。
+ * 長時間連不上 Firestore 時顯示連線狀態、一直重連；不退回本機模式（規則見 unavailable.ts）。
+ * 頁面在背景（螢幕關掉、切到別的 App）不算：計時器在背景被凍住，回到前景那一刻會立刻到期；
+ * 回到前景重新給一段寬限（onVisibility）。到期時實際問一次伺服器：問得到就恢復，問不到就顯示狀態、退避再問。
  */
-function armUnavailable() {
+function armUnavailable(ms = UNAVAILABLE_GRACE_MS) {
+  unavailableWatch = true
   unavailableTimer ??= setTimeout(() => {
     unavailableTimer = undefined
-    if (stopped) return
-    if (typeof navigator !== 'undefined' && !navigator.onLine) return armUnavailable()
-    fallback('firestore-unavailable')
-  }, UNAVAILABLE_GRACE_MS)
+    void onGraceOver()
+  }, ms)
+}
+
+function clearUnavailable() {
+  clearTimeout(unavailableTimer)
+  unavailableTimer = undefined
+  unavailableWatch = false
+  probeTries = 0
+  probeSeq++
+}
+
+/** 連得到了：清掉等待、狀態回到 ok；監聽之前被額度用完關掉的話重新開 */
+function connected() {
+  clearUnavailable()
+  setConnection('ok')
+  if (listenersBroken && !stopped) {
+    listenersBroken = false
+    restartListeners()
+  }
+}
+
+async function onGraceOver() {
+  if (stopped) return
+  const step = unavailableStep({ hidden: typeof document !== 'undefined' && document.visibilityState === 'hidden' })
+  if (step === 'wait-visible') return // onVisibility 回到前景時重新計時
+  const seq = ++probeSeq
+  let code: string | undefined
+  try {
+    await getDocFromServer(doc(db, 'config', 'gm'))
+  } catch (e) {
+    code = (e as { code?: string }).code ?? 'unavailable'
+  }
+  if (stopped || !unavailableWatch || seq !== probeSeq) return
+  const result = probeResultOf(code)
+  if (result === 'ok') return connected()
+  probeTries++
+  // 沒有網路時照樣退避再問；網路回來（online 事件）會提早問
+  setConnection(connectionAfter(result, typeof navigator === 'undefined' || navigator.onLine))
+  armUnavailable(retryDelay(probeTries, result))
+}
+
+/** 只給 tests/cloud 用：用很短的寬限觸發一次「連不上」的判斷 */
+export function _armUnavailableForTest(ms: number) {
+  clearTimeout(unavailableTimer)
+  unavailableTimer = undefined
+  armUnavailable(ms)
+}
+
+/** 回到前景：還在等 Firestore 的話，重新給一段完整的寬限（狀態已經顯示的話，馬上再問一次） */
+function onVisibility() {
+  if (stopped || document.visibilityState !== 'visible' || !unavailableWatch) return
+  clearTimeout(unavailableTimer)
+  unavailableTimer = undefined
+  probeTries = 0
+  probeSeq++
+  armUnavailable(connection === 'ok' ? UNAVAILABLE_GRACE_MS : 1_000)
+}
+
+/** 網路回來：在等的話馬上問一次 */
+function onOnline() {
+  if (stopped || !unavailableWatch) return
+  clearTimeout(unavailableTimer)
+  unavailableTimer = undefined
+  probeSeq++
+  armUnavailable(1_000)
 }
 
 function onListenError(e: FirestoreError) {
   if (stopped) return
-  if (e.code === 'resource-exhausted') return fallback('resource-exhausted')
+  if (e.code === 'resource-exhausted') {
+    // 監聽被關掉了：顯示狀態，連回來時 connected() 重新開
+    listenersBroken = true
+    setConnection('quota')
+    return armUnavailable(retryDelay(1, 'exhausted'))
+  }
   if (e.code === 'unavailable') return armUnavailable()
   console.warn('[cloud] 監聽失敗', e.code)
 }
 
 function onWriteError(label: string, e: unknown) {
   const code = (e as { code?: string }).code
-  if (code === 'resource-exhausted') return fallback('resource-exhausted')
+  if (code === 'resource-exhausted') {
+    setConnection('quota')
+    return armUnavailable(retryDelay(1, 'exhausted'))
+  }
   if (code === 'unavailable') return armUnavailable()
   console.warn(`[cloud] 寫入失敗 ${label}`, code ?? e)
 }
 
 function fromServer(snap: { metadata: { fromCache: boolean } }) {
-  if (!snap.metadata.fromCache && unavailableTimer) {
-    clearTimeout(unavailableTimer)
-    unavailableTimer = undefined
-  }
+  if (!snap.metadata.fromCache && unavailableWatch) connected()
 }
 
 function listen(q: Query, onNext: (snap: QuerySnapshot) => void, bucket: Unsubscribe[]) {
@@ -456,6 +541,7 @@ async function fetchNotes() {
 function onAuth() {
   const a = getAuthSnap()
   if (stopped || a.status !== 'ready' || !a.uid) return
+  if (connection === 'reconnecting' && !unavailableWatch) setConnection('ok')
   if (a.uid !== uid) switchUser(a.uid)
   void checkAdmin(a.uid, a.google)
 }
@@ -511,10 +597,15 @@ export function startCloud(h: Host) {
   host = h
   ;({ db } = getFirebase())
   stopped = false
+  connection = 'ok'
+  listenersBroken = false
   overlay = loadOverlay()
   window.addEventListener('storage', onOverlayStorage)
+  document.addEventListener('visibilitychange', onVisibility)
+  window.addEventListener('online', onOnline)
   unsubAuth = subscribeAuth(onAuth)
-  startAuth(() => fallback('auth-failed'))
+  // 匿名登入失敗不退回本機：顯示「正在重新連線」，firebase.ts 會一直退避重試，登入成功（onAuth）就恢復
+  startAuth(() => setConnection('reconnecting'))
   onAuth()
 }
 
@@ -532,16 +623,22 @@ export function stopCloud() {
   userSubs = []
   unsubAuth?.()
   unsubAuth = null
-  clearTimeout(unavailableTimer)
-  unavailableTimer = undefined
+  clearUnavailable()
   window.removeEventListener('storage', onOverlayStorage)
+  document.removeEventListener('visibilitychange', onVisibility)
+  window.removeEventListener('online', onOnline)
 }
 
-function fallback(reason: string) {
-  if (stopped) return
-  console.warn('[cloud] 退回本機模式：', reason)
-  stopCloud()
-  host.onFallback(reason)
+/** 監聽被額度用完關掉後，連回來時重新開（共用的與目前使用者的） */
+function restartListeners() {
+  shared.forEach((u) => u())
+  shared = []
+  startShared()
+  if (uid) {
+    userSubs.forEach((u) => u())
+    userSubs = []
+    startUser(uid)
+  }
 }
 
 // ---------- 使用者文件的合併寫入（同一個 tick 內的多個動作合成一次 setDoc） ----------

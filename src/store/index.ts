@@ -3,8 +3,9 @@
 //   - 雲端（Firebase：匿名登入＋Firestore，見 cloud.ts）：有 VITE_FIREBASE_*（或 VITE_FIREBASE_EMULATOR=1）時啟用。
 //     讀取靠 onSnapshot 鏡射成下面的 State，寫入先樂觀更新記憶體、再用 batch 寫 Firestore（格式需符合 firestore.rules）。
 //     `seen`（提示點）只存在這台裝置，不上雲端。
-//   - localStorage：沒有 Firebase 設定、Vitest、匿名登入失敗、或 Firestore 額度用完／長時間連不上時使用，
-//     UI 會顯示「離線示範模式」橫幅（session.fallback）。同一台電腦的兩個分頁靠 storage 事件即時同步。
+//   - localStorage：沒有 Firebase 設定、或 Vitest 時使用。同一台電腦的兩個分頁靠 storage 事件即時同步。
+//     雲端模式連不上（登入失敗、Firestore 斷線、額度用完）不會退回這裡（2026-10-21 使用者決定）：
+//     頂端顯示連線狀態（session.connection）並一直重連，這段時間的寫入由 Firestore 排著、連回來同步。
 // 非承辦人在後台（/gov、/vendor、/gm）的改動只寫本機覆寫層（overlay.ts），不進雲端。
 
 import { useMemo, useSyncExternalStore } from 'react'
@@ -120,17 +121,14 @@ function startCloud() {
   cloudOn = true
   seen = loadSeen()
   state = { ...emptyState(), seen }
-  setSession({ backend: 'cloud', fallback: false, userReady: false })
+  setSession({ backend: 'cloud', connection: 'ok', userReady: false })
   cloud.startCloud({
     onState(s) {
       state = { ...s, seen }
       emit()
     },
-    onFallback() {
-      cloudOn = false
-      state = read()
-      setSession({ backend: 'local', fallback: true, admin: 'no', migration: null, userReady: true })
-      emit()
+    onConnection(connection) {
+      setSession({ connection })
     },
   })
 }

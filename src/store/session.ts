@@ -1,6 +1,7 @@
 // 這個工作階段用哪個後端、是不是承辦人、有沒有待處理的遷移。UI 用 useSession() 讀。
 
 import { useSyncExternalStore } from 'react'
+import type { Connection } from './unavailable'
 
 export interface MigrationSummary {
   wishes: number
@@ -13,8 +14,8 @@ export interface MigrationSummary {
 
 export interface Session {
   backend: 'local' | 'cloud'
-  /** 雲端失敗而退回本機：顯示「離線示範模式」橫幅 */
-  fallback: boolean
+  /** 雲端的連線狀態：不是 ok 時頂端顯示（2026-10-21 起連不上也不退回本機模式，見 unavailable.ts） */
+  connection: Connection
   /** Google 登入且在 admins 白名單裡 */
   admin: 'checking' | 'yes' | 'no'
   migration: { summary: MigrationSummary; running: boolean; error?: string } | null
@@ -22,7 +23,7 @@ export interface Session {
   userReady: boolean
 }
 
-let session: Session = { backend: 'local', fallback: false, admin: 'no', migration: null, userReady: true }
+let session: Session = { backend: 'local', connection: 'ok', admin: 'no', migration: null, userReady: true }
 const listeners = new Set<() => void>()
 
 export const getSession = () => session

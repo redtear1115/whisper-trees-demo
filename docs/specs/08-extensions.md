@@ -220,7 +220,7 @@ scope 清單只定義在 `src/features/api/scopes.ts`，API 與 MCP 都引用它
 - 旗標存在 `ext.onboarding`（雲端是 `users/{uid}.onboarding` 的 map 欄位；規則不用改，`users/{uid}` 本來就是本人可讀寫）：`animal`（陪你的動物，`'taiwan-dog' | 'leopard-cat' | 'blue-magpie' | 'malayan-night-heron' | 'pangolin'`，沒有或不認得就當 `taiwan-dog`；舊值 `night-heron` 算黑冠麻鷺、`squirrel`（赤腹松鼠已移除）算預設，只在讀取時對應；2026-10-19 加、2026-10-20 改五隻，同樣逐欄合併、不需改 `cloud.ts` 與 `firestore.rules`）、`tourStep`、`tourSub`（第 0 步的小步驟，2026-10-20；見下「引導一」）、`tourDismissedAt`、`homeScreenAt`、`viewedCodexAt`、`viewedBadgesAt`、`giftAt`、`tasksCollapsed`（收合任務卡）、`newcomerCelebratedAt`（A3 慶祝過）、`firstLightCelebratedAt`（A1 慶祝過）。
 - 只能用 `patchOnboarding(partial)` 寫：以目前的值為底合併，雲端以 map 逐欄合併，所以不會蓋掉另一台裝置或舊快取寫的欄位。
 - 新手禮**只記 `onboarding.giftAt`**。擁有權由 `inventory()` 推算（`giftAt` 有值就把 `hat-acorn` 算進 `owned`，不重複）；`buy('hat-acorn')` 回傳「已擁有」。換上橡實帽走原本的 `equip`，由使用者操作。**不會自動寫入 `ext.inventory` 或 `ext.ledger`**，光點與餘額都不動。
-- 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式與退回本機時一律 ready。`grantStarterGift()` 在 ready 之前什麼都不做。
+- 自動寫入（偵測從桌面圖示打開、送新手禮）要等**目前這個 uid 的使用者文件載入完成**（`userReady()`／`useUserReady()`）；換 uid（例如用 Google 登入切換）會重設，本機模式一律 ready（2026-10-21 起雲端連不上不再退回本機，見 firebase-setup「連不上雲端時」）。`grantStarterGift()` 在 ready 之前什麼都不做。
 
 ### 我的區（2026-10-20 使用者決定，第三輪 B）
 

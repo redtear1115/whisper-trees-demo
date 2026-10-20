@@ -25,6 +25,7 @@ import {
   type Firestore,
 } from 'firebase/firestore'
 import { useSyncExternalStore } from 'react'
+import { authRetryDelay } from '../store/unavailable'
 
 const env = import.meta.env
 
@@ -111,7 +112,7 @@ function fromUser(u: User | null): AuthSnap {
 
 let started = false
 
-/** 開始監看登入狀態；沒登入就匿名登入。登入失敗時 onFail 會被呼叫（store 據此退回本機模式）。 */
+/** 開始監看登入狀態；沒登入就匿名登入，失敗會一直退避重試。每次失敗都呼叫 onFail（store 據此顯示「正在重新連線」）。 */
 export function startAuth(onFail: (e: unknown) => void) {
   if (started || !firebaseEnabled) return
   started = true
@@ -119,16 +120,21 @@ export function startAuth(onFail: (e: unknown) => void) {
   onAuthStateChanged(auth, (u) => {
     if (u) setSnap(fromUser(u))
   })
-  auth
-    .authStateReady()
-    .then(async () => {
+  // 匿名登入失敗不放棄（2026-10-21 起不再退回本機模式）：每次失敗都告訴 store（顯示「正在重新連線」），
+  // 再退避重試（authRetryDelay：1.5 秒起、×2、最多 30 秒），直到成功
+  const attempt = async (n: number): Promise<void> => {
+    try {
+      await auth.authStateReady()
       if (!auth.currentUser) await signInAnonymously(auth)
       setSnap(fromUser(auth.currentUser))
-    })
-    .catch((e) => {
-      setSnap({ status: 'failed', uid: null, isAnonymous: true, google: false })
+    } catch (e) {
+      console.warn('[auth] 匿名登入失敗，稍後再試', (e as { code?: string }).code ?? e)
       onFail(e)
-    })
+      await new Promise((r) => setTimeout(r, authRetryDelay(n)))
+      return attempt(n + 1)
+    }
+  }
+  void attempt(0)
 }
 
 // ---------- Google 綁定 ----------

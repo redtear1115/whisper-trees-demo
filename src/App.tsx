@@ -5,7 +5,7 @@ import { MobileOnly } from './features/device/MobileOnly'
 import { TabLayout } from './features/nav/TabLayout'
 import { LEGACY_REDIRECTS } from './features/nav/redirects'
 import { OnboardingEffects } from './features/onboarding/OnboardingEffects'
-import { FallbackBanner, MigrationPrompt, WriteFailedToast } from './features/cloud/Banners'
+import { ConnectionBanner, MigrationPrompt, WriteFailedToast } from './features/cloud/Banners'
 
 const MapPage = lazy(() => import('./pages/MapPage'))
 const ScanPage = lazy(() => import('./pages/ScanPage'))
@@ -54,7 +54,7 @@ export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <DemoBadge />
-      <FallbackBanner />
+      <ConnectionBanner />
       <MigrationPrompt />
       <WriteFailedToast />
       <OnboardingEffects />

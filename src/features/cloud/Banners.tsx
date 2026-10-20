@@ -1,18 +1,35 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { declineMigration } from '../../store/migrate'
 import { migrateToCloud, useSession } from '../../store'
+import { CONNECTION_TEXT } from '../../store/unavailable'
 
-/** 雲端失敗而退回本機模式時，頂端的提示 */
-export function FallbackBanner() {
-  const { fallback } = useSession()
+/**
+ * 雲端連不上時頂端的連線狀態（2026-10-21 起取代「離線示範模式」：不退回本機，一直重連，連回來自己消失）。
+ * 文字見 CONNECTION_TEXT；data-state 是狀態（reconnecting／offline／quota）。
+ */
+export function ConnectionBanner() {
+  const { connection } = useSession()
+  const ref = useRef<HTMLParagraphElement>(null)
+  const show = connection !== 'ok'
   useEffect(() => {
-    document.body.classList.toggle('has-offline', fallback)
+    document.body.classList.toggle('has-offline', show)
     return () => document.body.classList.remove('has-offline')
-  }, [fallback])
-  if (!fallback) return null
+  }, [show])
+  // 窄螢幕或字放大時會折成兩行：把實際高度給 CSS（--offline-h），頁面往下讓的距離跟著變，不會蓋住內容
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => document.body.style.setProperty('--offline-h', `${el.offsetHeight}px`))
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      document.body.style.removeProperty('--offline-h')
+    }
+  }, [show])
+  if (connection === 'ok') return null
   return (
-    <p className="offline-banner" role="status">
-      目前是離線示範模式，資料只存在這台裝置
+    <p ref={ref} className="offline-banner" role="status" data-testid="connection-banner" data-state={connection}>
+      {CONNECTION_TEXT[connection]}
     </p>
   )
 }
