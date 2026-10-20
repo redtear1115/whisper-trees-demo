@@ -2,7 +2,7 @@ import { Art } from '../../components/ui'
 import { ANIMALS } from './animals'
 import { setAnimal, useAnimal } from './useAnimal'
 
-/** 選陪你的動物：4 個選項的單選（原生 radio，鍵盤方向鍵可換）。點了立刻存、地圖上的角色立刻換。 */
+/** 選陪你的動物：5 個選項的單選（原生 radio，鍵盤方向鍵可換）。點了立刻存、地圖上的角色立刻換。 */
 export function AnimalPicker({ name = 'animal' }: { name?: string }) {
   const current = useAnimal()
   return (

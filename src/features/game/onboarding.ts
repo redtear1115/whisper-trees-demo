@@ -7,7 +7,7 @@ import { TAIPEI_DISTRICTS } from '../../store/types'
 import { baseLedger } from './ledger'
 
 export interface Onboarding {
-  /** 陪你的動物（地圖上代表你）：'pangolin' | 'blue-magpie' | 'night-heron' | 'squirrel'；沒選過就是穿山甲，見 features/avatar/animals.ts */
+  /** 陪你的動物（地圖上代表你）：'taiwan-dog' | 'leopard-cat' | 'blue-magpie' | 'malayan-night-heron' | 'pangolin'（舊值 night-heron 算黑冠麻鷺、squirrel 算預設）；沒選過就是臺灣黑狗，見 features/avatar/animals.ts */
   animal?: string
   /** 我的區：和 TAIPEI_DISTRICTS／PREFIX_DISTRICT 一模一樣的中文區名（如「大安區」）。沒設過就是沒有；讀請用 homeDistrict()。 */
   homeDistrict?: string
@@ -26,7 +26,7 @@ export interface Onboarding {
   homeScreenAt?: number
   viewedCodexAt?: number
   viewedBadgesAt?: number
-  /** 新手禮（草帽）送出的時間；擁有權由 inventory() 推算 */
+  /** 新手禮（橡實帽）送出的時間；擁有權由 inventory() 推算 */
   giftAt?: number
   /** 收合 /explore 的新手任務卡 */
   tasksCollapsed?: boolean
@@ -97,7 +97,7 @@ export function tasks(s?: State): Task[] {
       id: 'shop',
       label: '去商店換上新手禮，或買一件',
       to: '/shop',
-      done: !!(inv.equipped.outfit || inv.equipped.frame) || Object.values(inv.civic).some((n) => n > 0),
+      done: !!(inv.equipped.outfit || inv.equipped.frame),
     },
     {
       id: 'codex',

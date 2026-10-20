@@ -1,4 +1,5 @@
-// 角色「小芽」：依累計獲得的光點長大，花掉不會變小。
+// 角色「小芽」＝團隊簡報 v20（2026-10-20）p14 的樹精：依累計獲得的光點長大（不是真實樹齡），花掉不會變小。
+// 3 階：初心樹精 0 → 茁壯樹精 100 → 智慧老樹精 300。
 
 export interface Stage {
   id: string
@@ -8,11 +9,9 @@ export interface Stage {
 }
 
 export const STAGES: Stage[] = [
-  { id: 'seed', name: '種子', min: 0, art: 'sprout-0' },
-  { id: 'sprout', name: '發芽', min: 30, art: 'sprout-1' },
-  { id: 'sapling', name: '小樹苗', min: 100, art: 'sprout-2' },
-  { id: 'young', name: '小樹', min: 250, art: 'sprout-3' },
-  { id: 'grown', name: '大樹', min: 500, art: 'sprout-4' },
+  { id: 'novice', name: '初心樹精', min: 0, art: 'sprout-0' },
+  { id: 'sturdy', name: '茁壯樹精', min: 100, art: 'sprout-1' },
+  { id: 'wise', name: '智慧老樹精', min: 300, art: 'sprout-2' },
 ]
 
 export function stageOf(earned: number): { stage: Stage; next?: Stage; progress: number } {
@@ -25,7 +24,7 @@ export function stageOf(earned: number): { stage: Stage; next?: Stage; progress:
 }
 
 export interface GrowthCopy {
-  /** 「小芽・發芽」 */
+  /** 「小芽・茁壯樹精」 */
   headline: string
   /** 一句話：目前的樣子與往哪裡長（只講已經有的，不講還差多少） */
   line: string
@@ -37,7 +36,7 @@ export interface GrowthCopy {
   valuetext: string
 }
 
-/** 該放安心話嗎：手上還有光點，或流水帳裡有花掉的紀錄（買過東西、捐過） */
+/** 該放安心話嗎：手上還有光點，或流水帳裡有花掉的紀錄（買過東西） */
 export function shouldReassureSpend(a: { balance: number; spent: boolean }): boolean {
   return a.balance > 0 || a.spent
 }
@@ -55,7 +54,7 @@ export function growthCopy(earned: number, spendNote = false): GrowthCopy {
   if (!next) {
     return {
       headline,
-      line: '小芽已經長成大樹了，謝謝你一路陪著牠。',
+      line: `小芽已經長成${stage.name}了，謝謝你一路陪著牠。`,
       note: `一路收集了 ${earned} 光點。`,
       percent: 100,
       valuetext: `小芽已經長成${stage.name}`,
@@ -65,7 +64,7 @@ export function growthCopy(earned: number, spendNote = false): GrowthCopy {
   if (earned <= 0) {
     return {
       headline,
-      line: '還是一顆安靜的種子。收集到第一道光，牠就會慢慢醒來。',
+      line: `還是剛醒來的${stage.name}。收集到第一道光，牠就會慢慢長大。`,
       note: spendNote ? SPEND_NOTE : '',
       percent,
       valuetext: `小芽是${stage.name}，等著第一道光`,

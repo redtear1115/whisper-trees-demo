@@ -3137,8 +3137,8 @@ body.has-offline .gov {
 
 .animal-picker {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
   margin: 8px 0;
   padding: 0;
   border: 0;
@@ -3151,7 +3151,7 @@ body.has-offline .gov {
   align-items: center;
   gap: 2px;
   min-height: 44px;
-  padding: 6px 2px;
+  padding: 6px 0;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #fff;
@@ -3180,6 +3180,12 @@ body.has-offline .gov {
   font-size: 0.8rem;
   line-height: 1.25;
   overflow-wrap: anywhere;
+}
+
+/* 五隻動物一排：4 個字的名字（臺灣黑狗）在 360 px 要放得進一格，所以比共用的手寫字規則小一點（要比後面那條規則特定） */
+.animal-picker .animal-name {
+  font-size: 0.75rem;
+  letter-spacing: 0;
 }
 
 /* ---------- 點樹：樹旁的行動圈 ---------- */

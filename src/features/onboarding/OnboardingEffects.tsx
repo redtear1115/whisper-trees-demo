@@ -59,9 +59,9 @@ export function OnboardingEffects() {
     return (
       <CelebrationDialog badgeId="first-light" onClose={close}>
         <div className="tour-gift">
-          <Art id="item-hat-straw" alt="草帽" />
+          <Art id="item-hat-acorn" alt="橡實帽" />
           <p>
-            <strong>新手禮：草帽</strong>
+            <strong>新手禮：橡實帽</strong>
             <br />
             送你一頂，不花光點。<Link to="/me" onClick={close}>到小芽換上</Link>看看。
           </p>

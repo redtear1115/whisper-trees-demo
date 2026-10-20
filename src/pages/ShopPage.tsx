@@ -7,10 +7,9 @@ import { buy, useInventory, type BuyResult } from '../features/game/inventory'
 import { useGameConfig, type ItemKind } from '../features/game/config'
 import { EventBar } from '../features/game/EventBar'
 
-// 「回到城市」放最前面：光點最有意義的去處
+// 商店只賣虛擬造型（簡報 v20 p25）
 const KIND_TITLE: Record<ItemKind, string> = {
-  civic: '回到城市',
-  outfit: '小芽的造型',
+  outfit: '造型',
   frame: '樹的頁面相框',
 }
 
@@ -30,7 +29,7 @@ export default function ShopPage() {
   const items = cfg.shop.filter((i) => i.active)
   // 只在「最接近換得到」的那一個商品下面說還差多少，不在每個商品下面列欠額
   const nearest = items
-    .filter((i) => i.price > balance && !(i.kind !== 'civic' && inv.owned.includes(i.id)))
+    .filter((i) => i.price > balance && !inv.owned.includes(i.id))
     .sort((a, b) => a.price - b.price)[0]
 
   return (
@@ -57,17 +56,14 @@ export default function ShopPage() {
         return (
           <section key={kind}>
             <h2 className="section-title">{KIND_TITLE[kind]}</h2>
-            {kind === 'civic' && <p className="muted small">示意：目前不會真的捐款或認養。</p>}
             <div className="grid-cards">
               {list.map((item) => {
-                const owned = item.kind !== 'civic' && inv.owned.includes(item.id)
-                const times = inv.civic[item.id] ?? 0
+                const owned = inv.owned.includes(item.id)
                 return (
                   <div key={item.id} className="tile">
                     <Art id={item.art} alt="" />
                     <strong>{item.name}</strong>
                     <span className="small muted">{item.brief}</span>
-                    {times > 0 && <span className="small">已經做過 {times} 次，謝謝你</span>}
                     <button
                       className={`btn small ${balance >= item.price && !owned ? 'primary' : 'price'}`}
                       disabled={owned || balance < item.price}

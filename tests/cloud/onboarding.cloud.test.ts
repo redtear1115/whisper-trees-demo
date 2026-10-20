@@ -94,7 +94,7 @@ describe('onboarding in the cloud store', () => {
     }, { timeout: 10000 })
     const d = await serverDoc(a.uid)
     expect(d?.inventory).toEqual({ owned: ['frame-spring'], equipped: {}, civic: {} })
-    await vi.waitFor(() => expect(a.inv.inventory().owned.sort()).toEqual(['frame-spring', 'hat-straw']), { timeout: 10000 })
+    await vi.waitFor(() => expect(a.inv.inventory().owned.sort()).toEqual(['frame-spring', 'hat-acorn']), { timeout: 10000 })
   })
 
   it('flags survive a restart of the cloud store', async () => {

@@ -13,7 +13,6 @@ import {
   type PointAction,
 } from '../features/game/config'
 import { adjust, useBalance, useLedger } from '../features/game/ledger'
-import { useInventory } from '../features/game/inventory'
 import { AdminMode } from '../features/cloud/AdminMode'
 
 const WEEK = 7 * 86_400_000
@@ -49,12 +48,10 @@ export default function GmPage() {
 
 function Overview() {
   const ledger = useLedger()
-  const inv = useInventory()
   const since = Date.now() - WEEK
   const week = ledger.filter((e) => e.at >= since)
   const issued = week.filter((e) => e.delta > 0).reduce((n, e) => n + e.delta, 0)
   const spent = week.filter((e) => e.delta < 0).reduce((n, e) => n - e.delta, 0)
-  const funds = (inv.civic['fund-10'] ?? 0) + (inv.civic['water-bag'] ?? 0)
   return (
     <section>
       <h2>
@@ -68,10 +65,6 @@ function Overview() {
         <div className="stat">
           全市本週回收
           <strong>{(31_905 + spent).toLocaleString()}</strong>
-        </div>
-        <div className="stat">
-          捐給補種／認養
-          <strong>{(1_284 + funds).toLocaleString()} 次</strong>
         </div>
         <div className="stat">
           本機本週 發出／回收
@@ -348,7 +341,7 @@ function Shop() {
           {cfg.shop.map((i) => (
             <tr key={i.id}>
               <td>{i.name}</td>
-              <td>{{ outfit: '造型', frame: '相框', civic: '回到城市' }[i.kind]}</td>
+              <td>{{ outfit: '造型', frame: '相框' }[i.kind]}</td>
               <td>
                 <input
                   className="input num-input"

@@ -93,7 +93,7 @@ describe('home district persistence', () => {
   })
   it('later patches (animal, tour step) keep the district', () => {
     patchOnboarding({ homeDistrict: '信義區', homeDistrictChoice: 'other' })
-    patchOnboarding({ animal: 'squirrel', tourStep: 1 })
-    expect(onboarding()).toMatchObject({ homeDistrict: '信義區', homeDistrictChoice: 'other', animal: 'squirrel' })
+    patchOnboarding({ animal: 'leopard-cat', tourStep: 1 })
+    expect(onboarding()).toMatchObject({ homeDistrict: '信義區', homeDistrictChoice: 'other', animal: 'leopard-cat' })
   })
 })

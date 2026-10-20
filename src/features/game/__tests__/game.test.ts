@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { getState, recordCheckin, resetAll } from '../../../store'
+import { getState, recordCheckin, resetAll, setExt } from '../../../store'
 import { award, awardCheckin, balance, daylightFactor, earned, isDaytime, spend } from '../ledger'
 import { saveGameConfig, activeEvent, gameConfig, DEFAULT_SHOP } from '../config'
-import { buy, inventory } from '../inventory'
-import { stageOf } from '../character'
+import { buy, equip, inventory } from '../inventory'
+import { stageOf, STAGES } from '../character'
+import { ANCIENT_HAT } from '../drops'
 import { badges } from '../badges'
 
 // 台北 2026-10-19 中午與半夜
@@ -49,22 +50,60 @@ describe('shop', () => {
     award('wish', 'b', noon)
     for (let i = 0; i < 6; i++) award('checkin', `t${i}`, noon)
     expect(balance()).toBe(70)
-    const hat = DEFAULT_SHOP.find((i) => i.id === 'hat-straw')!
+    const hat = DEFAULT_SHOP.find((i) => i.id === 'hat-acorn')!
     expect(buy(hat)).toBe('ok')
     expect(buy(hat)).toBe('owned')
     expect(balance()).toBe(40)
     expect(earned()).toBe(70)
-    expect(inventory().equipped.outfit).toBe('hat-straw')
+    expect(inventory().equipped.outfit).toBe('hat-acorn')
     expect(spend(1000, 'x')).toBe(false)
-    expect(buy(DEFAULT_SHOP.find((i) => i.id === 'lantern')!)).toBe('poor')
+    expect(buy(DEFAULT_SHOP.find((i) => i.id === 'cape-moss')!)).toBe('poor')
+  })
+  it('sells only virtual cosmetics: no civic items, three outfits and two frames', () => {
+    expect(DEFAULT_SHOP.map((i) => i.id)).toEqual(['hat-acorn', 'crown-feather', 'cape-moss', 'frame-spring', 'frame-autumn'])
+    expect(DEFAULT_SHOP.filter((i) => i.kind === 'outfit').map((i) => i.name)).toEqual(['橡實帽', '花冠羽毛', '苔蘚斗篷'])
+  })
+  it('legacy outfit ids in the stored inventory resolve to the renamed ones; the rare hat is untouched', () => {
+    setExt('inventory', {
+      owned: ['hat-straw', 'scarf-leaf', 'lantern', 'frame-spring', ANCIENT_HAT],
+      equipped: { outfit: 'scarf-leaf', frame: 'frame-spring' },
+      civic: { 'fund-10': 2 },
+    })
+    const inv = inventory()
+    expect(inv.owned).toEqual(['hat-acorn', 'crown-feather', 'cape-moss', 'frame-spring', ANCIENT_HAT])
+    expect(inv.equipped).toEqual({ outfit: 'crown-feather', frame: 'frame-spring' })
+    expect(inv.civic).toEqual({ 'fund-10': 2 }) // old data is kept, just never written again
+    expect(inventory()).toBe(inv)
+    expect(buy(DEFAULT_SHOP[0])).toBe('owned')
+    equip('outfit', ANCIENT_HAT)
+    expect(inventory().equipped.outfit).toBe(ANCIENT_HAT)
+    equip('outfit', 'cape-moss')
+    expect(inventory().equipped.outfit).toBe('cape-moss')
+    expect(inventory().owned.filter((x) => x === 'hat-acorn')).toHaveLength(1)
+  })
+  it('a GM-saved shop with old items is renamed in place and loses the civic ones', () => {
+    setExt('gm', {
+      shop: [
+        { id: 'hat-straw', name: '草帽', kind: 'outfit', price: 45, active: false, art: 'item-hat-straw', brief: '' },
+        { id: 'fund-10', name: '捐', kind: 'civic', price: 100, active: true, art: 'item-fund', brief: '' },
+        { id: 'frame-spring', name: '春櫻相框', kind: 'frame', price: 40, active: true, art: 'item-frame-spring', brief: '' },
+      ],
+    })
+    const shop = gameConfig().shop
+    expect(shop.map((i) => i.id)).toEqual(['hat-acorn', 'frame-spring'])
+    expect(shop[0]).toMatchObject({ name: '橡實帽', art: 'item-hat-acorn', price: 45, active: false })
   })
 })
 
 describe('character', () => {
-  it('grows by earned points', () => {
-    expect(stageOf(0).stage.name).toBe('種子')
-    expect(stageOf(30).stage.name).toBe('發芽')
-    expect(stageOf(99).next?.name).toBe('小樹苗')
+  it('has three 樹精 stages that grow by earned points (0 / 100 / 300)', () => {
+    expect(STAGES.map((s) => [s.name, s.min])).toEqual([['初心樹精', 0], ['茁壯樹精', 100], ['智慧老樹精', 300]])
+    expect(stageOf(0).stage.name).toBe('初心樹精')
+    expect(stageOf(99).stage.name).toBe('初心樹精')
+    expect(stageOf(99).next?.name).toBe('茁壯樹精')
+    expect(stageOf(100).stage.name).toBe('茁壯樹精')
+    expect(stageOf(299).next?.name).toBe('智慧老樹精')
+    expect(stageOf(300).stage.name).toBe('智慧老樹精')
     expect(stageOf(9999).next).toBeUndefined()
   })
 })

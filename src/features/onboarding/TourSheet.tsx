@@ -179,9 +179,9 @@ function StepCelebrate() {
     <>
       <Celebration badgeId="first-light">
         <div className="tour-gift">
-          <Art id="item-hat-straw" alt="草帽" />
+          <Art id="item-hat-acorn" alt="橡實帽" />
           <p>
-            <strong>新手禮：草帽</strong>
+            <strong>新手禮：橡實帽</strong>
             <br />
             {giftAt ? '送你一頂，不花光點。到小芽換上看看。' : '正在放進你的背包…'}
           </p>

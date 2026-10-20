@@ -8,7 +8,7 @@ import { adjust, award, balance } from '../ledger'
 import { firstLightEarned, grantStarterGift, newcomerDone, onboarding, patchOnboarding, tasks } from '../onboarding'
 
 const noon = new Date('2026-10-19T12:00:00+08:00')
-const hat = DEFAULT_SHOP.find((i) => i.id === 'hat-straw')!
+const hat = DEFAULT_SHOP.find((i) => i.id === 'hat-acorn')!
 const done = () => Object.fromEntries(tasks().map((t) => [t.id, t.done]))
 const badge = (id: string) => badges(getState()).find((b) => b.id === id)!
 
@@ -60,7 +60,7 @@ describe('starter gift', () => {
     setSession({ userReady: true })
     expect(grantStarterGift()).toBe(true)
   })
-  it('inventory() lists hat-straw exactly once and with a stable reference', () => {
+  it('inventory() lists hat-acorn exactly once and with a stable reference', () => {
     expect(inventory().owned).toEqual([])
     patchOnboarding({ giftAt: 1 })
     expect(inventory().owned).toEqual([STARTER_GIFT])
@@ -69,7 +69,7 @@ describe('starter gift', () => {
     expect(inventory().owned.filter((x) => x === STARTER_GIFT)).toHaveLength(1)
     expect(inventory().equipped.outfit).toBe(STARTER_GIFT)
   })
-  it('buy(hat-straw) returns owned once the gift is given, without charging', () => {
+  it('buy(hat-acorn) returns owned once the gift is given, without charging', () => {
     award('checkin', 'T1', noon)
     const bal = balance()
     grantStarterGift()
@@ -101,13 +101,13 @@ describe('task derivation', () => {
     expect(done()).toEqual({ shop: false, codex: false, whisper: false, wish: false })
     expect(newcomerDone()).toBe(false)
   })
-  it('shop: equipped outfit or frame, or a civic purchase', () => {
+  it('shop: equipped outfit or frame; old civic purchases no longer count', () => {
     setExt('inventory', { owned: ['x'], equipped: {}, civic: {} })
     expect(done().shop).toBe(false)
     setExt('inventory', { owned: ['x'], equipped: { frame: 'x' }, civic: {} })
     expect(done().shop).toBe(true)
     setExt('inventory', { owned: [], equipped: {}, civic: { 'civic-tree': 1 } })
-    expect(done().shop).toBe(true)
+    expect(done().shop).toBe(false)
   })
   it('shop: just owning the gift does not count until it is worn', () => {
     patchOnboarding({ giftAt: 1 })

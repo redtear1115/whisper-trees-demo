@@ -31,7 +31,7 @@ export interface GameEvent {
   multiplier: number
 }
 
-export type ItemKind = 'outfit' | 'frame' | 'civic'
+export type ItemKind = 'outfit' | 'frame'
 
 export interface ShopItem {
   id: string
@@ -70,15 +70,41 @@ export interface GameConfig {
   shop: ShopItem[]
 }
 
+// 商店只賣虛擬造型與相框（團隊簡報 v20 p25，2026-10-20）；造型要能疊在五隻動物與小芽身上。
 export const DEFAULT_SHOP: ShopItem[] = [
-  { id: 'hat-straw', name: '草帽', kind: 'outfit', price: 30, active: true, art: 'item-hat-straw', brief: '夏天曬太陽也不怕' },
-  { id: 'scarf-leaf', name: '落葉圍巾', kind: 'outfit', price: 50, active: true, art: 'item-scarf-leaf', brief: '用楓香葉子織的' },
-  { id: 'lantern', name: '螢火提燈', kind: 'outfit', price: 80, active: true, art: 'item-lantern', brief: '夜裡陪樹說話時用' },
+  { id: 'hat-acorn', name: '橡實帽', kind: 'outfit', price: 30, active: true, art: 'item-hat-acorn', brief: '用橡實殼做的小帽子' },
+  { id: 'crown-feather', name: '花冠羽毛', kind: 'outfit', price: 50, active: true, art: 'item-crown-feather', brief: '野花編的花冠，插著一根羽毛' },
+  { id: 'cape-moss', name: '苔蘚斗篷', kind: 'outfit', price: 80, active: true, art: 'item-cape-moss', brief: '軟軟綠綠的苔蘚，披在肩上' },
   { id: 'frame-spring', name: '春櫻相框', kind: 'frame', price: 40, active: true, art: 'item-frame-spring', brief: '樹的頁面換上春天' },
   { id: 'frame-autumn', name: '秋楓相框', kind: 'frame', price: 40, active: true, art: 'item-frame-autumn', brief: '樹的頁面換上秋天' },
-  { id: 'fund-10', name: '捐 1 棵樹苗的一小步', kind: 'civic', price: 100, active: true, art: 'item-fund', brief: '光點捐給補種基金（示意，目前不會真的捐款）' },
-  { id: 'water-bag', name: '認養一個澆水袋', kind: 'civic', price: 150, active: true, art: 'item-water-bag', brief: '新植樹苗的緩釋澆水袋（示意）' },
 ]
+
+/** 簡報 v20 前的造型 id 對應到新的（只有這三個；稀有的古木紋理頭飾 hat-ancient 與相框不動）。讀 inventory 與 GM 存過的商品時都要走這個 */
+export const LEGACY_ITEM_ID: Record<string, string> = {
+  'hat-straw': 'hat-acorn',
+  'scarf-leaf': 'crown-feather',
+  lantern: 'cape-moss',
+}
+
+export function canonicalItemId(id: string): string {
+  return LEGACY_ITEM_ID[id] ?? id
+}
+
+/**
+ * GM 存過的商品清單可能還是舊的：舊造型換成新名字與素材（保留價格與上下架），
+ * 舊的「回到城市」商品（civic）整個拿掉。
+ */
+function normalizeShop(shop: ShopItem[]): ShopItem[] {
+  const out: ShopItem[] = []
+  for (const raw of shop) {
+    if ((raw.kind as string) === 'civic') continue
+    const id = canonicalItemId(raw.id)
+    const base = DEFAULT_SHOP.find((d) => d.id === id)
+    const item = id === raw.id || !base ? raw : { ...base, price: raw.price, active: raw.active }
+    if (!out.some((o) => o.id === item.id)) out.push(item)
+  }
+  return out
+}
 
 /**
  * 稀有配件：不在商店賣、不能用光點買，只能掉落（目前只有古木紋理頭飾，在受保護樹木第一次打卡成功時拿到，見 drops.ts）。
@@ -113,7 +139,12 @@ export const DEFAULT_CONFIG: GameConfig = {
 
 export function gameConfig(s?: State): GameConfig {
   const saved = getExt<Partial<GameConfig>>('gm', {}, s)
-  return { ...DEFAULT_CONFIG, ...saved, points: { ...DEFAULT_CONFIG.points, ...saved.points } }
+  return {
+    ...DEFAULT_CONFIG,
+    ...saved,
+    points: { ...DEFAULT_CONFIG.points, ...saved.points },
+    shop: saved.shop ? normalizeShop(saved.shop) : DEFAULT_CONFIG.shop,
+  }
 }
 
 let cache: { src: unknown; cfg: GameConfig } | null = null

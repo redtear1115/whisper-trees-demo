@@ -22,9 +22,10 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
 // 地圖人物與行動圈圖示：佔位檔多放一個 emoji 讓畫面看得出是什麼（正式美術取代後就不需要了）
 const GLYPH = {
+  'avatar-taiwan-dog': '🐕',
+  'avatar-leopard-cat': '🐈',
   'avatar-blue-magpie': '🐦',
-  'avatar-night-heron': '🐦‍⬛',
-  'avatar-squirrel': '🐿️',
+  'avatar-malayan-night-heron': '🐦‍⬛',
   'avatar-pangolin': '🦔',
   'action-scan': '📷',
   'action-whisper': '💬',
