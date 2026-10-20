@@ -1517,6 +1517,49 @@ textarea.input {
   text-align: center;
 }
 
+/* 相機開不了或全黑：取景框的位置換成說明卡（標題、一步步、重新開相機）；空間不夠就在卡片裡捲動 */
+.camera-help {
+  width: min(100%, 340px);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 253, 248, 0.97);
+  color: var(--ink);
+  text-align: left;
+}
+
+.camera-help h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.camera-help ol {
+  margin: 0 0 10px;
+  padding-left: 1.3em;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.camera-help li + li {
+  margin-top: 4px;
+}
+
+.camera-waiting {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.95);
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
 .scanner-error {
   background: rgba(255, 253, 248, 0.95);
   color: var(--ink);

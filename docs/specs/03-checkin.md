@@ -54,6 +54,12 @@ http://trees.gov.taipei/show/?treeid=SL0560111023
 - 用 zxing 系列函式庫（`@zxing/browser` 或 `html5-qrcode`）。iOS Safari 沒有 `BarcodeDetector`。
 - 同一張樹牌照片，OpenCV 解不出來、zxing 可以，所以不要用其他解碼器。
 - 也提供「從相簿選照片」，給不方便開相機的情況。
+- **相機打不開時（2026-10-21，同伴回報相機畫面全黑、只能從相簿上傳）**：取景框的位置換成說明卡（`camera-help`，`data-problem`；`src/features/checkin/camera.ts` 純函式有單元測試、`Scanner.tsx`）。
+  - 開相機前先問權限狀態（Permissions API 的 `camera`，不支援就跳過）：已經被拒絕就直接顯示說明；之後在設定裡改成允許，會自動重開。
+  - 依錯誤分類：權限被拒（`denied`）、沒有後鏡頭（先改用任何一個鏡頭再試一次，還是不行才是 `notFound`）、被別的 App 佔用（`busy`）、不是 HTTPS（`insecure`）、瀏覽器不支援（`unsupported`）。
+  - **全黑（`noFrames`）**：拿到相機串流 4 秒（`NO_FRAMES_MS`）還沒有畫面。有些手機開了相機卻一直不出畫面，這時不會有任何錯誤，以前畫面只會停在黑的。
+  - 權限視窗跳出來 3 秒還沒按：取景框下方提醒「看到『要使用相機嗎？』請按『允許』」（`camera-waiting`）；12 秒還沒有相機也沒有錯誤，改成說明卡（`unknown`）。
+  - 說明卡：標題說發生什麼，接著一步步怎麼打開（iPhone Safari：網址列「大小」→ 網站設定 → 相機；iPhone Chrome：設定 → Chrome → 相機；Android Chrome：網址列左邊的圖示 → 權限 → 相機，再不行到系統設定的 Chrome 權限），最後一定是「先拍下樹牌，再從相簿選照片」；可以重試的有「重新開相機」（`camera-retry`）。在 App 內建瀏覽器（LINE、IG…）裡一律先請他改用 Safari／Chrome。
 - 相機與定位只能在 HTTPS（或 localhost）使用。
 
 ## 防作弊（P2，只寫進未來展望）
