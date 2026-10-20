@@ -30,7 +30,6 @@ export default function TreePage() {
   const location = useLocation()
   const fresh = (location.state as CheckinState | null)?.checkin
   const drops = (location.state as CheckinState | null)?.drops
-  const askMoodState = (location.state as CheckinState | null)?.askMood === true
   const glowState = (location.state as CheckinState | null)?.glow
   // 從某個分頁點進來（樹洞、我的光點紀錄、探索、集章冊），返回就回到那一頁；其他（掃碼、地圖）回地圖
   const fromTab = (location.state as { from?: string } | null)?.from
@@ -93,11 +92,11 @@ export default function TreePage() {
   const whispers = useMemo(() => whispersOf(treeId), [treeId, myWhispers])
   const capsule = onSite ? whispers.find((w) => w.at < sessionStart) : undefined
   const thisVisit = whispers.filter((w) => w.at >= sessionStart && !w.mock)
-  // 跟樹互動時的心情（2026-10-21）：打卡是預設的那一次互動，剛掃完就展開「現在的心情？」，其他時候縮成一行。
-  // 有慶祝視窗開著時先不出現，等它關掉。樹洞的心情在樹洞卡裡（每一句話各自一個）。
+  // 跟樹互動時的心情（2026-10-21）：打卡成功後回到拉近畫面，不主動問打卡的心情（做完摸摸樹、回報、樹洞時才問）；
+  // 這裡縮成一行，想補選可以展開。有慶祝視窗開著時先不出現。樹洞的心情在樹洞卡裡（每一句話各自一個）。
   const celebrating = useCelebrationBlocking()
   const checkinMood =
-    onSite && recent && !celebrating ? <InteractionMood kind="checkin" treeId={treeId} at={recent.at} open={askMoodState} /> : null
+    onSite && recent && !celebrating ? <InteractionMood kind="checkin" treeId={treeId} at={recent.at} open={false} /> : null
   const lastWhisperAt = thisVisit.length ? thisVisit[thisVisit.length - 1].at : null
   const glow = seededInt(`${treeId}:${weekKey()}`, 0, 30) + (visitedThisWeek(treeId) ? 1 : 0)
 

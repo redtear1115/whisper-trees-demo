@@ -8,6 +8,8 @@ import type { Animal } from '../avatar/animals'
 import { TouchPanel } from '../touch/TouchPanel'
 import { focusActions, focusButtons, type FocusActionId, type RangeInfo } from './treeRings'
 import { InfoCard, ReportCard, WhisperCard } from './FocusCards'
+import { CheckinReward } from './CheckinReward'
+import type { FocusAfterScan, FocusCardAfterScan } from '../../pages/ScanPage'
 
 const ICON: Record<FocusActionId, ReactNode> = {
   touch: <IconActionTouch />,
@@ -24,7 +26,11 @@ interface Props {
   animal: Animal
   demo: boolean
   onClose: () => void
-  onScan: () => void
+  /** 剛掃樹牌打卡回來：先跳獎勵卡，收起後打開 openCard 那張卡 */
+  intro: FocusAfterScan | null
+  onIntroDone: () => void
+  /** 去掃樹牌；openCard：掃完回來要打開的互動 */
+  onScan: (openCard?: FocusCardAfterScan) => void
   onRoute: () => void
   onWalk: () => void
 }
@@ -36,7 +42,7 @@ interface Props {
  * 底部導覽留著；打過卡的互動點了在畫面裡打開一張卡；還沒打卡，在感應圈內直接去掃樹牌，圈外先走過去（第三版）。
  * 是對話框（role=dialog）：焦點移到第一個圈、Esc 關閉。
  */
-export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, onScan, onRoute, onWalk }: Props) {
+export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, intro, onIntroDone, onScan, onRoute, onWalk }: Props) {
   const root = useRef<HTMLDivElement>(null)
   const [note, setNote] = useState('')
   /** 打開的卡（摸摸樹、回報、留言在樹洞、樹的資料）；null = 看得到圈 */
@@ -47,6 +53,11 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
   // 換一棵樹、走進感應圈、打了卡，就清掉上一個提醒
   useEffect(() => setNote(''), [tree.id, range.inRange, checkedIn])
   useEffect(() => setCard(null), [tree.id])
+  const reward = intro?.reward ?? null
+  const finishIntro = () => {
+    if (intro?.openCard) setCard(intro.openCard)
+    onIntroDone()
+  }
 
   useEffect(() => {
     root.current?.querySelector<HTMLElement>('.focus-ring')?.focus()
@@ -55,12 +66,14 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
-      if (card) setCard(null)
+      if (reward) finishIntro()
+      else if (card) setCard(null)
       else onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose, card])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, card, reward])
 
   // 掛在手機框（.phone-shell）上：地圖頁自己的層疊順序蓋不過底部導覽；桌機 Demo 時也維持手機寬度
   return createPortal(
@@ -77,7 +90,8 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
         <Art id="tree-focus" alt="" className="tree-focus-art" />
         {/* 你的動物站在樹下 */}
         <Art id={animal.art} alt={`你在這裡：${animal.name}`} className="tree-focus-animal" />
-        {!card &&
+        {reward && <CheckinReward treeId={tree.id} reward={reward} onDone={finishIntro} />}
+        {!card && !reward &&
           actions.map((a) => (
             <button
               key={a.id}
@@ -90,7 +104,7 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
               onClick={() => {
                 if (!a.enabled || a.id === 'adopt') return setNote(a.why)
                 // 還沒打卡：在感應圈內直接去掃樹牌（掃一次 30 分鐘內都不用再掃）；圈外先走過去（Demo 模擬走到樹旁，一般畫路線）
-                if (a.first === 'scan') return onScan()
+                if (a.first === 'scan') return onScan(a.id)
                 if (a.first === 'walk') return demo ? onWalk() : onRoute()
                 setCard(a.id)
               }}

@@ -31,6 +31,7 @@ import { BUILDING_3D_PAINT, firstLabelLayerId, toneBasemap } from '../features/m
 import { setScanHint } from '../features/nav/scanHint'
 import { useAnimal } from '../features/avatar/useAnimal'
 import { TreeFocusView } from '../features/map/TreeFocusView'
+import type { FocusAfterScan } from './ScanPage'
 import { rangeInfo, TREE_FOCUS } from '../features/map/treeRings'
 import { loadRoadGraph, prefixAtAsync, routeBetween, routeLabel, routeMidpoint, type Route } from '../lib/route'
 import { treePrefix } from '../lib/treeId'
@@ -82,7 +83,7 @@ export default function MapPage() {
   })
   const [panel, setPanel] = useState(false)
   const [ready, setReady] = useState(false)
-  const navState = useLocation().state as { focus?: LngLat; wishId?: string; routeTreeId?: string } | null
+  const navState = useLocation().state as ({ focus?: LngLat; wishId?: string; routeTreeId?: string } & Partial<FocusAfterScan>) | null
   const focus = navState?.focus
   const anchor = useAnchor(true)
   const [follow, setFollow] = useState(false)
@@ -478,6 +479,29 @@ export default function MapPage() {
       alive = false
     }
   }, [routeTreeId, ready])
+
+  // 掃樹牌打卡成功回來：飛到那棵樹、打開拉近畫面，先跳獎勵卡，收起後打開剛剛點的互動。
+  // 用過就把路由 state 清掉，重新整理、返回再進來都不會再跳一次
+  const afterScan = navState?.focusTreeId ? (navState as FocusAfterScan) : null
+  const [focusIntro, setFocusIntro] = useState<FocusAfterScan | null>(null)
+  useEffect(() => {
+    if (!afterScan || !ready || !map.current) return
+    let alive = true
+    findTree(afterScan.focusTreeId).then((tree) => {
+      if (!alive || !tree) return
+      setFocusIntro(afterScan)
+      focusTree.current(tree)
+      navigate('.', { replace: true, state: null })
+    })
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [afterScan?.focusTreeId, ready])
+
+  useEffect(() => {
+    if (!treeFocus) setFocusIntro(null)
+  }, [treeFocus])
 
   // 圖層面板：Esc 關閉
   useEffect(() => {
@@ -1034,7 +1058,9 @@ export default function MapPage() {
           animal={animal}
           demo={demo}
           onClose={() => unfocusTree.current()}
-          onScan={() => navigate('/scan', { state: { hintTreeId: treeFocus.tree.id } })}
+          intro={focusIntro?.focusTreeId === treeFocus.tree.id ? focusIntro : null}
+          onIntroDone={() => setFocusIntro(null)}
+          onScan={(openCard) => navigate('/scan', { state: { hintTreeId: treeFocus.tree.id, openCard } })}
           // 怎麼走：拉近畫面先收起，地圖上畫出步行路線；下面的小列可以回到這棵樹
           onRoute={() => {
             routeFitted.current = false

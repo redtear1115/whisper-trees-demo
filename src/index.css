@@ -3623,6 +3623,53 @@ html:has(.tab-shell) {
   color: #173f33;
 }
 
+/* 打卡成功回到拉近畫面：樹冠上跳一下的獎勵卡（光點、掉落），點一下或幾秒後收起 */
+.checkin-reward {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: min(calc(100vw - 48px), 320px);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 253, 248, 0.97);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 28px 8px rgba(242, 193, 78, 0.5);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  animation: reward-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes reward-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+}
+
+.checkin-reward-title {
+  margin: 0;
+  font-family: var(--font-voice);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--green-ink);
+}
+
+.checkin-reward-points {
+  margin: 0;
+  font-weight: 700;
+}
+
+.checkin-reward .drop-cards {
+  width: 100%;
+  margin: 4px 0;
+  text-align: left;
+}
+
 /* 拉近畫面的卡（摸摸樹、回報、留言在樹洞、樹的資料）：從底部升起，蓋在樹與圈上面，留出「返回」那一列 */
 .tree-focus-sheet {
   position: absolute;
@@ -3818,7 +3865,8 @@ html:has(.tab-shell) {
 @media (prefers-reduced-motion: reduce) {
   .tree-focus,
   .focus-ring,
-  .tree-focus-sheet {
+  .tree-focus-sheet,
+  .checkin-reward {
     animation: none;
   }
   .touch-breath {
