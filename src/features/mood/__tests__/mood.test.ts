@@ -7,14 +7,13 @@ import {
   clearMood,
   currentMood,
   currentMoodOf,
-  INTERACTIONS,
   moodAge,
   moodById,
   moodState,
   MOODS,
+  noteMoodAsked,
   shouldAskMood,
   shouldAskMoodNow,
-  skipMood,
 } from '../mood'
 
 const H = 3_600_000
@@ -23,29 +22,27 @@ const T0 = new Date('2026-10-20T10:00:00+08:00').getTime()
 beforeEach(() => resetAll())
 
 describe('心情表', () => {
-  it('七種心情，id 不重複，每種都有 emoji、名稱、光與姿態、森林的回應與建議互動', () => {
+  it('七種心情，id 不重複，每種都有 emoji、名稱、光與姿態（只留作資料）與森林的回應', () => {
     expect(MOODS.map((m) => m.id)).toEqual(['calm', 'happy', 'tired', 'sad', 'anxious', 'angry', 'unsure'])
     expect(new Set(MOODS.map((m) => m.id)).size).toBe(7)
-    for (const m of MOODS) {
-      expect(m.emoji && m.name && m.light && m.response).toBeTruthy()
-      expect(INTERACTIONS[m.suggest]).toBeDefined()
-    }
+    for (const m of MOODS) expect(m.emoji && m.name && m.light && m.response).toBeTruthy()
   })
-  it('依簡報 v20 p15：名稱、森林回應與建議互動', () => {
+  it('第五輪改寫：名稱與森林此刻的回應（一句、第二人稱、不評價）', () => {
     const row = (id: string) => {
       const m = moodById(id)!
-      return [m.emoji, m.name, m.response, INTERACTIONS[m.suggest].label]
+      return [m.emoji, m.name, m.response]
     }
-    expect(row('calm')).toEqual(['😌', '平靜', '樹葉輕晃，傳來鳥鳴', '澆水'])
-    expect(row('happy')).toEqual(['😊', '開心', '鳥群飛來，花精冒出來一起慶祝', '澆水'])
-    expect(row('tired')).toEqual(['😮‍💨', '疲憊', '樹蔭擴大，出現可以坐下的樹根', '冥想'])
-    expect(row('sad')).toEqual(['😢', '難過', '螢火蟲慢慢聚過來，靜靜停留', '環抱樹'])
-    expect(row('anxious')).toEqual(['😰', '焦慮', '小鳥帶路，走一段節奏平穩的路線', '呼吸'])
-    expect(row('angry')).toEqual(['😠', '生氣', '風吹過樹葉沙沙作響，樹精只說「我聽著」', '呼吸'])
-    expect(row('unsure')).toEqual(['😶', '說不上來', '森林安靜陪伴，不追問', '冥想'])
+    expect(row('calm')).toEqual(['😌', '平靜', '樹葉輕輕晃，遠處有鳥在叫。'])
+    expect(row('happy')).toEqual(['😊', '開心', '一群小鳥飛過來，像在跟你一起高興。'])
+    expect(row('tired')).toEqual(['😮‍💨', '疲憊', '樹蔭在你身邊大了一點，坐一下也可以。'])
+    expect(row('sad')).toEqual(['😢', '難過', '螢火蟲慢慢聚過來，安靜地陪著你。'])
+    expect(row('anxious')).toEqual(['😰', '焦慮', '跟著葉子的節奏，吸氣四拍，吐氣四拍。'])
+    expect(row('angry')).toEqual(['😠', '生氣', '風吹過樹葉沙沙響，樹只說：「我聽著。」'])
+    expect(row('unsure')).toEqual(['😶', '說不上來', '森林安靜地陪著你，不追問。'])
   })
-  it('只有澆水是現在做得到的互動，其餘不假裝有', () => {
-    expect(Object.values(INTERACTIONS).filter((i) => i.available).map((i) => i.id)).toEqual(['water'])
+  it('回應不評價、不叫人怎麼做太多；只有焦慮邀請一次呼吸（有呼吸圓點）', () => {
+    for (const m of MOODS) expect(m.response).not.toMatch(/不好|不要|應該|怎麼了|你的光/)
+    expect(MOODS.filter((m) => m.breath).map((m) => m.id)).toEqual(['anxious'])
   })
   it('不認得的 id 沒有對應', () => {
     expect(moodById('bored')).toBeUndefined()
@@ -95,15 +92,15 @@ describe('存取', () => {
     expect(shouldAskMoodNow(T0 + 7 * H)).toBe(false)
     expect(shouldAskMoodNow(T0 + 8 * H)).toBe(true)
   })
-  it('略過：只記下詢問時間，不留心情，同樣 8 小時內不問', async () => {
-    await skipMood(T0)
+  it('那一列顯示出來但沒選：只記下詢問時間，不留心情，同樣 8 小時內不問', async () => {
+    await noteMoodAsked(T0)
     expect(moodState()).toEqual({ askedAt: T0 })
     expect(currentMood()).toBeNull()
     expect(shouldAskMoodNow(T0 + H)).toBe(false)
   })
-  it('略過不會清掉之前選的心情', async () => {
+  it('只記詢問時間不會清掉之前選的心情', async () => {
     await answerMood('calm', T0)
-    await skipMood(T0 + 9 * H)
+    await noteMoodAsked(T0 + 9 * H)
     expect(currentMood()?.mood.id).toBe('calm')
     expect(moodState().askedAt).toBe(T0 + 9 * H)
   })
@@ -125,7 +122,7 @@ describe('存取', () => {
     expect(currentMoodOf({ current: null })).toBeNull()
   })
   it('GM 調間隔後，詢問的判斷跟著變', async () => {
-    await skipMood(T0)
+    await noteMoodAsked(T0)
     expect(gameConfig().moodIntervalHours).toBe(8)
     saveGameConfig({ moodIntervalHours: 1 })
     expect(shouldAskMoodNow(T0 + 2 * H)).toBe(true)

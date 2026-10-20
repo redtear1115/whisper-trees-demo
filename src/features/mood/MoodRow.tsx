@@ -3,7 +3,7 @@ import { MoodPicker } from './MoodPicker'
 import { changeMood, clearMood, currentMoodOf, moodAge, useMood, type MoodId, type MoodState } from './mood'
 
 /**
- * 「我的」頂部的心情列：目前的心情（emoji、名稱、多久以前）與「換心情」。
+ * 「我的」頂部的心情列：目前的心情（名稱、多久以前；emoji 只在選擇器裡，第五輪統一）與「換心情」。
  * 這裡是換心情的唯一地方（樹的頁面不換）。沒選過就一行安靜的邀請。
  */
 export function MoodRow() {
@@ -29,10 +29,7 @@ export function MoodRowView({ state }: { state: MoodState }) {
           {cur ? (
             <>
               現在的心情：
-              <strong>
-                <span aria-hidden="true">{cur.mood.emoji} </span>
-                {cur.mood.name}
-              </strong>
+              <strong>{cur.mood.name}</strong>
               <span className="muted small me-mood-age"> ・{moodAge(cur.at)}</span>
             </>
           ) : (

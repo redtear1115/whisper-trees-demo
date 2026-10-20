@@ -1,52 +1,61 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
-import { MoodPrompt, MoodResponse } from '../MoodCards'
+import { MoodAsk, MoodLine } from '../MoodCards'
 import { MoodRowView } from '../MoodRow'
-import { MOODS, moodById } from '../mood'
+import { MOODS } from '../mood'
 
 const render = (el: React.ReactElement) => renderToStaticMarkup(<MemoryRouter>{el}</MemoryRouter>)
 
-describe('打卡後的詢問卡', () => {
-  const html = render(<MoodPrompt />)
-  it('標題「現在的心情？」，七個選項是 radiogroup 裡的 radio，每個都有 emoji 與名稱', () => {
+describe('樹洞卡上方的心情列（第五輪）', () => {
+  const html = render(<MoodAsk selected={null} />)
+  it('標題「現在的心情？」加「可以不選」，七個選項是 aria-pressed 的按鈕（不是 radio），每個有 emoji 與名稱', () => {
     expect(html).toContain('現在的心情？')
-    expect(html).toContain('role="radiogroup"')
-    expect(html.match(/type="radio"/g)).toHaveLength(7)
+    expect(html).toContain('可以不選')
+    expect(html).not.toContain('type="radio"')
+    expect(html.match(/aria-pressed="false"/g)).toHaveLength(7)
     for (const m of MOODS) {
       expect(html).toContain(m.emoji)
       expect(html).toContain(m.name)
     }
   })
-  it('有清楚的「略過」，沒選前「就這個」是停用的', () => {
-    expect(html).toContain('略過')
-    expect(html).toMatch(/disabled=""[^>]*data-testid="mood-confirm"|data-testid="mood-confirm"[^>]*disabled=""/)
-  })
-  it('說清楚只有自己看得到，沒有光點或評價的字眼', () => {
-    expect(html).toContain('只有你自己看得到')
+  it('沒有「就這個」「略過」、沒有「建議」，也沒有光點或評價的字眼', () => {
+    expect(html).not.toMatch(/就這個|略過|建議|還在規劃|你的光/)
     expect(html).not.toContain('光點 +')
     expect(html).not.toMatch(/不好|不開心|怎麼了/)
   })
+  it('沒選時沒有回應那一句', () => {
+    expect(html).not.toContain('data-testid="mood-response"')
+    expect(html).toContain('data-value=""')
+  })
+  it('選了：那個按鈕 aria-pressed、有勾（實心樣式 .on），其他不是；只出現一句回應', () => {
+    const out = render(<MoodAsk selected="tired" />)
+    expect(out.match(/aria-pressed="true"/g)).toHaveLength(1)
+    expect(out).toMatch(/class="mood-chip on"[^>]*aria-pressed="true"/)
+    expect(out).toContain('mood-chip-check') // 勾
+    expect(out.match(/data-testid="mood-response"/g)).toHaveLength(1)
+    expect(out).toContain('樹蔭在你身邊大了一點，坐一下也可以。')
+    expect(out).toContain('data-value="tired"')
+  })
 })
 
-describe('選好之後的回應卡', () => {
-  it('每種心情都寫出森林的回應、光與姿態，並標「建議」互動', () => {
+describe('森林的回應：一句，沒有「你的光」也沒有建議', () => {
+  it('每種心情都寫出自己的那一句，不顯示光與姿態', () => {
     for (const m of MOODS) {
-      const out = render(<MoodResponse mood={m} />)
+      const out = render(<MoodAsk selected={m.id} />)
       expect(out).toContain(m.response.replace(/"/g, '&quot;'))
-      expect(out).toContain(m.light)
-      expect(out).toContain('建議')
+      expect(out).not.toContain(m.light)
+      expect(out).not.toMatch(/你的光|建議/)
     }
   })
-  it('不用評價心情的話；emoji 不出現在回應卡（臉部留白）', () => {
-    const out = render(<MoodResponse mood={moodById('sad')!} />)
+  it('回應那一句沒有 emoji（臉部留白，emoji 只在選擇的按鈕上）', () => {
+    const out = render(<MoodLine id="sad" />)
     expect(out).not.toContain('😢')
     expect(out).not.toMatch(/心情不好|不要難過/)
   })
-  it('回應卡不能換心情，只指路到「我的」', () => {
-    const out = render(<MoodResponse mood={moodById('calm')!} />)
-    expect(out).not.toContain('type="radio"')
-    expect(out).toContain('href="/me"')
+  it('只有焦慮的那一句有呼吸圓點（aria-hidden）', () => {
+    expect(render(<MoodLine id="anxious" />)).toContain('breath-dot')
+    for (const m of MOODS.filter((x) => x.id !== 'anxious')) expect(render(<MoodLine id={m.id} />)).not.toContain('breath-dot')
   })
 })
 
@@ -58,9 +67,9 @@ describe('我的：心情列', () => {
     expect(out).not.toContain('換心情')
     expect(out).toContain('data-value=""')
   })
-  it('選過：顯示 emoji、名稱與相對時間，按鈕是「換心情」', () => {
+  it('選過：顯示名稱與相對時間（這一列沒有 emoji，emoji 只在選擇器裡），按鈕是「換心情」', () => {
     const out = render(<MoodRowView state={{ current: { id: 'happy', at: Date.now() - 2 * 3_600_000 } }} />)
-    expect(out).toContain('😊')
+    expect(out).not.toContain('😊')
     expect(out).toContain('開心')
     expect(out).toContain('2 小時前')
     expect(out).toContain('換心情')

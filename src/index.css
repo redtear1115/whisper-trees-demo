@@ -925,8 +925,8 @@ textarea.input {
 .drop-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 10px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--card);
@@ -945,23 +945,36 @@ textarea.input {
 
 .drop-art {
   flex: none;
-  width: 72px;
-  height: 72px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
 }
 
 .drop-line {
   font-family: var(--font-voice);
-  font-size: 1.05rem;
-  line-height: 1.45;
+  font-size: 1rem;
+  line-height: 1.4;
 }
 
-.drop-link {
-  display: inline-flex;
+.drop-sub {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  min-height: 44px;
+  gap: 0 10px;
+  margin-top: 2px;
+}
+
+/* 連結留在小字那一行；點擊範圍用偽元素撐到 44 px 高，不增加列高 */
+.drop-link {
+  position: relative;
   color: var(--green-ink);
   font-weight: 600;
+}
+
+.drop-link::after {
+  content: '';
+  position: absolute;
+  inset: -14px -6px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -5465,19 +5478,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 
 /* ---------- 打卡後的心情（只有選擇介面出現 emoji） ---------- */
 
-.mood-card {
-  margin: 12px 0 0;
-}
-
-.mood-title {
-  margin: 0 0 2px;
-  font-size: 1.2rem;
-}
-
-.mood-privacy {
-  margin: 0 0 10px;
-}
-
+/* 「我的」展開的選擇器（radiogroup，4 欄） */
 .mood-picker {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -5529,51 +5530,119 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   margin-top: 8px;
 }
 
-.mood-response {
-  background: var(--green-soft);
-  border-color: #bcd6bc;
+/* 樹洞卡上方的心情列（第五輪）：小按鈕排成可以折行的一列，點了就存 */
+.whisper-mood {
+  margin: 10px 0 2px;
+}
+
+.whisper.received .whisper-mood {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+  text-align: left;
+}
+
+.mood-ask-title {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.mood-ask-title .muted {
+  font-weight: 400;
+}
+
+.mood-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 5px;
+}
+
+.mood-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  gap: 3px;
+  min-height: 44px;
+  padding: 0 7px;
+  border: 1px solid var(--line);
+  border-radius: 16px 12px 16px 12px / 12px 16px 12px 16px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mood-chip-emoji {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+/* 選中：實心深綠底、白字、一個勾（不只靠邊框） */
+.mood-chip.on {
+  border-color: var(--green-ink);
+  background: var(--green-ink);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 勾放在角上，不增加按鈕的寬度（選了不會讓整列重新折行） */
+.mood-chip-check {
+  position: absolute;
+  top: -6px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--green-ink);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--green-ink);
+  font-size: 0.7rem;
 }
 
 .mood-forest {
-  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 0;
   font-family: var(--font-voice);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.5;
+  color: var(--green-ink);
   text-wrap: pretty;
 }
 
-.mood-light {
-  margin: 4px 0 0;
-}
-
-.mood-suggest {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 2px 8px;
-  margin: 10px 0 0;
-  padding-top: 8px;
-  border-top: 1px dashed #bcd6bc;
-}
-
-.mood-suggest-tag {
-  padding: 0 8px;
-  border-radius: 8px;
+/* 焦慮那句是邀請一次呼吸：一個圓點，約 4 秒脹大、4 秒縮小（純 CSS，減少動態時不動） */
+.breath-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
   background: var(--glow);
-  color: var(--ink);
-  font-size: 0.8rem;
+  box-shadow: 0 0 0 4px rgba(242, 193, 78, 0.35);
 }
 
-.mood-suggest .muted {
-  flex-basis: 100%;
-}
-
-.mood-change {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  color: var(--green-ink);
-  font-size: 0.9rem;
+@media (prefers-reduced-motion: no-preference) {
+  .breath-dot {
+    animation: breathe 8s ease-in-out infinite;
+  }
+  .mood-forest {
+    animation: drop-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(0.8);
+    }
+    50% {
+      transform: scale(1.5);
+    }
+  }
 }
 
 /* 我的：心情列接在動物、區的下面，同一種虛線分隔 */
@@ -5596,11 +5665,6 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   text-align: left;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .mood-response {
-    animation: drop-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-}
 
 /* ---------- 關於曦語 ---------- */
 

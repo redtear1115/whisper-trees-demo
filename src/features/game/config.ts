@@ -65,7 +65,7 @@ export interface GameConfig {
   insectChance: number
   /** 樹上住戶出現時的額外光點 */
   insectBonus: number
-  /** 打卡後多久才再問一次心情（小時，選了或略過都算）；0 = 每次打卡都問 */
+  /** 打卡後多久才再問一次心情（小時，那一列顯示出來就算，不選也算問過）；0 = 每次打卡都問 */
   moodIntervalHours: number
   multiplier: number
   events: GameEvent[]

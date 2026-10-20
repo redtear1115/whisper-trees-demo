@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { findTree, type Tree } from '../lib/trees'
 import { seededInt, weekKey } from '../lib/seed'
@@ -16,8 +16,8 @@ import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
 import { DropCards } from '../features/game/DropCards'
-import { MoodPrompt, MoodResponse } from '../features/mood/MoodCards'
-import { currentMoodOf, shouldAskMoodNow, useMood } from '../features/mood/mood'
+import { MoodAsk, MoodLine } from '../features/mood/MoodCards'
+import { currentMoodOf, noteMoodAsked, shouldAskMoodNow, useMood } from '../features/mood/mood'
 import { useCelebrationBlocking } from '../features/onboarding/celebrationGate'
 import { PhotoCarousel } from '../features/species/PhotoCarousel'
 import { photoIndexForTree } from '../features/species/carousel'
@@ -72,12 +72,26 @@ export default function TreePage() {
   const whispers = useMemo(() => whispersOf(treeId), [treeId, myWhispers])
   const capsule = onSite ? whispers.find((w) => w.at < sessionStart) : undefined
   const thisVisit = whispers.filter((w) => w.at >= sessionStart && !w.mock)
-  // 打卡後的心情：剛打卡成功（或遠觀）、距離上次詢問夠久、沒有慶祝視窗開著才問；選好後這次造訪顯示森林的回應
+  // 打卡後的心情（第五輪起併進樹洞卡）：剛打卡成功（或遠觀）、距離上次詢問夠久、沒有慶祝視窗開著，才在樹洞卡上方問。
+  // 那一列顯示出來的那一刻就記下詢問時間（不選也算問過）；記下之後 shouldAskMoodNow 變 false，所以用 state 把
+  // 「這一頁問過了」記住，這一列才不會一點就消失。重新整理後不再問，只剩選過的那一句回應。
   const moodStored = useMood()
   const celebrating = useCelebrationBlocking()
   const askMood = askMoodState && onSite !== null && !celebrating && shouldAskMoodNow()
+  const [askedFor, setAskedFor] = useState<string | null>(null)
+  useEffect(() => {
+    if (!askMood) return
+    setAskedFor(treeId)
+    void noteMoodAsked()
+  }, [askMood, treeId])
+  const asking = askMood || askedFor === treeId
   const mood = currentMoodOf(moodStored)
   const moodThisVisit = onSite && recent && mood && mood.at >= recent.at ? mood.mood : null
+  const moodSlot: ReactNode = asking ? (
+    <MoodAsk selected={moodThisVisit?.id ?? null} />
+  ) : moodThisVisit ? (
+    <MoodLine id={moodThisVisit.id} />
+  ) : null
   const glow = seededInt(`${treeId}:${weekKey()}`, 0, 30) + (visitedThisWeek(treeId) ? 1 : 0)
 
   if (tree === undefined) return <div className="page center muted">正在找這棵樹…</div>
@@ -125,8 +139,6 @@ export default function TreePage() {
         <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
       <DropCards drops={drops} />
-      {askMood && <MoodPrompt />}
-      {moodThisVisit && !askMood && <MoodResponse mood={moodThisVisit} />}
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
       {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}
@@ -155,7 +167,7 @@ export default function TreePage() {
 
       <div id="whisper" className="anchor-target">
         {onSite ? (
-          <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} />
+          <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} mood={moodSlot} />
         ) : (
           <section className="card">
             <p>{nearTree ? '你已經在樹旁邊了。掃一下樹幹上的樹牌，就能對它說句話。' : '想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。'}</p>
@@ -272,7 +284,7 @@ function CheckinStrip({
   )
 }
 
-function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
+function WhisperBox({ treeId, said, mood }: { treeId: string; said: string[]; mood?: ReactNode }) {
   const cloud = useSession().backend === 'cloud'
   const [text, setText] = useState('')
   const [writing, setWriting] = useState(said.length === 0)
@@ -296,6 +308,7 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
         >
           再說一句
         </button>
+        {mood && <div className="whisper-mood">{mood}</div>}
       </section>
     )
 
@@ -303,6 +316,7 @@ function WhisperBox({ treeId, said }: { treeId: string; said: string[] }) {
     <section className="whisper" aria-labelledby="whisper-title">
       <h2 id="whisper-title">樹洞</h2>
       <p className="muted small">{cloud ? '其他人看不到。存在曦語的雲端，不公開。' : '只有你看得到。不會上傳，也不公開。'}</p>
+      {mood && <div className="whisper-mood">{mood}</div>}
       <form
         onSubmit={(e) => {
           e.preventDefault()
