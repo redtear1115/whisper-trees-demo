@@ -3390,9 +3390,15 @@ html:has(.tab-shell) {
 }
 
 .tree-ring-icon {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
+  display: grid;
+  place-items: center;
+  /* 深綠線條圖示，和底部導覽同一套（線寬 1.75） */
+  color: var(--green-ink);
+}
+
+.tree-ring-icon .icon-svg {
+  width: 26px;
+  height: 26px;
 }
 
 .tree-ring-label {
@@ -3412,8 +3418,8 @@ html:has(.tab-shell) {
 }
 
 .tree-ring.off .tree-ring-icon {
-  filter: grayscale(1);
-  opacity: 0.55;
+  color: #6b6b60;
+  opacity: 0.8;
 }
 
 .tree-ring.off .tree-ring-label {

@@ -1,8 +1,17 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import type { Map as MLMap } from 'maplibre-gl'
 import type { Tree } from '../../lib/trees'
-import { Art } from '../../components/ui'
-import { arcOffsets, farNote, ringActions, type RangeInfo, type RingAction } from './treeRings'
+import { IconActionInfo, IconActionReport, IconActionRoute, IconActionWalk, IconActionWhisper } from '../../components/icons'
+import { arcOffsets, farNote, ringActions, type RangeInfo, type RingAction, type RingActionId } from './treeRings'
+
+/** 行動圈的圖示：和底部導覽同一套線條圖示（inline SVG、currentColor、同樣的線寬），不用 emoji */
+const RING_ICON: Record<RingActionId, ReactNode> = {
+  whisper: <IconActionWhisper />,
+  info: <IconActionInfo />,
+  report: <IconActionReport />,
+  route: <IconActionRoute />,
+  walk: <IconActionWalk />,
+}
 
 /** 弧的半徑（px）：一般 4 個、Demo 5 個 56 px 圈（弧張到 140°／170°）在 360 px 寬的螢幕上排得下，彼此不重疊 */
 const ARC_RADIUS = 118
@@ -90,7 +99,9 @@ export function TreeRingLayer({ map, tree, shown, range, onClose, onGo, demo = f
             }}
           >
             <span className="tree-ring-disc">
-              <Art id={a.art} alt="" className="tree-ring-icon" />
+              <span className="tree-ring-icon" aria-hidden>
+                {RING_ICON[a.id]}
+              </span>
             </span>
             <span className="tree-ring-label">{a.label}</span>
           </button>

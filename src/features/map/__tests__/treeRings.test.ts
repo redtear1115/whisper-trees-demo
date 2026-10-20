@@ -64,7 +64,7 @@ describe('ringActions', () => {
   })
   it('怎麼走 stays on however far the tree is, and does not change page', () => {
     const r = ringActions('X', { distance: 5000, inRange: false, remaining: 4965 }).find((x) => x.id === 'route')!
-    expect(r).toMatchObject({ label: '怎麼走', art: 'action-route', enabled: true, to: '' })
+    expect(r).toMatchObject({ label: '怎麼走', enabled: true, to: '' })
   })
   it('routes: whisper and report land on page anchors; there is no scan ring', () => {
     const a = Object.fromEntries(ringActions('DA0030211045-001', near).map((x) => [x.id, x]))

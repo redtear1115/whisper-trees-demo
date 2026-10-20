@@ -45,8 +45,6 @@ export function farNote(range: RangeInfo): string {
 export interface RingAction {
   id: RingActionId
   label: string
-  /** src/assets.ts 的素材 id */
-  art: string
   enabled: boolean
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
@@ -71,21 +69,20 @@ export function ringActions(treeId: string, range: RangeInfo, demo = false): Rin
     return { ...a, enabled, aria: enabled ? desc : `${desc}（暫時不能用：${why}）` }
   }
   const actions = [
-    make({ id: 'whisper', label: '樹洞', art: 'action-whisper', to: `/tree/${treeId}`, hash: 'whisper' }, true, '樹洞：對這棵樹說一句話'),
-    make({ id: 'info', label: '樹的資料', art: 'action-info', to: `/tree/${treeId}` }, false, '樹的資料'),
-    make({ id: 'report', label: '樹況回報', art: 'action-report', to: `/tree/${treeId}`, hash: 'report' }, true, '樹況回報'),
+    make({ id: 'whisper', label: '樹洞', to: `/tree/${treeId}`, hash: 'whisper' }, true, '樹洞：對這棵樹說一句話'),
+    make({ id: 'info', label: '樹的資料', to: `/tree/${treeId}` }, false, '樹的資料'),
+    make({ id: 'report', label: '樹況回報', to: `/tree/${treeId}`, hash: 'report' }, true, '樹況回報'),
   ]
   // 怎麼走：畫出從人物到這棵樹的步行路線。沒有位置（沒定位也不是 Demo）時沒有起點，灰色
   actions.push({
     id: 'route',
     label: '怎麼走',
-    art: 'action-route',
     to: '',
     ...(range.distance !== null
       ? { enabled: true, aria: '怎麼走：在地圖上畫出走到這棵樹的路線' }
       : { enabled: false, aria: `怎麼走（暫時不能用：${why}）` }),
   })
-  if (demo) actions.push(make({ id: 'walk', label: '走過去', art: 'action-walk', to: '' }, false, 'Demo：走到這棵樹旁邊'))
+  if (demo) actions.push(make({ id: 'walk', label: '走過去', to: '' }, false, 'Demo：走到這棵樹旁邊'))
   return actions
 }
 
