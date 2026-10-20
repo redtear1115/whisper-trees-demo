@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import type { Tree } from '../../lib/trees'
 import { Art } from '../../components/ui'
-import { IconActionAdopt, IconActionInfo, IconActionReport, IconActionRoute, IconActionTouch, IconActionWalk, IconActionWhisper, IconBack, IconScan } from '../../components/icons'
+import { IconActionAdopt, IconActionInfo, IconActionReport, IconActionRoute, IconActionTouch, IconActionWalk, IconActionWhisper, IconBack } from '../../components/icons'
 import { BalanceChip } from '../nav/BalanceChip'
 import type { Animal } from '../avatar/animals'
 import { TouchPanel } from '../touch/TouchPanel'
@@ -13,7 +13,6 @@ const ICON: Record<FocusActionId, ReactNode> = {
   touch: <IconActionTouch />,
   report: <IconActionReport />,
   whisper: <IconActionWhisper />,
-  info: <IconActionInfo />,
   adopt: <IconActionAdopt />,
 }
 
@@ -33,15 +32,15 @@ interface Props {
 /**
  * 點樹之後的拉近畫面（2026-10-21，依使用者給的「拉近的介面」設計圖）：蓋住地圖與底部導覽，
  * 中間一棵大樹，樹冠上是三個互動的大圈（摸摸樹、回報、留言在樹洞）和兩個小圈（樹的資料、認養），
- * 你的動物站在右下角，左下是「返回」；旁邊依情況是「掃樹牌」或「怎麼走」「走過去」。
- * 底部導覽留著（第二版）；點圈在畫面裡打開一張卡，不換頁。
+ * 你的動物站在樹下；底部是「返回」與「樹的資料」，範圍外再加「怎麼走」「走過去」。
+ * 底部導覽留著；打過卡的互動點了在畫面裡打開一張卡，還沒打卡（在感應圈內）就直接去掃樹牌（第三版）。
  * 是對話框（role=dialog）：焦點移到第一個圈、Esc 關閉。
  */
 export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, onScan, onRoute, onWalk }: Props) {
   const root = useRef<HTMLDivElement>(null)
   const [note, setNote] = useState('')
   /** 打開的卡（摸摸樹、回報、留言在樹洞、樹的資料）；null = 看得到圈 */
-  const [card, setCard] = useState<Exclude<FocusActionId, 'adopt'> | null>(null)
+  const [card, setCard] = useState<Exclude<FocusActionId, 'adopt'> | 'info' | null>(null)
   const actions = focusActions(range, checkedIn)
   const buttons = focusButtons(range, checkedIn, demo)
 
@@ -76,6 +75,8 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
 
       <div className="tree-focus-stage">
         <Art id="tree-focus" alt="" className="tree-focus-art" />
+        {/* 你的動物站在樹下 */}
+        <Art id={animal.art} alt={`你在這裡：${animal.name}`} className="tree-focus-animal" />
         {!card &&
           actions.map((a) => (
             <button
@@ -88,6 +89,8 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
               aria-disabled={!a.enabled}
               onClick={() => {
                 if (!a.enabled || a.id === 'adopt') return setNote(a.why)
+                // 還沒打卡：直接去掃樹牌（掃一次 30 分鐘內都不用再掃）
+                if (a.scanFirst) return onScan()
                 setCard(a.id)
               }}
             >
@@ -117,17 +120,14 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, o
         {note}
       </p>
 
-      <Art id={animal.art} alt={`你在這裡：${animal.name}`} className="tree-focus-animal" />
 
       <div className="tree-focus-bar">
         <button type="button" className="btn focus-back" data-testid="focus-back" onClick={onClose}>
           <IconBack /> 返回
         </button>
-        {buttons.scan && (
-          <button type="button" className="btn primary" data-testid="focus-scan" onClick={onScan}>
-            <IconScan /> 掃樹牌
-          </button>
-        )}
+        <button type="button" className="btn" data-testid="focus-info" aria-pressed={card === 'info'} onClick={() => setCard(card === 'info' ? null : 'info')}>
+          <IconActionInfo /> 樹的資料
+        </button>
         {buttons.route && (
           <button type="button" className="btn" data-testid="focus-route" onClick={onRoute}>
             <IconActionRoute /> 怎麼走

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CHECKIN } from '../../../config'
 import { checkinRadius, offsetNorth, type LngLat } from '../../../lib/geo'
-import { ADOPT_NOTE, farNote, focusActions, focusButtons, rangeInfo, SCAN_FIRST_NOTE } from '../treeRings'
+import { ADOPT_NOTE, farNote, focusActions, focusButtons, rangeInfo } from '../treeRings'
 
 const tree: LngLat = [121.5287, 25.0335]
 const demoAnchor = (lngLat: LngLat) => ({ lngLat, source: 'demo' as const })
@@ -50,44 +50,46 @@ describe('focusActions（拉近畫面的圈）', () => {
   const ids = (list: ReturnType<typeof focusActions>) => list.map((a) => a.id)
   const on = (list: ReturnType<typeof focusActions>) => list.filter((a) => a.enabled).map((a) => a.id)
 
-  it('three main rings (摸摸樹, 回報, 留言在樹洞) and two small ones, in a fixed order', () => {
+  it('three main rings (摸摸樹, 回報, 留言在樹洞) and 認養, in a fixed order; 樹的資料 is not a ring', () => {
     const list = focusActions(near, true)
-    expect(ids(list)).toEqual(['touch', 'report', 'whisper', 'info', 'adopt'])
-    expect(list.map((a) => a.label)).toEqual(['摸摸樹', '回報', '留言在樹洞', '樹的資料', '認養'])
-    expect(list.map((a) => a.size)).toEqual(['main', 'main', 'main', 'small', 'small'])
+    expect(ids(list)).toEqual(['touch', 'report', 'whisper', 'adopt'])
+    expect(list.map((a) => a.label)).toEqual(['摸摸樹', '回報', '留言在樹洞', '認養'])
+    expect(list.map((a) => a.size)).toEqual(['main', 'main', 'main', 'small'])
   })
-  it('after check-in the three interactions open; 認養 never does', () => {
-    expect(on(focusActions(near, true))).toEqual(['touch', 'report', 'whisper', 'info'])
-    expect(on(focusActions(far, true))).toEqual(['touch', 'report', 'whisper', 'info'])
+  it('after check-in the three interactions open their cards (no scan); 認養 never opens', () => {
+    for (const r of [near, far]) {
+      const list = focusActions(r, true)
+      expect(on(list)).toEqual(['touch', 'report', 'whisper'])
+      expect(list.some((a) => a.scanFirst)).toBe(false)
+    }
     const adopt = focusActions(near, true).find((a) => a.id === 'adopt')!
     expect(adopt.why).toBe(ADOPT_NOTE)
     expect(adopt.aria).toContain('即將開放')
   })
-  it('in range but not checked in: say scan first', () => {
+  it('in range but not checked in: rings stay lit and go to scanning first', () => {
     const list = focusActions(near, false)
-    expect(on(list)).toEqual(['info'])
-    expect(list[0].why).toBe(SCAN_FIRST_NOTE)
-    expect(list[0].aria).toContain('暫時不能用')
+    expect(on(list)).toEqual(['touch', 'report', 'whisper'])
+    expect(list.filter((a) => a.scanFirst).map((a) => a.id)).toEqual(['touch', 'report', 'whisper'])
+    expect(list[0].aria).toContain('先掃樹牌')
   })
-  it('out of range: say how far; no position: say so', () => {
+  it('out of range: grey, say how far; no position: say so', () => {
+    expect(on(focusActions(far, false))).toEqual([])
     expect(focusActions(far, false)[1].why).toBe('走近一點，還有約 25 公尺')
     expect(focusActions(none, false)[2].why).toContain('位置')
   })
 })
 
-describe('focusButtons（返回旁邊的按鈕）', () => {
-  it('in range, not checked in: 掃樹牌 only', () => {
-    expect(focusButtons({ distance: 10, inRange: true, remaining: null }, false, true)).toEqual({ scan: true, route: false, walk: false })
+describe('focusButtons（返回右邊的按鈕）', () => {
+  it('in range or checked in: nothing extra (樹的資料 is always there)', () => {
+    expect(focusButtons({ distance: 10, inRange: true, remaining: null }, false, true)).toEqual({ route: false, walk: false })
+    expect(focusButtons({ distance: 60, inRange: false, remaining: 25 }, true, true)).toEqual({ route: false, walk: false })
   })
   it('out of range: 怎麼走, plus 走過去 in Demo', () => {
     const far = { distance: 60, inRange: false, remaining: 25 }
-    expect(focusButtons(far, false, false)).toEqual({ scan: false, route: true, walk: false })
-    expect(focusButtons(far, false, true)).toEqual({ scan: false, route: true, walk: true })
+    expect(focusButtons(far, false, false)).toEqual({ route: true, walk: false })
+    expect(focusButtons(far, false, true)).toEqual({ route: true, walk: true })
   })
   it('no position: no route (no starting point)', () => {
     expect(focusButtons({ distance: null, inRange: false, remaining: null }, false, false).route).toBe(false)
-  })
-  it('checked in: only 返回', () => {
-    expect(focusButtons({ distance: 10, inRange: true, remaining: null }, true, true)).toEqual({ scan: false, route: false, walk: false })
   })
 })

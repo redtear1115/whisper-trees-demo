@@ -40,54 +40,56 @@ export function farNote(range: RangeInfo): string {
   return `走近一點，還有約 ${range.remaining} 公尺`
 }
 
-export type FocusActionId = 'touch' | 'report' | 'whisper' | 'info' | 'adopt'
+export type FocusActionId = 'touch' | 'report' | 'whisper' | 'adopt'
 
 export interface FocusAction {
   id: FocusActionId
   label: string
-  /** main：樹冠上的三個大圈（摸摸樹、回報、留言在樹洞）；small：樹的資料、認養 */
+  /** main：樹冠上的三個大圈（摸摸樹、回報、留言在樹洞）；small：認養 */
   size: 'main' | 'small'
   enabled: boolean
+  /** 在感應圈內但還沒打卡：點了先去掃樹牌 */
+  scanFirst: boolean
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
   /** 點灰色的圈時顯示的一句（能用的是空字串） */
   why: string
 }
 
-/** 在範圍內、還沒打卡時，三個互動灰掉的原因：掃樹牌是每棵樹預設的互動，打卡之後才打開其他的 */
-export const SCAN_FIRST_NOTE = '先掃樹牌打卡，就能摸摸它、回報、留話'
 export const ADOPT_NOTE = '認養即將開放'
 
 /**
  * 拉近畫面的圈（2026-10-21 使用者決定，依「拉近的介面」設計圖）。順序固定。
- * 三個互動（摸摸樹、回報、留言在樹洞）要先在這棵樹打卡（30 分鐘內，和樹的頁面一樣，見 recentCheckin）才能用；
- * 還沒打卡：在範圍內說「先掃樹牌」，範圍外說「走近一點」。樹的資料永遠能用；認養永遠是灰的（即將開放）。
- * 點了都在拉近畫面裡打開一張卡，不換頁（2026-10-21 第二版）。
+ * 三個互動（摸摸樹、回報、留言在樹洞）要先在這棵樹打卡（30 分鐘內不用再掃，見 recentCheckin）。
+ * 第三版（2026-10-21）：在感應圈內還沒打卡，圈照樣亮著，點了直接去掃樹牌（scanFirst）；
+ * 在感應圈外是灰的，點了說「走近一點」。認養永遠是灰的（即將開放）。樹的資料不用靠近，移到底部「返回」旁邊。
+ * 打卡過的互動點了在拉近畫面裡打開一張卡，不換頁。
  */
 export function focusActions(range: RangeInfo, checkedIn: boolean): FocusAction[] {
-  const why = checkedIn ? '' : range.inRange ? SCAN_FIRST_NOTE : farNote(range)
+  const enabled = checkedIn || range.inRange
+  const scanFirst = !checkedIn && range.inRange
+  const why = enabled ? '' : farNote(range)
   const main = (a: Pick<FocusAction, 'id' | 'label'>, desc: string): FocusAction => ({
     ...a,
     size: 'main',
-    enabled: checkedIn,
+    enabled,
+    scanFirst,
     why,
-    aria: checkedIn ? desc : `${desc}（暫時不能用：${why}）`,
+    aria: !enabled ? `${desc}（暫時不能用：${why}）` : scanFirst ? `${desc}（先掃樹牌打卡）` : desc,
   })
   return [
     main({ id: 'touch', label: '摸摸樹' }, '摸摸樹：呼吸、冥想或擁抱'),
     main({ id: 'report', label: '回報' }, '樹況回報'),
     main({ id: 'whisper', label: '留言在樹洞' }, '樹洞：對這棵樹說一句話'),
-    { id: 'info', label: '樹的資料', size: 'small', enabled: true, why: '', aria: '樹的資料' },
-    { id: 'adopt', label: '認養', size: 'small', enabled: false, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）` },
+    { id: 'adopt', label: '認養', size: 'small', enabled: false, scanFirst: false, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）` },
   ]
 }
 
 /**
- * 拉近畫面底部「返回」旁邊的按鈕：範圍內還沒打卡是「掃樹牌」（打卡仍然是樹牌 QR + GPS）；
- * 範圍外是「怎麼走」（有位置才有），Demo 再加「走過去」；走近之後這兩顆拿掉。打卡過了就只剩「返回」。
+ * 拉近畫面底部「返回」右邊的按鈕：「樹的資料」永遠在（不用靠近樹）；
+ * 範圍外還沒打卡再加「怎麼走」（有位置才有）與 Demo 的「走過去」，走近之後拿掉。沒有「掃樹牌」鈕：點互動就會去掃。
  */
-export function focusButtons(range: RangeInfo, checkedIn: boolean, demo: boolean): { scan: boolean; route: boolean; walk: boolean } {
-  if (checkedIn) return { scan: false, route: false, walk: false }
-  if (range.inRange) return { scan: true, route: false, walk: false }
-  return { scan: false, route: range.distance !== null, walk: demo }
+export function focusButtons(range: RangeInfo, checkedIn: boolean, demo: boolean): { route: boolean; walk: boolean } {
+  if (checkedIn || range.inRange) return { route: false, walk: false }
+  return { route: range.distance !== null, walk: demo }
 }

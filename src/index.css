@@ -3430,7 +3430,7 @@ html:has(.tab-shell) {
   z-index: 20;
   display: flex;
   flex-direction: column;
-  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 34px; /* 下面留給導覽中間凸出來的掃樹牌鈕 */
   background: radial-gradient(ellipse at 50% 40%, #f4f8ef 0%, #e6efe0 62%, #dbe7d4 100%);
   overflow: hidden;
   animation: focus-in 0.35s ease-out;
@@ -3541,7 +3541,7 @@ html:has(.tab-shell) {
   font-size: 0.75rem;
 }
 
-/* 位置：摸摸樹在樹冠頂、回報與樹洞在兩側，樹的資料與認養在下面 */
+/* 位置：摸摸樹在樹冠頂、回報與樹洞在兩側，認養在樹冠左下（右下的樹幹旁站著你的動物） */
 .ring-touch {
   left: 50%;
   top: 16%;
@@ -3556,15 +3556,10 @@ html:has(.tab-shell) {
   top: 38%;
   animation-delay: 120ms;
 }
-.ring-info {
-  left: 34%;
-  top: 62%;
-  animation-delay: 180ms;
-}
 .ring-adopt {
-  left: 66%;
-  top: 62%;
-  animation-delay: 240ms;
+  left: 30%;
+  top: 60%;
+  animation-delay: 180ms;
 }
 
 /* 還不能用：灰色、沒有發光，但還是可以點（會說為什麼） */
@@ -3599,12 +3594,12 @@ html:has(.tab-shell) {
   visibility: hidden;
 }
 
-/* 你的動物：右下角，和「返回」同一列（那一列右邊留了位置給牠） */
+/* 你的動物：站在樹下，樹幹右邊的草地上 */
 .tree-focus-animal {
   position: absolute;
-  right: 12px;
-  bottom: 8px;
-  width: 96px;
+  left: 58%;
+  bottom: 8%;
+  width: 84px;
   height: auto;
   pointer-events: none;
 }
@@ -3615,8 +3610,7 @@ html:has(.tab-shell) {
   align-items: center;
   gap: 10px;
   margin-top: auto;
-  min-height: 88px;
-  padding-right: 104px;
+  padding-top: 8px;
 }
 
 .tree-focus-bar .btn {
@@ -3634,8 +3628,8 @@ html:has(.tab-shell) {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: 76px;
-  max-height: calc(100% - 136px);
+  bottom: 98px;
+  max-height: calc(100% - 158px);
   overflow-y: auto;
   overscroll-behavior: contain;
   border-radius: 22px;
