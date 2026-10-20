@@ -48,8 +48,8 @@ export interface FocusAction {
   /** main：樹冠上的三個大圈（摸摸樹、回報、留言在樹洞）；small：認養 */
   size: 'main' | 'small'
   enabled: boolean
-  /** 在感應圈內但還沒打卡：點了先去掃樹牌 */
-  scanFirst: boolean
+  /** 還沒打卡時點了先做什麼：scan＝去掃樹牌（感應圈內）、walk＝走過去（感應圈外）；null＝直接開卡 */
+  first: 'scan' | 'walk' | null
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
   /** 點灰色的圈時顯示的一句（能用的是空字串） */
@@ -61,27 +61,27 @@ export const ADOPT_NOTE = '認養即將開放'
 /**
  * 拉近畫面的圈（2026-10-21 使用者決定，依「拉近的介面」設計圖）。順序固定。
  * 三個互動（摸摸樹、回報、留言在樹洞）要先在這棵樹打卡（30 分鐘內不用再掃，見 recentCheckin）。
- * 第三版（2026-10-21）：在感應圈內還沒打卡，圈照樣亮著，點了直接去掃樹牌（scanFirst）；
- * 在感應圈外是灰的，點了說「走近一點」。認養永遠是灰的（即將開放）。樹的資料不用靠近，移到底部「返回」旁邊。
- * 打卡過的互動點了在拉近畫面裡打開一張卡，不換頁。
+ * 還沒打卡時圈照樣亮著，點了先做「下一步」（first）：在感應圈內 → 去掃樹牌（scan）；
+ * 在感應圈外 → 走過去（walk：Demo 是模擬走到樹旁，一般是畫出步行路線）。只有沒有位置時是灰的。
+ * 認養永遠是灰的（即將開放）。樹的資料不用靠近，在底部「返回」旁邊。打卡過的互動點了在拉近畫面裡打開一張卡。
  */
 export function focusActions(range: RangeInfo, checkedIn: boolean): FocusAction[] {
-  const enabled = checkedIn || range.inRange
-  const scanFirst = !checkedIn && range.inRange
+  const first: FocusAction['first'] = checkedIn ? null : range.inRange ? 'scan' : 'walk'
+  const enabled = checkedIn || range.inRange || range.distance !== null
   const why = enabled ? '' : farNote(range)
   const main = (a: Pick<FocusAction, 'id' | 'label'>, desc: string): FocusAction => ({
     ...a,
     size: 'main',
     enabled,
-    scanFirst,
+    first: enabled ? first : null,
     why,
-    aria: !enabled ? `${desc}（暫時不能用：${why}）` : scanFirst ? `${desc}（先掃樹牌打卡）` : desc,
+    aria: !enabled ? `${desc}（暫時不能用：${why}）` : first === 'scan' ? `${desc}（先掃樹牌打卡）` : first === 'walk' ? `${desc}（先走到樹旁）` : desc,
   })
   return [
     main({ id: 'touch', label: '摸摸樹' }, '摸摸樹：呼吸、冥想或擁抱'),
     main({ id: 'report', label: '回報' }, '樹況回報'),
     main({ id: 'whisper', label: '留言在樹洞' }, '樹洞：對這棵樹說一句話'),
-    { id: 'adopt', label: '認養', size: 'small', enabled: false, scanFirst: false, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）` },
+    { id: 'adopt', label: '認養', size: 'small', enabled: false, first: null, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）` },
   ]
 }
 

@@ -60,7 +60,7 @@ describe('focusActions（拉近畫面的圈）', () => {
     for (const r of [near, far]) {
       const list = focusActions(r, true)
       expect(on(list)).toEqual(['touch', 'report', 'whisper'])
-      expect(list.some((a) => a.scanFirst)).toBe(false)
+      expect(list.some((a) => a.first)).toBe(false)
     }
     const adopt = focusActions(near, true).find((a) => a.id === 'adopt')!
     expect(adopt.why).toBe(ADOPT_NOTE)
@@ -69,13 +69,20 @@ describe('focusActions（拉近畫面的圈）', () => {
   it('in range but not checked in: rings stay lit and go to scanning first', () => {
     const list = focusActions(near, false)
     expect(on(list)).toEqual(['touch', 'report', 'whisper'])
-    expect(list.filter((a) => a.scanFirst).map((a) => a.id)).toEqual(['touch', 'report', 'whisper'])
+    expect(list.filter((a) => a.first === 'scan').map((a) => a.id)).toEqual(['touch', 'report', 'whisper'])
     expect(list[0].aria).toContain('先掃樹牌')
   })
-  it('out of range: grey, say how far; no position: say so', () => {
-    expect(on(focusActions(far, false))).toEqual([])
-    expect(focusActions(far, false)[1].why).toBe('走近一點，還有約 25 公尺')
-    expect(focusActions(none, false)[2].why).toContain('位置')
+  it('out of range: rings stay lit and walk there first', () => {
+    const list = focusActions(far, false)
+    expect(on(list)).toEqual(['touch', 'report', 'whisper'])
+    expect(list.filter((a) => a.first === 'walk').map((a) => a.id)).toEqual(['touch', 'report', 'whisper'])
+    expect(list[0].aria).toContain('先走到樹旁')
+  })
+  it('no position: grey and say so (nowhere to walk from)', () => {
+    const list = focusActions(none, false)
+    expect(on(list)).toEqual([])
+    expect(list[2].why).toContain('位置')
+    expect(list[2].first).toBeNull()
   })
 })
 
