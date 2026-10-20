@@ -20,16 +20,17 @@ const icons = [...src.matchAll(/\{ file: '([^']+)', size: (\d+), brief: '([^']+)
 const hue = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7)
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
-// 行動圈圖示：佔位檔放一個意思對的 emoji，讓畫面看得出是什麼（正式美術取代後就不需要了）。
-// 五隻動物沒有任何一個 emoji 是對的（穿山甲被當成刺蝟、石虎不是家貓、黑冠麻鷺不是黑鳥），所以不用 emoji，
-// 只畫一片中性的葉子剪影（名字由畫面上的標題、選擇器自己寫；第五輪，2026-10-21）。
-const GLYPH = {
-  'action-scan': '📷',
-  'action-whisper': '💬',
-  'action-info': '🌳',
-  'action-report': '✂️',
-  'action-route': '🧭',
-  'action-walk': '👣',
+// 動物的占位（行動圈圖示已改成程式內的線條圖示 src/components/icons.tsx，不再有 action-* 佔位檔，第六輪）。
+// 五隻動物沒有任何一個 emoji 是對的（穿山甲被當成刺蝟、石虎不是家貓、黑冠麻鷺不是黑鳥），所以不用 emoji。
+// 第五輪（2026-10-21）曾經五隻都用同一片葉子剪影；第六輪（2026-10-20 批評）改成各自一枚圓形徽章：
+// 柔和的底色加一個字（狗、石、鵲、鷺、甲），在美術交件前就分得出是哪一隻。底色刻意避開綠色（地圖上的樹是綠點）。
+// 底色與字色的對比 ≥ 6.5:1（WCAG AA 需要 4.5:1）
+const ANIMAL_BADGE = {
+  'avatar-taiwan-dog': { char: '狗', bg: '#F7DDA6', fg: '#5A3A00' },
+  'avatar-leopard-cat': { char: '石', bg: '#F6CFC0', fg: '#6B2A14' },
+  'avatar-blue-magpie': { char: '鵲', bg: '#C9DDF4', fg: '#1D3F6A' },
+  'avatar-malayan-night-heron': { char: '鷺', bg: '#DDD3F0', fg: '#43306E' },
+  'avatar-pangolin': { char: '甲', bg: '#E8D5BD', fg: '#4A2F14' },
 }
 const ANIMAL_NAME = {
   'avatar-taiwan-dog': '臺灣黑狗',
@@ -44,6 +45,9 @@ const leaf = (cx, cy, size, h) => {
   const k = size / 96
   return `<g transform="translate(${cx - 48 * k} ${cy - 48 * k}) scale(${k})" fill="hsl(${h} 35% 82%)" stroke="hsl(${h} 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 8C74 22 80 54 48 88C16 54 22 22 48 8Z"/><path d="M48 24V80" fill="none"/></g>`
 }
+// 動物的占位：圓形徽章（底色＋深色細框＋一個字）。圖高 96，圓置中偏上，底下留一行給 ?debug=1 的標示
+const badge = (cx, cy, r, { char, bg, fg }) =>
+  `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${bg}" stroke="${fg}" stroke-opacity="0.55" stroke-width="3"/>\n<text x="${cx}" y="${cy + r * 0.36}" text-anchor="middle" font-family="'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif" font-weight="700" font-size="${Math.round(r * 1.05)}" fill="${fg}">${char}</text>`
 // 小芽的剪影：一根莖、兩片葉子
 const sprout = (cx, cy, size, h) => {
   const k = size / 96
@@ -60,18 +64,14 @@ for (const a of assets) {
   const small = Math.min(a.w, a.h) <= 120
   const fs = Math.max(8, Math.min(small ? Math.round(a.w / 7) : 18, Math.floor((a.w * 1.6) / a.id.length)))
   const h = hue(a.id)
-  const glyph = GLYPH[a.id]
   const animal = ANIMAL_NAME[a.id]
   const isSprout = a.id.startsWith('sprout-')
   const head = `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">`
   const cap = (y, size, text, fill) => `<text x="50%" y="${y}" text-anchor="middle" font-family="sans-serif" font-size="${size}" fill="${fill}">${esc(text)}</text>\n`
   let body // 公民版
   let debug // 除錯版多出來的字
-  if (glyph) {
-    body = `<text x="50%" y="${Math.round(a.h * 0.7)}" text-anchor="middle" font-size="${Math.round(a.h * 0.62)}">${glyph}</text>\n`
-    debug = cap(a.h - 3, 7, `${a.id} 佔位`, `hsl(${h} 30% 30%)`)
-  } else if (animal) {
-    body = `${leaf(a.w / 2, a.h / 2, a.h * 0.7, 135)}\n`
+  if (animal) {
+    body = `${badge(a.w / 2, a.h / 2 - 2, a.h * 0.43, ANIMAL_BADGE[a.id])}\n`
     debug = cap(a.h - 1, 7, `${a.id} ${animal} 佔位`, `hsl(${h} 30% 30%)`)
   } else if (isSprout) {
     // 小芽：只有剪影，沒有框，視覺重量跟旁邊的動物差不多

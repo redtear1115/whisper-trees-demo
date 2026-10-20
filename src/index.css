@@ -3157,7 +3157,12 @@ html:has(.tab-shell) {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 3px 3px rgba(44, 58, 46, 0.35));
+  /* 佔位的圓形徽章：外面一圈白、再一圈深綠，在綠色的樹點與街景上一眼看得出「這是你」。正式美術（站立的動物）換上後，這兩圈要拿掉 */
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px var(--green-ink),
+    0 4px 8px rgba(44, 58, 46, 0.35);
 }
 
 .me-avatar-tag {

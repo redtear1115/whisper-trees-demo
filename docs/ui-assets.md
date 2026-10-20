@@ -17,18 +17,16 @@
 | ID | 尺寸 @1x | @2x | 放置位置 | 用在哪個畫面 | 程式參照 | 說明 |
 |---|---|---|---|---|---|---|
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
-| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:137` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
-| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:137` | 同上夜間版，「樹木休息中」的氣氛 |
-| `glow` | 96×96 | 192×192 | `public/assets/ph/glow.svg` | 微光、光點 | `src/pages/ShopPage.tsx:46`<br>`src/pages/TreePage.tsx:147` | 一道微光／光點的圖示，柔和發光 |
-| `capsule` | 96×96 | 192×192 | `public/assets/ph/capsule.svg` | 時空膠囊卡片 | `src/pages/TreePage.tsx:157`<br>`src/pages/TreePage.tsx:183` | 時空膠囊（信封或種子膠囊） |
-| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:505`<br>`src/pages/MapPage.tsx:831` | 小樹苗；地圖上依澆水數放大 |
+| `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:158` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
+| `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:158` | 同上夜間版，「樹木休息中」的氣氛 |
+| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:506`<br>`src/pages/MapPage.tsx:831` | 小樹苗；地圖上依澆水數放大 |
 | `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
 | `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:925` | 空的樹穴（方形土坑） |
 | `scan-tag` | 240×160 | 480×320 | `public/assets/ph/scan-tag.svg` | 掃樹牌說明 | （尚未使用） | 公園處樹牌與 QR Code 的位置示意 |
 | `sprout-0` | 240×240 | 480×480 | `public/assets/ph/sprout-0.svg` | 我的小芽 | `src/features/game/character.ts:12` | 角色「小芽」＝樹精（團隊簡報 v20 p14），第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景 |
 | `sprout-1` | 240×240 | 480×480 | `public/assets/ph/sprout-1.svg` | 我的小芽 | `src/features/game/character.ts:13` | 角色「小芽」第 2 階：茁壯樹精。同一個角色長大了，身形變穩、枝葉變多，樹皮紋路出現（規格同上） |
 | `sprout-2` | 240×240 | 480×480 | `public/assets/ph/sprout-2.svg` | 我的小芽 | `src/features/game/character.ts:14` | 角色「小芽」第 3 階：智慧老樹精。同一個角色的老年樣子，樹冠茂密、鬍鬚般的垂枝與苔蘚，神情溫和（規格同上） |
-| `item-hat-acorn` | 160×160 | 320×320 | `public/assets/ph/item-hat-acorn.svg` | 商店、小芽換裝、新手禮 | `src/features/game/config.ts:77`<br>`src/features/onboarding/OnboardingEffects.tsx:72`<br>`src/features/onboarding/TourSheet.tsx:185` | 造型：橡實帽（疊在五隻動物與小芽身上，透明背景）。新手禮 |
+| `item-hat-acorn` | 160×160 | 320×320 | `public/assets/ph/item-hat-acorn.svg` | 商店、小芽換裝、新手禮 | `src/features/game/config.ts:77` | 造型：橡實帽（疊在五隻動物與小芽身上，透明背景）。新手禮 |
 | `item-crown-feather` | 160×160 | 320×320 | `public/assets/ph/item-crown-feather.svg` | 商店、小芽換裝 | `src/features/game/config.ts:78` | 造型：花冠羽毛（花環插一根羽毛，疊在五隻動物與小芽身上，透明背景） |
 | `item-cape-moss` | 160×160 | 320×320 | `public/assets/ph/item-cape-moss.svg` | 商店、小芽換裝 | `src/features/game/config.ts:79` | 造型：苔蘚斗篷（披在肩上，疊在五隻動物與小芽身上，透明背景） |
 | `item-hat-ancient` | 160×160 | 320×320 | `public/assets/ph/item-hat-ancient.svg` | 小芽換裝、打卡後的稀有配件卡 | `src/features/game/DropCards.tsx:12`<br>`src/features/game/config.ts:116` | 稀有配件：古木紋理頭飾，木紋年輪，疊在角色上，透明背景（只能在受保護樹木掉落，不在商店賣） |
@@ -59,15 +57,9 @@
 | `avatar-blue-magpie` | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
 | `avatar-malayan-night-heron` | 96×96 | 192×192 | `public/assets/ph/avatar-malayan-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:20` | 地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
 | `avatar-pangolin` | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:21` | 地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
-| `action-scan` | 64×64 | 128×128 | `public/assets/ph/action-scan.svg` | 點樹後的行動圈 | （尚未使用） | 圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理 |
-| `action-whisper` | 64×64 | 128×128 | `public/assets/ph/action-whisper.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:74` | 圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上 |
-| `action-info` | 64×64 | 128×128 | `public/assets/ph/action-info.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:75` | 圖示：樹的資料（樹牌或葉子加一個 i）。規格同上 |
-| `action-report` | 64×64 | 128×128 | `public/assets/ph/action-report.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:76` | 圖示：樹況回報（剪刀或旗標）。規格同上 |
-| `action-route` | 64×64 | 128×128 | `public/assets/ph/action-route.svg` | 點樹後的行動圈 | `src/features/map/treeRings.ts:82` | 圖示：怎麼走（彎彎的路線加一個終點標記）。規格同上 |
-| `action-walk` | 64×64 | 128×128 | `public/assets/ph/action-walk.svg` | 點樹後的行動圈（只有 Demo 模式） | `src/features/map/treeRings.ts:88` | 圖示：走過去（腳印）。規格同上 |
 | `fog-empty` | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:81` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 
-共 50 項。
+共 42 項。
 
 ## PWA 圖示（加到手機主畫面）
 
@@ -83,12 +75,6 @@
 
 | 檔案位置 | 程式參照 |
 |---|---|
-| `public/assets/ph-debug/action-info.svg` | （尚未使用） |
-| `public/assets/ph-debug/action-report.svg` | （尚未使用） |
-| `public/assets/ph-debug/action-route.svg` | （尚未使用） |
-| `public/assets/ph-debug/action-scan.svg` | （尚未使用） |
-| `public/assets/ph-debug/action-walk.svg` | （尚未使用） |
-| `public/assets/ph-debug/action-whisper.svg` | （尚未使用） |
 | `public/assets/ph-debug/avatar-blue-magpie.svg` | （尚未使用） |
 | `public/assets/ph-debug/avatar-leopard-cat.svg` | （尚未使用） |
 | `public/assets/ph-debug/avatar-malayan-night-heron.svg` | （尚未使用） |
@@ -106,10 +92,8 @@
 | `public/assets/ph-debug/badge-species-3.svg` | （尚未使用） |
 | `public/assets/ph-debug/badge-waterer.svg` | （尚未使用） |
 | `public/assets/ph-debug/badge-wisher.svg` | （尚未使用） |
-| `public/assets/ph-debug/capsule.svg` | （尚未使用） |
 | `public/assets/ph-debug/empty-pit.svg` | （尚未使用） |
 | `public/assets/ph-debug/fog-empty.svg` | （尚未使用） |
-| `public/assets/ph-debug/glow.svg` | （尚未使用） |
 | `public/assets/ph-debug/insect-beetle.svg` | （尚未使用） |
 | `public/assets/ph-debug/insect-cicada.svg` | （尚未使用） |
 | `public/assets/ph-debug/insect-ladybug.svg` | （尚未使用） |

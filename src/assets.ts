@@ -18,8 +18,6 @@ export const ASSETS: AssetSpec[] = [
   { id: 'logo', w: 160, h: 48, where: '頁首', brief: '曦語 Whisper Trees 字標，蠟筆手繪感' },
   { id: 'tree-hero', w: 720, h: 400, where: '樹的頁面頂部', brief: '2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版' },
   { id: 'tree-hero-night', w: 720, h: 400, where: '樹的頁面頂部（夜間）', brief: '同上夜間版，「樹木休息中」的氣氛' },
-  { id: 'glow', w: 96, h: 96, where: '微光、光點', brief: '一道微光／光點的圖示，柔和發光' },
-  { id: 'capsule', w: 96, h: 96, where: '時空膠囊卡片', brief: '時空膠囊（信封或種子膠囊）' },
   { id: 'sapling', w: 96, h: 96, where: '許願、地圖許願圖層', brief: '小樹苗；地圖上依澆水數放大' },
   { id: 'watering', w: 96, h: 96, where: '澆水按鈕', brief: '澆水壺' },
   { id: 'empty-pit', w: 96, h: 96, where: '空樹穴抽屜', brief: '空的樹穴（方形土坑）' },
@@ -58,12 +56,6 @@ export const ASSETS: AssetSpec[] = [
   { id: 'avatar-blue-magpie', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
   { id: 'avatar-malayan-night-heron', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
   { id: 'avatar-pangolin', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
-  { id: 'action-scan', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：掃樹牌打卡（QR Code 框）。發光圓圈裡的單色小圖示，透明背景，灰色狀態由程式處理' },
-  { id: 'action-whisper', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹洞（樹幹上的小洞或對話氣泡）。規格同上' },
-  { id: 'action-info', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹的資料（樹牌或葉子加一個 i）。規格同上' },
-  { id: 'action-report', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：樹況回報（剪刀或旗標）。規格同上' },
-  { id: 'action-route', w: 64, h: 64, where: '點樹後的行動圈', brief: '圖示：怎麼走（彎彎的路線加一個終點標記）。規格同上' },
-  { id: 'action-walk', w: 64, h: 64, where: '點樹後的行動圈（只有 Demo 模式）', brief: '圖示：走過去（腳印）。規格同上' },
   { id: 'fog-empty', w: 240, h: 160, where: '探索頁空狀態（還沒打卡）', brief: '繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白' },
 ]
 

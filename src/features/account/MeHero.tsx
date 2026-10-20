@@ -66,7 +66,9 @@ export function MeHero() {
       </div>
       {grow.note && <p className="muted small me-hero-note">{grow.note}</p>}
       <div className="me-swap">
-        <span className="muted small">{animal.blurb}</span>
+        <span className="muted small me-animal-line" data-testid="me-animal-line">
+          <strong>{animal.name}</strong>：{animal.blurb}
+        </span>
         <button
           type="button"
           className="btn me-swap-btn"
