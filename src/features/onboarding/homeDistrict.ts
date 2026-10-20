@@ -1,5 +1,5 @@
 // 「我的區」：新手引導第 0 步與「我的」都用。純函式 + 一個會問位置的解析器，元件只負責畫。
-// 寫進 onboarding.homeDistrict（中文區名，和 PREFIX_DISTRICT 一模一樣）；選了「其他（不在台北市）」時
+// 寫進 onboarding.homeDistrict（中文區名，和 PREFIX_DISTRICT 一模一樣）；選了「其他（不在臺北市）」時
 // 用定位決定（人在台北市內 → 那一區），否則亂數挑一區並說出來。規格見 docs/specs/08-extensions.md §9。
 
 import { TAIPEI_DISTRICTS } from '../../store/types'
@@ -30,7 +30,7 @@ export interface OtherResult {
 }
 
 /**
- * 「其他（不在台北市）」要落在哪一區。
+ * 「其他（不在臺北市）」要落在哪一區。
  * 有位置、而且在台北市內 → 位置所在的區；沒有位置或在市界外 → 從 12 區亂數挑一區（rng 可注入，測試用）。
  */
 export async function resolveOtherDistrict(
@@ -94,7 +94,7 @@ export async function chooseHereDistrict(): Promise<HereResult> {
 export function hereNote(r: HereResult): string {
   if (r.ok) return `你現在在${r.district}。`
   return r.why === 'outside'
-    ? '你現在不在台北市。直接點一區，或選「其他」。'
+    ? '你現在不在臺北市。直接點一區，或選「其他」。'
     : '沒有拿到你的位置。直接點一區，或選「其他」。'
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserQRCodeSvgWriter } from '@zxing/browser'
 import { Link } from 'react-router-dom'
-import { Art } from '../../components/ui'
+import { IconGift } from '../../components/icons'
 import { isDemoMode, useStore, useUserReady } from '../../store'
 import { externalBrowserUrl, inAppBrowser, useAuth } from '../../lib/firebase'
 import { CHECKIN } from '../../config'
@@ -98,9 +98,9 @@ function StepDistrict() {
       </p>
       <DistrictPicker name="tour-district" />
       <div className="tour-actions sticky">
-        {/* 不選區也可以往下走（2026-10-20 使用者決定）：沒選時按鈕寫「先不選，出發」 */}
+        {/* 不選區也可以往下走（2026-10-20 使用者決定）：沒選時按鈕寫「先不選，下一步」。後面還有 4 步，所以不寫「出發」 */}
         <button className="btn primary" onClick={() => go(STEP_INTRO)} data-testid="district-go">
-          {chosen ? '好了，出發' : '先不選，出發'}
+          {chosen ? '下一步' : '先不選，下一步'}
         </button>
         <button className="btn" onClick={() => patchOnboarding({ tourSub: 'animal' })}>
           上一步
@@ -130,7 +130,7 @@ function StepIntro() {
         </tbody>
       </table>
       <p className="muted small">光點可以換小芽的造型和樹的頁面相框。</p>
-      <div className="tour-actions">
+      <div className="tour-actions sticky">
         <button className="btn primary" onClick={() => go(STEP_SCAN)}>
           下一步
         </button>
@@ -164,7 +164,7 @@ function StepScan() {
           </>
         )}
       </details>
-      <div className="tour-actions">
+      <div className="tour-actions sticky">
         <Link className="btn primary" to="/scan" onClick={() => go(STEP_SCAN)}>
           去掃樹牌
         </Link>
@@ -183,7 +183,9 @@ function StepCelebrate() {
     <>
       <Celebration badgeId="first-light">
         <div className="tour-gift">
-          <Art id="item-hat-acorn" alt="橡實帽" />
+          <span className="ornament" aria-hidden>
+            <IconGift />
+          </span>
           <p>
             <strong>新手禮：橡實帽</strong>
             <br />
@@ -191,7 +193,7 @@ function StepCelebrate() {
           </p>
         </div>
       </Celebration>
-      <div className="tour-actions">
+      <div className="tour-actions sticky">
         <Link className="btn" to="/me">
           到小芽換上
         </Link>
@@ -248,7 +250,7 @@ function StepHome() {
           <InstallHelp platform={platform} canInstall={canInstall} appName={app} />
         </>
       )}
-      <div className="tour-actions">
+      <div className="tour-actions sticky">
         <button className="btn primary" onClick={finish}>
           {standalone ? '完成' : '我加好了'}
         </button>

@@ -8,7 +8,7 @@ import { DISTRICTS_NORTH_TO_SOUTH, hereNote, otherNote, resolveHereDistrict, res
 
 const sync = async (p: [number, number]) => prefixAt(p)
 
-describe('resolveOtherDistrict (其他（不在台北市）)', () => {
+describe('resolveOtherDistrict (其他（不在臺北市）)', () => {
   it('uses the district at the position when it is inside Taipei', async () => {
     const r = await resolveOtherDistrict([121.55, 25.025], () => 0.99, sync)
     expect(r).toEqual({ district: '大安區', how: 'position' })
@@ -68,7 +68,7 @@ describe('resolveHereDistrict (用目前位置)', () => {
     expect(await resolveHereDistrict(null, sync)).toEqual({ ok: false, why: 'no-position' })
   })
   it('the failure notes say why and keep the other choices open', () => {
-    expect(hereNote({ ok: false, why: 'outside' })).toBe('你現在不在台北市。直接點一區，或選「其他」。')
+    expect(hereNote({ ok: false, why: 'outside' })).toBe('你現在不在臺北市。直接點一區，或選「其他」。')
     expect(hereNote({ ok: false, why: 'no-position' })).toBe('沒有拿到你的位置。直接點一區，或選「其他」。')
   })
 })

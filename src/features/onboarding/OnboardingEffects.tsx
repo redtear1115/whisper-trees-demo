@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Art } from '../../components/ui'
+import { IconGift } from '../../components/icons'
 import { useStore, useUserReady } from '../../store'
 import { useAuth } from '../../lib/firebase'
 import { firstLightEarned, grantStarterGift, newcomerDone, onboarding, patchOnboarding, shouldCelebrateNewcomer } from '../game/onboarding'
@@ -69,7 +69,9 @@ export function OnboardingEffects() {
     return (
       <CelebrationDialog badgeId="first-light" onClose={close}>
         <div className="tour-gift">
-          <Art id="item-hat-acorn" alt="橡實帽" />
+          <span className="ornament" aria-hidden>
+            <IconGift />
+          </span>
           <p>
             <strong>新手禮：橡實帽</strong>
             <br />

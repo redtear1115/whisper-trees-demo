@@ -2545,6 +2545,11 @@ body.has-offline .gov {
   margin-top: 12px;
 }
 
+.tour-actions .btn {
+  /* 「先不選，下一步」「上一步」「之後再說」要在 360 px 寬排成一列 */
+  padding: 0 12px;
+}
+
 .tour-details {
   margin: 8px 0;
 }
@@ -4932,7 +4937,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   font-family: var(--font-voice);
 }
 
-/* 12 區 3 欄、每格 44 px 高；「其他」整排。360 px 寬下每格約 100 px，「萬華區」「其他（不在台北市）」都放得下 */
+/* 12 區 3 欄、每格 44 px 高；「其他」整排。360 px 寬下每格約 100 px，「萬華區」「其他（不在臺北市）」都放得下 */
 .district-picker {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -5406,13 +5411,18 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 
 /* ---------- 第四輪 Y：新手、回報、我的 ---------- */
 
-/* 「用目前位置」：整排、放在 12 區前面，實心淺綠和下面虛線的「其他」分開 */
+/* 「用目前位置」：整排的次要按鈕（白底、綠框、定位圖示），不是選項——只有真正選到的那一區才填色（第六輪，2026-10-20） */
 .district-here {
   grid-column: 1 / -1;
+  gap: 6px;
   border-color: var(--green);
-  background: var(--green-soft);
+  background: #fff;
   color: var(--green-ink);
   font-weight: 600;
+}
+
+.district-here .icon-svg {
+  flex: none;
 }
 
 /* 第 0 步的第二個小步驟「你在哪一區？」：定位鈕、12 區、其他、提示、按鈕都要在不捲動下看得到（390×664、360×740）。

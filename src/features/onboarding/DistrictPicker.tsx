@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { IconLocate } from '../../components/icons'
 import { homeDistrictOf, useOnboarding } from '../game/onboarding'
 import {
   chooseHereDistrict,
@@ -10,7 +11,7 @@ import {
 } from './homeDistrict'
 
 /**
- * 選「我的區」：全寬的「用目前位置」，12 區 3 欄單選（由北往南，原生 radio，方向鍵可換），全寬的「其他（不在台北市）」。
+ * 選「我的區」：全寬的「用目前位置」，12 區 3 欄單選（由北往南，原生 radio，方向鍵可換），全寬的「其他（不在臺北市）」。
  * 點了立刻存。用目前位置：找得到在哪一區就選那一區，找不到就說原因、選項都還在。
  * 其他：有位置而且在台北市就用那一區，否則亂數挑一區並說出來（見 homeDistrict.ts）。
  * 新手引導的「你在哪一區？」與「我的」共用；where 決定提示文字裡要不要說「之後可以在『我的』換」。
@@ -55,6 +56,7 @@ export function DistrictPicker({ name = 'home-district', where = 'tour' }: { nam
       <fieldset className="district-picker" data-testid="district-picker" data-value={current ?? ''}>
         <legend className="sr-only">你在哪一區</legend>
         <button type="button" className="district-here" onClick={here} disabled={busy !== null} data-testid="district-here">
+          <IconLocate />
           {busy === 'here' ? '正在找你在哪一區…' : '用目前位置'}
         </button>
         {DISTRICTS_NORTH_TO_SOUTH.map((d) => (
@@ -71,7 +73,7 @@ export function DistrictPicker({ name = 'home-district', where = 'tour' }: { nam
           </label>
         ))}
         <button type="button" className="district-other" onClick={other} disabled={busy !== null} data-testid="district-other">
-          {busy === 'other' ? '正在找你在哪一區…' : '其他（不在台北市）'}
+          {busy === 'other' ? '正在找你在哪一區…' : '其他（不在臺北市）'}
         </button>
       </fieldset>
       <p className="small muted district-note" role="status" data-testid="district-note">

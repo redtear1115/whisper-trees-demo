@@ -147,3 +147,80 @@ export const IconPerson = () => (
     <path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" />
   </Svg>
 )
+
+/** 用目前位置：定位準心 */
+export const IconLocate = () => (
+  <Svg>
+    <circle cx="12" cy="12" r="3.2" />
+    <circle cx="12" cy="12" r="7.5" />
+    <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
+  </Svg>
+)
+
+// ---- 地圖上樹旁的行動圈（和底部導覽同一套：24px 網格、1.75 線寬、currentColor） ----
+
+/** 掃樹牌打卡：沿用底部導覽的取景框 */
+export const IconActionScan = IconScan
+
+/** 樹洞：沿用底部導覽的樹洞 */
+export const IconActionWhisper = IconHollow
+
+/** 樹的資料：一片葉子加一個 i */
+export const IconActionInfo = () => (
+  <Svg>
+    <path d="M5 19C5 10 10 5 19 5c0 9-5 14-14 14z" />
+    <path d="M5 19l7-7" />
+    <path d="M15.5 14.5v3.2M15.5 12.2v.1" />
+  </Svg>
+)
+
+/** 樹況回報：一片葉子加驚嘆號（不是剪刀，回報不是修剪） */
+export const IconActionReport = () => (
+  <Svg>
+    <path d="M12 3.5C7.5 6.5 5.5 10 5.5 13.5a6.5 6.5 0 0 0 13 0c0-3.5-2-7-6.5-10z" />
+    <path d="M12 9.2v4.3M12 16.4v.1" />
+  </Svg>
+)
+
+/** 怎麼走：彎彎的路線，起點小圓、終點旗標 */
+export const IconActionRoute = () => (
+  <Svg>
+    <circle cx="6" cy="18" r="2" />
+    <path d="M8 18h6a3.5 3.5 0 0 0 0-7H9.5a3 3 0 0 1 0-6H16" />
+    <path d="M16 3.5v6l4-1.5z" fill="currentColor" stroke="none" />
+  </Svg>
+)
+
+/** 走過去（Demo）：兩個腳印 */
+export const IconActionWalk = () => (
+  <Svg>
+    <ellipse cx="8.5" cy="14.5" rx="2.6" ry="4" transform="rotate(-12 8.5 14.5)" />
+    <ellipse cx="15.5" cy="9" rx="2.6" ry="4" transform="rotate(12 15.5 9)" />
+  </Svg>
+)
+
+// ---- 裝飾圖示（取代原本沒有資訊的佔位框） ----
+
+/** 微光、光點：四角的小星 */
+export const IconGlow = () => (
+  <Svg>
+    <path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z" />
+  </Svg>
+)
+
+/** 時空膠囊：一封信 */
+export const IconCapsule = () => (
+  <Svg>
+    <rect x="3.5" y="6" width="17" height="12" rx="2" />
+    <path d="M4 7.5l8 6 8-6" />
+  </Svg>
+)
+
+/** 新手禮：禮物盒 */
+export const IconGift = () => (
+  <Svg>
+    <rect x="4" y="10" width="16" height="10" rx="1.5" />
+    <path d="M3 7h18v3H3zM12 7v13" />
+    <path d="M12 7c-1.5-3.5-5.5-3-4.5 0M12 7c1.5-3.5 5.5-3 4.5 0" />
+  </Svg>
+)
