@@ -1,13 +1,61 @@
+import { useEffect, useId, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { exitDemoMode, isDemoMode, resetAll, signOutAccount, useSession } from '../../store'
+import { exitDemoMode, isDemoMode, resetAll, signOutAccount, useSession, useStore } from '../../store'
 import { MockTag } from '../../components/ui'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { externalBrowserUrl, inAppBrowser, useAuth } from '../../lib/firebase'
-import { onboarding, patchOnboarding } from '../game/onboarding'
+import { homeDistrictOf, onboarding, patchOnboarding, useOnboarding } from '../game/onboarding'
 import { reopenPatch } from '../onboarding/tour'
 import { useGoogleLink } from '../onboarding/useGoogleLink'
+import { DistrictPicker } from '../onboarding/DistrictPicker'
+import { balance, useEarned } from '../game/ledger'
+import { stageOf } from '../game/character'
+import { badges } from '../game/badges'
+
+/** 要確認的動作：登出、離開 Demo、刪除雲端資料、清除本機資料 */
+type Ask = 'signout' | 'exitDemo' | 'wipe' | null
+
+/** 我的區（2026-10-21 critique 從頂部的卡移來）：決定集章冊預設打開哪一區 */
+function DistrictRow() {
+  const district = homeDistrictOf(useOnboarding())
+  const [open, setOpen] = useState(false)
+  const boxId = useId()
+  const box = useRef<HTMLDivElement>(null)
+  // 展開後把目前選的那格捲進看得到的範圍；底部導覽中間凸起的掃樹牌鈕會蓋住最下面一截，
+  // 所以格子帶 scroll-margin-bottom（導覽高 + 40 px，見 index.css）。
+  useEffect(() => {
+    if (!open) return
+    const target = box.current?.querySelector<HTMLElement>('.district-chip.on') ?? box.current
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    target?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
+  }, [open])
+  return (
+    <div className="me-district" data-testid="me-district" data-value={district ?? ''}>
+      <button
+        type="button"
+        className="menu-link me-district-row"
+        aria-expanded={open}
+        aria-controls={boxId}
+        onClick={() => setOpen((v) => !v)}
+        data-testid="swap-district"
+      >
+        <span>
+          <span>
+            我的區：<strong>{district ?? '還沒選'}</strong>
+          </span>
+          <span className="muted small me-district-why">集章冊先打開這一區</span>
+        </span>
+        <span className="me-district-act">{open ? '收起' : district ? '換一區' : '選一區'}</span>
+      </button>
+      <div id={boxId} ref={box} className="me-district-box" hidden={!open}>
+        {open && <DistrictPicker name="me-district" where="me" />}
+      </div>
+    </div>
+  )
+}
 
 /** 帳號：訪客 / 已用 Google 保留。Google 綁定要在 click 事件裡同步呼叫（見 linkGoogle）。 */
-function AccountBlock() {
+function AccountBlock({ onSignOut }: { onSignOut: () => void }) {
   const auth = useAuth()
   const { msg, link } = useGoogleLink()
   const app = inAppBrowser()
@@ -41,13 +89,7 @@ function AccountBlock() {
           </button>
         ))}
       {auth.google && (
-        <button
-          className="btn"
-          onClick={() => {
-            if (confirm('登出後，這台裝置會回到新的訪客身分。你的紀錄還在雲端，再用 Google 登入就找得回來。'))
-              signOutAccount()
-          }}
-        >
+        <button className="btn" onClick={onSignOut}>
           登出
         </button>
       )}
@@ -64,12 +106,23 @@ function AccountBlock() {
 export function SettingsSection() {
   const cloud = useSession().backend === 'cloud'
   const navigate = useNavigate()
+  const [ask, setAsk] = useState<Ask>(null)
+  const earned = useEarned()
+  const points = useStore((s) => balance(s))
+  const badgeCount = useStore((s) => badges(s).filter((b) => b.earned).length)
+  const whisperCount = useStore((s) => Object.values(s.whispers).reduce((n, l) => n + l.filter((w) => !w.mock).length, 0))
+  const { stage: cur } = stageOf(earned)
+  const stage = cur.name
+  const stageIsFirst = cur.min === 0
+  const close = () => setAsk(null)
   return (
     <section className="me-settings" aria-labelledby="me-settings-title" data-testid="me-settings">
       <h2 id="me-settings-title" className="me-settings-title">
         設定與其他
       </h2>
       <div className="me-settings-list">
+        <DistrictRow />
+
         <button
           className="menu-link"
           data-testid="reopen-tour"
@@ -81,21 +134,14 @@ export function SettingsSection() {
           新手引導：收集光點、加到主畫面
         </button>
 
-        {cloud && <AccountBlock />}
+        {cloud && <AccountBlock onSignOut={() => setAsk('signout')} />}
 
         <Link className="menu-link" to="/about" data-testid="about-link">
           關於曦語
         </Link>
 
         {isDemoMode() ? (
-          <button
-            className="menu-link"
-            onClick={() => {
-              if (!confirm('離開 Demo 模式？之後會用你真實的 GPS 位置。')) return
-              exitDemoMode()
-              location.href = import.meta.env.BASE_URL
-            }}
-          >
+          <button className="menu-link" onClick={() => setAsk('exitDemo')}>
             離開 Demo 模式（目前：模擬定位）
           </button>
         ) : (
@@ -109,18 +155,58 @@ export function SettingsSection() {
           小芽、光點與徽章（存在你的裝置上）、許願、澆水、微光人數、案件進度，都是示範用的模擬資料。
         </p>
 
-        <button
-          className="menu-link danger"
-          onClick={() => {
-            const ok = cloud
-              ? confirm('刪除你在雲端的樹洞與紀錄，然後登出？你送出的許願、澆水和回報會保留。這無法復原。')
-              : confirm('清除這台裝置上的所有曦語資料？')
-            if (ok) resetAll()
-          }}
-        >
+        <button className="menu-link danger" onClick={() => setAsk('wipe')}>
           {cloud ? '刪除我的雲端資料並登出' : '清除本機資料'}
         </button>
       </div>
+
+      {ask === 'signout' && (
+        <ConfirmDialog
+          title="登出？"
+          lines={['這台裝置會回到新的訪客身分。', '你的紀錄還在雲端，再用 Google 登入就找得回來。']}
+          confirmLabel="登出"
+          onCancel={close}
+          onConfirm={() => {
+            close()
+            signOutAccount()
+          }}
+        />
+      )}
+      {ask === 'exitDemo' && (
+        <ConfirmDialog
+          title="離開 Demo 模式？"
+          lines={['之後會用你真實的 GPS 位置，要走到樹旁才能打卡。', '想再試玩，可以從這裡重新開啟。']}
+          confirmLabel="離開 Demo"
+          onCancel={close}
+          onConfirm={() => {
+            close()
+            exitDemoMode()
+            location.href = import.meta.env.BASE_URL
+          }}
+        />
+      )}
+      {ask === 'wipe' && (
+        <ConfirmDialog
+          title={cloud ? '刪除你的雲端資料並登出？' : '清除這台裝置上的曦語資料？'}
+          lines={[
+            earned <= 0
+              ? '小芽、光點與徽章都會回到一開始。'
+              : stageIsFirst
+                ? `小芽的成長、${points} 光點、${badgeCount} 枚徽章都會歸零。`
+                : `小芽會從${stage}回到初心樹精，${points} 光點、${badgeCount} 枚徽章都會歸零。`,
+            whisperCount > 0 ? `你在樹洞留的 ${whisperCount} 句話會刪掉。` : '打卡、心情與日記也會清掉。',
+            ...(cloud ? ['你送出的許願、澆水和回報會保留。'] : []),
+            <strong key="undo">這無法復原。</strong>,
+          ]}
+          confirmLabel={cloud ? '刪除並登出' : '清除'}
+          danger
+          onCancel={close}
+          onConfirm={() => {
+            close()
+            resetAll()
+          }}
+        />
+      )}
     </section>
   )
 }

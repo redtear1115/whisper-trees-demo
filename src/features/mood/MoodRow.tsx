@@ -56,7 +56,7 @@ export function MoodRowView({ state }: { state: MoodState }) {
                   setOpen(false)
                 }}
               >
-                就這個
+                {!draft ? '先選一個' : draft === cur?.mood.id ? '就是現在這個' : '就這個'}
               </button>
               {cur && (
                 <button

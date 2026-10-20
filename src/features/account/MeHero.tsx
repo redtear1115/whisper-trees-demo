@@ -1,40 +1,39 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { Art } from '../../components/ui'
 import { useStore } from '../../store'
 import { balance, ledger, useEarned } from '../game/ledger'
-import { growthCopy, shouldReassureSpend, stageOf } from '../game/character'
-import { homeDistrictOf, useOnboarding } from '../game/onboarding'
-import { DistrictPicker } from '../onboarding/DistrictPicker'
+import { growthCopy, spendNoteKind, stageOf, stagePath } from '../game/character'
 import { useInventory } from '../game/inventory'
 import { allItems, useGameConfig } from '../game/config'
 import { AnimalPicker } from '../avatar/AnimalPicker'
 import { useAnimal } from '../avatar/useAnimal'
 import { MoodRow } from '../mood/MoodRow'
 
-/** /me 的頂部：陪你的動物（地圖上的那一隻）守著小芽，下面是小芽的成長；「換一隻」就在這裡 */
+/** 小芽身邊的微光：累計光點越多越亮，最多 12 點（位置固定，不亂跳） */
+const GLOW_SPOTS = [
+  [18, 22], [78, 14], [8, 58], [90, 50], [30, 6], [62, 4], [96, 82], [2, 86], [46, 0], [84, 30], [14, 40], [70, 70],
+] as const
+
+export function glowCount(earned: number): number {
+  return Math.min(GLOW_SPOTS.length, Math.ceil(Math.max(0, earned) / 15))
+}
+
+/**
+ * /me 的頂部，主角是小芽（2026-10-21 critique）：小芽比旁邊陪你的動物大一點，身邊的微光跟著累計光點變多；
+ * 成長條是金色的「光」，下面標出三個階段。卡片裡只留「換一隻」與心情一行；「我的區」移到「設定與其他」。
+ */
 export function MeHero() {
   const animal = useAnimal()
   const earned = useEarned()
   const inv = useInventory()
   const cfg = useGameConfig()
-  const district = homeDistrictOf(useOnboarding())
-  const reassure = useStore((s) => shouldReassureSpend({ balance: balance(s), spent: ledger(s).some((e) => e.delta < 0) }))
+  const note = useStore((s) => spendNoteKind({ balance: balance(s), spent: ledger(s).some((e) => e.delta < 0) }))
   const [picking, setPicking] = useState(false)
-  const [pickingDistrict, setPickingDistrict] = useState(false)
   const pickId = useId()
-  const districtId = useId()
-  const districtBox = useRef<HTMLDivElement>(null)
-  // 展開「換一區」後，把目前選的那格捲進看得到的範圍；底部導覽中間凸起的掃樹牌鈕會蓋住畫面最下面一截，
-  // 所以格子帶 scroll-margin-bottom（導覽高 + 40 px，見 index.css）。
-  useEffect(() => {
-    if (!pickingDistrict) return
-    const box = districtBox.current
-    const target = box?.querySelector<HTMLElement>('.district-chip.on') ?? box
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    target?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' })
-  }, [pickingDistrict])
   const { stage } = stageOf(earned)
-  const grow = growthCopy(earned, reassure)
+  const grow = growthCopy(earned, note)
+  const path = stagePath(earned)
+  const glows = GLOW_SPOTS.slice(0, glowCount(earned))
   const outfit = allItems(cfg).find((i) => i.id === inv.equipped.outfit)
 
   return (
@@ -43,7 +42,12 @@ export function MeHero() {
         <div className="me-companion" data-testid="me-animal" data-animal={animal.id}>
           <Art id={animal.art} alt={`陪你的${animal.name}`} />
         </div>
-        <div className="me-sprout">
+        <div className="me-sprout" data-testid="me-sprout">
+          <span className="me-glows" aria-hidden="true" data-count={glows.length}>
+            {glows.map(([x, y], i) => (
+              <span key={i} className="me-glow" style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${(i % 4) * 0.7}s` }} />
+            ))}
+          </span>
           <Art id={stage.art} alt={`小芽：${stage.name}`} />
           {outfit && <Art id={outfit.art} alt={outfit.name} className="outfit" />}
         </div>
@@ -64,6 +68,13 @@ export function MeHero() {
       >
         <div style={{ width: `${grow.percent}%` }} />
       </div>
+      <ol className="me-stages" aria-label="小芽的三個階段">
+        {path.map((p) => (
+          <li key={p.stage.id} className={`${p.reached ? 'reached' : ''} ${p.current ? 'current' : ''}`} aria-current={p.current ? 'step' : undefined}>
+            {p.stage.name}
+          </li>
+        ))}
+      </ol>
       {grow.note && <p className="muted small me-hero-note">{grow.note}</p>}
       <div className="me-swap">
         <span className="muted small me-animal-line" data-testid="me-animal-line">
@@ -82,24 +93,6 @@ export function MeHero() {
       </div>
       <div id={pickId} hidden={!picking}>
         {picking && <AnimalPicker name="me-animal" />}
-      </div>
-      <div className="me-swap me-district" data-testid="me-district" data-value={district ?? ''}>
-        <span className="me-district-text">
-          我的區：<strong>{district ?? '還沒選'}</strong>
-        </span>
-        <button
-          type="button"
-          className="btn me-swap-btn"
-          aria-expanded={pickingDistrict}
-          aria-controls={districtId}
-          onClick={() => setPickingDistrict((v) => !v)}
-          data-testid="swap-district"
-        >
-          {pickingDistrict ? '收起' : district ? '換一區' : '選一區'}
-        </button>
-      </div>
-      <div id={districtId} ref={districtBox} className="me-district-box" hidden={!pickingDistrict}>
-        {pickingDistrict && <DistrictPicker name="me-district" where="me" />}
       </div>
       <MoodRow />
     </section>

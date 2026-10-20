@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { growthCopy, shouldReassureSpend } from '../character'
+import { growthCopy, spendNoteKind, stagePath } from '../character'
 import { badges, badgeSummary } from '../badges'
 import { getState, resetAll } from '../../../store'
 import { setSession } from '../../../store/session'
@@ -8,7 +8,7 @@ import { award } from '../ledger'
 describe('growthCopy', () => {
   it('never frames growth as what is missing', () => {
     for (const n of [0, 12, 30, 99, 100, 250, 299, 300, 900]) {
-      const c = growthCopy(n, true)
+      const c = growthCopy(n, 'past')
       expect(`${c.line}${c.note}`).not.toMatch(/再\s*\d+\s*光點|還差|還需要|不足/)
     }
   })
@@ -27,14 +27,26 @@ describe('growthCopy', () => {
     expect(growthCopy(100).headline).toBe('小芽・茁壯樹精')
     expect(growthCopy(250).line).toContain('「智慧老樹精」')
   })
-  it('the spend reassurance only shows when asked (balance > 0 or something was spent)', () => {
+  it('the spend reassurance is past tense only after something was spent; before that it says 之後', () => {
     for (const n of [0, 50, 99, 250]) {
-      expect(growthCopy(n).note).not.toContain('光點花掉了')
-      expect(growthCopy(n, true).note).toContain('光點花掉了，小芽也不會變小')
+      expect(growthCopy(n).note).toBe('')
+      expect(growthCopy(n, 'past').note).toBe('光點花掉了，小芽也不會變小。')
+      expect(growthCopy(n, 'future').note).toBe('之後用光點換東西，小芽也不會變小。')
     }
-    expect(shouldReassureSpend({ balance: 0, spent: false })).toBe(false)
-    expect(shouldReassureSpend({ balance: 3, spent: false })).toBe(true)
-    expect(shouldReassureSpend({ balance: 0, spent: true })).toBe(true)
+    expect(spendNoteKind({ balance: 0, spent: false })).toBeNull()
+    expect(spendNoteKind({ balance: 30, spent: false })).toBe('future')
+    expect(spendNoteKind({ balance: 0, spent: true })).toBe('past')
+    expect(spendNoteKind({ balance: 30, spent: true })).toBe('past')
+  })
+  it('stagePath marks reached stages and the current one', () => {
+    expect(stagePath(0).map((p) => [p.stage.name, p.reached, p.current])).toEqual([
+      ['初心樹精', true, true],
+      ['茁壯樹精', false, false],
+      ['智慧老樹精', false, false],
+    ])
+    expect(stagePath(150).filter((p) => p.reached).length).toBe(2)
+    expect(stagePath(150).find((p) => p.current)?.stage.name).toBe('茁壯樹精')
+    expect(stagePath(300).every((p) => p.reached)).toBe(true)
   })
   it('top stage is complete at 100', () => {
     const c = growthCopy(300)
