@@ -5601,3 +5601,122 @@ body:not(:has(.bottom-nav)) .migrate-banner {
     animation: drop-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
+
+/* ---------- 關於曦語 ---------- */
+
+.about-section {
+  margin: 20px 0 0;
+}
+
+.about-section h2 {
+  margin-bottom: 6px;
+}
+
+.about-lead {
+  font-family: var(--font-voice);
+  font-size: 1.15rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.about-pinyin {
+  margin: 2px 0 10px;
+  color: var(--green-ink);
+  font-weight: 600;
+}
+
+.about-en {
+  margin-bottom: 4px;
+}
+
+.about-twoway,
+.about-spirit,
+.team-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-twoway li {
+  display: grid;
+  gap: 0;
+  padding: 8px 14px;
+  border-left: 3px solid var(--glow);
+  background: var(--card);
+  border-radius: 4px 14px 14px 4px;
+}
+
+.about-twoway strong {
+  font-family: var(--font-voice);
+  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+}
+
+.about-spirit .card {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.about-spirit strong,
+.team-name {
+  font-family: var(--font-voice);
+  font-size: 1.1rem;
+}
+
+.about-team-sum {
+  margin: 0;
+  font-weight: 600;
+}
+
+.team-list {
+  margin-top: 10px;
+}
+
+.team-card {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+}
+
+.team-badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--green-soft);
+  border: 1px solid #bcd6bc;
+  color: var(--green-ink);
+  font-family: var(--font-voice);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.team-body {
+  min-width: 0;
+}
+
+.team-name {
+  margin: 0;
+}
+
+.team-title {
+  margin: 0;
+  color: var(--green-ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.team-role {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.team-skills {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}

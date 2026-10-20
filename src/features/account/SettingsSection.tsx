@@ -83,6 +83,10 @@ export function SettingsSection() {
 
         {cloud && <AccountBlock />}
 
+        <Link className="menu-link" to="/about" data-testid="about-link">
+          關於曦語
+        </Link>
+
         {isDemoMode() ? (
           <button
             className="menu-link"

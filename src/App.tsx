@@ -14,6 +14,7 @@ const MyWishesPage = lazy(() => import('./pages/MyWishesPage'))
 const GovPage = lazy(() => import('./pages/GovPage'))
 const MePage = lazy(() => import('./pages/MePage'))
 const ShopPage = lazy(() => import('./pages/ShopPage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
 const JournalPage = lazy(() => import('./pages/JournalPage'))
 const DemoControlPage = lazy(() => import('./pages/DemoControlPage'))
 const StampsPage = lazy(() => import('./pages/StampsPage'))
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="/tree/:treeId" element={<MobileOnly><TreePage /></MobileOnly>} />
           <Route path="/wishes" element={<MobileOnly><MyWishesPage /></MobileOnly>} />
           <Route path="/shop" element={<MobileOnly><ShopPage /></MobileOnly>} />
+          <Route path="/about" element={<MobileOnly><AboutPage /></MobileOnly>} />
           <Route path="/gov" element={<GovPage />} />
           <Route path="/gm" element={<GmPage />} />
           <Route path="/vendor" element={<VendorPage />} />
