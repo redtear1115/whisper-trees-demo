@@ -41,3 +41,21 @@ export function treeLabel(tree: { species: string; place: string } | null | unde
 export function wishLabel(wish: { road: string } | null | undefined): string | null {
   return wish?.road ? `${wish.road}的願望` : null
 }
+
+/**
+ * 光點紀錄給人看的原因：流水帳裡存的是規則（「寂寞樹 ×3（模擬）」「日照 ×1.4」），讀起來像規則引擎；
+ * 畫面上改成一般人的話。不認得的片段（活動名稱、舊資料）原樣保留。模擬的標記（「（模擬）」）保留。
+ */
+export function plainReason(reason: string): string {
+  return reason
+    .split('・')
+    .map((part) => {
+      if (/^寂寞樹 ×\d+(\.\d+)?（模擬）$/.test(part)) return '好久沒人來的樹，多給一點（模擬）'
+      if (/^日照 ×\d+(\.\d+)?$/.test(part)) return '白天的光比較足'
+      if (/^受保護樹木 基礎 \d+$/.test(part)) return '受保護的老樹'
+      if (/^同一棵樹第 \d+ 個互動$/.test(part)) return '同一棵樹旁又做了一件事'
+      if (/^今天第 \d+ 棵起減半$/.test(part)) return '今天走了很多棵，光點減半'
+      return part
+    })
+    .join('・')
+}

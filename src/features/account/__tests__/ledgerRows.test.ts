@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ledgerRow, newestRows, treeLabel, wishLabel } from '../ledgerRows'
+import { ledgerRow, newestRows, plainReason, treeLabel, wishLabel } from '../ledgerRows'
 
 describe('ledgerRow', () => {
   it('reads the tree id from a checkin key', () => {
@@ -46,5 +46,17 @@ describe('labels', () => {
     expect(wishLabel({ road: '信義路五段' })).toBe('信義路五段的願望')
     expect(wishLabel({ road: '' })).toBeNull()
     expect(wishLabel(undefined)).toBeNull()
+  })
+})
+
+describe('plainReason', () => {
+  it('turns rules into plain words and keeps the 模擬 mark', () => {
+    expect(plainReason('打卡成功・寂寞樹 ×3（模擬）・日照 ×1.4')).toBe('打卡成功・好久沒人來的樹，多給一點（模擬）・白天的光比較足')
+    expect(plainReason('打卡成功・受保護樹木 基礎 20')).toBe('打卡成功・受保護的老樹')
+    expect(plainReason('打卡成功・今天第 11 棵起減半')).toBe('打卡成功・今天走了很多棵，光點減半')
+  })
+  it('leaves other reasons (events, old data) alone', () => {
+    expect(plainReason('留樹洞・樹木節加倍')).toBe('留樹洞・樹木節加倍')
+    expect(plainReason('白天打卡的日照加成')).toBe('白天打卡的日照加成')
   })
 })

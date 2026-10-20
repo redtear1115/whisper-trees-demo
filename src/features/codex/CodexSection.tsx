@@ -73,7 +73,7 @@ export function CodexSection() {
         樹的圖鑑
       </h2>
       <p>
-        你遇見了 <strong>{met.size}</strong> 種樹。台北共有 {rows.length} 種、{total.toLocaleString()} 棵登錄的樹。
+        你遇見了 <strong>{met.size}</strong> 種樹。臺北共有 {rows.length} 種、{total.toLocaleString()} 棵登錄的樹。
       </p>
       <p className="muted small">在那種樹旁掃樹牌，就會收進圖鑑。棵數為臺北市公園處 2026-10-16 開放資料。</p>
       <input
@@ -87,7 +87,7 @@ export function CodexSection() {
       {!query && met.size === 0 && (
         <p className="muted">還沒有遇見任何一種。到樹旁掃樹牌，第一種樹就會出現在這裡。</p>
       )}
-      {query && top.length === 0 && <p className="muted">台北的登錄資料裡沒有「{query}」。</p>}
+      {query && top.length === 0 && <p className="muted">臺北的登錄資料裡沒有「{query}」。</p>}
       <div className="grid-cards">
         {top.map((r) => {
           const c = met.get(r.species)
@@ -138,7 +138,7 @@ export function CodexSection() {
       {!query && <InsectSection />}
       {!query && (
         <details className="about">
-          <summary>台北最常見的樹</summary>
+          <summary>臺北最常見的樹</summary>
           <p className="small">
             {common.slice(0, 20).map((r) => `${r.species}（${r.count.toLocaleString()}）`).join('、')}…
           </p>

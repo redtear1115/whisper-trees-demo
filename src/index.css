@@ -3615,6 +3615,8 @@ html:has(.tab-shell) {
 
 .atlas-crumbs button {
   min-height: 44px;
+  /* 「全市」兩個字只有 38 px 寬：點擊範圍至少 44 px */
+  min-width: 44px;
   padding: 0 4px;
   border: 0;
   background: none;
@@ -4977,6 +4979,24 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 .map-page .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact-show {
   padding: 2px 12px 2px 44px;
   max-width: min(calc(100vw - 92px), 320px);
+}
+/* 收著的時候是「ⓘ 資料來源」一顆藥丸：只有一個 i 看不出是什麼（第六輪）。展開後回到 44 px 的圓鈕 */
+.map-page .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
+  min-width: 104px;
+}
+.map-page .maplibregl-ctrl-bottom-left .maplibregl-compact:not(.maplibregl-compact-show) .maplibregl-ctrl-attrib-button {
+  width: 104px;
+  background-position: 10px center;
+}
+.map-page .maplibregl-ctrl-bottom-left .maplibregl-compact:not(.maplibregl-compact-show) .maplibregl-ctrl-attrib-button::after {
+  content: '資料來源';
+  position: absolute;
+  left: 40px;
+  top: 0;
+  line-height: 44px;
+  font-size: 0.8rem;
+  color: var(--ink);
+  pointer-events: none;
 }
 /* 展開時抬高到主按鈕上方，不蓋住它 */
 .map-page .maplibregl-ctrl-bottom-left:has(.maplibregl-compact-show) {

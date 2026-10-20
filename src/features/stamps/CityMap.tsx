@@ -5,6 +5,7 @@ import { NEIGHBOUR_FILL, PANEL_BG, TIER_TONES, toneOf } from './colors'
 import { CrayonDefs } from './Crayon'
 import { boundsOf, labelPoint, parseRings } from './svgPath'
 import { DOUBLE_TAP_MS, isDoubleTap, tapPadRadius } from './tap'
+import { spreadLabels } from './labels'
 
 export { DOUBLE_TAP_MS, isDoubleTap }
 
@@ -18,6 +19,10 @@ export const CITY_MAP_VH = 0.36
 const LABEL_PX = 14
 /** 區名在畫面上最小的字級（CSS px；第五輪由 10 改 12） */
 const LABEL_MIN_PX = 12
+
+function expand(b: [number, number, number, number] | undefined, by: number): [number, number, number, number] | undefined {
+  return b && [b[0] - by, b[1] - by, b[2] + by, b[3] + by]
+}
 
 /** 一區的 SVG 形狀、名字位置。純資料，隨 outline 算一次。 */
 export function useCityGeometry(outline: Outline) {
@@ -83,6 +88,19 @@ export function CityMap({
   // 區名在畫面上至少 LABEL_MIN_PX：地圖縮小時字不跟著縮到看不見
   const fs = Math.max((LABEL_PX * vw) / 360, LABEL_MIN_PX / pxPerUnit)
   const byDistrict = new Map(book.map((b) => [b.district, b]))
+  // 區名之間不重疊（中山／大同／松山、中正／大安在 360 px 寬會疊在一起）：量出每個字的寬高，把疊到的推開，並夾在各自那一區的外框內
+  const labelAt = useMemo(() => {
+    const items = [...geo.labels].map(([name, p]) => ({
+      id: name,
+      x: p[0],
+      y: p[1],
+      w: shortName(name as District).length * fs * 1.02,
+      h: fs * 1.15,
+      // 小區（萬華、中正、大安、信義排成一列）放不下兩個字：容許名字超出自己那一區的外框一點（一個字高），其餘照舊夾在裡面
+      within: expand(geo.bounds.get(name), fs),
+    }))
+    return new Map(spreadLabels(items, fs * 0.08).map((b) => [b.id, [b.x, b.y] as [number, number]]))
+  }, [geo, fs])
   // 選到的區畫在最上面，外框才不會被鄰居蓋住
   const names = Object.keys(outline.districts).sort((a, b) => Number(a === picked) - Number(b === picked))
 
@@ -97,7 +115,7 @@ export function CityMap({
           </li>
         ))}
       </ul>
-      <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} role="group" aria-label="台北市行政區地圖" style={{ backgroundColor: PANEL_BG }}>
+      <svg viewBox={`${vx} ${vy} ${vw} ${vh}`} role="group" aria-label="臺北市行政區地圖" style={{ backgroundColor: PANEL_BG }}>
         <CrayonDefs id="atlas-crayon-city" unitsPerPx={1 / pxPerUnit} />
         <g filter="url(#atlas-crayon-city)">
         <path d={outline.newtaipei} fill={NEIGHBOUR_FILL} aria-hidden="true" />
@@ -142,7 +160,7 @@ export function CityMap({
           return <circle key={name} cx={p[0]} cy={p[1]} r={r} className="atlas-tap-pad" aria-hidden="true" onClick={() => tap(name as District)} />
         })}
         {names.map((name) => {
-          const p = geo.labels.get(name)
+          const p = labelAt.get(name)
           if (!p) return null
           const tone = toneOf(byDistrict.get(name as District)?.top?.id)
           return (

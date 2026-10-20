@@ -5,7 +5,7 @@ import { formatDayTime } from '../../lib/datetime'
 import { findTree } from '../../lib/trees'
 import { useWishes } from '../../store'
 import { useLedger } from '../game/ledger'
-import { newestRows, treeLabel, wishLabel, type LedgerRow } from './ledgerRows'
+import { newestRows, plainReason, treeLabel, wishLabel, type LedgerRow } from './ledgerRows'
 
 const PREVIEW = 3
 
@@ -13,7 +13,7 @@ function Row({ row, where }: { row: LedgerRow; where: string | null }) {
   const body = (
     <>
       <span className="ledger-main">
-        <span className="ledger-reason">{row.reason}</span>
+        <span className="ledger-reason">{plainReason(row.reason)}</span>
         {where && <span className="ledger-where">{where}</span>}
         <span className="ledger-when">{formatDayTime(row.at)}</span>
       </span>
