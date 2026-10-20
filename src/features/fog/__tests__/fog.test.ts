@@ -8,7 +8,9 @@ import {
   clearedBounds,
   clearedCenters,
   exploredTreeIds,
+  areaPhrase,
   formatArea,
+  PITCH_M2,
   fogStat,
   fogView,
   fogAllView,
@@ -115,6 +117,19 @@ describe('fogStat / format', () => {
     expect(formatArea(0)).toBe('0')
     expect(formatArea(0.0079)).toBe('不到 0.01')
     expect(formatArea(0.1234)).toBe('0.12')
+  })
+  it('says the area in football pitches: warm, concrete, rounded, never fake-precise', () => {
+    expect(areaPhrase(0)).toBe('')
+    expect(areaPhrase(0.002)).toBe('不到一個足球場那麼大')
+    // 一棵樹的圓（半徑 50 公尺）約 1.1 個足球場
+    expect(areaPhrase(unionAreaKm2([[121.54, 25.03]]))).toBe('約 1 個足球場那麼大')
+    expect(areaPhrase((PITCH_M2 * 3.2) / 1e6)).toBe('約 3 個足球場那麼大')
+    expect(areaPhrase((PITCH_M2 * 12.4) / 1e6)).toBe('約 10 個足球場那麼大')
+    expect(areaPhrase((PITCH_M2 * 47) / 1e6)).toBe('約 45 個足球場那麼大')
+    expect(areaPhrase((PITCH_M2 * 123) / 1e6)).toBe('約 120 個足球場那麼大')
+    // 1 平方公里以上才改用平方公里
+    expect(areaPhrase(1.26)).toBe('約 1.3 平方公里')
+    expect(areaPhrase(0.02)).not.toContain('平方公里')
   })
   it('keeps a visible radius when zoomed out', () => {
     expect(clearPixelRadius(50, 70)).toBe(MIN_CLEAR_PX)

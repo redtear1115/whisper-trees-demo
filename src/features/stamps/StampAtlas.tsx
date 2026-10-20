@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Checkin } from '../../store/types'
-import { useOutline } from '../game/OutlineBackdrop'
+import type { Outline } from '../../lib/outline'
 import { PREFIX_DISTRICT, type District, type DistrictLedger, type DistrictStamps } from '../game/districts'
 import { countLitByVillage, loadVillages, type DistrictVillages, type Village } from '../../lib/villages'
 import { CityMap } from './CityMap'
@@ -10,7 +10,7 @@ import { VillageList } from './VillageList'
 import { VillageMap } from './VillageMap'
 import { creditText } from './credit'
 import { useReveal } from './reveal'
-import { asDistrict, homeSummaryText, selectedDistrict, villageUntouched } from './home'
+import { asDistrict, homeSummaryText, selectedDistrict, stampCountText, villageUntouched } from './home'
 import { litTreeIds, litTreePoints, loadTreePoints, type TreePoint } from './villageTrees'
 
 const PREFIX_OF = Object.fromEntries(Object.entries(PREFIX_DISTRICT).map(([p, d]) => [d, p])) as Record<District, string>
@@ -28,14 +28,22 @@ export function StampAtlas({
   light,
   checkins,
   homeDistrict,
+  viewToggle,
+  stampCount = 0,
+  outline,
 }: {
   book: readonly DistrictStamps[]
   light: ReadonlyMap<District, DistrictLedger>
   checkins: readonly Checkin[]
   /** 我的區（中文區名）：打開時就選好這一區、卡片可見；沒有就是空白的全市 */
   homeDistrict?: string
+  /** 「地圖／依取得時間」切換鈕：放在地圖卡片的頂端（在地圖之前，讀屏先遇到它） */
+  viewToggle?: ReactNode
+  /** 已集到的章數：有「我的區」就併進那一行，沒有就放在切換鈕旁 */
+  stampCount?: number
+  /** 台北市輪廓與區界（由頁面載入並保留：切到「依取得時間」再切回來，地圖和切換鈕不會重新掛載、焦點不掉）；還沒載好是 null */
+  outline: Outline | null
 }) {
-  const outline = useOutline()
   const [level, setLevel] = useState<Level>('city')
   const [picked, setDistrict] = useState<District | null>(null)
   const district = selectedDistrict(picked, homeDistrict)
@@ -72,11 +80,14 @@ export function StampAtlas({
   const [villageReveal, setVillageReveal] = useState<string | null>(null)
   const [announce, setAnnounce] = useState('')
   const seq = useRef(0)
-  const cityCardRef = useReveal<HTMLDivElement>(cityReveal)
+  // 「看我的區」把整張卡捲進頂端與導覽之間；點地圖只捲到看得到標題列（見 reveal.ts）
+  const [cityFull, setCityFull] = useState(false)
+  const cityCardRef = useReveal<HTMLDivElement>(cityReveal, '.atlas-panel', cityFull)
   const villageCardRef = useReveal<HTMLDivElement>(villageReveal)
 
-  const pickDistrict = (d: District) => {
+  const pickDistrict = (d: District, full = false) => {
     setDistrict(d)
+    setCityFull(full)
     setCityReveal(`${d}:${seq.current++}`)
     setAnnounce(`已選取${d}，詳細在下方的卡片。`)
   }
@@ -94,6 +105,18 @@ export function StampAtlas({
     setVillageReveal(`${v.id}:${seq.current++}`)
     setAnnounce(`已選取${v.name}，詳細在下方的卡片。`)
   }
+
+  const countText = stampCountText(stampCount)
+  const head = viewToggle ? (
+    <div className="atlas-head" data-testid="atlas-head">
+      {viewToggle}
+      {!home && countText && (
+        <span className="stamps-count">
+          已集 <strong data-testid="stamp-count">{stampCount}</strong> 枚章
+        </span>
+      )}
+    </div>
+  ) : undefined
 
   const crumbs: { label: string; go?: () => void }[] = [{ label: '全市', go: level === 'city' ? undefined : goCity }]
   if (level !== 'city' && district) crumbs.push({ label: district, go: level === 'district' && !village ? undefined : goDistrict })
@@ -124,8 +147,15 @@ export function StampAtlas({
         <>
           {home && homeBook && (
             <div className="atlas-home" data-testid="home-summary" data-district={home}>
-              <p>{homeSummaryText(home, homeBook.distinct)}</p>
-              <button type="button" className="btn small" onClick={() => pickDistrict(home)} data-testid="home-jump">
+              <p>
+                {homeSummaryText(home, homeBook.distinct)}
+                {countText && (
+                  <span className="home-count">
+                    <span className="visually-hidden">，</span>已集 <strong data-testid="stamp-count">{stampCount}</strong> 枚章
+                  </span>
+                )}
+              </p>
+              <button type="button" className="btn small" onClick={() => pickDistrict(home, true)} data-testid="home-jump">
                 看我的區 <span aria-hidden="true">↓</span>
               </button>
             </div>
@@ -135,14 +165,18 @@ export function StampAtlas({
               outline={outline}
               book={book}
               picked={district}
-              onPick={pickDistrict}
+              head={head}
+              onPick={(d) => pickDistrict(d)}
               onEnter={(d) => {
                 setDistrict(d)
                 goDistrict()
               }}
             />
           ) : (
-            <p className="atlas-note">正在載入地圖…</p>
+            <>
+              {head}
+              <p className="atlas-note">正在載入地圖…</p>
+            </>
           )}
           {b ? (
             <div ref={cityCardRef} className="atlas-reveal">
@@ -161,11 +195,12 @@ export function StampAtlas({
 
       {level !== 'city' && district && (
         <>
+          {(data === null || data === 'failed') && head}
           {data === 'failed' && <p className="atlas-note" data-testid="village-failed">里的資料暫時載入失敗，晚點再試試看。</p>}
           {data === null && <p className="atlas-note" aria-live="polite">正在載入{district}的里…</p>}
           {data && data !== 'failed' && level === 'district' && (
             <>
-              <VillageMap data={data.villages} lit={litByVillage} pickedId={village?.id ?? null} onPick={pickVillage} />
+              <VillageMap data={data.villages} lit={litByVillage} pickedId={village?.id ?? null} onPick={pickVillage} head={head} />
               {village ? (
                 <div ref={villageCardRef} className="atlas-reveal">
                   <VillageCard village={village} lit={litByVillage.get(village.id) ?? 0} onRoute={() => setLevel('route')} />
@@ -180,6 +215,8 @@ export function StampAtlas({
             </>
           )}
           {data && data !== 'failed' && level === 'route' && village && prefix && (
+            <>
+            {head}
             <section className="atlas-card" aria-label={`${village.name}的路線`}>
               <h2>{village.name}・規劃路線</h2>
               <RouteView prefix={prefix} village={village} lit={lit} />
@@ -187,6 +224,7 @@ export function StampAtlas({
                 回{district}的里地圖
               </button>
             </section>
+            </>
           )}
         </>
       )}

@@ -6,7 +6,7 @@ import { MAP_LOCALE, maplibregl, applyChineseLabels } from '../../lib/maplibre'
 import { MAP_STYLE } from '../../config'
 import type { LngLat } from '../../lib/geo'
 import { Art } from '../../components/ui'
-import { FOG_RADIUS_M, TAIPEI_BBOX, clearPixelRadius, fogActions, fogAllView, fogView, formatArea, type FogMode } from './fog'
+import { FOG_RADIUS_M, TAIPEI_BBOX, clearPixelRadius, fogActions, fogAllView, fogView, areaPhrase, type FogMode } from './fog'
 import { useFog } from './useFog'
 
 /** 底圖超過這麼久還沒載好，就當作載入失敗 */
@@ -234,7 +234,7 @@ function FogView({
       <canvas ref={canvas} className="fog-canvas" aria-hidden="true" />
       <p className="fog-stat" data-testid="fog-stat" data-count={count} data-area={areaKm2.toFixed(4)}>
         已探索 <strong>{count}</strong> 棵樹周圍
-        {count > 0 && <span>，約 {formatArea(areaKm2)} 平方公里</span>}
+        {count > 0 && areaKm2 > 0 && <span>，{areaPhrase(areaKm2)}</span>}
       </p>
       <div className="fog-actions">
         {fogActions(mode, view).map((a) => (

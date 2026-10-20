@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { findTree, type Tree } from '../lib/trees'
 import { seededInt, weekKey } from '../lib/seed'
@@ -11,6 +11,7 @@ import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
 import { award, isDaytime } from '../features/game/ledger'
 import { useIsProtectedTree } from '../features/game/protectedTrees'
+import { gameConfig } from '../features/game/config'
 import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
@@ -35,6 +36,8 @@ export default function TreePage() {
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
   const photos = useSpeciesPhotos(tree?.species)
   const isProtected = useIsProtectedTree(treeId)
+  const [sealOpen, setSealOpen] = useState(false)
+  const sealNoteId = useId()
 
   useEffect(() => {
     let alive = true
@@ -85,7 +88,18 @@ export default function TreePage() {
           <IconBack /> {back.label}
         </button>
         <h1 className="topbar-title">{tree.species}</h1>
+        {isProtected && <ProtectedSeal open={sealOpen} onToggle={() => setSealOpen(!sealOpen)} noteId={sealNoteId} />}
       </header>
+      {isProtected && sealOpen && (
+        <div id={sealNoteId} className="protected-note" data-testid="protected-note">
+          <p>
+            這是臺北市「受保護樹木」名冊裡的老樹，在它旁邊打卡，基礎光點是 {gameConfig().protectedBase}。
+          </p>
+          <p className="muted small">
+            來源：臺北市政府文化局「臺北市受保護樹木」開放資料，依位置與樹種比對到這棵樹；樹籍名冊比對，非官方認定。
+          </p>
+        </div>
+      )}
 
       {/* 打卡的結果和樹放在一起，是這一頁唯一的主角 */}
       <section className={`hero-wrap ${frame ? `frame ${frame}` : ''} ${onSite ? 'met' : ''} ${photos.length ? 'photos' : ''}`} aria-label="這棵樹">
@@ -101,11 +115,6 @@ export default function TreePage() {
         <CheckinStrip fresh={fresh} onSite={onSite} />
       </section>
       <DropCards drops={drops} />
-      {isProtected && (
-        <p className="protected-tag" data-testid="protected-tag">
-          受保護樹木
-        </p>
-      )}
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
       {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}
@@ -180,13 +189,25 @@ export default function TreePage() {
           <dd className="num">{tree.id}</dd>
         </dl>
         <p className="muted small">資料來源：臺北市政府工務局公園路燈工程管理處開放資料</p>
-        {isProtected && <p className="muted small">受保護樹木名冊：臺北市政府文化局開放資料，依位置與樹種比對到這棵樹。</p>}
       </details>
 
       <div id="report" className="anchor-target">
         <ReportBox tree={tree} onSite={!!onSite} />
       </div>
     </div>
+  )
+}
+
+/**
+ * 受保護樹木的印章：放在樹名旁邊，可以點（按鈕、至少 44 px 的點擊範圍），點開看說明與資料來源。
+ * 印章本身（紅色手蓋的框）比點擊範圍小；說明在頁首下面，不開也不佔位置。
+ */
+function ProtectedSeal({ open, onToggle, noteId }: { open: boolean; onToggle: () => void; noteId: string }) {
+  return (
+    <button type="button" className="protected-tag" data-testid="protected-tag" aria-expanded={open} aria-controls={open ? noteId : undefined} onClick={onToggle}>
+      <span className="seal">受保護樹木</span>
+      <span className="visually-hidden">{open ? '，收起說明' : '，看說明'}</span>
+    </button>
   )
 }
 

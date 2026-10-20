@@ -37,10 +37,21 @@ export function homeSummaryText(district: string, distinct: number): string {
   return `我的區：${district}・${distinct > 0 ? `${distinct} 棵` : '還是一張白紙'}`
 }
 
-/** 里列表分成兩段：走過的（含沒有樹木資料的里，它們沒得走）在前面，還沒走過的收在一個可展開的按鈕後面；順序維持不變 */
-export function splitUntouched<T extends { village: Pick<Village, 'total'>; lit: number }>(rows: readonly T[]): { active: T[]; untouched: T[] } {
+/** 「已集 3 枚章」：併在「我的區」那一行；一枚都沒有就不寫（沒有 0 枚的負擔） */
+export function stampCountText(n: number): string {
+  return n > 0 ? `已集 ${n} 枚章` : ''
+}
+
+/**
+ * 里列表分三段：走過的在前面；還沒走過的（有樹可以走）收在一個可展開的按鈕後面；
+ * 沒有樹木資料的里（沒得走）另外放，不算「走過」也不算「還沒走過」。順序維持不變。
+ */
+export function splitUntouched<T extends { village: Pick<Village, 'total'>; lit: number }>(
+  rows: readonly T[],
+): { active: T[]; untouched: T[]; noData: T[] } {
   const active: T[] = []
   const untouched: T[] = []
-  for (const r of rows) (villageUntouched(r.village, r.lit) ? untouched : active).push(r)
-  return { active, untouched }
+  const noData: T[] = []
+  for (const r of rows) (r.village.total === 0 ? noData : villageUntouched(r.village, r.lit) ? untouched : active).push(r)
+  return { active, untouched, noData }
 }

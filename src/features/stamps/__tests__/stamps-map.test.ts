@@ -6,7 +6,7 @@ import { PREFIX_DISTRICT } from '../../game/districts'
 import { INK_EDGE, NEIGHBOUR_FILL, PANEL_BG, RAMP_STEPS, TIER_TONES, contrast, rampColor, rampT, toneOf, villageFill, villageText } from '../colors'
 import { creditText } from '../credit'
 import { MIN_TARGET_PX, tapPadRadius, villageRows } from '../tap'
-import { fitProjection, labelFits, unionBBox, villageLabel, villagePath } from '../projection'
+import { fitProjection, labelFits, unionBBox, villageLabel, villageNameMode, villagePath } from '../projection'
 import { boundsOf, labelPoint, parseRings, ringArea, ringCentroid } from '../svgPath'
 import { litTreeIds, parseTreePoints, routeCandidates, tourSummary } from '../villageTrees'
 
@@ -234,6 +234,15 @@ describe('projection', () => {
     expect(labelFits('大龍峒保安里', l, 11)).toBe(false)
     expect(labelFits('永康里', { ...l, h: 10 }, 11)).toBe(false)
     expect(labelFits('永康里', null, 11)).toBe(false)
+  })
+
+  it('a lit village always gets its name, even when it is too small for it; unlit small ones stay unnamed', () => {
+    const tiny = { x: 0, y: 0, w: 12, h: 12 }
+    expect(villageNameMode('永康里', tiny, 11, 0)).toBe('none')
+    expect(villageNameMode('永康里', tiny, 11, 3)).toBe('forced')
+    expect(villageNameMode('永康里', { x: 0, y: 0, w: 40, h: 20 }, 11, 0)).toBe('fit')
+    expect(villageNameMode('永康里', { x: 0, y: 0, w: 40, h: 20 }, 11, 2)).toBe('fit')
+    expect(villageNameMode('永康里', null, 11, 5)).toBe('none')
   })
 
   it('projects every real 大安 village into the canvas', () => {

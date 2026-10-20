@@ -1040,14 +1040,66 @@ textarea.input {
   margin: 8px 0 0;
 }
 
+/* 受保護樹木的印章：在樹名旁邊，是一顆可以點的按鈕（點擊範圍 44 px），紅色手蓋的框、微微歪。
+   樹名很長時整個印章換到下一行 */
+.tree-page .topbar {
+  flex-wrap: wrap;
+}
+
 .protected-tag {
-  display: inline-block;
-  margin: 8px 2px 0;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--green-soft);
-  color: var(--green-ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--red-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.protected-tag .seal {
+  padding: 1px 8px;
+  border: 2px solid var(--red-ink);
+  border-radius: 7px 5px 8px 5px;
+  box-shadow: inset 0 0 0 1px rgba(147, 53, 43, 0.28);
+  background: rgba(180, 72, 60, 0.07);
+  font-family: var(--font-voice);
   font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  white-space: nowrap;
+  transform: rotate(-3deg);
+}
+
+.protected-tag[aria-expanded='true'] .seal {
+  background: rgba(180, 72, 60, 0.16);
+}
+
+.protected-tag:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+/* 點開印章之後的說明：頁首下面的一小塊，不是卡片 */
+.protected-note {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--red-ink);
+  border-radius: 0 10px 10px 0;
+  background: rgba(180, 72, 60, 0.06);
+}
+
+.protected-note p {
+  margin: 0;
+}
+
+.protected-note p + p {
+  margin-top: 4px;
 }
 
 .night-note {
@@ -1320,6 +1372,8 @@ textarea.input {
   position: fixed;
   inset: 0;
   z-index: 40;
+  display: flex;
+  flex-direction: column;
   background: #000;
   color: #fff;
 }
@@ -1332,22 +1386,40 @@ textarea.input {
   object-fit: cover;
 }
 
+/* 頂端列、取景框所在的空間、底部提示：由上到下排，不再各自絕對定位，所以不會互相蓋住（影片之上用 relative） */
+.scanner-top,
+.scanner-stage,
+.scanner-bottom {
+  position: relative;
+}
+
+/* 取景框外的暗色（box-shadow）不要蓋到頂端列與底部提示 */
+.scanner-top,
+.scanner-bottom {
+  z-index: 1;
+}
+
+.scanner-stage {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  padding: 12px 0;
+}
+
 .scanner-frame {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(64vw, 280px);
+  height: 100%;
+  max-height: min(64vw, 280px);
   aspect-ratio: 1;
-  transform: translate(-50%, -55%);
   border: 3px solid rgba(255, 255, 255, 0.85);
   border-radius: 18px;
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35);
 }
 
 .scanner-top {
-  position: absolute;
-  top: max(12px, env(safe-area-inset-top));
-  left: 12px;
+  flex: none;
+  padding: max(12px, env(safe-area-inset-top)) 12px 0;
 }
 
 .btn.ghost.light {
@@ -1356,10 +1428,8 @@ textarea.input {
 }
 
 .scanner-bottom {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: max(24px, env(safe-area-inset-bottom));
+  flex: none;
+  padding: 0 16px max(24px, env(safe-area-inset-bottom));
   display: grid;
   gap: 10px;
   justify-items: center;
@@ -1842,7 +1912,7 @@ body.is-demo .map-top {
 }
 
 body.is-demo .scanner-top {
-  top: calc(var(--demo-h) + 8px);
+  padding-top: calc(var(--demo-h) + 8px);
 }
 
 body.is-demo .page,
@@ -2900,7 +2970,13 @@ body.has-offline .gov {
 
 /* 分頁頁面：內容底部留出導覽高度 */
 .tab-shell .page {
-  padding-bottom: calc(var(--nav-h) + 24px);
+  /* 導覽高度加上中間浮出的掃樹牌圓鈕（約 34 px）再留一點：頁尾的連結與按鈕不會被蓋住 */
+  padding-bottom: calc(var(--nav-h) + 52px);
+}
+
+/* 鍵盤聚焦、scrollIntoView 到分頁頁面的東西時，也不要停在導覽與圓鈕底下 */
+html:has(.tab-shell) {
+  scroll-padding-bottom: calc(var(--nav-h) + 48px);
 }
 
 .tab-top {
@@ -4916,7 +4992,8 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   bottom: -20px;
   z-index: 1;
   margin: 8px -16px -20px;
-  padding: 10px 16px max(20px, env(safe-area-inset-bottom));
+  /* 下緣要高過導覽中間浮出的掃樹牌圓鈕（約 34 px）再留 12 px：「先跳過」「之後再說」不會貼到或蓋到它 */
+  padding: 10px 16px max(46px, env(safe-area-inset-bottom));
   background: var(--card);
   box-shadow: 0 -8px 10px -8px rgba(44, 58, 46, 0.2);
 }
@@ -5008,23 +5085,39 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   border-radius: var(--radius);
 }
 
-/* 地圖／依取得時間：在地圖上面，淡一點（只是換看法），不浮在畫面上 */
-.stamps-view {
+/* 地圖／依取得時間：放在「地圖」卡片的頂端（卡片內的一列），淡一點（只是換看法），不浮在畫面上 */
+.atlas-head {
   display: flex;
-  margin: 4px 0 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 2px 6px;
 }
 
-.stamps-view .segmented {
+/* 依取得時間：沒有地圖卡片，自己就是一列 */
+.atlas-head.standalone {
+  padding: 0;
+  margin: 4px 0 8px;
+  border-bottom: 0;
+}
+
+.atlas-head .segmented {
   box-shadow: none;
   background: transparent;
 }
 
-.stamps-view .segmented button {
+/* 卡片裡不需要再圍一圈膠囊：選中的那顆自己就是框，省下上下各一圈 */
+.atlas-panel > .atlas-head .segmented {
+  padding: 0;
+  border: 0;
+}
+
+.atlas-head .segmented button {
   color: var(--muted);
   font-size: 0.95rem;
 }
 
-.stamps-view .segmented button.on {
+.atlas-head .segmented button.on {
   background: var(--green-soft);
   color: var(--green-ink);
   font-weight: 700;
@@ -5257,10 +5350,6 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 }
 
 /* 第一屏要塞得下摘要、地圖和卡片標題：這幾個間距收緊 */
-.stamps-page .stamps-view {
-  margin-bottom: 4px;
-}
-
 .stamps-page .atlas {
   margin-top: 4px;
 }
@@ -5273,11 +5362,13 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   margin-top: 8px;
 }
 
-/* 「地圖／依取得時間」右邊放已集到的章數；說明句放在地圖下面 */
-.stamps-view {
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 12px;
+/* 已集到的章數：併在「我的區」那一行的第二行；沒有我的區時在切換鈕右邊 */
+.home-count {
+  display: block;
+  color: var(--muted);
+  font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
 }
 
 .stamps-count {
@@ -5311,6 +5402,11 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 
 .map-page .tour-sheet[data-sub='district'] {
   max-height: calc(100dvh - var(--nav-h) - 72px);
+}
+
+.tour-sheet[data-sub='district'] .tour-why {
+  margin: 0 0 4px;
+  line-height: 1.4;
 }
 
 .tour-sheet[data-sub='district'] .district-picker {

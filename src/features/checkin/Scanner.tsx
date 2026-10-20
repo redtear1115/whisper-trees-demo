@@ -76,11 +76,14 @@ export function Scanner({ onResult, onClose, hint, hintId }: Props) {
   return (
     <div className="scanner" role="dialog" aria-label="掃樹牌">
       <video ref={video} className="scanner-video" playsInline muted />
-      <div className="scanner-frame" aria-hidden />
       <div className="scanner-top">
         <button className="btn ghost light" onClick={onClose} aria-label="關閉掃描，回地圖">
           <IconBack /> 回地圖
         </button>
+      </div>
+      {/* 取景框在頂端列與下面的提示之間剩下的空間裡置中，空間不夠就縮小：提示卡再長也蓋不到它 */}
+      <div className="scanner-stage">
+        <div className="scanner-frame" aria-hidden />
       </div>
       <div className="scanner-bottom">
         {hint && (

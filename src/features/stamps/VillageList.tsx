@@ -5,7 +5,7 @@ import { splitUntouched, villageCountText, villageUntouched } from './home'
 
 /**
  * 里的列表：地圖上有的里很小（有的不到 20 px），列表是另一條路，也是鍵盤與讀屏的路。
- * 點亮多的排前面；每一列是一個至少 44 px 高的按鈕。
+ * 點亮多的排前面；每一列是一個至少 44 px 高的按鈕。還沒走過的、沒有樹木資料的里各收在自己的按鈕後面（沒有資料的不算「走過」）。
  */
 export function VillageList({
   villages,
@@ -21,9 +21,11 @@ export function VillageList({
   const [open, setOpen] = useState(false)
   const listId = useId()
   const rows = useMemo(() => villageRows(villages, lit), [villages, lit])
-  const { active, untouched } = useMemo(() => splitUntouched(rows), [rows])
+  const { active, untouched, noData } = useMemo(() => splitUntouched(rows), [rows])
   const [showUntouched, setShowUntouched] = useState(false)
   const untouchedId = useId()
+  const [showNoData, setShowNoData] = useState(false)
+  const noDataId = useId()
 
   return (
     <div className="village-list-wrap">
@@ -54,6 +56,27 @@ export function VillageList({
               {showUntouched && (
                 <ul className="village-list" id={untouchedId} data-testid="village-list-untouched" aria-label="還沒走過的里">
                   {untouched.map((r) => (
+                    <VillageRowItem key={r.village.id} row={r} pickedId={pickedId} onPick={onPick} />
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+          {noData.length > 0 && (
+            <>
+              <button
+                type="button"
+                className="btn block village-untouched-toggle"
+                aria-expanded={showNoData}
+                aria-controls={noDataId}
+                onClick={() => setShowNoData(!showNoData)}
+                data-testid="village-nodata-toggle"
+              >
+                {showNoData ? '收起沒有樹木資料的里' : `沒有樹木資料的 ${noData.length} 個里`}
+              </button>
+              {showNoData && (
+                <ul className="village-list" id={noDataId} data-testid="village-list-nodata" aria-label="沒有樹木資料的里">
+                  {noData.map((r) => (
                     <VillageRowItem key={r.village.id} row={r} pickedId={pickedId} onPick={onPick} />
                   ))}
                 </ul>

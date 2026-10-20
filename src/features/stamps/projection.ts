@@ -80,3 +80,13 @@ export function labelFits(name: string, label: VillageLabel | null, fontSize: nu
   if (!label) return false
   return label.w >= [...name].length * fontSize * 1.05 && label.h >= fontSize * 1.6
 }
+
+/**
+ * 里名要不要畫在地圖上：放得下就畫；放不下的，點亮過的（lit > 0）也要畫——
+ * 點亮的里是使用者走過的地方，不能是一塊沒有名字的色塊。放不下的標籤字級縮小一點、疊在最上面。
+ */
+export function villageNameMode(name: string, label: VillageLabel | null, fontSize: number, lit: number): 'fit' | 'forced' | 'none' {
+  if (!label) return 'none'
+  if (labelFits(name, label, fontSize)) return 'fit'
+  return lit > 0 ? 'forced' : 'none'
+}

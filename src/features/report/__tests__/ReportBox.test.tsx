@@ -44,13 +44,13 @@ const html = (onSite: boolean) =>
   )
 
 describe('ReportBox off site', () => {
-  it('ends in a primary 去掃樹牌 link to /scan instead of text only', () => {
+  it('ends in a 去掃樹牌 link (secondary; the page keeps one primary) to /scan instead of text only', () => {
     const out = html(false)
     expect(out).toContain('data-testid="report-scan"')
     expect(out).toContain('href="/scan"')
     expect(out).toContain(`data-state="${JSON.stringify({ hintTreeId: tree.id }).replace(/"/g, '&quot;')}"`)
     expect(out).toContain('去掃樹牌')
-    expect(out).toMatch(/class="btn primary block report-scan"/)
+    expect(out).toMatch(/class="btn block report-scan"/)
     expect(out).not.toContain('回報問題')
   })
   it('on site there is the report form entry, not the scan link', () => {

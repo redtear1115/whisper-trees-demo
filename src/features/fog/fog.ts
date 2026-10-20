@@ -137,6 +137,22 @@ export function formatArea(km2: number): string {
   return km2.toFixed(2)
 }
 
+/** 一個標準足球場的面積（平方公尺）：105 × 68 公尺（FIFA 建議的標準場地） */
+export const PITCH_M2 = 105 * 68
+
+/**
+ * 清出的面積用大家有感覺的說法：不到 1 平方公里就換算成足球場，一個清出的圓（半徑 50 公尺）約 1.1 個；
+ * 1 平方公里以上才用平方公里。數字是從面積換算的、四捨五入，不是量出來的精確值。
+ */
+export function areaPhrase(km2: number): string {
+  if (km2 <= 0) return ''
+  if (km2 >= 1) return `約 ${km2.toFixed(1)} 平方公里`
+  const pitches = (km2 * 1_000_000) / PITCH_M2
+  if (pitches < 0.75) return '不到一個足球場那麼大'
+  const n = pitches < 10 ? Math.round(pitches) : pitches < 100 ? Math.round(pitches / 5) * 5 : Math.round(pitches / 10) * 10
+  return `約 ${n} 個足球場那麼大`
+}
+
 /** 縮小到看全市時，50 m 不到 1 px 看不見；畫面上的圓至少畫這麼大（只影響顯示，不影響統計） */
 export const MIN_CLEAR_PX = 14
 

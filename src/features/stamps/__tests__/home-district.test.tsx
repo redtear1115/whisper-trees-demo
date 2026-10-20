@@ -4,9 +4,9 @@ import { MemoryRouter } from 'react-router-dom'
 import { TAIPEI_DISTRICTS, type Checkin } from '../../../store/types'
 import type { Village } from '../../../lib/villages'
 import { stampBook } from '../../game/districts'
-import { WAITING_INVITATION, asDistrict, homeSummaryText, isWaiting, selectedDistrict, splitUntouched, villageCountText, villageUntouched } from '../home'
+import { WAITING_INVITATION, asDistrict, homeSummaryText, isWaiting, selectedDistrict, splitUntouched, stampCountText, villageCountText, villageUntouched } from '../home'
 import { TIER_TONES, toneOf } from '../colors'
-import { KEEP_MAP_PX, revealDelta } from '../reveal'
+import { KEEP_MAP_PX, fitDelta, revealDelta } from '../reveal'
 import { DistrictCard } from '../DistrictCard'
 
 const ck = (i: number): Checkin => ({ treeId: `DA${String(i).padStart(10, '0')}`, result: 'success', at: 1_700_000_000_000 + i })
@@ -111,17 +111,43 @@ describe('untouched villages', () => {
 })
 
 describe('village list split', () => {
-  it('keeps walked villages and no-data villages up front; untouched ones collapse, order unchanged', () => {
+  it('walked villages up front, untouched ones collapse, no-data villages are neither walked nor untouched; order unchanged', () => {
     const rows = [
       { village: { total: 100 }, lit: 5, id: 'a' },
       { village: { total: 100 }, lit: 0, id: 'b' },
       { village: { total: 0 }, lit: 0, id: 'c' },
       { village: { total: 50 }, lit: 0, id: 'd' },
     ]
-    const { active, untouched } = splitUntouched(rows)
-    expect(active.map((r) => r.id)).toEqual(['a', 'c'])
+    const { active, untouched, noData } = splitUntouched(rows)
+    expect(active.map((r) => r.id)).toEqual(['a'])
     expect(untouched.map((r) => r.id)).toEqual(['b', 'd'])
+    expect(noData.map((r) => r.id)).toEqual(['c'])
     expect(splitUntouched([]).untouched).toEqual([])
+  })
+})
+
+describe('stamp count text', () => {
+  it('is merged into the home summary; none yet means nothing to show', () => {
+    expect(stampCountText(0)).toBe('')
+    expect(stampCountText(3)).toBe('已集 3 枚章')
+  })
+})
+
+describe('fitDelta (看我的區)', () => {
+  const band = { topEdge: 50, bottomEdge: 540 }
+  it('does nothing when the whole card is already between the edges', () => {
+    expect(fitDelta({ cardTop: 100, cardBottom: 400, ...band })).toBe(0)
+  })
+  it('scrolls down until the card bottom clears the nav and the raised scan button', () => {
+    expect(fitDelta({ cardTop: 519, cardBottom: 773, ...band })).toBe(233)
+    // after scrolling, the card ends exactly at the bottom edge and still starts below the top edge
+    expect(519 - 233).toBeGreaterThanOrEqual(band.topEdge)
+  })
+  it('scrolls back up when the card top is under the top bar', () => {
+    expect(fitDelta({ cardTop: 10, cardBottom: 200, ...band })).toBe(-40)
+  })
+  it('a card taller than the band lines up its top, so the heading and main button come first', () => {
+    expect(fitDelta({ cardTop: 400, cardBottom: 1000, ...band })).toBe(350)
   })
 })
 

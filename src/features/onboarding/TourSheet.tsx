@@ -94,6 +94,9 @@ function StepDistrict() {
   return (
     <>
       <h2>你在哪一區？</h2>
+      <p className="tour-why muted small" data-testid="district-why">
+        集章冊會先從這一區開始，之後可以在「我的」換。
+      </p>
       <DistrictPicker name="tour-district" />
       <div className="tour-actions sticky">
         <button className="btn primary" disabled={!chosen} onClick={() => go(STEP_INTRO)}>

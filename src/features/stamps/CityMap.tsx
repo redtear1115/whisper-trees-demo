@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, type ReactNode } from 'react'
 import type { Outline } from '../../lib/outline'
 import { PREFIX_DISTRICT, shortName, type District, type DistrictStamps } from '../game/districts'
 import { NEIGHBOUR_FILL, PANEL_BG, TIER_TONES, toneOf } from './colors'
@@ -52,6 +52,7 @@ export function CityMap({
   picked,
   onPick,
   onEnter,
+  head,
 }: {
   outline: Outline
   book: readonly DistrictStamps[]
@@ -59,6 +60,8 @@ export function CityMap({
   onPick: (d: District) => void
   /** 點兩下：進入這一區的里地圖 */
   onEnter: (d: District) => void
+  /** 卡片頂端一列（集章冊放「地圖／依取得時間」切換鈕），在圖例與地圖之前 */
+  head?: ReactNode
 }) {
   // 自己判斷「點兩下」：iPhone 上連點兩下不一定會觸發 dblclick
   const lastTap = useRef<{ name: string; at: number } | null>(null)
@@ -85,6 +88,7 @@ export function CityMap({
 
   return (
     <div className="atlas-panel city-map" data-testid="city-map">
+      {head}
       <ul className="atlas-legend" aria-label="圖例">
         {TIER_TONES.map((t) => (
           <li key={t.key}>
