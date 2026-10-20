@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { findTree, type Tree } from '../lib/trees'
 import { seededInt, weekKey } from '../lib/seed'
@@ -6,17 +6,18 @@ import type { CheckinResult } from '../lib/geo'
 import { useSession } from '../store'
 import { addWhisper, recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
 import { Art, MockTag, formatDate, relativeDays } from '../components/ui'
-import { IconBack } from '../components/icons'
+import { IconBack, IconCapsule, IconGlow } from '../components/icons'
 import type { CheckinState } from './ScanPage'
 import { ReportBox } from '../features/report/ReportBox'
 import { award, isDaytime } from '../features/game/ledger'
 import { useIsProtectedTree } from '../features/game/protectedTrees'
+import { checkinPointsLine } from '../features/game/checkinLine'
 import { gameConfig } from '../features/game/config'
 import { useInventory } from '../features/game/inventory'
 import { NoticeCard } from '../features/notice/NoticeCard'
 import { noticeFor } from '../features/notice/notices'
 import { DropCards } from '../features/game/DropCards'
-import { MoodAsk, MoodLine } from '../features/mood/MoodCards'
+import { MoodAsk, MoodCollapsed, MoodLine } from '../features/mood/MoodCards'
 import { currentMoodOf, noteMoodAsked, shouldAskMoodNow, useMood } from '../features/mood/mood'
 import { useCelebrationBlocking } from '../features/onboarding/celebrationGate'
 import { PhotoCarousel } from '../features/species/PhotoCarousel'
@@ -30,6 +31,7 @@ export default function TreePage() {
   const fresh = (location.state as CheckinState | null)?.checkin
   const drops = (location.state as CheckinState | null)?.drops
   const askMoodState = (location.state as CheckinState | null)?.askMood === true
+  const glowState = (location.state as CheckinState | null)?.glow
   // 從某個分頁點進來（樹洞、我的光點紀錄、探索、集章冊），返回就回到那一頁；其他（掃碼、地圖）回地圖
   const fromTab = (location.state as { from?: string } | null)?.from
   const back = backTarget(fromTab)
@@ -43,6 +45,16 @@ export default function TreePage() {
   const [sealOpen, setSealOpen] = useState(false)
   const sealNoteId = useId()
 
+  // 剛打卡完的光點說明（2026-10-20 使用者決定）：只在這次打卡後顯示。記在 state 裡之後，把路由 state 的 glow 清掉，
+  // 所以重新整理、返回再進來都不會再出現（其他欄位照舊保留）。
+  const [freshGlow, setFreshGlow] = useState<{ treeId: string; glow: number } | null>(null)
+  useEffect(() => {
+    if (glowState === undefined) return
+    setFreshGlow({ treeId, glow: glowState })
+    navigate(`${location.pathname}${location.search}${location.hash}`, { replace: true, state: { ...(location.state as object), glow: undefined } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glowState, treeId])
+
   useEffect(() => {
     let alive = true
     findTree(treeId).then((t) => alive && setTree(t))
@@ -51,16 +63,25 @@ export default function TreePage() {
     }
   }, [treeId])
 
-  // 從地圖的行動圈來：/tree/:id#whisper、#report 捲到對應的區塊（樹資料載入後才有區塊）
+  // 從地圖的行動圈、掃描頁來：/tree/:id#whisper、#report 捲到對應的區塊（樹資料載入後才有區塊）。
+  // 樹況回報收在「關於這棵樹」裡（頁面最後是樹洞與時空膠囊，不是行政卡片）：#report 要先把那一摺打開，再捲過去。
   const hash = location.hash.slice(1)
   const loaded = !!tree
+  const [aboutOpen, setAboutOpen] = useState(hash === 'report')
+  const scrolledTo = useRef('')
+  useEffect(() => {
+    if (hash === 'report') setAboutOpen(true)
+  }, [hash, treeId])
   useEffect(() => {
     if (!hash || !loaded) return
+    if (hash === 'report' && !aboutOpen) return
+    if (scrolledTo.current === `${treeId}#${hash}`) return
     const target = document.getElementById(hash)
     if (!target) return
+    scrolledTo.current = `${treeId}#${hash}`
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
-  }, [hash, loaded])
+  }, [hash, loaded, aboutOpen, treeId])
 
   const checkins = useStore((s) => s.checkins)
   const myWhispers = useStore((s) => s.whispers[treeId])
@@ -92,6 +113,8 @@ export default function TreePage() {
   ) : moodThisVisit ? (
     <MoodLine id={moodThisVisit.id} />
   ) : null
+  // 留完樹洞後，剛問過的那一列縮成一行「心情：疲憊・改」
+  const moodSlotAfter: ReactNode = asking ? <MoodCollapsed selected={moodThisVisit?.id ?? null} /> : moodSlot
   const glow = seededInt(`${treeId}:${weekKey()}`, 0, 30) + (visitedThisWeek(treeId) ? 1 : 0)
 
   if (tree === undefined) return <div className="page center muted">正在找這棵樹…</div>
@@ -136,25 +159,28 @@ export default function TreePage() {
         ) : (
           <Art id={night ? 'tree-hero-night' : 'tree-hero'} alt={`${tree.species}的插畫`} className="hero" />
         )}
-        <CheckinStrip fresh={fresh} onSite={onSite} />
+        <CheckinStrip
+          fresh={fresh}
+          onSite={onSite}
+          pointsLine={
+            onSite && freshGlow?.treeId === treeId
+              ? checkinPointsLine({ glow: freshGlow.glow, kind: onSite === 'farView' ? 'farView' : 'success', protectedTree: isProtected })
+              : null
+          }
+        />
       </section>
       <DropCards drops={drops} />
       {night && <p className="night-note">夜裡，樹木休息中・沒有日照加成・回家路上注意安全</p>}
 
       {noticeFor(treeId) && <NoticeCard notice={noticeFor(treeId)!} />}
 
-      <div className="glow-line">
-        <Art id="glow" alt="" className="icon sm" />
-        <span className="glow-sentence">
-          這棵樹本週有 <strong>{glow}</strong> 道微光陪伴
-        </span>
-        <MockTag />
-        <GlowHelp />
-      </div>
+      <GlowLine glow={glow} />
 
       {capsule && !capsule.mock && (
         <section className="capsule" aria-label="時空膠囊">
-          <Art id="capsule" alt="" className="icon" />
+          <span className="ornament" aria-hidden>
+            <IconCapsule />
+          </span>
           <div>
             <p className="capsule-when">
               {capsule.mock ? '示範：一年後回到這棵樹，會看到當時說的話' : `上次你在這裡說了…… ${relativeDays(capsule.at)}`}
@@ -167,7 +193,7 @@ export default function TreePage() {
 
       <div id="whisper" className="anchor-target">
         {onSite ? (
-          <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} mood={moodSlot} />
+          <WhisperBox treeId={treeId} said={thisVisit.map((w) => w.text)} mood={moodSlot} moodAfter={moodSlotAfter} />
         ) : (
           <section className="card">
             <p>{nearTree ? '你已經在樹旁邊了。掃一下樹幹上的樹牌，就能對它說句話。' : '想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。'}</p>
@@ -180,7 +206,9 @@ export default function TreePage() {
 
       {capsule && capsule.mock && (
         <section className="capsule" aria-label="時空膠囊">
-          <Art id="capsule" alt="" className="icon" />
+          <span className="ornament" aria-hidden>
+            <IconCapsule />
+          </span>
           <div>
             <p className="capsule-when">
               {capsule.mock ? '示範：一年後回到這棵樹，會看到當時說的話' : `上次你在這裡說了…… ${relativeDays(capsule.at)}`}
@@ -191,9 +219,9 @@ export default function TreePage() {
         </section>
       )}
 
-      <details className="about">
+      <details className="about" id="about" open={aboutOpen} onToggle={(e) => setAboutOpen(e.currentTarget.open)}>
         <summary>
-          關於這棵樹 <span className="muted small">樹種、樹高、樹籍編號</span>
+          關於這棵樹 <span className="muted small">樹種、樹高、樹籍編號、樹況回報</span>
         </summary>
         <dl className="facts">
           <dt>樹種</dt>
@@ -213,11 +241,10 @@ export default function TreePage() {
           <dd className="num">{tree.id}</dd>
         </dl>
         <p className="muted small">資料來源：臺北市政府工務局公園路燈工程管理處開放資料</p>
+        <div id="report" className="anchor-target">
+          <ReportBox tree={tree} onSite={!!onSite} openForm={hash === 'report'} />
+        </div>
       </details>
-
-      <div id="report" className="anchor-target">
-        <ReportBox tree={tree} onSite={!!onSite} />
-      </div>
     </div>
   )
 }
@@ -235,30 +262,52 @@ function ProtectedSeal({ open, onToggle, noteId }: { open: boolean; onToggle: ()
   )
 }
 
-/** 「微光是什麼？」 */
-function GlowHelp() {
+/** 本週微光人數；「?」是 44 px 的按鈕，和句子同一行（句子太長可以折行），說明展開在下面整列 */
+function GlowLine({ glow }: { glow: number }) {
+  const [open, setOpen] = useState(false)
+  const helpId = useId()
   return (
-    <details className="inline-help">
-      <summary aria-label="微光是什麼？">?</summary>
-      <span>
-        每個在這棵樹旁打卡的人，就是一道微光。只顯示人數，不會顯示任何人說了什麼。
+    <div className="glow-line">
+      <span className="ornament sm glow" aria-hidden>
+        <IconGlow />
       </span>
-    </details>
+      <span className="glow-sentence">
+        這棵樹本週有 <strong>{glow}</strong> 道微光陪伴
+      </span>
+      <MockTag />
+      <button type="button" className="help-btn" aria-label="微光是什麼？" aria-expanded={open} aria-controls={helpId} onClick={() => setOpen(!open)}>
+        <span className="help-dot" aria-hidden>
+          ?
+        </span>
+      </button>
+      {open && (
+        <p id={helpId} className="glow-help muted small">
+          每個在這棵樹旁打卡的人，就是一道微光。只顯示人數，不會顯示任何人說了什麼。
+        </p>
+      )}
+    </div>
   )
 }
 
 function CheckinStrip({
   fresh,
   onSite,
+  pointsLine,
 }: {
   fresh?: CheckinResult
   onSite: string | null
+  pointsLine: string | null
 }) {
   if (onSite)
     return (
       <div className="checkin-strip ok" role="status">
         <strong>{onSite === 'success' ? '你在這棵樹旁邊。' : '遠遠陪著它。'}</strong>
         {onSite === 'farView' && <span>這棵樹在安全島上，在人行道看著它就好。</span>}
+        {pointsLine && (
+          <span className="checkin-points" data-testid="checkin-points">
+            {pointsLine}
+          </span>
+        )}
       </div>
     )
   if (fresh?.kind === 'tooFar')
@@ -284,7 +333,7 @@ function CheckinStrip({
   )
 }
 
-function WhisperBox({ treeId, said, mood }: { treeId: string; said: string[]; mood?: ReactNode }) {
+function WhisperBox({ treeId, said, mood, moodAfter }: { treeId: string; said: string[]; mood?: ReactNode; moodAfter?: ReactNode }) {
   const cloud = useSession().backend === 'cloud'
   const [text, setText] = useState('')
   const [writing, setWriting] = useState(said.length === 0)
@@ -308,7 +357,7 @@ function WhisperBox({ treeId, said, mood }: { treeId: string; said: string[]; mo
         >
           再說一句
         </button>
-        {mood && <div className="whisper-mood">{mood}</div>}
+        {moodAfter && <div className="whisper-mood">{moodAfter}</div>}
       </section>
     )
 

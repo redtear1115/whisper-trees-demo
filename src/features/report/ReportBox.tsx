@@ -6,10 +6,12 @@ import type { Tree } from '../../lib/trees'
 import { Card } from '../../components/ui'
 import { award } from '../game/ledger'
 import { gameConfig } from '../game/config'
+import { reportPointsLine } from '../game/checkinLine'
 
 /** 樹況回報：五個類別一鍵選（團隊簡報 v17 第 22 頁）。只有在現場（打卡或遠觀）才能送出。送出得光點（GM 可調，預設 +15）。 */
-export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
-  const [open, setOpen] = useState(false)
+export function ReportBox({ tree, onSite, openForm = false }: { tree: Tree; onSite: boolean; openForm?: boolean }) {
+  // openForm：從地圖的「樹況回報」圈、#report 連結來，直接把表單展開
+  const [open, setOpen] = useState(openForm)
   const [kind, setKind] = useState<ReportKind | null>(null)
   const [note, setNote] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
@@ -17,6 +19,10 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
   const [glow, setGlow] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const cloud = useSession().backend === 'cloud'
+
+  useEffect(() => {
+    if (openForm) setOpen(true)
+  }, [openForm])
 
   useEffect(() => () => void (photo && URL.revokeObjectURL(photo)), [photo])
 
@@ -36,7 +42,7 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
     return (
       <Card>
         <h2>樹況回報</h2>
-        <p className="banner ok">已送出，謝謝你。{glow > 0 && `光點 +${glow}。`}</p>
+        <p className="banner ok">已送出，謝謝你。{reportPointsLine(glow)}</p>
         <p className="muted small">
           {cloud ? '回報會送到公園處，補充說明只有承辦人看得到。' : '這是示範：回報只存在這台裝置，不會真的送出。'}
         </p>
@@ -65,7 +71,7 @@ export function ReportBox({ tree, onSite }: { tree: Tree; onSite: boolean }) {
         )}
       </div>
       {!open ? (
-        <p className="muted small">五種狀況一鍵選，附張照片就能送出，公園處會依街區路段彙整。回報一筆 +{gameConfig().points.report} 光點。</p>
+        <p className="muted small">五種狀況一鍵選，附張照片就能送出，公園處會依街區路段彙整。回報一筆可以收進 {gameConfig().points.report} 道光點。</p>
       ) : (
         <form
           onSubmit={(e) => {

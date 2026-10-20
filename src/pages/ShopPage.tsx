@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { IconBack } from '../components/icons'
+import { IconBack, IconGlow } from '../components/icons'
 import { useNavigate } from 'react-router-dom'
 import { Art, MockTag } from '../components/ui'
 import { useBalance } from '../features/game/ledger'
@@ -43,7 +43,7 @@ export default function ShopPage() {
       </header>
       <EventBar />
       <p className="balance-chip">
-        <Art id="glow" alt="" className="icon sm" /> 你有 {balance} 光點
+        <IconGlow /> 你有 {balance} 光點
       </p>
       {msg && (
         <p className="banner" role="status">

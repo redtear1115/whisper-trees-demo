@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import { IconCheck } from '../../components/icons'
 import { answerMood, clearMood, MOODS, moodById, type MoodId } from './mood'
 
@@ -62,6 +62,39 @@ export function MoodLine({ id }: { id: MoodId }) {
     <p className="mood-forest" data-testid="mood-response" data-mood={mood.id}>
       {mood.breath && <span className="breath-dot" aria-hidden="true" />}
       {mood.response}
+    </p>
+  )
+}
+
+/**
+ * 留完樹洞之後，心情那一列縮成一行「心情：疲憊・改」（沒選過就是「心情：沒選・選一個」）。
+ * 點「改」再展開七個按鈕；選了（或取消）就縮回一行。第六輪（2026-10-20，設計批評）。
+ */
+export function MoodCollapsed({ selected }: { selected: MoodId | null }) {
+  const [open, setOpen] = useState(false)
+  const mood = moodById(selected)
+  if (open)
+    return (
+      <MoodAsk
+        selected={selected}
+        onPick={(id) => {
+          void answerMood(id)
+          setOpen(false)
+        }}
+        onClear={() => {
+          void clearMood()
+          setOpen(false)
+        }}
+      />
+    )
+  return (
+    <p className="mood-collapsed" data-testid="mood-collapsed" data-value={mood?.id ?? ''}>
+      <span>
+        心情：<strong>{mood ? mood.name : '沒選'}</strong>
+      </span>
+      <button type="button" className="mood-edit" onClick={() => setOpen(true)} data-testid="mood-edit" aria-label={mood ? `心情：${mood.name}，改` : '心情：沒選，選一個'}>
+        {mood ? '改' : '選一個'}
+      </button>
     </p>
   )
 }

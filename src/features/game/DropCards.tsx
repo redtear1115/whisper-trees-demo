@@ -30,7 +30,7 @@ export function DropCards({ drops }: { drops?: CheckinDrops }) {
             </p>
             <p className="drop-sub small">
               <span className="muted">
-                {drops.insect.bonus > 0 ? `光點 +${drops.insect.bonus}，` : ''}
+                {drops.insect.bonus > 0 ? `多收進 ${drops.insect.bonus} 道光點，` : ''}
                 已收進圖鑑。
               </span>
               <Link className="drop-link" to="/stamps?tab=explore#insects">
