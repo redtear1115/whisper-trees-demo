@@ -31,10 +31,15 @@ const EMPTY: Diary = { entries: [] }
 /** 存太多會讓使用者文件變大；只留最新的這麼多筆 */
 export const DIARY_MAX = 400
 /**
- * 心情對回互動時允許的時間差。雲端的樹洞與回報用伺服器時間，和按下去那一刻差個幾秒，
- * 所以不要求完全相等；同一棵樹同一種互動兩分鐘內不會有兩次（打卡 30 分鐘內算同一次）。
+ * 心情對回互動時允許的時間差。雲端的樹洞與回報用伺服器時間，和按下去那一刻差個幾秒，所以不要求完全相等；
+ * 但「再說一句」兩句話可能只隔幾十秒，所以容許值要小（15 秒），而且寫入與讀出都找「最近的那一筆」。
+ * 摸摸樹的時間是自己記的（recordTouch 與選心情用同一個 at），一定要完全相等，兩次擁抱隔幾秒也分得開。
  */
-export const MATCH_MS = 120_000
+export const MATCH_MS = 15_000
+
+function tolerance(kind: InteractionKind): number {
+  return kind === 'touch' ? 0 : MATCH_MS
+}
 
 export function diary(s?: State): Diary {
   return getExt<Diary>('diary', EMPTY, s)
@@ -44,16 +49,21 @@ export function useDiary() {
   return useStore((s) => diary(s))
 }
 
-function sameInteraction(e: DiaryEntry, kind: InteractionKind, treeId: string, at: number): boolean {
-  return e.kind === kind && e.treeId === treeId && Math.abs(e.at - at) <= MATCH_MS
+/** 同一種、同一棵樹、時間在容許值內最近的那一筆（沒有是 -1） */
+function closestIndex(entries: readonly DiaryEntry[], kind: InteractionKind, treeId: string, at: number): number {
+  let best = -1
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i]
+    if (e.kind !== kind || e.treeId !== treeId || Math.abs(e.at - at) > tolerance(kind)) continue
+    if (best < 0 || Math.abs(e.at - at) < Math.abs(entries[best].at - at)) best = i
+  }
+  return best
 }
 
 /** 這一次互動選的心情（沒選是 null；存了不認得的心情也當沒選） */
 export function moodOf(entries: readonly DiaryEntry[], kind: InteractionKind, treeId: string, at: number): MoodId | null {
-  let best: DiaryEntry | undefined
-  for (const e of entries)
-    if (sameInteraction(e, kind, treeId, at) && (!best || Math.abs(e.at - at) < Math.abs(best.at - at))) best = e
-  return best?.mood && moodById(best.mood) ? best.mood : null
+  const e = entries[closestIndex(entries, kind, treeId, at)]
+  return e?.mood && moodById(e.mood) ? e.mood : null
 }
 
 /**
@@ -61,7 +71,7 @@ export function moodOf(entries: readonly DiaryEntry[], kind: InteractionKind, tr
  * 摸摸樹的紀錄清掉心情時還留著（它本身就是一次互動）；其他種類沒有心情就整筆拿掉。
  */
 export function withMood(entries: readonly DiaryEntry[], kind: InteractionKind, treeId: string, at: number, mood: MoodId | null): DiaryEntry[] {
-  const i = entries.findIndex((e) => sameInteraction(e, kind, treeId, at))
+  const i = closestIndex(entries, kind, treeId, at)
   if (i < 0) return mood ? trim([...entries, { kind, treeId, at, mood }]) : [...entries]
   const next = [...entries]
   if (mood) next[i] = { ...next[i], mood }

@@ -16,6 +16,17 @@ describe('wisher badge', () => {
   })
 })
 
+describe('reporter badge', () => {
+  it('counts only my own reports (cloud mode also holds other people\'s, mine: false)', () => {
+    const base = { id: 'r', treeId: 'A', species: '', road: '', district: '大安區', kind: 'other' as const, details: [], note: '', hasPhoto: false, at: 1 }
+    const earned = (reports: object[]) => badges({ ...getState(), reports: reports as never }).find((b) => b.id === 'reporter')!.earned
+    expect(earned([{ ...base, mine: false }])).toBe(false)
+    expect(earned([{ ...base, mock: true }])).toBe(false)
+    expect(earned([{ ...base, mine: true }])).toBe(true)
+    expect(earned([base])).toBe(true)
+  })
+})
+
 describe('badgesToCelebrate', () => {
   it('seeds silently for users who never had the field', () => {
     expect(badgesToCelebrate(['first', 'wisher'], undefined)).toEqual({ show: [], record: ['first', 'wisher'] })
