@@ -1,12 +1,12 @@
-// 點地圖上的樹之後，樹旁浮出的四個行動圈。哪些能用、距離提示、排成弧形的位置，全是純函式。
-// 「能用」的判斷和打卡共用 checkinRadius（經 ringRadius）：圈內才能掃樹牌、留樹洞、回報；樹的資料隨時可以看。
+// 點地圖上的樹之後的「拉近畫面」：哪些圈能用、距離提示、底部的按鈕，全是純函式。
+// 「範圍內」的判斷和打卡共用 checkinRadius（經 ringRadius）：圈內才能掃樹牌打卡；打卡之後才能摸摸樹、回報、留言。
 
 import type { LngLat } from '../../lib/geo'
 import { distanceMeters } from '../../lib/geo'
 import { ringRadius } from './ring'
 import type { Anchor } from './useAnchor'
 
-/** 點樹後鏡頭的目標。縮放、俯角集中在這裡；樹放在畫面中心偏上，下方留給弧形的行動圈 */
+/** 點樹後鏡頭的目標（拉近畫面蓋在上面；看路線、關掉之後回到這裡）。縮放、俯角集中在這裡 */
 export const TREE_FOCUS = {
   zoom: 20.5,
   pitch: 60,
@@ -15,8 +15,6 @@ export const TREE_FOCUS = {
   /** 飛過去、飛回來的時間（毫秒；減少動態時為 0） */
   durationMs: 1100,
 }
-
-export type RingActionId = 'whisper' | 'info' | 'report' | 'route' | 'walk'
 
 export interface RangeInfo {
   /** 沒有定位（fallback）時是 null：當作很遠 */
@@ -42,65 +40,57 @@ export function farNote(range: RangeInfo): string {
   return `走近一點，還有約 ${range.remaining} 公尺`
 }
 
-export interface RingAction {
-  id: RingActionId
+export type FocusActionId = 'touch' | 'report' | 'whisper' | 'info' | 'adopt'
+
+export interface FocusAction {
+  id: FocusActionId
   label: string
+  /** main：樹冠上的三個大圈（摸摸樹、回報、留言在樹洞）；small：樹的資料、認養 */
+  size: 'main' | 'small'
   enabled: boolean
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
-  /** 要去哪（router 路徑）；「怎麼走」「走過去」不換頁，是空字串 */
+  /** 點灰色的圈時顯示的一句（能用的是空字串） */
+  why: string
+  /** 要去哪（router 路徑）；摸摸樹、認養不換頁，是空字串 */
   to: string
   /** 樹的頁面上的錨點（id，不含 #） */
   hash?: string
-  /** 只有掃樹牌帶：告訴掃描頁是為哪一棵樹來的 */
-  hintTreeId?: string
 }
 
+/** 在範圍內、還沒打卡時，三個互動灰掉的原因：掃樹牌是每棵樹預設的互動，打卡之後才打開其他的 */
+export const SCAN_FIRST_NOTE = '先掃樹牌打卡，就能摸摸它、回報、留話'
+export const ADOPT_NOTE = '認養即將開放'
+
 /**
- * 四個行動，順序固定（左到右）。圈外只有「樹的資料」和「怎麼走」能用（怎麼走：有位置就能用，不管多遠）。
- * 掃樹牌不是圈：用底部導覽中間的大按鈕（在首頁是「掃樹牌」，點了樹就帶著這棵樹去掃描頁）。
- * Demo 模式（demo = true）多一個「走過去」：把模擬位置移到樹旁，永遠能用（MapPage 處理）。
+ * 拉近畫面的圈（2026-10-21 使用者決定，依「拉近的介面」設計圖）。順序固定。
+ * 三個互動（摸摸樹、回報、留言在樹洞）要先在這棵樹打卡（30 分鐘內，和樹的頁面一樣，見 recentCheckin）才能用；
+ * 還沒打卡：在範圍內說「先掃樹牌」，範圍外說「走近一點」。樹的資料永遠能用；認養永遠是灰的（即將開放）。
  */
-export function ringActions(treeId: string, range: RangeInfo, demo = false): RingAction[] {
-  const near = range.inRange
-  const why = farNote(range)
-  const make = (a: Omit<RingAction, 'enabled' | 'aria'>, needsNear: boolean, desc: string): RingAction => {
-    const enabled = !needsNear || near
-    return { ...a, enabled, aria: enabled ? desc : `${desc}（暫時不能用：${why}）` }
-  }
-  const actions = [
-    make({ id: 'whisper', label: '樹洞', to: `/tree/${treeId}`, hash: 'whisper' }, true, '樹洞：對這棵樹說一句話'),
-    make({ id: 'info', label: '樹的資料', to: `/tree/${treeId}` }, false, '樹的資料'),
-    make({ id: 'report', label: '樹況回報', to: `/tree/${treeId}`, hash: 'report' }, true, '樹況回報'),
+export function focusActions(treeId: string, range: RangeInfo, checkedIn: boolean): FocusAction[] {
+  const why = checkedIn ? '' : range.inRange ? SCAN_FIRST_NOTE : farNote(range)
+  const main = (a: Pick<FocusAction, 'id' | 'label' | 'to' | 'hash'>, desc: string): FocusAction => ({
+    ...a,
+    size: 'main',
+    enabled: checkedIn,
+    why,
+    aria: checkedIn ? desc : `${desc}（暫時不能用：${why}）`,
+  })
+  return [
+    main({ id: 'touch', label: '摸摸樹', to: '' }, '摸摸樹：呼吸、冥想或擁抱'),
+    main({ id: 'report', label: '回報', to: `/tree/${treeId}`, hash: 'report' }, '樹況回報'),
+    main({ id: 'whisper', label: '留言在樹洞', to: `/tree/${treeId}`, hash: 'whisper' }, '樹洞：對這棵樹說一句話'),
+    { id: 'info', label: '樹的資料', size: 'small', enabled: true, why: '', aria: '樹的資料', to: `/tree/${treeId}` },
+    { id: 'adopt', label: '認養', size: 'small', enabled: false, why: ADOPT_NOTE, aria: `認養（${ADOPT_NOTE}）`, to: '' },
   ]
-  // 怎麼走：畫出從人物到這棵樹的步行路線。沒有位置（沒定位也不是 Demo）時沒有起點，灰色
-  actions.push({
-    id: 'route',
-    label: '怎麼走',
-    to: '',
-    ...(range.distance !== null
-      ? { enabled: true, aria: '怎麼走：在地圖上畫出走到這棵樹的路線' }
-      : { enabled: false, aria: `怎麼走（暫時不能用：${why}）` }),
-  })
-  if (demo) actions.push(make({ id: 'walk', label: '走過去', to: '' }, false, 'Demo：走到這棵樹旁邊'))
-  return actions
-}
-
-export interface Offset {
-  x: number
-  y: number
 }
 
 /**
- * 在樹的下方排成一道弧：count 個圈、半徑 radius（px），整道弧張開 spanDeg 度（4 個圈 140°，5 個圈 170° 才不擠；4 個圈的間距約 93 px、5 個約 85 px，72 px 寬的圈加標籤不重疊），正下方為中間。
- * 回傳相對樹中心的位置（x 向右、y 向下），由左到右。
+ * 拉近畫面底部「返回」旁邊的按鈕：範圍內還沒打卡是「掃樹牌」（打卡仍然是樹牌 QR + GPS）；
+ * 範圍外是「怎麼走」（有位置才有），Demo 再加「走過去」；走近之後這兩顆拿掉。打卡過了就只剩「返回」。
  */
-export function arcOffsets(count: number, radius: number, spanDeg = count > 4 ? 170 : 140): Offset[] {
-  if (count <= 0) return []
-  if (count === 1) return [{ x: 0, y: radius }]
-  return Array.from({ length: count }, (_, i) => {
-    const deg = -spanDeg / 2 + (spanDeg * i) / (count - 1)
-    const rad = (deg * Math.PI) / 180
-    return { x: Math.round(radius * Math.sin(rad) * 10) / 10, y: Math.round(radius * Math.cos(rad) * 10) / 10 }
-  })
+export function focusButtons(range: RangeInfo, checkedIn: boolean, demo: boolean): { scan: boolean; route: boolean; walk: boolean } {
+  if (checkedIn) return { scan: false, route: false, walk: false }
+  if (range.inRange) return { scan: true, route: false, walk: false }
+  return { scan: false, route: range.distance !== null, walk: demo }
 }

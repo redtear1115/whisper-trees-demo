@@ -54,6 +54,26 @@ const sprout = (cx, cy, size, h) => {
   return `<g transform="translate(${cx - 48 * k} ${cy - 48 * k}) scale(${k})" fill="hsl(${h} 35% 82%)" stroke="hsl(${h} 30% 36%)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"><path d="M48 88V44" fill="none"/><path d="M48 50C48 30 32 20 14 22C14 42 28 54 48 50Z"/><path d="M48 44C48 26 62 14 82 16C82 36 68 48 48 44Z"/></g>`
 }
 
+// 樹的剪影（地圖拉近時的樹、拉近畫面的大樹）：圓底座、樹幹、三團樹冠。地圖上一次畫上百棵，
+// 用虛線框的通用佔位會整片都是框，所以這三張畫成簡單的樹。圈內（可以摸）亮綠，圈外灰藍綠。
+const TREE_SHAPE = {
+  'map-tree-near': { crown: '#5DAA67', light: '#8BCB8F', base: '#CFE8C9' },
+  'map-tree-far': { crown: '#7FA3A6', light: '#A9C4C5', base: '#CFE8C9' },
+  'tree-focus': { crown: '#3F9150', light: '#7CC48A', base: '#D7EBCF' },
+}
+const treeShape = (w, h, { crown, light, base }) => {
+  const cx = w / 2
+  const r = w * 0.27
+  return [
+    `<ellipse cx="${cx}" cy="${h * 0.9}" rx="${w * 0.36}" ry="${h * 0.07}" fill="${base}" stroke="#7FA86F" stroke-width="${Math.max(1, w / 64)}"/>`,
+    `<path d="M${cx - w * 0.06} ${h * 0.9} L${cx - w * 0.04} ${h * 0.55} L${cx + w * 0.04} ${h * 0.55} L${cx + w * 0.06} ${h * 0.9} Z" fill="#9A6B3F"/>`,
+    `<circle cx="${cx - r * 0.75}" cy="${h * 0.45}" r="${r}" fill="${crown}"/>`,
+    `<circle cx="${cx + r * 0.75}" cy="${h * 0.45}" r="${r}" fill="${crown}"/>`,
+    `<circle cx="${cx}" cy="${h * 0.3}" r="${r * 1.1}" fill="${crown}"/>`,
+    `<circle cx="${cx - r * 0.35}" cy="${h * 0.25}" r="${r * 0.45}" fill="${light}" opacity="0.7"/>`,
+  ].join('\n')
+}
+
 // 兩種版本：public/assets/ph/<id>.svg 是公民看得到的（沒有任何標示文字）；public/assets/ph-debug/<id>.svg 多一行
 // 「id 佔位」「尺寸 佔位」給設計與開發對照，只在網址帶 ?debug=1 時才載入（src/lib/debug.ts）。
 const outDir = join(root, 'public/assets/ph')
@@ -70,7 +90,10 @@ for (const a of assets) {
   const cap = (y, size, text, fill) => `<text x="50%" y="${y}" text-anchor="middle" font-family="sans-serif" font-size="${size}" fill="${fill}">${esc(text)}</text>\n`
   let body // 公民版
   let debug // 除錯版多出來的字
-  if (animal) {
+  if (TREE_SHAPE[a.id]) {
+    body = `${treeShape(a.w, a.h, TREE_SHAPE[a.id])}\n`
+    debug = cap(a.h - 2, Math.max(7, Math.round(a.w / 18)), `${a.id} 佔位`, `hsl(${h} 30% 30%)`)
+  } else if (animal) {
     body = `${badge(a.w / 2, a.h / 2 - 2, a.h * 0.43, ANIMAL_BADGE[a.id])}\n`
     debug = cap(a.h - 1, 7, `${a.id} ${animal} 佔位`, `hsl(${h} 30% 30%)`)
   } else if (isSprout) {

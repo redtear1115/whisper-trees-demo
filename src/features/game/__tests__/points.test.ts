@@ -249,3 +249,14 @@ describe('award with the ledger', () => {
     expect(award('water', 'w2', noon)).toBe(3)
   })
 })
+
+describe('摸摸樹（2026-10-21）', () => {
+  it('counts like a whisper: never the first slot, +2 then +1, nothing from the 4th', () => {
+    const cfg = { ...DEFAULT_CONFIG, multiplier: 1 }
+    const base = { treeOrder: 1, daylight: 1, lonelyDays: 0, protectedTree: false, eventMult: 1 }
+    expect(calcTreePoints({ ...base, action: 'touch', slot: 1 }, cfg).delta).toBe(cfg.ladder2)
+    expect(calcTreePoints({ ...base, action: 'touch', slot: 2 }, cfg).delta).toBe(cfg.ladder2)
+    expect(calcTreePoints({ ...base, action: 'touch', slot: 3 }, cfg).delta).toBe(cfg.ladder3)
+    expect(calcTreePoints({ ...base, action: 'touch', slot: 4 }, cfg).delta).toBe(0)
+  })
+})

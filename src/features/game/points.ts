@@ -3,7 +3,7 @@
 
 import { ACTION_LABEL, type GameConfig } from './config'
 
-export type TreeAction = 'checkin' | 'farView' | 'whisper' | 'report'
+export type TreeAction = 'checkin' | 'farView' | 'whisper' | 'touch' | 'report'
 
 export interface TreePointsInput {
   action: TreeAction
@@ -43,8 +43,8 @@ export function calcTreePoints(input: TreePointsInput, cfg: GameConfig): TreePoi
     return { delta: Math.round(cfg.points.report * global), parts }
   }
 
-  // 樹洞不是「靠近一棵樹」，最多算第 2 個互動（沒打卡就留樹洞的邊角情形）
-  const slot = input.action === 'whisper' ? Math.max(2, input.slot) : input.slot
+  // 樹洞、摸摸樹不是「靠近一棵樹」（那是打卡），最多算第 2 個互動（沒打卡就做的邊角情形）
+  const slot = input.action === 'whisper' || input.action === 'touch' ? Math.max(2, input.slot) : input.slot
   if (slot >= 4) return { delta: 0, parts }
 
   let base: number

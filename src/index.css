@@ -1992,6 +1992,10 @@ body.is-demo .map-top {
   padding-top: calc(var(--demo-h) + 10px);
 }
 
+body.is-demo .tree-focus {
+  padding-top: calc(var(--demo-h) + 8px);
+}
+
 body.is-demo .scanner-top {
   padding-top: calc(var(--demo-h) + 8px);
 }
@@ -3374,168 +3378,343 @@ html:has(.tab-shell) {
   letter-spacing: 0;
 }
 
-/* ---------- 點樹：樹旁的行動圈 ---------- */
+/* ---------- 點樹：拉近畫面（2026-10-21，依「拉近的介面」設計圖） ---------- */
 
-/* 蓋在地圖上的一層；位置由 TreeRingLayer 依樹在畫面上的位置設定。這層不吃點擊，只有圈本身吃，點地圖其他地方還是會到地圖 */
-.tree-rings-layer {
-  position: absolute;
+/* 蓋住地圖與底部導覽（導覽 z-index 4）；頂端一列、中間的大樹與圈、右下的動物、底部「返回」 */
+.tree-focus {
+  position: fixed;
   inset: 0;
-  z-index: 5;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.tree-rings {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 0;
-  will-change: transform;
-}
-
-.tree-rings-title {
-  position: absolute;
-  left: 0;
-  top: -112px;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  width: max-content;
-  max-width: min(300px, calc(100vw - 24px));
-  padding: 2px 2px 2px 14px;
-  border-radius: 999px;
-  background: rgba(255, 253, 248, 0.95);
-  box-shadow: var(--shadow);
-  pointer-events: auto;
-  opacity: 0;
-  transition: opacity 0.25s ease-out;
-}
-
-.tree-rings.shown .tree-rings-title {
-  opacity: 1;
-}
-
-.tree-rings-name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.tree-rings-close {
-  flex: none;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.tree-ring {
-  position: absolute;
-  left: -36px;
-  top: -28px;
-  width: 72px;
+  z-index: 20;
   display: flex;
   flex-direction: column;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: radial-gradient(ellipse at 50% 40%, #f4f8ef 0%, #e6efe0 62%, #dbe7d4 100%);
+  overflow: hidden;
+  animation: focus-in 0.35s ease-out;
+}
+
+@keyframes focus-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.tree-focus-top {
+  display: flex;
   align-items: center;
-  gap: 3px;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.tree-focus-name {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-voice);
+  font-size: 1.15rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.tree-focus-name .muted {
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* 大樹與圈：圈的位置是舞台的百分比，所以螢幕大小改了，圈還是在樹冠上 */
+.tree-focus-stage {
+  position: relative;
+  flex: 1;
+  width: min(100%, 380px);
+  max-height: 460px;
+  min-height: 300px;
+  margin: 4px auto 0;
+}
+
+.tree-focus-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.focus-ring {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  width: 88px;
+  height: 88px;
   padding: 0;
   border: 0;
-  background: none;
-  cursor: pointer;
-  pointer-events: auto;
-  color: var(--ink);
-  transform: translate(var(--x), var(--y)) scale(var(--s, 1));
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out;
-}
-
-.tree-rings:not(.shown) .tree-ring {
-  --s: 0.5;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.tree-ring-disc {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
   border-radius: 50%;
+  transform: translate(-50%, -50%);
   background: radial-gradient(circle at 35% 30%, #fffbe8, #f8dd8f 58%, #ecbf4f);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.75), 0 0 18px 6px rgba(242, 193, 78, 0.6);
-}
-
-.tree-ring-icon {
-  display: grid;
-  place-items: center;
-  /* 深綠線條圖示，和底部導覽同一套（線寬 1.75） */
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8), 0 0 22px 6px rgba(242, 193, 78, 0.55);
   color: var(--green-ink);
+  cursor: pointer;
+  animation: ring-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.tree-ring-icon .icon-svg {
+@keyframes ring-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+}
+
+.focus-ring.small {
+  width: 64px;
+  height: 64px;
+}
+
+.focus-ring-icon .icon-svg {
   width: 26px;
   height: 26px;
 }
 
-.tree-ring-label {
-  padding: 0 6px;
-  border-radius: 999px;
-  background: rgba(255, 253, 248, 0.92);
-  font-size: 0.8rem;
+.focus-ring.small .focus-ring-icon .icon-svg {
+  width: 20px;
+  height: 20px;
+}
+
+.focus-ring-label {
+  max-width: 72px;
+  font-size: 0.85rem;
   font-weight: 700;
-  line-height: 1.5;
-  white-space: nowrap;
+  line-height: 1.2;
+  text-align: center;
 }
 
-/* 離太遠：灰色、沒有發光，但還是可以點（會說還差多遠） */
-.tree-ring.off .tree-ring-disc {
-  background: #dcdcd4;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6);
+.focus-ring.small .focus-ring-label {
+  font-size: 0.75rem;
 }
 
-.tree-ring.off .tree-ring-icon {
-  color: #6b6b60;
-  opacity: 0.8;
+/* 位置：摸摸樹在樹冠頂、回報與樹洞在兩側，樹的資料與認養在下面 */
+.ring-touch {
+  left: 50%;
+  top: 16%;
+}
+.ring-report {
+  left: 20%;
+  top: 38%;
+  animation-delay: 60ms;
+}
+.ring-whisper {
+  left: 80%;
+  top: 38%;
+  animation-delay: 120ms;
+}
+.ring-info {
+  left: 34%;
+  top: 62%;
+  animation-delay: 180ms;
+}
+.ring-adopt {
+  left: 66%;
+  top: 62%;
+  animation-delay: 240ms;
 }
 
-.tree-ring.off .tree-ring-label {
-  color: var(--muted);
+/* 還不能用：灰色、沒有發光，但還是可以點（會說為什麼） */
+.focus-ring.off {
+  background: #e4e4dc;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.7);
+  color: #5d5d53;
+}
+
+.focus-ring.off .focus-ring-label {
   font-weight: 400;
 }
 
-.tree-ring:focus-visible .tree-ring-disc,
-.tree-rings-close:focus-visible {
+.focus-ring:focus-visible {
   outline: 3px solid var(--green);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
-.tree-rings-note {
-  position: absolute;
-  left: 0;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: min(280px, calc(100vw - 24px));
-  margin: 0;
+.tree-focus-note {
+  min-height: 1.5em;
+  margin: 8px auto 0;
+  max-width: 300px;
   padding: 6px 14px;
   border-radius: 12px;
   background: rgba(255, 253, 248, 0.96);
   box-shadow: var(--shadow);
   font-size: 0.9rem;
   text-align: center;
+}
+
+.tree-focus-note:empty {
+  visibility: hidden;
+}
+
+/* 你的動物：右下角，和「返回」同一列（那一列右邊留了位置給牠） */
+.tree-focus-animal {
+  position: absolute;
+  right: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  width: 96px;
+  height: auto;
   pointer-events: none;
 }
 
-.tree-rings-note:empty {
-  display: none;
+.tree-focus-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  min-height: 96px;
+  padding-right: 104px;
+}
+
+.tree-focus-bar .btn {
+  min-height: 48px;
+}
+
+.focus-back {
+  background: #9ccbb4;
+  border-color: #2f6f5e;
+  color: #173f33;
+}
+
+/* 摸摸樹：從底部升起的一張卡，蓋在樹與圈上面 */
+.tree-focus-sheet {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  max-height: calc(100% - 140px);
+  overflow-y: auto;
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  z-index: 1;
+}
+
+.touch-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.touch-title {
+  margin: 0;
+}
+
+.touch-picks {
+  display: grid;
+  gap: 8px;
+}
+
+.touch-pick {
+  display: grid;
+  gap: 2px;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.touch-pick strong {
+  font-family: var(--font-voice);
+  font-size: 1.05rem;
+}
+
+.touch-pick:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+}
+
+.touch-guide,
+.touch-done {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.touch-done {
+  justify-items: stretch;
+}
+
+.touch-say {
+  margin: 0;
+  font-family: var(--font-voice);
+  font-size: 1.1rem;
+}
+
+/* 呼吸：吸氣時圓慢慢變大（4 秒），吐氣時變小 */
+.touch-breath {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe8, #f8dd8f 60%, rgba(242, 193, 78, 0.4));
+  transform: scale(0.55);
+  transition: transform 4s ease-in-out;
+}
+
+.touch-breath.in {
+  transform: scale(1);
+}
+
+/* 冥想：一圈慢慢填滿的時鐘 */
+.touch-clock {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: conic-gradient(var(--glow) var(--p, 0deg), var(--green-soft) 0);
+  mask: radial-gradient(circle, transparent 54%, #000 56%);
+}
+
+/* 看路線時：拉近畫面收起，底部一列「回到這棵樹」與路線長度 */
+/* 看路線時底部導覽還在（地圖頁），這一列坐在導覽上面 */
+.route-bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--map-base) + 28px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.route-bar .btn {
+  flex: none;
+  min-height: 44px;
+}
+
+.route-bar-note {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--green-ink);
+  font-weight: 700;
+}
+
+.route-bar-close {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.4rem;
+  cursor: pointer;
 }
 
 /* 「怎麼走」路線中間的小膠囊：「約 120 公尺・步行 2 分鐘」 */
@@ -3554,8 +3733,11 @@ html:has(.tab-shell) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tree-ring,
-  .tree-rings-title {
+  .tree-focus,
+  .focus-ring {
+    animation: none;
+  }
+  .touch-breath {
     transition: none;
   }
 }
@@ -4899,8 +5081,6 @@ html:has(.tab-shell) {
 .animal-name,
 .nearby-name,
 .village-row-name,
-.tree-rings-title,
-.tree-rings-name,
 .tasks-head h2,
 .wish-card > strong,
 .codex-name,
@@ -4991,6 +5171,28 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   min-height: 44px;
   background: none;
   filter: none;
+}
+.wish-marker {
+  position: relative;
+}
+/* 「許願中」：小樹苗頭上的金色星星，字在星星中間（設計圖） */
+.wish-tag {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 6px);
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 56px;
+  padding-top: 6px;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0%, 62% 32%, 98% 35%, 70% 57%, 79% 92%, 50% 72%, 21% 92%, 30% 57%, 2% 35%, 38% 32%);
+  background: #f2c14e;
+  color: #5a3a00;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
 }
 .wish-marker-art {
   display: block;

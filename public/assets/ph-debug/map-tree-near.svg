@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="72" viewBox="0 0 64 72">
+<ellipse cx="32" cy="64.8" rx="23.04" ry="5.040000000000001" fill="#CFE8C9" stroke="#7FA86F" stroke-width="1"/>
+<path d="M28.16 64.8 L29.44 39.6 L34.56 39.6 L35.84 64.8 Z" fill="#9A6B3F"/>
+<circle cx="19.04" cy="32.4" r="17.28" fill="#5DAA67"/>
+<circle cx="44.96" cy="32.4" r="17.28" fill="#5DAA67"/>
+<circle cx="32" cy="21.599999999999998" r="19.008000000000003" fill="#5DAA67"/>
+<circle cx="25.951999999999998" cy="18" r="7.776000000000001" fill="#8BCB8F" opacity="0.7"/>
+<text x="50%" y="70" text-anchor="middle" font-family="sans-serif" font-size="7" fill="hsl(159 30% 30%)">map-tree-near 佔位</text>
+</svg>

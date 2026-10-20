@@ -6,14 +6,14 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, type Tree } from '../lib/trees'
 import type { LngLat } from '../lib/geo'
-import { clearActiveTour, demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useActiveTour, useStore, useUserReady, useWishes, wishByPit } from '../store'
+import { clearActiveTour, recentCheckin, wishStatus, demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useActiveTour, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { ActiveTour } from '../store'
 import type { Wish } from '../store/types'
 import { wishHitSize, wishMarkerLabel, wishMarkerSize } from '../features/map/wishMarker'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
-import { IconHeading, IconLamp, IconLayers, IconNorth, IconTrash } from '../components/icons'
+import { IconBack, IconHeading, IconLamp, IconLayers, IconNorth, IconTrash } from '../components/icons'
 import { distanceMeters, walkTarget } from '../lib/geo'
 import { STATUS_LABEL } from '../store/types'
 import { assetUrl } from '../assets'
@@ -30,7 +30,7 @@ import { BalanceChip } from '../features/nav/BalanceChip'
 import { BUILDING_3D_PAINT, firstLabelLayerId, toneBasemap } from '../features/map/basemapTone'
 import { setScanHint } from '../features/nav/scanHint'
 import { useAnimal } from '../features/avatar/useAnimal'
-import { TreeRingLayer } from '../features/map/TreeRingLayer'
+import { TreeFocusView } from '../features/map/TreeFocusView'
 import { rangeInfo, TREE_FOCUS } from '../features/map/treeRings'
 import { loadRoadGraph, prefixAtAsync, routeBetween, routeLabel, routeMidpoint, type Route } from '../lib/route'
 import { treePrefix } from '../lib/treeId'
@@ -272,6 +272,51 @@ export default function MapPage() {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3.5, 17, 6, 19, 10],
         },
       })
+      // 拉近到街景（18 級起）：每棵樹站起來變成插畫小樹，原本的圓點變成它腳下的底座（2026-10-21「拉近的介面」）。
+      // 圈內（可以摸）亮綠、圈外灰藍綠；圖示永遠面向畫面。點擊仍以樹為準（見下面的點擊處理，圖示也算點到）
+      const treeIcon = (layerId: string, image: string, extra: Partial<maplibregl.SymbolLayerSpecification> = {}) =>
+        m.addLayer({
+          id: layerId,
+          type: 'symbol',
+          source: 'trees',
+          'source-layer': 'trees',
+          minzoom: TREE_ICON_MINZOOM,
+          layout: {
+            'icon-image': image,
+            'icon-anchor': 'bottom',
+            'icon-size': ['interpolate', ['linear'], ['zoom'], TREE_ICON_MINZOOM, 0.55, 18.5, 0.75, 20.5, 1.25],
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+            'icon-pitch-alignment': 'viewport',
+            'icon-rotation-alignment': 'viewport',
+            'symbol-z-order': 'viewport-y',
+            ...extra.layout,
+          },
+          ...(extra.filter ? { filter: extra.filter } : {}),
+        } as maplibregl.SymbolLayerSpecification)
+      loadMapIcon(m, 'tree-far', assetUrl('map-tree-far'), 64, 72)
+      loadMapIcon(m, 'tree-near', assetUrl('map-tree-near'), 64, 72)
+      treeIcon('trees-icon', 'tree-far')
+      treeIcon('trees-near-icon', 'tree-near', { layout: { visibility: 'none' } })
+      // 空樹穴拉近時標「樹穴」：褐底淡字，和設計圖一樣
+      m.addLayer({
+        id: 'pits-label',
+        type: 'symbol',
+        source: 'pits',
+        minzoom: 18,
+        layout: {
+          'text-field': '樹穴',
+          // 底圖（OpenFreeMap）有的字型；中文字由瀏覽器自己畫（MapLibre 的 localIdeographFontFamily）
+          'text-font': ['Noto Sans Regular'],
+          'text-size': ['interpolate', ['linear'], ['zoom'], 18, 12, 20, 15],
+          'text-anchor': 'center',
+          // 每個樹穴都標：和街名重疊時也要看得到（樹穴本身就畫在那裡）
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
+          'text-pitch-alignment': 'viewport',
+        },
+        paint: { 'text-color': '#fff4d6', 'text-halo-color': '#9a6a2c', 'text-halo-width': 2.5 },
+      })
       // 里路線（集章冊「開始」）：白色描邊加深綠色線，畫在樹的上面、「怎麼走」的路線下面
       m.addSource('tour', { type: 'geojson', data: EMPTY_LINE })
       m.addLayer({
@@ -325,7 +370,7 @@ export default function MapPage() {
         },
         'trees',
       )
-      applyChineseLabels(m)
+      applyChineseLabels(m, ['pits-label']) // 「樹穴」是固定的字，不是地名
       setReady(true)
     })
     m.on('click', (e) => {
@@ -335,10 +380,12 @@ export default function MapPage() {
         [e.point.x - pad, e.point.y - pad],
         [e.point.x + pad, e.point.y + pad],
       ]
-      const layersNow = ['pits', 'trees'].filter((l) => m.getLayer(l) && m.getLayoutProperty(l, 'visibility') !== 'none')
-      const hit = m.queryRenderedFeatures(box, { layers: layersNow })[0]
+      const layersNow = ['pits', 'trees', 'trees-icon', 'trees-near-icon'].filter((l) => m.getLayer(l) && m.getLayoutProperty(l, 'visibility') !== 'none')
+      const hits = m.queryRenderedFeatures(box, { layers: layersNow })
+      // 拉近時點到小樹的樹冠（圖示）也算點到那棵樹；樹優先於樹穴
+      const hit = hits.find((f) => f.layer.id.startsWith('trees')) ?? hits[0]
       const focused = focusRef.current
-      if (hit?.layer.id === 'trees') {
+      if (hit?.layer.id.startsWith('trees')) {
         // 點樹：鏡頭飛進去，樹旁浮出行動圈（不開抽屜）。已在看的那棵再點一次不動作；點別棵就換過去
         const id = hit.properties.id as string
         if (focused?.tree.id === id) return
@@ -655,15 +702,14 @@ export default function MapPage() {
     const marker = new maplibregl.Marker({ element: label, anchor: 'bottom', offset: [0, -16] }).setLngLat(routeMidpoint(route.coords)).addTo(m)
     if (!routeFitted.current) {
       routeFitted.current = true
-      // 把路線連同它對著樹的鏡像一起框進畫面：樹留在畫面中間，行動圈（左右各約 150 px）才不會被切到
-      const tree = route.coords[route.coords.length - 1]
-      const bounds = new maplibregl.LngLatBounds(tree, tree)
-      for (const c of route.coords) bounds.extend(c).extend([2 * tree[0] - c[0], 2 * tree[1] - c[1]])
+      // 看路線時拉近畫面收起來了，直接框整條路線（上面留給光點餘額與路線標籤，下面留給「回到這棵樹」那一列與導覽）
+      const bounds = new maplibregl.LngLatBounds(route.coords[0], route.coords[0])
+      for (const c of route.coords) bounds.extend(c)
       boundsLifted.current = true
       m.setMaxBounds(null)
       m.setMinZoom(13) // 路線長時要拉得比街景遠才框得下
       m.fitBounds(bounds, {
-        padding: { top: 130, bottom: 240, left: 24, right: 24 },
+        padding: { top: 150, bottom: 230, left: 96, right: 96 }, // 左右多留：路線標籤掛在路線中點，寬約 170 px
         maxZoom: 19.5,
         pitch: 0,
         duration: motionMs(TREE_FOCUS.durationMs),
@@ -767,6 +813,7 @@ export default function MapPage() {
     if (radius === null) {
       ring?.setData({ type: 'FeatureCollection', features: [] })
       m.setLayoutProperty('trees-near', 'visibility', 'none')
+      m.setLayoutProperty('trees-near-icon', 'visibility', 'none')
       setNearCount(0)
       return
     }
@@ -774,6 +821,8 @@ export default function MapPage() {
     ring?.setData(polygon)
     m.setFilter('trees-near', ['within', polygon])
     m.setLayoutProperty('trees-near', 'visibility', layers.trees ? 'visible' : 'none')
+    m.setFilter('trees-near-icon', ['within', polygon])
+    m.setLayoutProperty('trees-near-icon', 'visibility', layers.trees ? 'visible' : 'none')
     // 數圈內的樹：用已載入的圖磚算距離（和打卡同一個半徑）。人拖開、圖磚還沒載入時保留上一次的數字
     const count = () => {
       if (!layers.trees) return setNearCount(0)
@@ -830,7 +879,16 @@ export default function MapPage() {
       art.style.width = art.style.height = `${size}px`
       art.style.backgroundImage = `url(${assetUrl('sapling')})`
       node.appendChild(art)
-      node.setAttribute('aria-label', wishMarkerLabel(w.road))
+      // 還在進行中的願望頭上一顆「許願中」小星星（已種植、不可種就不標）
+      const live = !['planted', 'rejected'].includes(wishStatus(w))
+      if (live) {
+        const tag = document.createElement('span')
+        tag.className = 'wish-tag'
+        tag.setAttribute('aria-hidden', 'true')
+        tag.textContent = '許願中'
+        node.appendChild(tag)
+      }
+      node.setAttribute('aria-label', `${wishMarkerLabel(w.road)}${live ? '（許願中）' : ''}`)
       // 地圖外的標記不進 Tab 順序；鍵盤使用者從「樹洞」的我的許願進入
       node.tabIndex = -1
       node.onclick = (ev) => {
@@ -851,6 +909,9 @@ export default function MapPage() {
       for (const l of ['trees', 'pits', 'parks'] as const) {
         if (m.getLayer(l)) m.setLayoutProperty(l, 'visibility', layers[l] ? 'visible' : 'none')
       }
+      // 跟著它們開關的圖層（圈內的樹圖示由感應圈的 effect 管）
+      if (m.getLayer('trees-icon')) m.setLayoutProperty('trees-icon', 'visibility', layers.trees ? 'visible' : 'none')
+      if (m.getLayer('pits-label')) m.setLayoutProperty('pits-label', 'visibility', layers.pits ? 'visible' : 'none')
     }
     if (m.isStyleLoaded()) apply()
     else m.once('idle', apply)
@@ -859,6 +920,7 @@ export default function MapPage() {
   // 點樹看行動圈時，其他浮動元件先收起，畫面只留地圖與行動圈
   const idle = !sheet && !tour.open && !treeFocus
   const focusRange = treeFocus ? rangeInfo(anchor, treeFocus.tree.lngLat) : null
+  const focusCheckedIn = useStore((s) => (treeFocus ? !!recentCheckin(treeFocus.tree.id, s) : false))
 
   const sheetWish: Wish | undefined = sheet?.kind === 'wish' ? wishes.find((w) => w.id === sheet.wishId) : undefined
 
@@ -964,31 +1026,39 @@ export default function MapPage() {
         </Sheet>
       )}
 
-      {treeFocus && focusRange && (
-        <TreeRingLayer
-          map={map.current}
+      {treeFocus && focusRange && routeFor !== treeFocus.tree.id && (
+        <TreeFocusView
           tree={treeFocus.tree}
-          shown={treeFocus.shown}
           range={focusRange}
-          onClose={() => unfocusTree.current()}
+          checkedIn={focusCheckedIn}
+          animal={animal}
           demo={demo}
-          extraNote={route === 'none' ? '找不到路線，這裡的小路可能沒有收錄' : routeFor === treeFocus.tree.id && !route ? '正在找路線…' : ''}
-          onGo={(a) => {
-            // 怎麼走：畫出（再點一次收起）從人物到這棵樹的步行路線，不換頁
-            if (a.id === 'route') {
-              routeFitted.current = false
-              return setRouteFor((id) => (id === treeFocus.tree.id ? null : treeFocus.tree.id))
-            }
-            // Demo 的「走過去」：模擬位置移到樹旁，圈就跟著亮了（不換頁）；路線跟著收起
-            if (a.id === 'walk') {
-              setRouteFor(null)
-              return setDemoPosition(walkTarget(anchor.lngLat, treeFocus.tree.lngLat))
-            }
-            // nearTree：從行動圈來而且在感應圈內，樹的頁面可以說「你已經在樹旁邊了」；打卡仍然要掃樹牌
-            const state = { ...(a.hintTreeId && { hintTreeId: a.hintTreeId }), nearTree: focusRange.inRange }
-            navigate({ pathname: a.to, hash: a.hash ? `#${a.hash}` : undefined }, { state })
+          onClose={() => unfocusTree.current()}
+          // nearTree：從拉近畫面來而且在感應圈內，樹的頁面可以說「你已經在樹旁邊了」；打卡仍然要掃樹牌
+          onGo={(a) => navigate({ pathname: a.to, hash: a.hash ? `#${a.hash}` : undefined }, { state: { nearTree: focusRange.inRange } })}
+          onScan={() => navigate('/scan', { state: { hintTreeId: treeFocus.tree.id } })}
+          // 怎麼走：拉近畫面先收起，地圖上畫出步行路線；下面的小列可以回到這棵樹
+          onRoute={() => {
+            routeFitted.current = false
+            setRouteFor(treeFocus.tree.id)
           }}
+          // Demo 的「走過去」：模擬位置移到樹旁，範圍跟著重算（不換頁）
+          onWalk={() => setDemoPosition(walkTarget(anchor.lngLat, treeFocus.tree.lngLat))}
         />
+      )}
+
+      {treeFocus && routeFor === treeFocus.tree.id && (
+        <div className="route-bar" data-testid="route-bar" role="group" aria-label={`往${treeFocus.tree.species}的路線`}>
+          <button type="button" className="btn" data-testid="route-back" onClick={() => setRouteFor(null)}>
+            <IconBack /> 回到這棵樹
+          </button>
+          <p className="route-bar-note" role="status" data-testid="ring-note">
+            {route === 'none' ? '找不到路線，這裡的小路可能沒有收錄' : !route ? '正在找路線…' : routeLabel(route)}
+          </p>
+          <button type="button" className="route-bar-close" data-testid="route-close" aria-label="關閉，回到街景" onClick={() => unfocusTree.current()}>
+            ×
+          </button>
+        </div>
       )}
 
       {tour.open && !sheet && !treeFocus && <TourSheet step={tour.step} />}
@@ -1059,7 +1129,7 @@ export default function MapPage() {
 
       {idle && (
         <p className="scan-hint" data-testid={nearCount > 0 ? 'near-hint' : undefined} data-count={nearCount || undefined}>
-          {nearCount > 0 ? `附近有 ${nearCount} 棵樹可以掃` : '找一棵樹，掃它樹幹上的樹牌'}
+          {nearCount > 0 ? `附近有 ${nearCount} 棵樹可以摸` : '找一棵樹，掃它樹幹上的樹牌'}
         </p>
       )}
     </div>
@@ -1182,4 +1252,16 @@ function NearbyWishes({ wishes, center, onPick }: { wishes: Wish[]; center: LngL
       </ul>
     </div>
   )
+}
+
+/** 地圖拉近時樹變成插畫小樹的縮放（街景預設 18.5，所以一打開就是小樹） */
+const TREE_ICON_MINZOOM = 18
+
+/** 把 SVG 素材（佔位或美術交件）載入成地圖圖示；用 2 倍解析度，手機上不糊 */
+function loadMapIcon(m: MLMap, name: string, url: string, w: number, h: number) {
+  const img = new Image(w * 2, h * 2)
+  img.onload = () => {
+    if (!m.hasImage(name)) m.addImage(name, img, { pixelRatio: 2 })
+  }
+  img.src = url
 }

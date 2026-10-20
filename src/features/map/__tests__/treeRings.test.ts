@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CHECKIN } from '../../../config'
 import { checkinRadius, offsetNorth, type LngLat } from '../../../lib/geo'
-import { arcOffsets, farNote, rangeInfo, ringActions } from '../treeRings'
+import { ADOPT_NOTE, farNote, focusActions, focusButtons, rangeInfo, SCAN_FIRST_NOTE } from '../treeRings'
 
 const tree: LngLat = [121.5287, 25.0335]
 const demoAnchor = (lngLat: LngLat) => ({ lngLat, source: 'demo' as const })
@@ -43,85 +43,58 @@ describe('farNote', () => {
   })
 })
 
-describe('ringActions', () => {
-  const near = { distance: 3, inRange: true, remaining: null }
+describe('focusActions（拉近畫面的圈）', () => {
+  const near = { distance: 10, inRange: true, remaining: null }
   const far = { distance: 60, inRange: false, remaining: 25 }
-  it('in range all four are active, in a fixed order (掃樹牌 is the big button, not a ring)', () => {
-    const a = ringActions('DA0030211045', near)
-    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report', 'route'])
-    expect(a.every((x) => x.enabled)).toBe(true)
+  const none = { distance: null, inRange: false, remaining: null }
+  const ids = (list: ReturnType<typeof focusActions>) => list.map((a) => a.id)
+  const on = (list: ReturnType<typeof focusActions>) => list.filter((a) => a.enabled).map((a) => a.id)
+
+  it('three main rings (摸摸樹, 回報, 留言在樹洞) and two small ones, in a fixed order', () => {
+    const list = focusActions('T1', near, true)
+    expect(ids(list)).toEqual(['touch', 'report', 'whisper', 'info', 'adopt'])
+    expect(list.map((a) => a.label)).toEqual(['摸摸樹', '回報', '留言在樹洞', '樹的資料', '認養'])
+    expect(list.map((a) => a.size)).toEqual(['main', 'main', 'main', 'small', 'small'])
   })
-  it('out of range only 樹的資料 and 怎麼走 are active; the others say why in their aria-label', () => {
-    const a = ringActions('DA0030211045', far)
-    expect(a.filter((x) => x.enabled).map((x) => x.id)).toEqual(['info', 'route'])
-    for (const x of a.filter((x) => !x.enabled)) expect(x.aria).toContain('走近一點，還有約 25 公尺')
-    expect(a.find((x) => x.id === 'info')!.aria).toBe('樹的資料')
+  it('after check-in the three interactions open; 認養 never does', () => {
+    expect(on(focusActions('T1', near, true))).toEqual(['touch', 'report', 'whisper', 'info'])
+    expect(on(focusActions('T1', far, true))).toEqual(['touch', 'report', 'whisper', 'info'])
+    const adopt = focusActions('T1', near, true).find((a) => a.id === 'adopt')!
+    expect(adopt.why).toBe(ADOPT_NOTE)
+    expect(adopt.aria).toContain('即將開放')
   })
-  it('no location: only 樹的資料 is active (怎麼走 needs a starting point)', () => {
-    const a = ringActions('X', { distance: null, inRange: false, remaining: null })
-    expect(a.filter((x) => x.enabled).map((x) => x.id)).toEqual(['info'])
-    expect(a.find((x) => x.id === 'route')!.aria).toContain('暫時不能用')
+  it('in range but not checked in: say scan first', () => {
+    const list = focusActions('T1', near, false)
+    expect(on(list)).toEqual(['info'])
+    expect(list[0].why).toBe(SCAN_FIRST_NOTE)
+    expect(list[0].aria).toContain('暫時不能用')
   })
-  it('怎麼走 stays on however far the tree is, and does not change page', () => {
-    const r = ringActions('X', { distance: 5000, inRange: false, remaining: 4965 }).find((x) => x.id === 'route')!
-    expect(r).toMatchObject({ label: '怎麼走', enabled: true, to: '' })
+  it('out of range: say how far; no position: say so', () => {
+    expect(focusActions('T1', far, false)[1].why).toBe('走近一點，還有約 25 公尺')
+    expect(focusActions('T1', none, false)[2].why).toContain('位置')
   })
-  it('routes: whisper and report land on page anchors; there is no scan ring', () => {
-    const a = Object.fromEntries(ringActions('DA0030211045-001', near).map((x) => [x.id, x]))
-    expect(a.scan).toBeUndefined()
-    expect(a.whisper).toMatchObject({ to: '/tree/DA0030211045-001', hash: 'whisper' })
-    expect(a.info).toMatchObject({ to: '/tree/DA0030211045-001' })
-    expect(a.info.hash).toBeUndefined()
-    expect(a.report).toMatchObject({ to: '/tree/DA0030211045-001', hash: 'report' })
+  it('report and whisper land on page anchors; touch and adopt do not change page', () => {
+    const list = focusActions('T1', near, true)
+    expect(list.find((a) => a.id === 'report')).toMatchObject({ to: '/tree/T1', hash: 'report' })
+    expect(list.find((a) => a.id === 'whisper')).toMatchObject({ to: '/tree/T1', hash: 'whisper' })
+    expect(list.find((a) => a.id === 'info')).toMatchObject({ to: '/tree/T1' })
+    expect(list.find((a) => a.id === 'touch')?.to).toBe('')
   })
 })
 
-describe('ringActions in Demo (走過去)', () => {
-  const far = { distance: 60, inRange: false, remaining: 25 }
-  it('adds a ring 走過去, always active, only in Demo', () => {
-    expect(ringActions('X', far).some((x) => x.id === 'walk')).toBe(false)
-    const a = ringActions('X', far, true)
-    expect(a.map((x) => x.id)).toEqual(['whisper', 'info', 'report', 'route', 'walk'])
-    expect(a.find((x) => x.id === 'walk')).toMatchObject({ label: '走過去', enabled: true })
+describe('focusButtons（返回旁邊的按鈕）', () => {
+  it('in range, not checked in: 掃樹牌 only', () => {
+    expect(focusButtons({ distance: 10, inRange: true, remaining: null }, false, true)).toEqual({ scan: true, route: false, walk: false })
   })
-  it('after walking (in range) every ring is active', () => {
-    expect(ringActions('X', { distance: 10, inRange: true, remaining: null }, true).every((x) => x.enabled)).toBe(true)
+  it('out of range: 怎麼走, plus 走過去 in Demo', () => {
+    const far = { distance: 60, inRange: false, remaining: 25 }
+    expect(focusButtons(far, false, false)).toEqual({ scan: false, route: true, walk: false })
+    expect(focusButtons(far, false, true)).toEqual({ scan: false, route: true, walk: true })
   })
-  it('4 and 5 rings keep the 72 px wide buttons (disc + label) apart at 360 px', () => {
-    for (const n of [4, 5]) {
-      const o = arcOffsets(n, 118)
-      for (let i = 1; i < o.length; i++) expect(Math.hypot(o[i].x - o[i - 1].x, o[i].y - o[i - 1].y)).toBeGreaterThanOrEqual(72)
-      expect(Math.max(...o.map((p) => Math.abs(p.x))) + 36).toBeLessThanOrEqual(180)
-    }
+  it('no position: no route (no starting point)', () => {
+    expect(focusButtons({ distance: null, inRange: false, remaining: null }, false, false).route).toBe(false)
   })
-  it('5 rings fan wider so 56 px discs stay apart (>= 56 px between centres)', () => {
-    const o = arcOffsets(5, 118)
-    for (let i = 1; i < o.length; i++) expect(Math.hypot(o[i].x - o[i - 1].x, o[i].y - o[i - 1].y)).toBeGreaterThanOrEqual(56)
-    expect(Math.max(...o.map((p) => Math.abs(p.x))) + 36).toBeLessThanOrEqual(180) // 360 px 寬，樹在中間
-  })
-})
-
-describe('arcOffsets', () => {
-  it('puts the middle of the arc straight below the tree and mirrors left/right', () => {
-    const o = arcOffsets(3, 100, 120)
-    expect(o[1]).toEqual({ x: 0, y: 100 })
-    expect(o[0].x).toBeCloseTo(-o[2].x)
-    expect(o[0].y).toBeCloseTo(o[2].y)
-    expect(o[0].x).toBeLessThan(0)
-  })
-  it('keeps every point on the circle and left to right in order', () => {
-    const o = arcOffsets(4, 118)
-    for (const p of o) expect(Math.hypot(p.x, p.y)).toBeCloseTo(118, 0)
-    expect(o.map((p) => p.x)).toEqual([...o.map((p) => p.x)].sort((a, b) => a - b))
-  })
-  it('fits a 360 px screen with 56 px circles', () => {
-    const o = arcOffsets(4, 118)
-    expect(Math.max(...o.map((p) => Math.abs(p.x))) + 28).toBeLessThanOrEqual(180)
-    // neighbours do not overlap
-    for (let i = 1; i < o.length; i++) expect(Math.hypot(o[i].x - o[i - 1].x, o[i].y - o[i - 1].y)).toBeGreaterThanOrEqual(56)
-  })
-  it('handles 0 and 1', () => {
-    expect(arcOffsets(0, 100)).toEqual([])
-    expect(arcOffsets(1, 100)).toEqual([{ x: 0, y: 100 }])
+  it('checked in: only 返回', () => {
+    expect(focusButtons({ distance: 10, inRange: true, remaining: null }, true, true)).toEqual({ scan: false, route: false, walk: false })
   })
 })

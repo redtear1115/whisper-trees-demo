@@ -3,13 +3,14 @@
 import { getExt, setExt, useStore, type State } from '../../store'
 
 /** `sun` 是舊版的獨立日照加成（2026-10-20 前的流水帳還有），現在日照是倍率，不再單獨發 */
-export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'report' | 'wish' | 'water' | 'insect'
+export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'touch' | 'report' | 'wish' | 'water' | 'insect'
 
 export const ACTION_LABEL: Record<Action, string> = {
   checkin: '打卡成功',
   farView: '遠觀模式打卡',
   sun: '白天打卡的日照加成',
   whisper: '留樹洞',
+  touch: '摸摸樹',
   report: '樹況回報',
   wish: '許願',
   water: '澆水',
@@ -20,7 +21,7 @@ export const ACTION_LABEL: Record<Action, string> = {
 export type PointAction = 'checkin' | 'farView' | 'report' | 'wish' | 'water'
 
 /** 「在一棵樹旁」做的互動：每棵樹每天依序算第 1、2、3 個（見 points.ts） */
-export const TREE_ACTIONS: readonly Action[] = ['checkin', 'farView', 'whisper', 'report']
+export const TREE_ACTIONS: readonly Action[] = ['checkin', 'farView', 'whisper', 'touch', 'report']
 
 export interface GameEvent {
   id: string
