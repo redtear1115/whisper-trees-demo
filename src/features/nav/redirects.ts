@@ -1,4 +1,4 @@
-// 舊網址轉址：探索與圖鑑併進集章冊（2026-10-20 決定），探索區用 ?tab=explore 選取。
+// 舊網址轉址：探索與圖鑑併進集章冊，探索區用 ?tab=explore 選取。
 
 export type StampsTab = 'stamps' | 'explore'
 

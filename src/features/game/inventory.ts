@@ -3,14 +3,14 @@ import { spend } from './ledger'
 import { canonicalItemId, type ShopItem } from './config'
 import type { Onboarding } from './onboarding'
 
-/** 新手禮：完成「收集光點」後送的橡實帽（簡報 v20 前是草帽 hat-straw）。只靠 onboarding.giftAt 推算擁有，不寫進 ext.inventory。 */
+/** 新手禮：完成「收集光點」後送的橡實帽。只靠 onboarding.giftAt 推算擁有，不寫進 ext.inventory。 */
 export const STARTER_GIFT = 'hat-acorn'
 
 export interface Inventory {
   /** 買過的造型與相框 */
   owned: string[]
   equipped: { outfit?: string; frame?: string }
-  /** 舊版「回到城市」商品的累計次數。簡報 v20（2026-10-20）起商店不賣了，只讀不寫，舊資料原樣保留 */
+  /** 舊版「回到城市」商品的累計次數。商店已不賣，只讀不寫，舊資料原樣保留 */
   civic: Record<string, number>
   /** 樹上住戶（昆蟲彩蛋，模擬）第一次遇見：昆蟲 id → 哪棵樹、什麼時候。存在這裡是因為雲端的 users/{uid}.inventory 本來就是整個 map，不用動規則與寫入形狀。 */
   insects?: Record<string, { treeId: string; at: number }>
@@ -20,7 +20,7 @@ const EMPTY: Inventory = { owned: [], equipped: {}, civic: {} }
 
 let memo: { raw: Inventory; gift: boolean; out: Inventory } | null = null
 
-/** 舊造型 id 換成新的（去重），讓舊使用者保有原本的東西；沒有要換的就原樣回傳 */
+/** 舊造型 id 換成新的（去重），讓舊使用者保有已有的東西；沒有要換的就原樣回傳 */
 function canonical(raw: Inventory): Inventory {
   const owned = [...new Set(raw.owned.map(canonicalItemId))]
   const o = raw.equipped.outfit

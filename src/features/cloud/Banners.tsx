@@ -4,7 +4,7 @@ import { migrateToCloud, useSession } from '../../store'
 import { CONNECTION_TEXT } from '../../store/unavailable'
 
 /**
- * 雲端連不上時頂端的連線狀態（2026-10-21 起取代「離線示範模式」：不退回本機，一直重連，連回來自己消失）。
+ * 雲端連不上時頂端的連線狀態（不退回本機，一直重連，連回來自己消失）。
  * 文字見 CONNECTION_TEXT；data-state 是狀態（reconnecting／offline／quota）。
  */
 export function ConnectionBanner() {
@@ -60,8 +60,8 @@ export function WriteFailedToast() {
 
 /**
  * 第一次進雲端模式、這台裝置有舊的本機紀錄：問要不要搬。
- * 不是對話框（2026-10-20 決定）：浮在導覽上方的小卡，不擋住畫面、不搶焦點、不鎖背景，
- * 回來的本機使用者照常看集章冊，想處理再按。內容與動作和原本的對話框一樣：存到雲端、先不要（= 這台不再問）。
+ * 不是對話框：浮在導覽上方的小卡，不擋住畫面、不搶焦點、不鎖背景，
+ * 回來的本機使用者照常看集章冊，想處理再按。內容與動作：存到雲端、先不要（= 這台不再問）。
  */
 export function MigrationPrompt() {
   const { migration } = useSession()

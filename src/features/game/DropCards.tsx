@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Art, MockTag } from '../../components/ui'
 import type { CheckinDrops } from './drops'
 
-/** 打卡之後的小驚喜：稀有配件與樹上住戶。安靜地出現，沒有倒數、沒有催促。第五輪起是緊湊的小列：小圖示、一句話、一行小字加連結（手機上原本一張約 140 px，現在約一半），讓樹洞卡早一點出現。 */
+/** 打卡之後的小驚喜：稀有配件與樹上住戶。安靜地出現，沒有倒數、沒有催促。緊湊的小列：小圖示、一句話、一行小字加連結，讓樹洞卡早一點出現。 */
 export function DropCards({ drops }: { drops?: CheckinDrops }) {
   if (!drops?.hat && !drops?.insect) return null
   return (

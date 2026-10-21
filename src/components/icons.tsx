@@ -1,4 +1,4 @@
-// 介面圖示：同一套 24px 網格、1.75 線寬、圓角端點。取代 emoji。
+// 介面圖示：同一套 24px 網格、1.75 線寬、圓角端點。用來代替 emoji。
 
 import type { ReactNode, SVGProps } from 'react'
 
@@ -217,7 +217,7 @@ export const IconActionAdopt = () => (
   </Svg>
 )
 
-// ---- 裝飾圖示（取代原本沒有資訊的佔位框） ----
+// ---- 裝飾圖示（代替沒有資訊的佔位框） ----
 
 /** 微光、光點：四角的小星 */
 export const IconGlow = () => (

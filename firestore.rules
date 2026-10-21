@@ -194,7 +194,7 @@ service cloud.firestore {
       return d.keys().hasOnly(fields)
         && d.keys().hasAll(fields)
         && d.at == request.time
-        // 五類（2026-10-20）：樹木修剪問題、病蟲害、遮蔭太多或修剪過度、新長枝芽擋路、其他。
+        // 五類：樹木修剪問題、病蟲害、遮蔭太多或修剪過度、新長枝芽擋路、其他。
         // 舊的 'sick' 不再接受新增；已存在的舊文件照舊可讀。
         && d.kind in ['pruning', 'pest', 'shade', 'sprout', 'other']
         && d.details is list

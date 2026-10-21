@@ -4,7 +4,7 @@ import { PANEL_BG, RAMP_STEPS, villageFill, villageText } from './colors'
 import { CrayonDefs } from './Crayon'
 import { fitProjection, unionBBox, villageLabel, villageNameMode, villagePath, type BBox } from './projection'
 
-/** 里名在畫面上至少幾個螢幕像素（CSS px）。第五輪：原本 SVG 單位 11，地圖被 36svh 夾住縮小後實際只剩約 6–10 px */
+/** 里名在畫面上至少幾個螢幕像素（CSS px）。SVG 單位 11 的字在地圖被 36svh 夾住縮小後實際只剩約 6–10 px，所以以螢幕像素為準 */
 const LABEL_MIN_PX = 12
 /** 里地圖最多佔螢幕高度的幾成（CSS 的 .atlas-panel svg 同步） */
 const VILLAGE_MAP_VH = 0.36
@@ -13,7 +13,7 @@ const VILLAGE_MAP_VH = 0.36
  * 里的完成度地圖：以該區範圍投影，每個里依「點亮的樹 ÷ 里內的樹」像印泥一樣上色（0 棵是空白紙格，有 1 棵就看得出變化）。
  * 里很小（有的不到 20 px），所以地圖是給「看」和「用手點」的；鍵盤與讀屏走旁邊的里列表（VillageList），
  * 地圖本身不進 Tab 順序，也對讀屏隱藏，避免 50 幾個停靠點。名字在畫面上至少 12 px，
- * 放得下才顯示；太小放不下的里**不畫名字、也不縮小字級**（第五輪：縮到 10 px 以下讀不到），
+ * 放得下才顯示；太小放不下的里**不畫名字、也不縮小字級**（縮到 10 px 以下讀不到），
  * 名字在旁邊的里列表裡找得到（含點亮與否），點那一塊地圖也會開卡片（見 villageNameMode）。
  */
 export function VillageMap({

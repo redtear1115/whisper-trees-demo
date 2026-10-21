@@ -9,7 +9,7 @@ import { ReportBox } from '../report/ReportBox'
 import { TreeFacts } from '../tree/TreeFacts'
 import { WhisperBox } from '../whisper/WhisperBox'
 
-// 拉近畫面裡的卡片（2026-10-21 第二版，使用者決定「點了就開卡，不換頁」）：留言在樹洞、回報、樹的資料。
+// 拉近畫面裡的卡片（點了就開卡，不換頁）：留言在樹洞、回報、樹的資料。
 // 摸摸樹的卡是 ../touch/TouchPanel（在感應圈內就打得開，不用掃樹牌）。留言、回報的卡只有打過卡才打得開（拉近畫面擋著），所以這裡都當作在現場。
 
 /** 留言在樹洞：和樹的頁面同一個樹洞（WhisperBox），下面是時空膠囊（上次說的話，或示範） */

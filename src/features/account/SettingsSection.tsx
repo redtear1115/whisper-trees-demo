@@ -15,7 +15,7 @@ import { badges } from '../game/badges'
 /** 要確認的動作：登出、離開 Demo、刪除雲端資料、清除本機資料 */
 type Ask = 'signout' | 'exitDemo' | 'wipe' | null
 
-/** 我的區（2026-10-21 critique 從頂部的卡移來）：決定集章冊預設打開哪一區 */
+/** 我的區：決定集章冊預設打開哪一區 */
 function DistrictRow() {
   const district = homeDistrictOf(useOnboarding())
   const [open, setOpen] = useState(false)

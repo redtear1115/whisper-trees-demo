@@ -7,7 +7,7 @@ import { buy, useInventory, type BuyResult } from '../features/game/inventory'
 import { useGameConfig, type ItemKind } from '../features/game/config'
 import { EventBar } from '../features/game/EventBar'
 
-// 商店只賣虛擬造型（簡報 v20 p25）
+// 商店只賣虛擬造型
 const KIND_TITLE: Record<ItemKind, string> = {
   outfit: '造型',
   frame: '樹的頁面相框',

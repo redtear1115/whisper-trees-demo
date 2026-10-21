@@ -12,7 +12,7 @@ interface Props {
 }
 
 /**
- * App 內的確認框（2026-10-21 critique，取代瀏覽器原生的 confirm()）：寫出會發生什麼、會失去什麼，
+ * App 內的確認框（代替瀏覽器原生的 confirm()）：寫出會發生什麼、會失去什麼，
  * 預設焦點在「取消」，Esc 或點外面也是取消。樣式沿用慶祝視窗的 .modal。
  */
 export function ConfirmDialog({ title, lines, confirmLabel, danger = false, onConfirm, onCancel }: Props) {

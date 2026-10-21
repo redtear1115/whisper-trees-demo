@@ -61,7 +61,7 @@ export interface Checkin {
 }
 
 /**
- * 樹況回報五個類別（團隊簡報 v17 第 22 頁）：一鍵選類別，不再選細項。
+ * 樹況回報五個類別：一鍵選類別，不再選細項。
  * `pruning` 這個 id 沿用舊值，語意是「樹木修剪問題」。
  */
 export type ReportKind = 'pruning' | 'pest' | 'shade' | 'sprout' | 'other'
@@ -74,7 +74,7 @@ export const REPORT_KINDS: Record<ReportKind, { label: string }> = {
   other: { label: '其他' },
 }
 
-/** 舊版（2026-10-20 前）回報的細項。只用來讀舊資料與搬舊的本機回報，新的回報不再選細項。 */
+/** 舊版回報的細項。只用來讀舊資料與搬舊的本機回報，新的回報不再選細項。 */
 export const LEGACY_REPORT_DETAILS = ['修剪過度', '遮蔭過多', '枝葉擋路', '病蟲害', '枯枝或落枝', '樹幹傾斜或受損']
 
 /**

@@ -14,7 +14,7 @@ import { formatDistance } from '../features/journal/nearby'
 const NEARBY_WISH_FIRST = 3
 
 /**
- * 許願分頁：/wishes 與 /journal 共用（2026-10-21：不只自己的，附近別人的願也列出來，直接幫它澆水）。
+ * 許願分頁：/wishes 與 /journal 共用（不只自己的，附近別人的願也列出來，直接幫它澆水）。
  * 我許的願 → 附近別人的願（300 m 內，近到遠）→ 我澆過水、但不在附近的別人的願。
  */
 export function MyWishes({ sub = false }: { sub?: boolean }) {

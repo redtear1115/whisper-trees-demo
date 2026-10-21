@@ -52,7 +52,7 @@ const NOTICE_IDS = ['notice-1']
 
 export interface Host {
   onState(s: State): void
-  /** 頂端的連線狀態（2026-10-21 起不再退回本機模式，連不上就顯示狀態、一直重連） */
+  /** 頂端的連線狀態（不退回本機模式，連不上就顯示狀態、一直重連） */
   onConnection(c: Connection): void
 }
 
@@ -79,7 +79,7 @@ interface UserDoc {
   onboarding: unknown | undefined
   /** 打卡後的心情：{ current: { id, at } | null, askedAt }；map 欄位，逐欄合併 */
   mood: unknown | undefined
-  /** 跟樹的互動與當時的心情（我的日記）：{ entries: [...] }，整份取代 */
+  /** 跟樹的互動與當時的心情（我的日記）：{ entries: [...] }，整份覆寫 */
   diary: unknown | undefined
 }
 

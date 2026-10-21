@@ -1,4 +1,4 @@
-// 角色「小芽」＝團隊簡報 v20（2026-10-20）p14 的樹精：依累計獲得的光點長大（不是真實樹齡），花掉不會變小。
+// 角色「小芽」＝樹精：依累計獲得的光點長大（不是真實樹齡），花掉不會變小。
 // 3 階：初心樹精 0 → 茁壯樹精 100 → 智慧老樹精 300。
 
 export interface Stage {
@@ -44,7 +44,7 @@ export function spendNoteKind(a: { balance: number; spent: boolean }): SpendNote
   return a.balance > 0 ? 'future' : null
 }
 
-/** 2026-10-21 critique：剛拿到第一份光點就看到「光點花掉了」，會以為被扣了，所以沒花過的人改說「之後」 */
+/** 剛拿到第一份光點就看到「光點花掉了」，會以為被扣了，所以沒花過的人改說「之後」 */
 const SPEND_NOTE: Record<Exclude<SpendNote, null>, string> = {
   past: '光點花掉了，小芽也不會變小。',
   future: '之後用光點換東西，小芽也不會變小。',

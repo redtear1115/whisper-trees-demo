@@ -4,7 +4,7 @@
 # ///
 """Download a few openly licensed tree photos per species from iNaturalist, for the 圖鑑 and the tree page.
 
-Rules (decided 2026-10-20):
+Rules:
   * source: iNaturalist only (official API v1, https://api.inaturalist.org/v1/docs)
   * licences: CC0 and CC BY only. No CC BY-NC / BY-SA / ND, no all-rights-reserved.
     The filter `photo_license` on /observations only means "has AT LEAST ONE photo with this licence", so every

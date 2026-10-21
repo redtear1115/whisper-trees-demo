@@ -2,7 +2,7 @@ import { isDebugMode } from './lib/debug'
 
 // UX/UI 美術素材清單。目前全部用佔位檔（public/assets/ph/<id>.svg），
 // 由 `node scripts/make_placeholders.mjs` 依這份清單產生，同時輸出 docs/ui-assets.md 交給設計。
-// 設計交件時用同名檔案（建議 .webp / .svg）取代即可。
+// 設計交件時用同名檔案（建議 .webp / .svg）替換即可。
 
 export interface AssetSpec {
   id: string
@@ -22,7 +22,7 @@ export const ASSETS: AssetSpec[] = [
   { id: 'watering', w: 96, h: 96, where: '澆水按鈕', brief: '澆水壺' },
   { id: 'empty-pit', w: 96, h: 96, where: '空樹穴抽屜', brief: '空的樹穴（方形土坑）' },
   { id: 'scan-tag', w: 240, h: 160, where: '掃樹牌說明', brief: '公園處樹牌與 QR Code 的位置示意' },
-  { id: 'sprout-0', w: 240, h: 240, where: '我的小芽', brief: '角色「小芽」＝樹精（團隊簡報 v20 p14），第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景' },
+  { id: 'sprout-0', w: 240, h: 240, where: '我的小芽', brief: '角色「小芽」＝樹精，第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景' },
   { id: 'sprout-1', w: 240, h: 240, where: '我的小芽', brief: '角色「小芽」第 2 階：茁壯樹精。同一個角色長大了，身形變穩、枝葉變多，樹皮紋路出現（規格同上）' },
   { id: 'sprout-2', w: 240, h: 240, where: '我的小芽', brief: '角色「小芽」第 3 階：智慧老樹精。同一個角色的老年樣子，樹冠茂密、鬍鬚般的垂枝與苔蘚，神情溫和（規格同上）' },
   { id: 'item-hat-acorn', w: 160, h: 160, where: '商店、小芽換裝、新手禮', brief: '造型：橡實帽（疊在五隻動物與小芽身上，透明背景）。新手禮' },
@@ -51,11 +51,11 @@ export const ASSETS: AssetSpec[] = [
   { id: 'stamp-bronze', w: 120, h: 120, where: '集章冊', brief: '行政區集章：銅章（10 棵）。同一組造型，材質不同' },
   { id: 'stamp-silver', w: 120, h: 120, where: '集章冊', brief: '行政區集章：銀章（50 棵）' },
   { id: 'stamp-gold', w: 120, h: 120, where: '集章冊', brief: '行政區集章：金章（200 棵）' },
-  { id: 'avatar-taiwan-dog', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：臺灣黑狗（預設）。開朗樂天，鐮刀尾是招牌。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點）。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
-  { id: 'avatar-leopard-cat', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：石虎。冷淡的觀察家，耳後白斑是招牌。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
-  { id: 'avatar-blue-magpie', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
-  { id: 'avatar-malayan-night-heron', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
-  { id: 'avatar-pangolin', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。' },
+  { id: 'avatar-taiwan-dog', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：臺灣黑狗（預設）。開朗樂天，鐮刀尾是招牌。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點）。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。' },
+  { id: 'avatar-leopard-cat', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：石虎。冷淡的觀察家，耳後白斑是招牌。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。' },
+  { id: 'avatar-blue-magpie', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。' },
+  { id: 'avatar-malayan-night-heron', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。' },
+  { id: 'avatar-pangolin', w: 96, h: 96, where: '地圖上代表你、新手引導、我的', brief: '地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。' },
   { id: 'tree-focus', w: 360, h: 400, where: '地圖點樹後的拉近畫面（中間的大樹）', brief: '2.5D 蠟筆繪本風的一棵大樹：圓潤蓬鬆的綠色樹冠占上方三分之二，粗短的褐色樹幹，樹根坐在淡淡的圓形草地上；透明背景、主體置中，樹冠上要留得下 5 個圓形按鈕（文字疊在上面仍看得清楚）' },
   { id: 'map-tree-near', w: 64, h: 72, where: '地圖拉近時，感應圈內的樹（可以摸）', brief: '2.5D 蠟筆風的小樹圖示：蓬鬆的亮綠色樹冠、褐色樹幹，腳下一個淡綠色圓形底座；透明背景、底座中心對準樹的位置（圖片底部中央）' },
   { id: 'map-tree-far', w: 64, h: 72, where: '地圖拉近時，感應圈外的樹', brief: '同上，樹冠改成灰藍綠色、彩度低，底座同樣淡綠；看得出是同一種樹，但比較安靜' },
@@ -70,7 +70,7 @@ export function assetUrl(id: string): string {
   return `${import.meta.env.BASE_URL}assets/${isDebugMode() ? 'ph-debug' : 'ph'}/${id}.svg`
 }
 
-/** PWA 圖示（加到手機主畫面用）。佔位檔是 PNG，由 make_placeholders 產生到 public/assets/pwa/；設計交件後用同名檔案取代。 */
+/** PWA 圖示（加到手機主畫面用）。佔位檔是 PNG，由 make_placeholders 產生到 public/assets/pwa/；設計交件後用同名檔案替換。 */
 export interface PwaIconSpec {
   file: string
   size: number

@@ -1,4 +1,4 @@
-// 底圖調色：把 OpenFreeMap positron 的灰白換成繪本紙張的暖色（2026-10-20，批評修正 M）。
+// 底圖調色：把 OpenFreeMap positron 的灰白換成繪本紙張的暖色。
 // 底圖是遠端樣式，不能改檔，所以在樣式載入後用 setPaintProperty 逐層覆蓋。
 // 純資料（TONE_PAINT）＋一個函式（toneBasemap）；地圖頁與迷霧地圖共用，同一套紙色。
 import type { Map as MLMap } from 'maplibre-gl'

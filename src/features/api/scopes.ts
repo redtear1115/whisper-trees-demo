@@ -1,4 +1,4 @@
-// OAuth scope 清單：整個 API 與 MCP 只認這裡的定義（2026-10-20，見 docs/specs/08-extensions.md §7）。
+// OAuth scope 清單：整個 API 與 MCP 只認這裡的定義（見 docs/specs/08-extensions.md §7）。
 
 export const GOV_SCOPES = [
   'hotspots:read',

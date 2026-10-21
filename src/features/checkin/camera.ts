@@ -1,5 +1,5 @@
 // 掃描頁的相機問題：把 getUserMedia 的錯誤、權限狀態、「開了但沒有畫面」分類，給對應的一步步說明。
-// 2026-10-21 起（同伴回報相機畫面全黑，只能從相簿上傳）。純函式，有單元測試。規格：docs/specs/03-checkin.md「相機打不開時」。
+// 相機畫面全黑時只能從相簿上傳。純函式，有單元測試。規格：docs/specs/03-checkin.md「相機打不開時」。
 
 import { IN_APP_NAME, type InAppBrowser } from '../../lib/firebase'
 

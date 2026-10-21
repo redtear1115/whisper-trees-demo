@@ -86,7 +86,7 @@ p {
   margin: 0.3em 0;
 }
 
-/* 連結預設用深綠：--green 在紙色上只有 4.46:1、在淡綠底上 4.07:1，小字連結不到 4.5:1（第五輪） */
+/* 連結預設用深綠：--green 在紙色上只有 4.46:1、在淡綠底上 4.07:1，小字連結不到 4.5:1 */
 a {
   color: var(--green-ink);
 }
@@ -1183,7 +1183,7 @@ textarea.input {
   margin: 0;
 }
 
-/* 裝飾圖示：取代沒有資訊的佔位框。柔和的圓底加一個線條圖示（和底部導覽同一套） */
+/* 裝飾圖示：用來代替沒有資訊的佔位框。柔和的圓底加一個線條圖示（和底部導覽同一套） */
 .ornament {
   display: grid;
   place-items: center;
@@ -3033,7 +3033,7 @@ body.has-offline .tree-focus {
   gap: 2px;
   min-height: 56px;
   color: var(--muted);
-  /* 13 px（原本 12）：5 個分頁在 360 寬各 72 px，最長的標籤「集章冊」「掃樹牌」不折行 */
+  /* 13 px：5 個分頁在 360 寬各 72 px，最長的標籤「集章冊」「掃樹牌」不折行 */
   font-size: 0.8125rem;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
@@ -3140,7 +3140,7 @@ html:has(.tab-shell) {
 }
 
 .balance-pill span {
-  color: #8a6400; /* 4.9:1（原本 #a87a00 只有 3.5:1） */
+  color: #8a6400; /* 4.9:1（#a87a00 只有 3.5:1，不夠） */
 }
 
 .fog-slot {
@@ -3301,7 +3301,7 @@ html:has(.tab-shell) {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* 正式美術（站著的動物，2026-10-21）換上後拿掉佔位的兩圈：改用貼著輪廓的白邊與一點陰影，在綠色的樹與街景上一樣看得出「這是你」 */
+  /* 正式美術（站著的動物）不加佔位的兩圈：用貼著輪廓的白邊與一點陰影，在綠色的樹與街景上一樣看得出「這是你」 */
   filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff) drop-shadow(0 3px 3px rgba(44, 58, 46, 0.4));
 }
 
@@ -3424,7 +3424,7 @@ html:has(.tab-shell) {
   letter-spacing: 0;
 }
 
-/* ---------- 點樹：拉近畫面（2026-10-21，依「拉近的介面」設計圖） ---------- */
+/* ---------- 點樹：拉近畫面 ---------- */
 
 /* 蓋住地圖與底部導覽（導覽 z-index 4）；頂端一列、中間的大樹與圈、右下的動物、底部「返回」 */
 .tree-focus {
@@ -4564,7 +4564,7 @@ html:has(.tab-shell) {
   }
 }
 
-/* ---------- 大地圖上的里路線（集章冊「開始」，2026-10-20） ---------- */
+/* ---------- 大地圖上的里路線（集章冊「開始」） ---------- */
 
 /* 頂端列放在光點餘額下面：頁首換行，列佔滿一行 */
 .map-top.has-tour {
@@ -4687,7 +4687,7 @@ html:has(.tab-shell) {
   background: var(--red-ink);
 }
 
-/* ---------- 我的（批評修正 P） ---------- */
+/* ---------- 我的 ---------- */
 
 /* 繪本感：手剪般不對稱的圓角、暖色紙底、柔和有位移的陰影。全部只用既有的色彩變數。 */
 .me-hero {
@@ -4739,7 +4739,7 @@ html:has(.tab-shell) {
   margin-bottom: 4px;
 }
 
-/* 小芽是這一頁的主角（2026-10-21 critique，取代第五輪「和動物一樣大」）：比旁邊陪你的動物大一點 */
+/* 小芽是這一頁的主角：比旁邊陪你的動物大一點 */
 .me-sprout {
   width: 116px;
   height: 116px;
@@ -5064,7 +5064,7 @@ html:has(.tab-shell) {
   font-weight: 600;
 }
 
-/* App 內的確認框（取代瀏覽器的 confirm()） */
+/* App 內的確認框（代替瀏覽器的 confirm()） */
 .confirm-title {
   margin: 0 0 8px;
   font-size: 1.15rem;
@@ -5145,7 +5145,7 @@ html:has(.tab-shell) {
   object-fit: contain;
 }
 
-/* ---------- 探索與樹洞（批評修正 E） ---------- */
+/* ---------- 探索與樹洞 ---------- */
 
 /* 迷霧：座標還在查時的占位框，高度跟地圖一樣，不讓版面跳動 */
 .fog-pending {
@@ -5274,7 +5274,7 @@ html:has(.tab-shell) {
   margin: 0;
 }
 
-/* ---------- 集章冊（批評修正 S） ---------- */
+/* ---------- 集章冊 ---------- */
 
 /* 紙紋：面板像一頁微微有顆粒的紙（顏色用 backgroundColor 內聯，圖案在這裡） */
 .atlas-panel svg {
@@ -5374,9 +5374,9 @@ html:has(.tab-shell) {
   line-height: 1.5;
 }
 
-/* ---------- 地圖與全站（批評修正 M） ---------- */
+/* ---------- 地圖與全站 ---------- */
 
-/* 手寫感的聲音（2026-10-20）：卡片標題、區塊標題、章與徽章的名字、關鍵數字都用 --font-voice（霞鶩文楷）；
+/* 手寫感的聲音：卡片標題、區塊標題、章與徽章的名字、關鍵數字都用 --font-voice（霞鶩文楷）；
    內文、說明、按鈕、表單維持 UI 字。霞鶩文楷在小字會變細，所以這裡只放 ≥ 14 px 的文字，
    `max(1em, 0.875rem)` 保證不會小於 14 px。 */
 .tile > strong,
@@ -5472,9 +5472,9 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   }
 }
 
-/* ---------- 地圖與樹洞（第三輪 D） ---------- */
+/* ---------- 地圖與樹洞 ---------- */
 
-/* 許願小樹苗：按鈕是 44 px 以上的透明可點範圍，圖案（.wish-marker-art）保持原本的視覺大小 */
+/* 許願小樹苗：按鈕是 44 px 以上的透明可點範圍，圖案（.wish-marker-art）保持圖案本身的視覺大小 */
 .wish-marker {
   display: grid;
   place-items: center;
@@ -5486,7 +5486,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 .wish-marker {
   position: relative;
 }
-/* 「許願中」：小樹苗頭上的金色星星，字在星星中間（設計圖） */
+/* 「許願中」：小樹苗頭上的金色星星，字在星星中間 */
 .wish-tag {
   position: absolute;
   left: 50%;
@@ -5564,7 +5564,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   padding: 2px 12px 2px 44px;
   max-width: min(calc(100vw - 92px), 320px);
 }
-/* 收著的時候是「ⓘ 資料來源」一顆藥丸：只有一個 i 看不出是什麼（第六輪）。展開後回到 44 px 的圓鈕 */
+/* 收著的時候是「ⓘ 資料來源」一顆藥丸：只有一個 i 看不出是什麼。展開後回到 44 px 的圓鈕 */
 .map-page .maplibregl-ctrl-bottom-left .maplibregl-ctrl-attrib.maplibregl-compact:not(.maplibregl-compact-show) {
   min-width: 104px;
 }
@@ -5605,7 +5605,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   white-space: nowrap;
 }
 
-/* ---------- 新手引導與我的（第三輪 B） ---------- */
+/* ---------- 新手引導與我的 ---------- */
 
 .tour-sub {
   margin: 10px 0 2px;
@@ -5698,7 +5698,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   box-shadow: 0 -8px 10px -8px rgba(44, 58, 46, 0.2);
 }
 
-/* ---------- 光點規則與樹況回報（第三輪 C） ---------- */
+/* ---------- 光點規則與樹況回報 ---------- */
 
 /* 回報類別：五個一鍵選，一欄排開，方便單手點 */
 .report .kind-pick {
@@ -5768,7 +5768,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   color: var(--muted, #6b6455);
 }
 
-/* ---------- 導覽與集章冊（第三輪 A） ---------- */
+/* ---------- 導覽與集章冊 ---------- */
 
 /* 集章冊頂端的「集章／探索」：比下面的「地圖／依取得時間」重，是整個頁面的兩個區 */
 .stamps-page > .segmented {
@@ -5942,7 +5942,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   outline-offset: 0;
 }
 
-/* ---------- 光點規則與樹況回報（第三輪 C） ---------- */
+/* ---------- 光點規則與樹況回報 ---------- */
 
 /* 回報類別：五個一鍵選，一欄排開，方便單手點 */
 .report .kind-pick {
@@ -6012,7 +6012,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   color: var(--muted, #6b6455);
 }
 
-/* ---------- 第四輪 X：集章冊與迷霧 ---------- */
+/* ---------- 集章冊與迷霧 ---------- */
 
 /* 全市地圖上面的一行：我的區的進度，加一顆跳到卡片的鈕 */
 .atlas-home {
@@ -6083,9 +6083,9 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   text-wrap: pretty;
 }
 
-/* ---------- 第四輪 Y：新手、回報、我的 ---------- */
+/* ---------- 新手、回報、我的 ---------- */
 
-/* 「用目前位置」：整排的次要按鈕（白底、綠框、定位圖示），不是選項——只有真正選到的那一區才填色（第六輪，2026-10-20） */
+/* 「用目前位置」：整排的次要按鈕（白底、綠框、定位圖示），不是選項——只有真正選到的那一區才填色 */
 .district-here {
   grid-column: 1 / -1;
   gap: 6px;
@@ -6141,7 +6141,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 }
 
 /* 照片授權與出處連結：字還是小字，但每個連結是 44 px 高的整列點擊範圍。
-   作者那行獨佔一列，兩個連結排在下一列，總高度和原本三行小字差不多 */
+   作者那行獨佔一列，兩個連結排在下一列，總高度和三行小字差不多 */
 .carousel-credit {
   gap: 0 18px;
   padding-bottom: 0;
@@ -6221,7 +6221,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   margin-top: 8px;
 }
 
-/* 樹洞卡上方的心情列（第五輪）：小按鈕排成可以折行的一列，點了就存 */
+/* 樹洞卡上方的心情列：小按鈕排成可以折行的一列，點了就存 */
 .whisper-mood {
   margin: 10px 0 2px;
 }
@@ -6402,7 +6402,7 @@ body:not(:has(.bottom-nav)) .migrate-banner {
 }
 
 /* 矮螢幕（360×640 一類）：第一屏的三列（動物、區、心情）要整個在導覽中間浮出的掃樹牌圓鈕上面，
-   不能被它蓋掉一半。小圖、列距收一點，省下約 50 px（第五輪） */
+   不能被它蓋掉一半。小圖、列距收一點，省下約 50 px */
 @media (max-height: 700px) {
   .me-scene {
     min-height: 108px;

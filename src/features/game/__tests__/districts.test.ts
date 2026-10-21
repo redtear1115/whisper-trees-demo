@@ -143,7 +143,7 @@ describe('lightByDistrict', () => {
 
   it('attributes tree actions by prefix and wish/water by the wish district', () => {
     award('checkin', 'DA0000000001', noon)
-    // 2026-10-20 前的流水帳有獨立的 sun 紀錄（現在日照是倍率，不再單獨發）；舊資料仍要歸到行政區
+    // 舊流水帳有獨立的 sun 紀錄（現在日照是倍率，不再單獨發）；舊資料仍要歸到行政區
     setExt('ledger', [...baseLedger(), { at: noon.getTime(), delta: 2, reason: '白天打卡的日照加成', key: 'sun:DA0000000001:2026-10-19' }])
     award('whisper', 'SL0000000001-001', noon)
     award('wish', 'w-1', noon)
