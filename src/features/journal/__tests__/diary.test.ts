@@ -3,7 +3,7 @@ import { resetAll } from '../../../store'
 import { setSession } from '../../../store/session'
 import { currentMood } from '../../mood/mood'
 import type { TreeReport } from '../../../store/types'
-import { DIARY_MAX, diary, diaryRows, MATCH_MS, moodOf, pickMood, recordTouch, rowTitle, withMood, withTouch, type DiaryEntry } from '../diary'
+import { DIARY_MAX, diary, diaryRows, MATCH_MS, moodOf, pickMood, recordTouch, rowTitle, treesMetToday, withMood, withTouch, type DiaryEntry } from '../diary'
 
 beforeEach(() => {
   resetAll()
@@ -106,5 +106,19 @@ describe('diaryRows', () => {
   })
   it('is empty with no records', () => {
     expect(diaryRows({ checkins: [], whispers: {}, reports: [], entries: [] })).toEqual([])
+  })
+})
+
+describe('treesMetToday（地圖上的小花）', () => {
+  it('only trees with an interaction on today (Taipei calendar day), each once, sorted', () => {
+    const now = new Date('2026-10-21T10:00:00+08:00')
+    const rows = [
+      { treeId: 'B', at: new Date('2026-10-21T09:00:00+08:00').getTime() },
+      { treeId: 'A', at: new Date('2026-10-21T00:10:00+08:00').getTime() },
+      { treeId: 'B', at: new Date('2026-10-21T08:00:00+08:00').getTime() },
+      { treeId: 'C', at: new Date('2026-10-20T23:59:00+08:00').getTime() },
+    ]
+    expect(treesMetToday(rows, now)).toEqual(['A', 'B'])
+    expect(treesMetToday([], now)).toEqual([])
   })
 })

@@ -7,6 +7,7 @@
 
 import { getExt, setExt, useStore, type State } from '../../store'
 import { whenUserReady } from '../../store/session'
+import { dayKey } from '../../lib/seed'
 import type { Checkin, TreeReport, Whisper } from '../../store/types'
 import { changeMood, moodById, type MoodId } from '../mood/mood'
 
@@ -141,6 +142,12 @@ export function diaryRows(a: {
   for (const r of a.reports) if (isMyReport(r)) rows.push({ kind: 'report', treeId: r.treeId, at: r.at, mood: m('report', r.treeId, r.at) })
   for (const e of a.entries) if (e.kind === 'touch') rows.push({ kind: 'touch', treeId: e.treeId, at: e.at, touch: e.touch, mood: e.mood && moodById(e.mood) ? e.mood : null })
   return rows.sort((x, y) => y.at - x.at || x.treeId.localeCompare(y.treeId))
+}
+
+/** 今天（台北日曆日）跟哪些樹互動過（打卡、摸摸樹、回報、樹洞都算）：地圖上這些樹腳邊長小花 */
+export function treesMetToday(rows: readonly Pick<DiaryRow, 'treeId' | 'at'>[], now = new Date()): string[] {
+  const today = dayKey(now)
+  return [...new Set(rows.filter((r) => dayKey(new Date(r.at)) === today).map((r) => r.treeId))].sort()
 }
 
 export const TOUCH_NAME: Record<TouchId, string> = { breathe: '呼吸', meditate: '冥想', hug: '擁抱' }

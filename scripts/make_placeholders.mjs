@@ -74,6 +74,28 @@ const treeShape = (w, h, { crown, light, base }) => {
   ].join('\n')
 }
 
+// 今天互動過的樹腳邊的小花（地圖拉近時疊在樹的圖示上，同樣大小、同樣底部對齊）：底座左右兩叢，五瓣花加葉子。
+const FLOWERS = [
+  { x: 0.17, y: 0.9, r: 0.105, petal: '#F6A5B8' },
+  { x: 0.33, y: 0.99, r: 0.085, petal: '#FFD66B' },
+  { x: 0.7, y: 0.97, r: 0.105, petal: '#C9A7EB' },
+  { x: 0.86, y: 0.87, r: 0.085, petal: '#F6A5B8' },
+]
+const flowers = (w, h) =>
+  FLOWERS.map(({ x, y, r, petal }) => {
+    const cx = w * x
+    const cy = h * y - w * r
+    const pr = w * r * 0.55
+    const leaf = `<ellipse cx="${cx + pr}" cy="${cy + pr * 1.6}" rx="${pr * 0.9}" ry="${pr * 0.45}" fill="#6FB46F" transform="rotate(-30 ${cx + pr} ${cy + pr * 1.6})"/>`
+    const petals = [0, 72, 144, 216, 288]
+      .map((deg) => {
+        const a = (deg * Math.PI) / 180
+        return `<circle cx="${(cx + Math.sin(a) * pr).toFixed(2)}" cy="${(cy - Math.cos(a) * pr).toFixed(2)}" r="${pr.toFixed(2)}" fill="${petal}" stroke="#fff" stroke-width="0.6"/>`
+      })
+      .join('')
+    return `${leaf}${petals}<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${(pr * 0.7).toFixed(2)}" fill="#F2B33D"/>`
+  }).join('\n')
+
 // 兩種版本：public/assets/ph/<id>.svg 是公民看得到的（沒有任何標示文字）；public/assets/ph-debug/<id>.svg 多一行
 // 「id 佔位」「尺寸 佔位」給設計與開發對照，只在網址帶 ?debug=1 時才載入（src/lib/debug.ts）。
 const outDir = join(root, 'public/assets/ph')
@@ -111,6 +133,9 @@ for (const a of assets) {
   if (TREE_SHAPE[a.id]) {
     body = `${treeShape(a.w, a.h, TREE_SHAPE[a.id])}\n`
     debug = cap(a.h - 2, Math.max(7, Math.round(a.w / 18)), `${a.id} 佔位`, `hsl(${h} 30% 30%)`)
+  } else if (a.id === 'map-met-flowers') {
+    body = `${flowers(a.w, a.h)}\n`
+    debug = cap(a.h * 0.5, Math.max(7, Math.round(a.w / 18)), `${a.id} 佔位`, `hsl(${h} 30% 30%)`)
   } else if (animal) {
     body = `${badge(a.w / 2, a.h / 2 - 2, a.h * 0.43, ANIMAL_BADGE[a.id])}\n`
     debug = cap(a.h - 1, 7, `${a.id} ${animal} 佔位`, `hsl(${h} 30% 30%)`)

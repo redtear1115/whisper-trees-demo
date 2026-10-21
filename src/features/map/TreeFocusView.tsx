@@ -18,6 +18,9 @@ const ICON: Record<FocusActionId, ReactNode> = {
   adopt: <IconActionAdopt />,
 }
 
+/** 提示浮在畫面上多久（毫秒；夥伴回饋 3～5 秒） */
+export const NOTE_MS = 4000
+
 interface Props {
   tree: Tree
   range: RangeInfo
@@ -44,14 +47,22 @@ interface Props {
  */
 export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, intro, onIntroDone, onScan, onRoute, onWalk }: Props) {
   const root = useRef<HTMLDivElement>(null)
-  const [note, setNote] = useState('')
+  /** 點灰色圈、認養時的提示：浮在樹上面（不推動版面），NOTE_MS 後自己消失；n 讓同一句再點一次也重新計時 */
+  const [note, setNoteState] = useState({ text: '', n: 0 })
+  const setNote = (text: string) => setNoteState((p) => ({ text, n: p.n + 1 }))
   /** 打開的卡（摸摸樹、回報、留言在樹洞、樹的資料）；null = 看得到圈 */
   const [card, setCard] = useState<Exclude<FocusActionId, 'adopt'> | 'info' | null>(null)
   const actions = focusActions(range, checkedIn)
   const buttons = focusButtons(range, checkedIn, demo)
 
   // 換一棵樹、走進感應圈、打了卡，就清掉上一個提醒
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setNote(''), [tree.id, range.inRange, checkedIn])
+  useEffect(() => {
+    if (!note.text) return
+    const t = setTimeout(() => setNoteState((p) => (p.n === note.n ? { ...p, text: '' } : p)), NOTE_MS)
+    return () => clearTimeout(t)
+  }, [note])
   useEffect(() => setCard(null), [tree.id])
   const reward = intro?.reward ?? null
   const finishIntro = () => {
@@ -90,6 +101,9 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, i
         <Art id="tree-focus" alt="" className="tree-focus-art" />
         {/* 你的動物站在樹下 */}
         <Art id={animal.art} alt={`你在這裡：${animal.name}`} className="tree-focus-animal" />
+        <p className="tree-focus-note" role="status" data-testid="focus-note">
+          {note.text}
+        </p>
         {reward && <CheckinReward treeId={tree.id} reward={reward} onDone={finishIntro} />}
         {!card && !reward &&
           actions.map((a) => (
@@ -130,10 +144,6 @@ export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, i
           {card === 'info' && <InfoCard tree={tree} />}
         </div>
       )}
-
-      <p className="tree-focus-note" role="status" data-testid="focus-note">
-        {note}
-      </p>
 
 
       <div className="tree-focus-bar">

@@ -5,11 +5,12 @@ import type { Map as MLMap, Marker, PointLike } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { DEMO, MAP_STYLE, NEAR } from '../config'
 import { findTree, type Tree } from '../lib/trees'
+import { diaryRows, treesMetToday, useDiary } from '../features/journal/diary'
 import type { LngLat } from '../lib/geo'
-import { clearActiveTour, recentCheckin, wishStatus, demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useActiveTour, useStore, useUserReady, useWishes, wishByPit } from '../store'
+import { clearActiveTour, hasWateredToday, recentCheckin, wishStatus, demoHintSeen, dismissDemoHint, isDemoMode, setDemoPosition, totalWater, useActiveTour, useStore, useUserReady, useWishes, wishByPit } from '../store'
 import type { ActiveTour } from '../store'
 import type { Wish } from '../store/types'
-import { wishHitSize, wishMarkerLabel, wishMarkerSize } from '../features/map/wishMarker'
+import { wishHitSize, wishMarkerLabel, wishMarkerSize, wishWaterLabel, wishWaterMark } from '../features/map/wishMarker'
 import { WishCard } from '../features/wish/WishCard'
 import { FeasibilityResult, WishForm, type PitInfo } from '../features/wish/WishForm'
 import { Art } from '../components/ui'
@@ -299,6 +300,24 @@ export default function MapPage() {
       loadMapIcon(m, 'tree-near', assetUrl('map-tree-near'), 64, 72)
       treeIcon('trees-icon', 'tree-far')
       treeIcon('trees-near-icon', 'tree-near', { layout: { visibility: 'none' } })
+      // 今天互動過的樹：腳邊長幾朵小花（和樹的圖示同大小、同底部對齊，疊在上面）。點位由下面的 effect 填
+      m.addSource('met', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+      loadMapIcon(m, 'met-flowers', assetUrl('map-met-flowers'), 64, 72)
+      m.addLayer({
+        id: 'met-flowers',
+        type: 'symbol',
+        source: 'met',
+        minzoom: TREE_ICON_MINZOOM,
+        layout: {
+          'icon-image': 'met-flowers',
+          'icon-anchor': 'bottom',
+          'icon-size': ['interpolate', ['linear'], ['zoom'], TREE_ICON_MINZOOM, 0.55, 18.5, 0.75, 20.5, 1.25],
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+          'icon-pitch-alignment': 'viewport',
+          'icon-rotation-alignment': 'viewport',
+        },
+      })
       // 空樹穴拉近時標「樹穴」：褐底淡字，和設計圖一樣
       m.addLayer({
         id: 'pits-label',
@@ -888,7 +907,30 @@ export default function MapPage() {
     }
   }, [follow])
 
-  // 許願圖層：小樹苗，大小對應澆水數
+  // 今天互動過的樹（夥伴回饋 2026-10-21）：日記的四種互動，今天的那些樹，腳邊長小花
+  const metWhispers = useStore((s) => s.whispers)
+  const metReports = useStore((s) => s.reports)
+  const metEntries = useDiary().entries
+  const metIds = treesMetToday(diaryRows({ checkins, whispers: metWhispers, reports: metReports, entries: metEntries })).join(',')
+  useEffect(() => {
+    const m = map.current
+    if (!m || !ready) return
+    let alive = true
+    const ids = metIds ? metIds.split(',') : []
+    Promise.all(ids.map((id) => findTree(id))).then((trees) => {
+      const src = alive ? (m.getSource('met') as maplibregl.GeoJSONSource | undefined) : undefined
+      src?.setData({
+        type: 'FeatureCollection',
+        features: trees.filter((t): t is Tree => !!t).map((t) => ({ type: 'Feature', properties: { id: t.id }, geometry: { type: 'Point', coordinates: t.lngLat } })),
+      })
+    })
+    return () => {
+      alive = false
+    }
+  }, [metIds, ready])
+
+  // 許願圖層：小樹苗，大小對應澆水數；今天澆了一次就重畫（水滴換成勾）
+  const watered = useStore((s) => s.watered)
   useEffect(() => {
     const m = map.current
     if (!m || !layers.wishes) return
@@ -912,7 +954,17 @@ export default function MapPage() {
         tag.textContent = '許願中'
         node.appendChild(tag)
       }
-      node.setAttribute('aria-label', `${wishMarkerLabel(w.road)}${live ? '（許願中）' : ''}`)
+      // 今天還能澆：水滴；今天澆過：勾（夥伴回饋 2026-10-21）
+      const water = wishWaterMark(live, hasWateredToday(w.id))
+      if (water) {
+        const badge = document.createElement('span')
+        badge.className = `wish-water ${water}`
+        badge.setAttribute('aria-hidden', 'true')
+        badge.textContent = water === 'done' ? '✓' : ''
+        node.appendChild(badge)
+        node.classList.toggle('watered', water === 'done')
+      }
+      node.setAttribute('aria-label', `${wishMarkerLabel(w.road)}${wishWaterLabel(water)}`)
       // 地圖外的標記不進 Tab 順序；鍵盤使用者從「樹洞」的我的許願進入
       node.tabIndex = -1
       node.onclick = (ev) => {
@@ -924,7 +976,7 @@ export default function MapPage() {
       return new maplibregl.Marker({ element: node }).setLngLat(w.lngLat).addTo(m)
     })
     return () => markers.forEach((mk) => mk.remove())
-  }, [wishes, layers.wishes])
+  }, [wishes, layers.wishes, watered])
 
   useEffect(() => {
     const m = map.current
@@ -935,6 +987,7 @@ export default function MapPage() {
       }
       // 跟著它們開關的圖層（圈內的樹圖示由感應圈的 effect 管）
       if (m.getLayer('trees-icon')) m.setLayoutProperty('trees-icon', 'visibility', layers.trees ? 'visible' : 'none')
+      if (m.getLayer('met-flowers')) m.setLayoutProperty('met-flowers', 'visibility', layers.trees ? 'visible' : 'none')
       if (m.getLayer('pits-label')) m.setLayoutProperty('pits-label', 'visibility', layers.pits ? 'visible' : 'none')
     }
     if (m.isStyleLoaded()) apply()
@@ -979,7 +1032,7 @@ export default function MapPage() {
             [
               ['trees', '樹木', 'legend-tree'],
               ['pits', '空樹穴（可以許願）', 'legend-pit'],
-              ['wishes', '許願', 'legend-wish'],
+              ['wishes', '許願（水滴：今天還能澆；勾：今天澆過）', 'legend-wish'],
               ['parks', '公園範圍（OSM）', 'legend-park'],
             ] as const
           ).map(([k, label, cls]) => (

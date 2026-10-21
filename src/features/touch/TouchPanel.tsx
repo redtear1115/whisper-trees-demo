@@ -9,7 +9,7 @@ type Step = { kind: 'pick' } | { kind: 'doing'; id: TouchId; start: number } | {
 
 /**
  * 摸摸樹：選呼吸、冥想或擁抱 → 跟著做 → 做完記一筆日記（recordTouch）、算一個互動（award('touch')），
- * 然後可以加一個心情。只有在這棵樹打過卡才打得開（拉近畫面擋著）。純 CSS 動畫，減少動態時不動，只有文字。
+ * 然後可以加一個心情。在感應圈內（或打過卡）才打得開，不用掃樹牌（拉近畫面擋著）。純 CSS 動畫，減少動態時不動，只有文字。
  */
 export function TouchPanel({ treeId, onClose }: { treeId: string; onClose: () => void }) {
   const [step, setStep] = useState<Step>({ kind: 'pick' })

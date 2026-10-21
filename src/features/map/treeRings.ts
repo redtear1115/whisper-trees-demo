@@ -1,5 +1,5 @@
 // 點地圖上的樹之後的「拉近畫面」：哪些圈能用、距離提示、底部的按鈕，全是純函式。
-// 「範圍內」的判斷和打卡共用 checkinRadius（經 ringRadius）：圈內才能掃樹牌打卡；打卡之後才能摸摸樹、回報、留言。
+// 「範圍內」的判斷和打卡共用 checkinRadius（經 ringRadius）：圈內才能掃樹牌打卡、摸摸樹；打卡之後才能回報、留言。
 
 import type { LngLat } from '../../lib/geo'
 import { distanceMeters } from '../../lib/geo'
@@ -48,7 +48,7 @@ export interface FocusAction {
   /** main：樹冠上的三個大圈（摸摸樹、回報、留言在樹洞）；small：認養 */
   size: 'main' | 'small'
   enabled: boolean
-  /** 還沒打卡時點了先做什麼：scan＝去掃樹牌（感應圈內）、walk＝走過去（感應圈外）；null＝直接開卡 */
+  /** 點了先做什麼：scan＝去掃樹牌（感應圈內還沒打卡）、walk＝走過去（感應圈外）；null＝直接開卡 */
   first: 'scan' | 'walk' | null
   /** 螢幕閱讀器念的完整說明，灰色的會帶原因 */
   aria: string
@@ -60,8 +60,9 @@ export const ADOPT_NOTE = '認養即將開放'
 
 /**
  * 拉近畫面的圈（2026-10-21 使用者決定，依「拉近的介面」設計圖）。順序固定。
- * 三個互動（摸摸樹、回報、留言在樹洞）要先在這棵樹打卡（30 分鐘內不用再掃，見 recentCheckin）。
- * 還沒打卡時圈照樣亮著，點了先做「下一步」（first）：在感應圈內 → 去掃樹牌（scan）；
+ * 回報、留言在樹洞要先在這棵樹打卡（30 分鐘內不用再掃，見 recentCheckin）。
+ * 摸摸樹不用掃樹牌，站在感應圈內就能做（2026-10-21 夥伴回饋：分隔島上的樹摸得到、掃不到樹牌）。
+ * 還沒打卡時圈照樣亮著，點了先做「下一步」（first）：在感應圈內 → 去掃樹牌（scan；摸摸樹直接開卡）；
  * 在感應圈外 → 走過去（walk：Demo 是模擬走到樹旁，一般是畫出步行路線）。只有沒有位置時是灰的。
  * 認養永遠是灰的（即將開放）。樹的資料不用靠近，在底部「返回」旁邊。打卡過的互動點了在拉近畫面裡打開一張卡。
  */
@@ -69,14 +70,18 @@ export function focusActions(range: RangeInfo, checkedIn: boolean): FocusAction[
   const first: FocusAction['first'] = checkedIn ? null : range.inRange ? 'scan' : 'walk'
   const enabled = checkedIn || range.inRange || range.distance !== null
   const why = enabled ? '' : farNote(range)
-  const main = (a: Pick<FocusAction, 'id' | 'label'>, desc: string): FocusAction => ({
-    ...a,
-    size: 'main',
-    enabled,
-    first: enabled ? first : null,
-    why,
-    aria: !enabled ? `${desc}（暫時不能用：${why}）` : first === 'scan' ? `${desc}（先掃樹牌打卡）` : first === 'walk' ? `${desc}（先走到樹旁）` : desc,
-  })
+  const main = (a: Pick<FocusAction, 'id' | 'label'>, desc: string): FocusAction => {
+    // 摸摸樹不用掃樹牌：在感應圈內就直接開卡
+    const step = a.id === 'touch' && first === 'scan' ? null : enabled ? first : null
+    return {
+      ...a,
+      size: 'main',
+      enabled,
+      first: step,
+      why,
+      aria: !enabled ? `${desc}（暫時不能用：${why}）` : step === 'scan' ? `${desc}（先掃樹牌打卡）` : step === 'walk' ? `${desc}（先走到樹旁）` : desc,
+    }
+  }
   return [
     main({ id: 'touch', label: '摸摸樹' }, '摸摸樹：呼吸、冥想或擁抱'),
     main({ id: 'report', label: '回報' }, '樹況回報'),

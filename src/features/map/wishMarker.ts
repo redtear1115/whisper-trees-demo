@@ -15,3 +15,19 @@ export function wishHitSize(visual: number): number {
 export function wishMarkerLabel(road: string): string {
   return `${road.trim()}的許願`
 }
+
+/**
+ * 許願中的樹苗今天能不能澆（2026-10-21 夥伴回饋：要分今天還能澆、今天澆過）：
+ * can＝今天還沒澆（水滴）、done＝今天澆過（勾）；已種植、不可種的不標（null）
+ */
+export type WishWaterMark = 'can' | 'done' | null
+
+export function wishWaterMark(live: boolean, wateredToday: boolean): WishWaterMark {
+  if (!live) return null
+  return wateredToday ? 'done' : 'can'
+}
+
+/** 無障礙名稱後面接的狀態 */
+export function wishWaterLabel(mark: WishWaterMark): string {
+  return mark === 'can' ? '（許願中，今天還能澆水）' : mark === 'done' ? '（許願中，今天澆過了）' : ''
+}

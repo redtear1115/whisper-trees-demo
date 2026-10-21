@@ -48,7 +48,7 @@ describe('ReportBox off site', () => {
     const out = html(false)
     expect(out).toContain('data-testid="report-scan"')
     expect(out).toContain('href="/scan"')
-    expect(out).toContain(`data-state="${JSON.stringify({ hintTreeId: tree.id }).replace(/"/g, '&quot;')}"`)
+    expect(out).toContain(`data-state="${JSON.stringify({ hintTreeId: tree.id, openCard: 'report' }).replace(/"/g, '&quot;')}"`)
     expect(out).toContain('去掃樹牌')
     expect(out).toMatch(/class="btn block report-scan"/)
     expect(out).not.toContain('回報問題')

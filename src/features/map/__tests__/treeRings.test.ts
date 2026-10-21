@@ -66,11 +66,13 @@ describe('focusActions（拉近畫面的圈）', () => {
     expect(adopt.why).toBe(ADOPT_NOTE)
     expect(adopt.aria).toContain('即將開放')
   })
-  it('in range but not checked in: rings stay lit and go to scanning first', () => {
+  it('in range but not checked in: 摸摸樹 opens right away; 回報 and 留言 go to scanning first', () => {
     const list = focusActions(near, false)
     expect(on(list)).toEqual(['touch', 'report', 'whisper'])
-    expect(list.filter((a) => a.first === 'scan').map((a) => a.id)).toEqual(['touch', 'report', 'whisper'])
-    expect(list[0].aria).toContain('先掃樹牌')
+    expect(list[0].first).toBeNull()
+    expect(list.filter((a) => a.first === 'scan').map((a) => a.id)).toEqual(['report', 'whisper'])
+    expect(list[0].aria).not.toContain('先掃樹牌')
+    expect(list[1].aria).toContain('先掃樹牌')
   })
   it('out of range: rings stay lit and walk there first', () => {
     const list = focusActions(far, false)

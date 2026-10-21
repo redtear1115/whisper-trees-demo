@@ -3581,10 +3581,16 @@ html:has(.tab-shell) {
   outline-offset: 4px;
 }
 
+/* 提示浮在舞台上緣（樹上面）、不佔版面（不然折成兩行會把樹往上推），幾秒後自己消失（TreeFocusView 的 NOTE_MS） */
 .tree-focus-note {
-  min-height: 1.5em;
-  margin: 8px auto 0;
-  max-width: 300px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: max-content;
+  max-width: min(300px, calc(100% - 32px));
+  margin: 0;
   padding: 6px 14px;
   border-radius: 12px;
   background: rgba(255, 253, 248, 0.96);
@@ -3595,6 +3601,17 @@ html:has(.tab-shell) {
 
 .tree-focus-note:empty {
   visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tree-focus-note:not(:empty) {
+    animation: note-in 0.2s ease-out;
+  }
+  @keyframes note-in {
+    from {
+      opacity: 0;
+    }
+  }
 }
 
 /* 你的動物：站在樹下，樹幹右邊的草地上 */
@@ -5487,6 +5504,42 @@ body:not(:has(.bottom-nav)) .migrate-banner {
   font-weight: 700;
   line-height: 1;
   pointer-events: none;
+}
+/* 今天澆水的狀態：樹苗右下角的小圓章。水滴＝今天還能澆，勾＝今天澆過（澆過的星星也淡一點） */
+.wish-water {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+.wish-water.can {
+  background: #4a9fd8;
+}
+.wish-water.can::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-top: 2px;
+  border-radius: 0 50% 50% 50%;
+  background: #fff;
+  transform: rotate(45deg);
+}
+.wish-water.done {
+  background: #6c9a7a;
+}
+.wish-marker.watered .wish-tag {
+  opacity: 0.55;
 }
 .wish-marker-art {
   display: block;

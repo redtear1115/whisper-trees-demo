@@ -19,9 +19,9 @@
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
 | `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:143` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
 | `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:143` | 同上夜間版，「樹木休息中」的氣氛 |
-| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:506`<br>`src/pages/MapPage.tsx:904` | 小樹苗；地圖上依澆水數放大 |
+| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:506`<br>`src/pages/MapPage.tsx:946` | 小樹苗；地圖上依澆水數放大 |
 | `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
-| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:1011` | 空的樹穴（方形土坑） |
+| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:1064` | 空的樹穴（方形土坑） |
 | `scan-tag` | 240×160 | 480×320 | `public/assets/ph/scan-tag.svg` | 掃樹牌說明 | （尚未使用） | 公園處樹牌與 QR Code 的位置示意 |
 | `sprout-0` | 240×240 | 480×480 | `public/assets/ph/sprout-0.svg` | 我的小芽 | `src/features/game/character.ts:12` | 角色「小芽」＝樹精（團隊簡報 v20 p14），第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景 |
 | `sprout-1` | 240×240 | 480×480 | `public/assets/ph/sprout-1.svg` | 我的小芽 | `src/features/game/character.ts:13` | 角色「小芽」第 2 階：茁壯樹精。同一個角色長大了，身形變穩、枝葉變多，樹皮紋路出現（規格同上） |
@@ -57,14 +57,15 @@
 | `avatar-blue-magpie`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
 | `avatar-malayan-night-heron`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-malayan-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:20` | 地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
 | `avatar-pangolin`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:21` | 地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
-| `tree-focus` | 360×400 | 720×800 | `public/assets/ph/tree-focus.svg` | 地圖點樹後的拉近畫面（中間的大樹） | `src/features/map/TreeFocusView.tsx:90` | 2.5D 蠟筆繪本風的一棵大樹：圓潤蓬鬆的綠色樹冠占上方三分之二，粗短的褐色樹幹，樹根坐在淡淡的圓形草地上；透明背景、主體置中，樹冠上要留得下 5 個圓形按鈕（文字疊在上面仍看得清楚） |
-| `map-tree-near` | 64×72 | 128×144 | `public/assets/ph/map-tree-near.svg` | 地圖拉近時，感應圈內的樹（可以摸） | `src/pages/MapPage.tsx:299` | 2.5D 蠟筆風的小樹圖示：蓬鬆的亮綠色樹冠、褐色樹幹，腳下一個淡綠色圓形底座；透明背景、底座中心對準樹的位置（圖片底部中央） |
-| `map-tree-far` | 64×72 | 128×144 | `public/assets/ph/map-tree-far.svg` | 地圖拉近時，感應圈外的樹 | `src/pages/MapPage.tsx:298` | 同上，樹冠改成灰藍綠色、彩度低，底座同樣淡綠；看得出是同一種樹，但比較安靜 |
+| `tree-focus` | 360×400 | 720×800 | `public/assets/ph/tree-focus.svg` | 地圖點樹後的拉近畫面（中間的大樹） | `src/features/map/TreeFocusView.tsx:101` | 2.5D 蠟筆繪本風的一棵大樹：圓潤蓬鬆的綠色樹冠占上方三分之二，粗短的褐色樹幹，樹根坐在淡淡的圓形草地上；透明背景、主體置中，樹冠上要留得下 5 個圓形按鈕（文字疊在上面仍看得清楚） |
+| `map-tree-near` | 64×72 | 128×144 | `public/assets/ph/map-tree-near.svg` | 地圖拉近時，感應圈內的樹（可以摸） | `src/pages/MapPage.tsx:300` | 2.5D 蠟筆風的小樹圖示：蓬鬆的亮綠色樹冠、褐色樹幹，腳下一個淡綠色圓形底座；透明背景、底座中心對準樹的位置（圖片底部中央） |
+| `map-tree-far` | 64×72 | 128×144 | `public/assets/ph/map-tree-far.svg` | 地圖拉近時，感應圈外的樹 | `src/pages/MapPage.tsx:299` | 同上，樹冠改成灰藍綠色、彩度低，底座同樣淡綠；看得出是同一種樹，但比較安靜 |
+| `map-met-flowers` | 64×72 | 128×144 | `public/assets/ph/map-met-flowers.svg` | 地圖拉近時，今天互動過的樹 | `src/pages/MapPage.tsx:305` | 疊在樹的圖示上的幾朵小花（粉、黃、淡紫），長在底座左右兩側、不擋樹幹；尺寸與底部對齊和 map-tree-near 相同，其餘透明 |
 | `journal-empty` | 240×160 | 480×320 | `public/assets/ph/journal-empty.svg` | 樹洞頁「我的日記」空狀態 | （尚未使用） | 繪本風：一本攤開的空白小日記本靠在樹根旁，一片發光葉子當書籤；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 | `wish-empty` | 240×160 | 480×320 | `public/assets/ph/wish-empty.svg` | 樹洞頁「許願」空狀態 | （尚未使用） | 繪本風：一個空的方形樹穴，旁邊插著一張小小的許願卡，一隻小鳥停在上面；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 | `fog-empty` | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:81` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 
-共 47 項。
+共 48 項。
 
 ## PWA 圖示（加到手機主畫面）
 
@@ -110,6 +111,7 @@
 | `public/assets/ph-debug/item-hat-ancient.svg` | （尚未使用） |
 | `public/assets/ph-debug/journal-empty.svg` | （尚未使用） |
 | `public/assets/ph-debug/logo.svg` | （尚未使用） |
+| `public/assets/ph-debug/map-met-flowers.svg` | （尚未使用） |
 | `public/assets/ph-debug/map-tree-far.svg` | （尚未使用） |
 | `public/assets/ph-debug/map-tree-near.svg` | （尚未使用） |
 | `public/assets/ph-debug/sapling.svg` | （尚未使用） |
