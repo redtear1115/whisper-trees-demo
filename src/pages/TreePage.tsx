@@ -35,7 +35,6 @@ export default function TreePage() {
   const fromTab = (location.state as { from?: string } | null)?.from
   const back = backTarget(fromTab)
   // 從地圖行動圈來、人在感應圈內：還沒打卡就提醒「掃一下樹牌就好」，不要再叫人走過去
-  const nearTree = (location.state as { nearTree?: boolean } | null)?.nearTree === true
   const night = !isDaytime()
   const frame = useInventory().equipped.frame
   const [tree, setTree] = useState<Tree | null | undefined>(undefined)
@@ -184,7 +183,7 @@ export default function TreePage() {
           />
         ) : (
           <section className="card">
-            <p>{nearTree ? '你已經在樹旁邊了。掃一下樹幹上的樹牌，就能對它說句話。' : '想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。'}</p>
+            <p>想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。</p>
             <Link className="btn primary block" to="/scan" state={{ hintTreeId: treeId }}>
               掃樹牌
             </Link>
