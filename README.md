@@ -166,9 +166,32 @@
 - 被放棄的匿名帳號資料不會清理。
 - 管理者角色只有一種，沒有分級。
 
-## 如果市府要落地
+## 新市府百日內怎麼落地
 
-需要涵蓋：主責局處（公園處）、需要開放的資料（移樹紀錄、樹穴現況）、樹牌 QR 指向的網址如何導到新服務、預估成本。
+主責局處：工務局公園處（行道樹與公園樹木、樹牌、補植）；新工處（人行道與樹穴）協辦。
+
+**第 1～30 天：接上現有的樹牌，不換任何一塊**
+- 公園處指定承辦與資料窗口，網站搬到市府的網域與雲端（目前是 Cloudflare Pages ＋ Firebase，都可以換）。
+- 樹牌 QR 指向的 `trees.gov.taipei/show/?treeid=…` 頁面加一個連結「到樹旁跟它打招呼」，帶著樹籍編號進來；全市既有樹牌不用重印。
+- 政府端改用市府帳號登入（台北通或內部帳號），取代目前的 Google 白名單；完成個資與資安檢核。
+
+**第 31～60 天：補齊資料，選兩個行政區試辦**
+- 開放目前缺的資料：逐年移樹紀錄與原因、樹穴現況、補植排程。
+- 樹況回報接進公園處既有的派工流程（或 1999），讓市民看得到自己的回報處理到哪。
+- 選一個行道樹密、一個缺蔭的行政區試辦，在樹牌旁、里辦公處與學校推廣。
+
+**第 61～100 天：看數字，決定要不要擴大**
+- 檢視試辦結果：打卡與回報數、回報平均處理天數、許願熱點與空樹穴的重疊程度。
+- 補種優先分數（市民需求、遮蔭缺口、可行性、公平性）納入下一年度補植計畫的參考。
+- 決定是否全市上線，以及光點、商店等遊戲化功能要不要保留。
+
+**成本**：網站本身是靜態頁面加雲端資料庫，試辦規模的用量不高；主要成本是承辦人力、派工系統串接與推廣。
+
+## 授權
+
+- **程式碼**：[MIT](LICENSE)，© 2026 皮卡愛台灣。
+- **資料**不在 MIT 範圍內，沿用各自原本的授權：政府開放資料依[政府資料開放授權條款第 1 版](https://data.gov.tw/license)；OpenStreetMap 資料依 [ODbL 1.0](https://opendatacommons.org/licenses/odbl/)（© OpenStreetMap contributors）；iNaturalist 樹種照片依各張的 CC0 或 CC BY，版權屬各攝影者（逐張記在 `material/raw/inat/manifest.json`）。詳見上方「資料：哪些是真的、哪些是模擬的」。
+- 使用的開源套件依各自的授權，見下方「使用的開源套件與 AI 工具」。
 
 ## 參考與致謝
 
@@ -218,7 +241,7 @@ npm test
 npm run test:rules   # 本機 Firestore + Auth emulator 跑規則測試與雲端 store 測試（tests/rules、tests/cloud；brew install openjdk）
 cp .env.example .env.local   # 填入 6 個 VITE_FIREBASE_* 值；沒有這個檔就用 localStorage
 npm run build    # 輸出 dist/，靜態網站
-npm run deploy   # 建置並部署到 Cloudflare Pages（專案 whisper-trees）
+npm run deploy   # 建置並部署到 Cloudflare Pages（專案 whisper-trees）；.env.local 要有 CLOUDFLARE_ACCOUNT_ID
 node scripts/make_placeholders.mjs   # 依 src/assets.ts 重新產生佔位美術與 docs/ui-assets.md
 ```
 

@@ -2,6 +2,7 @@
   "name": "whisper-trees-demo",
   "private": true,
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run --dir src",
     "test:rules": "PATH=/opt/homebrew/opt/openjdk/bin:$PATH firebase emulators:exec --only firestore,auth --project demo-whisper-trees \"vitest run -c vitest.rules.config.ts\"",
-    "deploy": "npm run build && CLOUDFLARE_ACCOUNT_ID=c0fdc56af91423b181796c3f7c44afcc wrangler pages deploy dist --project-name whisper-trees --branch main"
+    "deploy": "npm run build && set -a && . ./.env.local && set +a && test -n \"$CLOUDFLARE_ACCOUNT_ID\" && wrangler pages deploy dist --project-name whisper-trees --branch main"
   },
   "dependencies": {
     "@zxing/browser": "^0.2.1",

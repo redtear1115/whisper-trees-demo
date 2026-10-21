@@ -79,7 +79,8 @@ npm run deploy  # 部署到 Cloudflare Pages：https://whisper-trees-demo.southe
 node scripts/make_placeholders.mjs   # 佔位美術，清單在 src/assets.ts
 ```
 
-- `.env.local`：複製 6 個 `VITE_FIREBASE_*` 值進去，不要進版控。Cloudflare Pages 建置時也要設同樣 6 個變數。
+- `.env.local`：複製 6 個 `VITE_FIREBASE_*` 值進去，不要進版控。Cloudflare Pages 建置時也要設同樣 6 個變數。要部署的人另外加 `CLOUDFLARE_ACCOUNT_ID`（`npm run deploy` 會讀）。
+- 投稿用的欄位與介紹文字見 `docs/submission.md`。
 - 美術一律先用佔位檔：在 `src/assets.ts` 加一筆，跑上面的腳本，畫面用 `<Art id="…">`。
 - 延伸功能（光點、商店、GM 等）見 `docs/specs/08-extensions.md`。
 
