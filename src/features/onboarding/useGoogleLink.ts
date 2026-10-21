@@ -7,9 +7,9 @@ export function useGoogleLink() {
   const link = () => {
     setMsg(null)
     linkGoogle().then((r) => {
-      if (r === 'linked') setMsg('已用 Google 保留。換瀏覽器或換手機，用同一個 Google 登入就找得回來。')
+      if (r === 'linked') setMsg('已用 Google 登入。原本匿名身分下的雲端紀錄會保留，換瀏覽器或換手機也找得回來。')
       else if (r === 'switched')
-        setMsg('這個 Google 帳號已經有紀錄，已切換過去。這台裝置原本的訪客紀錄不會合併，會留在這台裝置的訪客帳號裡。')
+        setMsg('這個 Google 帳號已經有紀錄，已切換過去。這台裝置原本的匿名紀錄不會合併，會留在原本的匿名帳號裡。')
       else if (r === 'error') setMsg('沒有連上 Google，請稍後再試。')
     })
   }

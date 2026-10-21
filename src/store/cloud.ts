@@ -66,6 +66,7 @@ interface CloudWish {
   feasibility: Wish['feasibility']
   createdAt: number
   history: StatusEvent[]
+  createdBy: string
 }
 
 interface UserDoc {
@@ -181,7 +182,11 @@ function rebuildUser() {
     const [wid, day] = key.split('|')
     if (!(watered[wid] ?? []).includes(day)) watered[wid] = [...(watered[wid] ?? []), day]
   }
-  S = { ...S, checkins: userDoc.checkins, watered, myWishIds: userDoc.myWishIds }
+  // 正常情況由 users/{uid}.myWishIds 判斷；createdBy 是保險，避免早期資料漏寫關聯後，
+  // 政府更新了案件但原許願市民在「我許的願」看不到。
+  const ownedWishIds = uid ? Object.values(wishDocs).filter((w) => w.createdBy === uid).map((w) => w.id) : []
+  const myWishIds = [...new Set([...userDoc.myWishIds, ...ownedWishIds])]
+  S = { ...S, checkins: userDoc.checkins, watered, myWishIds }
 }
 
 function rebuildWhispers() {
@@ -368,9 +373,11 @@ function startShared() {
           feasibility: x.feasibility,
           createdAt: ms(x.createdAt),
           history: (x.history ?? []).map(normEvent),
+          createdBy: x.createdBy ?? '',
         }
       })
       rebuildWishes()
+      rebuildUser()
       commit()
     },
     shared,
@@ -695,7 +702,7 @@ export function createWish(input: Omit<Wish, 'id' | 'createdAt' | 'seedWater' | 
   const road = input.road.slice(0, 40)
   const wish: Wish = { ...input, id: wishId, road, reasons, feasibility, createdAt: now, seedWater: 0, water: 0, history, mock: false }
 
-  wishDocs = { ...wishDocs, [wishId]: { id: wishId, pitId: input.pitId, lngLat: input.lngLat, road, district: input.district, reasons, feasibility, createdAt: now, history } }
+  wishDocs = { ...wishDocs, [wishId]: { id: wishId, pitId: input.pitId, lngLat: input.lngLat, road, district: input.district, reasons, feasibility, createdAt: now, history, createdBy: uid } }
   userDoc = { ...userDoc, myWishIds: [...userDoc.myWishIds, wishId] }
   rebuildWishes()
   rebuildUser()

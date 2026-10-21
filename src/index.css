@@ -3026,6 +3026,7 @@ body.has-offline .tree-focus {
 }
 
 .bottom-tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3037,6 +3038,38 @@ body.has-offline .tree-focus {
   font-size: 0.8125rem;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.nav-notification {
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 8px);
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 2px solid var(--card);
+  border-radius: 999px;
+  background: #b43b32;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.wish-update-banner {
+  width: 100%;
+  margin: 8px 0 2px;
+  padding: 10px 12px;
+  border: 1px solid #e6b94f;
+  border-radius: 10px;
+  background: #fff4cf;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
 }
 
 .bottom-tab .icon-svg {

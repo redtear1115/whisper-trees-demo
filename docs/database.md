@@ -9,7 +9,7 @@
   - 設了 `VITE_FIREBASE_*`：正式 Firestore（`src/store/cloud.ts`）。
   - 再加 `VITE_FIREBASE_EMULATOR=1`：本機 Emulator，不碰正式專案。
   - 都沒設：localStorage（`src/store/index.ts`）。
-- 登入：一律匿名自動登入；可以在「我的 → 設定與其他」連結 Google。Firestore 只存 uid，不存 email 或姓名。
+- 登入：一律匿名自動登入；可以在「我的 → 設定與其他」選擇繼續匿名使用，或連結 Google。兩種身分都沿用既有 Firestore 資料流；Firestore 只存 uid，不存 email 或姓名。
 - **後台寫入**（政府端、發包商、GM）限 `admins/{uid}` 白名單；白名單只能在 console 建立。不是白名單的人在後台的操作只寫進本機覆寫層（`src/store/overlay.ts`，「示範：只在這台裝置」），疊在雲端資料上顯示，不會寫進雲端。
 
 ## 已接上 Firestore
@@ -19,7 +19,7 @@
 | 打卡、自己的許願清單、澆水紀錄、自己的回報清單 | `users/{uid}`：`checkins`、`myWishIds`、`watered`、`myReportIds` | 本人 | 本人 |
 | 光點流水帳、物品與造型、新手引導、心情、我的日記 | `users/{uid}`：`ledger`、`inventory`、`onboarding`、`mood`、`diary` | 本人 | 本人 |
 | 樹洞留言 | `users/{uid}/whispers/{id}` | 本人 | 本人新增、刪除；不能修改 |
-| 許願 | `wishes/{id}` | 登入者 | 本人新增；進度（`history`）限白名單 |
+| 許願 | `wishes/{id}` | 登入者 | 本人新增；進度（`history`）限白名單；原許願市民即時收到「樹洞」通知並可看時間軸 |
 | 澆水 | `wishes/{id}/waterings/{uid_日期}`、`wishStats/{id}.water` | 登入者 | 每人每天每個許願一次 |
 | 示範許願的進度 | `wishOverrides/{id}` | 登入者 | 白名單 |
 | 樹況回報 | `reports/{id}` | 登入者 | 本人新增 |

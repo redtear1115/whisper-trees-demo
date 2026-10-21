@@ -18,7 +18,7 @@
 
 **App 內建瀏覽器**：從 LINE、Threads、Instagram、Facebook、Messenger、微信、TikTok、X 點連結打開，或任何認不出名字的內建 WebView（iPhone 上沒有「Safari/」、Android 上有「; wv)」），市民端頂端都會出現提醒「請改用 Safari（Android：Chrome）打開曦語」，說明掃樹牌、定位、加到主畫面、Google 登入可能不能用，並依 App 給做法：LINE 有直接跳轉的按鈕（`openExternalBrowser=1`），其他是「右上角「⋯」→ 在 Safari 中開啟」加「複製網址」。可以關掉，這次瀏覽不再出現（`src/features/device/InAppNotice.tsx`，判斷在 `inAppBrowser()`）。
 
-兩端共用同一份資料庫（Firestore，跨裝置即時同步；沒有設定 Firebase 時退回 localStorage，同一台電腦開兩個分頁會同步）。
+市民端與後台共用同一份資料庫（Firestore，跨裝置即時同步；沒有設定 Firebase 時退回 localStorage，同一台電腦開兩個分頁會同步）。
 
 ### 市民端導覽
 

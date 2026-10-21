@@ -54,7 +54,7 @@ function DistrictRow() {
   )
 }
 
-/** 帳號：訪客 / 已用 Google 保留。Google 綁定要在 click 事件裡同步呼叫（見 linkGoogle）。 */
+/** 帳號：匿名訪客 / 已用 Google 登入。Google 綁定要在 click 事件裡同步呼叫（見 linkGoogle）。 */
 function AccountBlock({ onSignOut }: { onSignOut: () => void }) {
   const auth = useAuth()
   const { msg, link } = useGoogleLink()
@@ -65,11 +65,11 @@ function AccountBlock({ onSignOut }: { onSignOut: () => void }) {
       <p>
         目前：
         <strong>
-          {auth.status !== 'ready' ? '連線中…' : auth.google ? '已用 Google 保留（不顯示 email）' : '訪客'}
+          {auth.status !== 'ready' ? '連線中…' : auth.google ? '已用 Google 登入（不顯示 email）' : '匿名訪客'}
         </strong>
       </p>
       {auth.status === 'ready' && !auth.google && (
-        <p className="muted small">訪客的紀錄存在這個瀏覽器的雲端帳號；清掉瀏覽器資料就找不回來。</p>
+        <p className="muted small">匿名訪客的既有資料流照常存入 Firebase；用 Google 登入後，紀錄會綁定 Google 帳號，換裝置仍可取回。</p>
       )}
       {auth.status === 'ready' &&
         !auth.google &&
@@ -85,7 +85,7 @@ function AccountBlock({ onSignOut }: { onSignOut: () => void }) {
           </p>
         ) : (
           <button className="btn primary" onClick={link}>
-            用 Google 保留紀錄
+            用 Google 登入並保留紀錄
           </button>
         ))}
       {auth.google && (

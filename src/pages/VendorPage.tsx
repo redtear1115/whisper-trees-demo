@@ -57,6 +57,7 @@ export default function VendorPage() {
               id={`wish:${w.id}`}
               wishId={w.id}
               title={`${w.district} ${w.road}`}
+              sourceLabel={!w.mock ? '市民新許願' : undefined}
               detail={`候選空樹穴 ${w.pitId ?? '（需會勘）'}・市民原因：${w.reasons.join('、')}・承包：${vendorOfDistrict(w.district).name}`}
               stage={stageOf(`wish:${w.id}`, orders)}
               at={orders[`wish:${w.id}`]?.at}
@@ -77,6 +78,7 @@ export default function VendorPage() {
               key={r.id}
               id={`report:${r.id}`}
               title={`${r.district} ${r.road}・${r.species}（${r.treeId}）`}
+              sourceLabel={!r.mock ? '市民新回報' : undefined}
               detail={`${REPORT_KINDS[r.kind].label}${r.details.length > 0 ? `（${r.details.join('、')}）` : ''}${r.note && (canSeeNotes || r.mock || r.mine) ? `。「${r.note}」` : ''}・${relativeDays(r.at)}回報・承包：${vendorOfDistrict(r.district).name}`}
               stage={stageOf(`report:${r.id}`, orders)}
               at={orders[`report:${r.id}`]?.at}
@@ -95,6 +97,7 @@ function Order({
   id,
   wishId,
   title,
+  sourceLabel,
   detail,
   stage,
   at,
@@ -103,6 +106,7 @@ function Order({
   id: string
   wishId?: string
   title: string
+  sourceLabel?: string
   detail: string
   stage: OrderStage
   at?: number
@@ -114,7 +118,10 @@ function Order({
   return (
     <div className="order">
       <div className="row between center-v" style={{ gap: 8, flexWrap: 'wrap' }}>
-        <strong>{title}</strong>
+        <span>
+          <strong>{title}</strong>
+          {sourceLabel && <span className="new-tag">{sourceLabel}</span>}
+        </span>
         <span className={`status-pill ${stage === 'done' ? 's-planted' : stage === 'new' ? 's-received' : 's-scheduled'}`}>
           {STAGE_LABEL[stage]}
         </span>

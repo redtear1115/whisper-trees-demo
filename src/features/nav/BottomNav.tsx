@@ -3,6 +3,8 @@ import type { ReactNode } from 'react'
 import { IconHollow, IconMapPin, IconPerson, IconScan, IconStamp } from '../../components/icons'
 import { NAV_SLOTS, TABS, activeTab, centerAction, scanState, type TabId } from './tabs'
 import { useScanHint } from './scanHint'
+import { useStore, useWishes } from '../../store'
+import { unseenWishUpdateCount } from '../wish/updates'
 
 const ICON: Record<TabId, ReactNode> = {
   home: <IconMapPin />,
@@ -18,6 +20,10 @@ const ICON: Record<TabId, ReactNode> = {
 export function BottomNav() {
   const active = activeTab(useLocation().pathname)
   const hint = useScanHint()
+  const wishes = useWishes()
+  const myWishIds = useStore((s) => s.myWishIds)
+  const seen = useStore((s) => s.seen)
+  const wishUpdates = unseenWishUpdateCount(wishes, myWishIds, seen)
   return (
     <nav className="bottom-nav" aria-label="主要" data-testid="bottom-nav">
       {NAV_SLOTS.map((slot) => {
@@ -43,6 +49,11 @@ export function BottomNav() {
           >
             {ICON[t.id]}
             <span>{t.label}</span>
+            {t.id === 'journal' && wishUpdates > 0 && (
+              <span className="nav-notification" aria-label={`${wishUpdates} 個許願進度更新`}>
+                {wishUpdates > 9 ? '9+' : wishUpdates}
+              </span>
+            )}
           </Link>
         )
       })}

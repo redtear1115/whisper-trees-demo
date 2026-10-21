@@ -9,6 +9,7 @@ import { NEAR } from '../config'
 import { useAnchor } from '../features/map/useAnchor'
 import { nearbyWishes } from '../features/wish/nearbyWishes'
 import { formatDistance } from '../features/journal/nearby'
+import { hasUnseenWishUpdate } from '../features/wish/updates'
 
 /** 附近別人的願先列幾個，其餘按「看更多」 */
 const NEARBY_WISH_FIRST = 3
@@ -113,7 +114,7 @@ function Section({
       {sub ? <h3 className="section-title">{title}</h3> : <h2 className="section-title">{title}</h2>}
       {list.length === 0 && <p className="muted">{empty}</p>}
       {list.map((w) => (
-        <SeenCard key={w.id} wish={w} changed={seen[w.id] !== undefined && seen[w.id] < w.history.length} />
+        <SeenCard key={w.id} wish={w} changed={hasUnseenWishUpdate(w, seen[w.id])} />
       ))}
     </>
   )
