@@ -137,7 +137,7 @@ function Rules() {
   return (
     <section className="gm-rules">
       <h2>光點規則</h2>
-      <p className="muted small">依團隊簡報 v17「能量單位：光點」。這裡是示範用的模擬經濟，數值都可以調。</p>
+      <p className="muted small">這裡是示範用的模擬經濟，數值都可以調。</p>
       {table(
         '基礎點數',
         <>

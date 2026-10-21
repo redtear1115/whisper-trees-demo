@@ -3,7 +3,7 @@
 > 由 `node scripts/make_placeholders.mjs` 依 `src/assets.ts` 產生，請勿手改。
 > 新增素材：在 `src/assets.ts` 加一筆，跑上面的指令，畫面用 `<Art id="…">`。「程式參照」欄是掃描 `src/` 自動找出的。
 
-風格：2.5D 斜俯視、蠟筆手繪繪本風（簡報 v15）。語氣是慢下來、無壓陪伴。
+風格：2.5D 斜俯視、蠟筆手繪繪本風。語氣是慢下來、無壓陪伴。
 
 ## 交件方式
 
@@ -19,11 +19,11 @@
 | `logo` | 160×48 | 320×96 | `public/assets/ph/logo.svg` | 頁首 | （尚未使用） | 曦語 Whisper Trees 字標，蠟筆手繪感 |
 | `tree-hero` | 720×400 | 1440×800 | `public/assets/ph/tree-hero.svg` | 樹的頁面頂部 | `src/pages/TreePage.tsx:143` | 2.5D 斜俯視的一棵行道樹與人行道，繪本風；日間版 |
 | `tree-hero-night` | 720×400 | 1440×800 | `public/assets/ph/tree-hero-night.svg` | 樹的頁面頂部（夜間） | `src/pages/TreePage.tsx:143` | 同上夜間版，「樹木休息中」的氣氛 |
-| `sapling` | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:506`<br>`src/pages/MapPage.tsx:946` | 小樹苗；地圖上依澆水數放大 |
-| `watering` | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
-| `empty-pit` | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:1064` | 空的樹穴（方形土坑） |
-| `scan-tag` | 240×160 | 480×320 | `public/assets/ph/scan-tag.svg` | 掃樹牌說明 | （尚未使用） | 公園處樹牌與 QR Code 的位置示意 |
-| `sprout-0` | 240×240 | 480×480 | `public/assets/ph/sprout-0.svg` | 我的小芽 | `src/features/game/character.ts:12` | 角色「小芽」＝樹精（團隊簡報 v20 p14），第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景 |
+| `sapling`（已交件） | 96×96 | 192×192 | `public/assets/ph/sapling.svg` | 許願、地圖許願圖層 | `src/features/wish/WishForm.tsx:77`<br>`src/index.css:506`<br>`src/pages/MapPage.tsx:946` | 小樹苗；地圖上依澆水數放大 |
+| `watering`（已交件） | 96×96 | 192×192 | `public/assets/ph/watering.svg` | 澆水按鈕 | `src/features/wish/WishCard.tsx:40` | 澆水壺 |
+| `empty-pit`（已交件） | 96×96 | 192×192 | `public/assets/ph/empty-pit.svg` | 空樹穴抽屜 | `src/pages/MapPage.tsx:1064` | 空的樹穴（方形土坑） |
+| `scan-tag`（已交件） | 240×160 | 480×320 | `public/assets/ph/scan-tag.svg` | 掃樹牌說明 | （尚未使用） | 公園處樹牌與 QR Code 的位置示意 |
+| `sprout-0` | 240×240 | 480×480 | `public/assets/ph/sprout-0.svg` | 我的小芽 | `src/features/game/character.ts:12` | 角色「小芽」＝樹精，第 1 階：初心樹精。2.5D 蠟筆繪本風，剛醒來、圓圓小小、頭上一片新芽、眼神好奇，透明背景 |
 | `sprout-1` | 240×240 | 480×480 | `public/assets/ph/sprout-1.svg` | 我的小芽 | `src/features/game/character.ts:13` | 角色「小芽」第 2 階：茁壯樹精。同一個角色長大了，身形變穩、枝葉變多，樹皮紋路出現（規格同上） |
 | `sprout-2` | 240×240 | 480×480 | `public/assets/ph/sprout-2.svg` | 我的小芽 | `src/features/game/character.ts:14` | 角色「小芽」第 3 階：智慧老樹精。同一個角色的老年樣子，樹冠茂密、鬍鬚般的垂枝與苔蘚，神情溫和（規格同上） |
 | `item-hat-acorn` | 160×160 | 320×320 | `public/assets/ph/item-hat-acorn.svg` | 商店、小芽換裝、新手禮 | `src/features/game/config.ts:76` | 造型：橡實帽（疊在五隻動物與小芽身上，透明背景）。新手禮 |
@@ -32,44 +32,44 @@
 | `item-hat-ancient` | 160×160 | 320×320 | `public/assets/ph/item-hat-ancient.svg` | 小芽換裝、打卡後的稀有配件卡 | `src/features/game/DropCards.tsx:12`<br>`src/features/game/config.ts:115` | 稀有配件：古木紋理頭飾，木紋年輪，疊在角色上，透明背景（只能在受保護樹木掉落，不在商店賣） |
 | `item-frame-spring` | 160×160 | 320×320 | `public/assets/ph/item-frame-spring.svg` | 商店 | `src/features/game/config.ts:79` | 樹的頁面相框：春櫻（商品縮圖；實際相框另需 720×400 外框） |
 | `item-frame-autumn` | 160×160 | 320×320 | `public/assets/ph/item-frame-autumn.svg` | 商店 | `src/features/game/config.ts:80` | 樹的頁面相框：秋楓（同上） |
-| `insect-ladybug` | 120×120 | 240×240 | `public/assets/ph/insect-ladybug.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:28` | 樹上住戶：瓢蟲，蠟筆繪本風，小、透明背景 |
-| `insect-beetle` | 120×120 | 240×240 | `public/assets/ph/insect-beetle.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:29` | 樹上住戶：獨角仙，蠟筆繪本風，小、透明背景 |
-| `insect-cicada` | 120×120 | 240×240 | `public/assets/ph/insect-cicada.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:30` | 樹上住戶：蟬（只在 5～9 月出現），蠟筆繪本風，小、透明背景 |
-| `species-card` | 160×160 | 320×320 | `public/assets/ph/species-card.svg` | 圖鑑 | `src/features/codex/CodexSection.tsx:108` | 樹種卡通用底圖；正式版每個樹種一張（先做前 40 名，清單見 public/data/species.json） |
-| `badge-first` | 120×120 | 240×240 | `public/assets/ph/badge-first.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 第一次相遇 |
-| `badge-species-3` | 120×120 | 240×240 | `public/assets/ph/badge-species-3.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 認識三種樹 |
-| `badge-species-10` | 120×120 | 240×240 | `public/assets/ph/badge-species-10.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 樹的朋友（10 種） |
-| `badge-far-view` | 120×120 | 240×240 | `public/assets/ph/badge-far-view.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 遠遠看著你（安全島樹） |
-| `badge-capsule` | 120×120 | 240×240 | `public/assets/ph/badge-capsule.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 時空膠囊（回到同一棵樹） |
-| `badge-wisher` | 120×120 | 240×240 | `public/assets/ph/badge-wisher.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 種下一個願望 |
-| `badge-waterer` | 120×120 | 240×240 | `public/assets/ph/badge-waterer.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 澆水十次 |
-| `badge-night` | 120×120 | 240×240 | `public/assets/ph/badge-night.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 夜行者（夜間打卡） |
-| `badge-reporter` | 120×120 | 240×240 | `public/assets/ph/badge-reporter.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 樹的守望者（樹況回報） |
-| `badge-first-light` | 120×120 | 240×240 | `public/assets/ph/badge-first-light.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 第一道光（第一次收集光點） |
-| `badge-home-screen` | 120×120 | 240×240 | `public/assets/ph/badge-home-screen.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 回家的路（從手機桌面圖示打開） |
-| `badge-newcomer` | 120×120 | 240×240 | `public/assets/ph/badge-newcomer.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 城市的新朋友（完成新手任務） |
-| `stamp-iron` | 120×120 | 240×240 | `public/assets/ph/stamp-iron.svg` | 集章冊 | `src/features/game/districts.ts:52` | 行政區集章：鐵章（打卡 1 棵不同的樹）。圓形印章，中間留空放行政區名 |
-| `stamp-bronze` | 120×120 | 240×240 | `public/assets/ph/stamp-bronze.svg` | 集章冊 | `src/features/game/districts.ts:53` | 行政區集章：銅章（10 棵）。同一組造型，材質不同 |
-| `stamp-silver` | 120×120 | 240×240 | `public/assets/ph/stamp-silver.svg` | 集章冊 | `src/features/game/districts.ts:54` | 行政區集章：銀章（50 棵） |
-| `stamp-gold` | 120×120 | 240×240 | `public/assets/ph/stamp-gold.svg` | 集章冊 | `src/features/game/districts.ts:55` | 行政區集章：金章（200 棵） |
-| `avatar-taiwan-dog`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-taiwan-dog.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:17` | 地圖人物：臺灣黑狗（預設）。開朗樂天，鐮刀尾是招牌。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點）。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
-| `avatar-leopard-cat`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-leopard-cat.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:18` | 地圖人物：石虎。冷淡的觀察家，耳後白斑是招牌。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
-| `avatar-blue-magpie`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
-| `avatar-malayan-night-heron`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-malayan-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:20` | 地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
-| `avatar-pangolin`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:21` | 地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白（團隊簡報 v17，v20 增為五隻）。 |
+| `insect-ladybug`（已交件） | 120×120 | 240×240 | `public/assets/ph/insect-ladybug.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:28` | 樹上住戶：瓢蟲，蠟筆繪本風，小、透明背景 |
+| `insect-beetle`（已交件） | 120×120 | 240×240 | `public/assets/ph/insect-beetle.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:29` | 樹上住戶：獨角仙，蠟筆繪本風，小、透明背景 |
+| `insect-cicada`（已交件） | 120×120 | 240×240 | `public/assets/ph/insect-cicada.svg` | 圖鑑「樹上住戶」、打卡後的彩蛋卡（模擬） | `src/features/game/drops.ts:30` | 樹上住戶：蟬（只在 5～9 月出現），蠟筆繪本風，小、透明背景 |
+| `species-card`（已交件） | 160×160 | 320×320 | `public/assets/ph/species-card.svg` | 圖鑑 | `src/features/codex/CodexSection.tsx:108` | 樹種卡通用底圖；正式版每個樹種一張（先做前 40 名，清單見 public/data/species.json） |
+| `badge-first`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-first.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 第一次相遇 |
+| `badge-species-3`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-species-3.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 認識三種樹 |
+| `badge-species-10`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-species-10.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 樹的朋友（10 種） |
+| `badge-far-view`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-far-view.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 遠遠看著你（安全島樹） |
+| `badge-capsule`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-capsule.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 時空膠囊（回到同一棵樹） |
+| `badge-wisher`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-wisher.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 種下一個願望 |
+| `badge-waterer`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-waterer.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 澆水十次 |
+| `badge-night`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-night.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 夜行者（夜間打卡） |
+| `badge-reporter`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-reporter.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 樹的守望者（樹況回報） |
+| `badge-first-light`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-first-light.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 第一道光（第一次收集光點） |
+| `badge-home-screen`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-home-screen.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 回家的路（從手機桌面圖示打開） |
+| `badge-newcomer`（已交件） | 120×120 | 240×240 | `public/assets/ph/badge-newcomer.svg` | 成長徽章 | `src/features/account/BadgesSection.tsx:29（動態）`<br>`src/features/game/badges.ts:68（動態）` | 城市的新朋友（完成新手任務） |
+| `stamp-iron`（已交件） | 120×120 | 240×240 | `public/assets/ph/stamp-iron.svg` | 集章冊 | `src/features/game/districts.ts:52` | 行政區集章：鐵章（打卡 1 棵不同的樹）。圓形印章，中間留空放行政區名 |
+| `stamp-bronze`（已交件） | 120×120 | 240×240 | `public/assets/ph/stamp-bronze.svg` | 集章冊 | `src/features/game/districts.ts:53` | 行政區集章：銅章（10 棵）。同一組造型，材質不同 |
+| `stamp-silver`（已交件） | 120×120 | 240×240 | `public/assets/ph/stamp-silver.svg` | 集章冊 | `src/features/game/districts.ts:54` | 行政區集章：銀章（50 棵） |
+| `stamp-gold`（已交件） | 120×120 | 240×240 | `public/assets/ph/stamp-gold.svg` | 集章冊 | `src/features/game/districts.ts:55` | 行政區集章：金章（200 棵） |
+| `avatar-taiwan-dog`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-taiwan-dog.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:17` | 地圖人物：臺灣黑狗（預設）。開朗樂天，鐮刀尾是招牌。2.5D 繪本風的小動物站著、正面朝向鏡頭，透明背景，腳底在圖的下緣中央（地圖定位點）。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。 |
+| `avatar-leopard-cat`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-leopard-cat.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:18` | 地圖人物：石虎。冷淡的觀察家，耳後白斑是招牌。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。 |
+| `avatar-blue-magpie`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-blue-magpie.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:19` | 地圖人物：臺灣藍鵲。火爆脾氣，長尾巴。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。 |
+| `avatar-malayan-night-heron`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-malayan-night-heron.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:20` | 地圖人物：黑冠麻鷺。呆萌的大笨鳥，常定格發呆、偶爾歪頭。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。 |
+| `avatar-pangolin`（已交件） | 96×96 | 192×192 | `public/assets/ph/avatar-pangolin.svg` | 地圖上代表你、新手引導、我的 | `src/features/avatar/animals.ts:21` | 地圖人物：穿山甲。容易緊張，緊張時捲成球。規格同上。五隻動物都帶著同一片發光葉子，點狀眼睛、臉部留白。 |
 | `tree-focus` | 360×400 | 720×800 | `public/assets/ph/tree-focus.svg` | 地圖點樹後的拉近畫面（中間的大樹） | `src/features/map/TreeFocusView.tsx:101` | 2.5D 蠟筆繪本風的一棵大樹：圓潤蓬鬆的綠色樹冠占上方三分之二，粗短的褐色樹幹，樹根坐在淡淡的圓形草地上；透明背景、主體置中，樹冠上要留得下 5 個圓形按鈕（文字疊在上面仍看得清楚） |
-| `map-tree-near` | 64×72 | 128×144 | `public/assets/ph/map-tree-near.svg` | 地圖拉近時，感應圈內的樹（可以摸） | `src/pages/MapPage.tsx:300` | 2.5D 蠟筆風的小樹圖示：蓬鬆的亮綠色樹冠、褐色樹幹，腳下一個淡綠色圓形底座；透明背景、底座中心對準樹的位置（圖片底部中央） |
-| `map-tree-far` | 64×72 | 128×144 | `public/assets/ph/map-tree-far.svg` | 地圖拉近時，感應圈外的樹 | `src/pages/MapPage.tsx:299` | 同上，樹冠改成灰藍綠色、彩度低，底座同樣淡綠；看得出是同一種樹，但比較安靜 |
-| `map-met-flowers` | 64×72 | 128×144 | `public/assets/ph/map-met-flowers.svg` | 地圖拉近時，今天互動過的樹 | `src/pages/MapPage.tsx:305` | 疊在樹的圖示上的幾朵小花（粉、黃、淡紫），長在底座左右兩側、不擋樹幹；尺寸與底部對齊和 map-tree-near 相同，其餘透明 |
-| `journal-empty` | 240×160 | 480×320 | `public/assets/ph/journal-empty.svg` | 樹洞頁「我的日記」空狀態 | （尚未使用） | 繪本風：一本攤開的空白小日記本靠在樹根旁，一片發光葉子當書籤；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
-| `wish-empty` | 240×160 | 480×320 | `public/assets/ph/wish-empty.svg` | 樹洞頁「許願」空狀態 | （尚未使用） | 繪本風：一個空的方形樹穴，旁邊插著一張小小的許願卡，一隻小鳥停在上面；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
-| `fog-empty` | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:81` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
+| `map-tree-near`（已交件） | 64×72 | 128×144 | `public/assets/ph/map-tree-near.svg` | 地圖拉近時，感應圈內的樹（可以摸） | `src/pages/MapPage.tsx:300` | 2.5D 蠟筆風的小樹圖示：蓬鬆的亮綠色樹冠、褐色樹幹，腳下一個淡綠色圓形底座；透明背景、底座中心對準樹的位置（圖片底部中央） |
+| `map-tree-far`（已交件） | 64×72 | 128×144 | `public/assets/ph/map-tree-far.svg` | 地圖拉近時，感應圈外的樹 | `src/pages/MapPage.tsx:299` | 同上，樹冠改成灰藍綠色、彩度低，底座同樣淡綠；看得出是同一種樹，但比較安靜 |
+| `map-met-flowers`（已交件） | 64×72 | 128×144 | `public/assets/ph/map-met-flowers.svg` | 地圖拉近時，今天互動過的樹 | `src/pages/MapPage.tsx:305` | 疊在樹的圖示上的幾朵小花（粉、黃、淡紫），長在底座左右兩側、不擋樹幹；尺寸與底部對齊和 map-tree-near 相同，其餘透明 |
+| `journal-empty`（已交件） | 240×160 | 480×320 | `public/assets/ph/journal-empty.svg` | 樹洞頁「我的日記」空狀態 | （尚未使用） | 繪本風：一本攤開的空白小日記本靠在樹根旁，一片發光葉子當書籤；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
+| `wish-empty`（已交件） | 240×160 | 480×320 | `public/assets/ph/wish-empty.svg` | 樹洞頁「許願」空狀態 | （尚未使用） | 繪本風：一個空的方形樹穴，旁邊插著一張小小的許願卡，一隻小鳥停在上面；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
+| `fog-empty`（已交件） | 240×160 | 480×320 | `public/assets/ph/fog-empty.svg` | 探索頁空狀態（還沒打卡） | `src/features/fog/FogMap.tsx:81` | 繪本風：一棵小樹苗被淡淡的霧蓋住，旁邊一盞小提燈；暖黃光暈、蠟筆質感，透明背景，主體置中、四周留白 |
 
 共 48 項。
 
 ## PWA 圖示（加到手機主畫面）
 
-佔位檔是 PNG（`public/assets/pwa/<file>`，由同一支腳本產生）；交件時用同名檔案取代。`public/manifest.webmanifest` 與 `index.html` 的 `apple-touch-icon` 指向這些檔案。
+佔位檔是 PNG（`public/assets/pwa/<file>`，由同一支腳本產生）；交件時用同名檔案替換。`public/manifest.webmanifest` 與 `index.html` 的 `apple-touch-icon` 指向這些檔案。
 
 | 檔名 | 尺寸（px） | 放置位置 | 說明 |
 |---|---|---|---|
