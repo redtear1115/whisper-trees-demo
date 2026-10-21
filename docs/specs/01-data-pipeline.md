@@ -57,9 +57,7 @@
 
 裝不了就退而求其次：輸出 `public/data/tree-points/<前綴>.json`，每檔只放 `[經度, 緯度, 樹種索引]`，前端依畫面範圍載入。
 
-兩種做法擇一，在本檔記下最後採用哪個。
-
-**採用 tippecanoe 向量圖磚，輸出成靜態目錄**（2026-10-19）：`public/data/tree-tiles/{z}/{x}/{y}.pbf`，圖層 `trees`，屬性 `id`（TreeID）、`k`（`s` 行道樹／`p` 公園樹），z10–16，740 個檔、約 20 MB（未壓縮，由 Cloudflare 壓縮傳輸）。原本用單一 PMTiles 檔，但 Cloudflare Pages 不支援 HTTP Range，讀不到，所以改成目錄。
+**採用 tippecanoe 向量圖磚，輸出成靜態目錄**：`public/data/tree-tiles/{z}/{x}/{y}.pbf`，圖層 `trees`，屬性 `id`（TreeID）、`k`（`s` 行道樹／`p` 公園樹），z10–16，740 個檔、約 20 MB（未壓縮，由 Cloudflare 壓縮傳輸）。不用單一 PMTiles 檔，因為 Cloudflare Pages 不支援 HTTP Range。
 
 ### 3. 空樹穴 `public/data/pits-empty.geojson`
 
@@ -72,7 +70,7 @@
 
 ### 4. 行政區統計 `public/data/districts.json`
 
-每區：行道樹數、人行道長度（km）、每公里行道樹數、候選空樹穴數。用來顯示「大安是文山的 2.6 倍」。算法沿用簡報：行道樹數 ÷ 人行道長度（含安全島與綠帶）。
+每區：行道樹數、人行道長度（km）、每公里行道樹數、候選空樹穴數。用來顯示「大安是文山的 2.6 倍」。算法：行道樹數 ÷ 人行道長度（含安全島與綠帶）。
 
 ## 座標轉換
 
@@ -85,7 +83,7 @@ TWD97（EPSG:3826）→ WGS84（EPSG:4326），用 `pyproj`，`always_xy=True`�
 - 新增 `scripts/build_web_data.py`（uv 腳本，相依套件寫在檔頭），一次產生上面所有輸出。
 - 輸出檔可以進版控（網站部署需要），但 `material/raw/` 不需要部署。
 
-## 既有處理規則（沿用 oshen-wave-tree）
+## 處理規則
 
 ### 樹穴合併（`scripts/merge_treepits.py`）
 
@@ -102,7 +100,7 @@ TWD97（EPSG:3826）→ WGS84（EPSG:4326），用 `pyproj`，`always_xy=True`�
 
 `ratio` = OSM 面積 ÷ 官方面積；`contains` 與 `intersection+*` 的品質較差，使用前看一下 `ratio`。
 
-## 受保護樹木名冊（2026-10-20）
+## 受保護樹木名冊
 
 不是公園處資料的一部分，獨立一條：`scripts/fetch_protected_trees.py` 下載 [臺北市受保護樹木](https://data.gov.tw/dataset/121274) 到 `material/raw/protected_trees/`，`scripts/build_protected_trees.py` 依位置與樹種比對到 TreeID，輸出 `public/data/protected-trees.json`。方法、門檻與結果見 [08 §1](08-extensions.md)。
 
