@@ -1,11 +1,17 @@
 import type { Wish } from '../../store/types'
 
 /**
- * 許願建立時一定有一筆「已收件」，所以沒看過這台裝置的紀錄時以 1 為基準。
- * 這樣換手機登入後，只要政府曾新增處理進度，也會顯示通知。
+ * 這台裝置沒有「看過」紀錄時的基準（fallback）：
+ * - 自己許的願用 1：建立時一定有一筆「已收件」，之後每一筆都是政府的回應，換手機登入也會提示。
+ * - 別人的願用 null：澆水當時看過幾筆只記在原本的裝置，猜不到，就不提示。
  */
-export function hasUnseenWishUpdate(wish: Pick<Wish, 'history'>, seenCount?: number): boolean {
-  return (seenCount ?? 1) < wish.history.length
+export function hasUnseenWishUpdate(
+  wish: Pick<Wish, 'history'>,
+  seenCount: number | undefined,
+  fallback: number | null = 1,
+): boolean {
+  const base = seenCount ?? fallback
+  return base !== null && base < wish.history.length
 }
 
 export function unseenWishUpdateCount(

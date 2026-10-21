@@ -19,11 +19,16 @@ const wish = (id: string, statuses: Wish['history'][number]['status'][]): Wish =
 
 describe('citizen wish progress notifications', () => {
   it('does not notify for the initial received event on a new device', () => {
-    expect(hasUnseenWishUpdate(wish('a', ['received']))).toBe(false)
+    expect(hasUnseenWishUpdate(wish('a', ['received']), undefined)).toBe(false)
   })
 
   it('notifies on a new device when government added progress', () => {
-    expect(hasUnseenWishUpdate(wish('a', ['received', 'surveying']))).toBe(true)
+    expect(hasUnseenWishUpdate(wish('a', ['received', 'surveying']), undefined)).toBe(true)
+  })
+
+  it('does not notify for someone else wish without a record on this device', () => {
+    expect(hasUnseenWishUpdate(wish('a', ['received', 'surveying']), undefined, null)).toBe(false)
+    expect(hasUnseenWishUpdate(wish('a', ['received', 'surveying', 'scheduled']), 2, null)).toBe(true)
   })
 
   it('counts only the signed-in citizen own unseen wishes', () => {

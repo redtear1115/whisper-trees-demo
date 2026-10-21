@@ -3051,7 +3051,7 @@ body.has-offline .tree-focus {
   padding: 0 5px;
   border: 2px solid var(--card);
   border-radius: 999px;
-  background: #b43b32;
+  background: var(--amber-ink);
   color: #fff;
   font-size: 0.68rem;
   font-weight: 800;
@@ -3062,9 +3062,9 @@ body.has-offline .tree-focus {
   width: 100%;
   margin: 8px 0 2px;
   padding: 10px 12px;
-  border: 1px solid #e6b94f;
+  border: 1px solid var(--amber);
   border-radius: 10px;
-  background: #fff4cf;
+  background: var(--amber-soft);
   color: var(--ink);
   font: inherit;
   font-weight: 700;

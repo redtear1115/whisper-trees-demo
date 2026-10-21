@@ -53,7 +53,7 @@ export function MyWishes({ sub = false }: { sub?: boolean }) {
         </EmptyCard>
       ) : (
         <>
-          <Section sub={sub} title="我許的願" list={mine} seen={seen} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
+          <Section sub={sub} title="我許的願" list={mine} seen={seen} fallback={1} empty="還沒有許願。在地圖上點空樹穴（空心圓）就可以許願。" />
           <section data-testid="wishes-nearby">
             <Title className="section-title">附近別人的願</Title>
             <p className="muted small">你身邊 {NEAR.radiusMeters} 公尺內，別人許的願。一天可以幫每個願澆一次水。</p>
@@ -74,7 +74,7 @@ export function MyWishes({ sub = false }: { sub?: boolean }) {
               </>
             )}
           </section>
-          {wateredOnly.length > 0 && <Section sub={sub} title="我澆過水的別人的願" list={wateredOnly} seen={seen} empty="" />}
+          {wateredOnly.length > 0 && <Section sub={sub} title="我澆過水的別人的願" list={wateredOnly} seen={seen} fallback={null} empty="" />}
         </>
       )}
     </div>
@@ -101,20 +101,28 @@ function Section({
   title,
   list,
   seen,
+  fallback,
   empty,
 }: {
   sub: boolean
   title: string
   list: Wish[]
   seen: Record<string, number>
+  /** 這台裝置沒有看過紀錄時的基準，見 hasUnseenWishUpdate */
+  fallback: number | null
   empty: string
 }) {
+  // 別人的願在這台裝置第一次出現：記下現在的筆數當基準，之後新增的進度才提示
+  useEffect(() => {
+    if (fallback !== null) return
+    for (const w of list) if (seen[w.id] === undefined) markSeen(w.id)
+  }, [fallback, list, seen])
   return (
     <>
       {sub ? <h3 className="section-title">{title}</h3> : <h2 className="section-title">{title}</h2>}
       {list.length === 0 && <p className="muted">{empty}</p>}
       {list.map((w) => (
-        <SeenCard key={w.id} wish={w} changed={hasUnseenWishUpdate(w, seen[w.id])} />
+        <SeenCard key={w.id} wish={w} changed={hasUnseenWishUpdate(w, seen[w.id], fallback)} />
       ))}
     </>
   )
