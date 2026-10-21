@@ -3,7 +3,10 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { findTree, type Tree } from '../lib/trees'
 import { seededInt, weekKey } from '../lib/seed'
 import type { CheckinResult } from '../lib/geo'
-import { recentCheckin, useStore, visitedThisWeek, whispersOf } from '../store'
+import { isDemoMode, recentCheckin, setDemoPosition, useStore, visitedThisWeek, whispersOf } from '../store'
+import { walkTarget } from '../lib/geo'
+import { useAnchor } from '../features/map/useAnchor'
+import { rangeInfo } from '../features/map/treeRings'
 import { Art, MockTag, formatDate, relativeDays } from '../components/ui'
 import { IconBack, IconCapsule, IconGlow } from '../components/icons'
 import type { CheckinState } from './ScanPage'
@@ -86,10 +89,16 @@ export default function TreePage() {
   const recent = useMemo(() => recentCheckin(treeId), [treeId, checkins])
   const onSite: CheckinResult['kind'] | null =
     fresh?.kind === 'success' || fresh?.kind === 'farView' ? fresh.kind : recent?.result ?? null
-  const sessionStart = recent?.at ?? Date.now()
+  // 樹洞不用掃樹牌：打過卡，或人在這棵樹的感應圈內（和地圖、打卡同一個半徑）就能留話
+  const anchor = useAnchor(true)
+  const range = tree ? rangeInfo(anchor, tree.lngLat) : null
+  const canWhisper = !!onSite || !!range?.inRange
+  // 這一次來訪從什麼時候算：打過卡就從打卡算，否則從打開這一頁算（固定住，不然每次重畫都會把剛說的話濾掉）
+  const openedAt = useMemo(() => Date.now(), [treeId])
+  const sessionStart = recent?.at ?? openedAt
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const whispers = useMemo(() => whispersOf(treeId), [treeId, myWhispers])
-  const capsule = onSite ? whispers.find((w) => w.at < sessionStart) : undefined
+  const capsule = canWhisper ? whispers.find((w) => w.at < sessionStart) : undefined
   const thisVisit = whispers.filter((w) => w.at >= sessionStart && !w.mock)
   // 跟樹互動時的心情：打卡成功後回到拉近畫面，不主動問打卡的心情（做完摸摸樹、回報、樹洞時才問）；
   // 這裡縮成一行，想補選可以展開。有慶祝視窗開著時先不出現。樹洞的心情在樹洞卡裡（每一句話各自一個）。
@@ -175,18 +184,29 @@ export default function TreePage() {
       )}
 
       <div id="whisper" className="anchor-target">
-        {onSite ? (
+        {canWhisper ? (
           <WhisperBox
             treeId={treeId}
             said={thisVisit.map((w) => w.text)}
             mood={(open) => (lastWhisperAt !== null ? <InteractionMood kind="whisper" treeId={treeId} at={lastWhisperAt} open={open} /> : null)}
           />
         ) : (
-          <section className="card">
-            <p>想對這棵樹說句話？走到樹旁邊，掃樹幹上的樹牌就可以。</p>
-            <Link className="btn primary block" to="/scan" state={{ hintTreeId: treeId }}>
-              掃樹牌
-            </Link>
+          <section className="card" data-testid="whisper-far">
+            <p>想對這棵樹說句話？走到樹旁邊就可以。</p>
+            {range?.distance === null || !tree ? (
+              <p className="muted small">還沒有你的位置。打開定位，或用 Demo 模式。</p>
+            ) : (
+              <div className="row gap">
+                {isDemoMode() && (
+                  <button type="button" className="btn primary" data-testid="whisper-walk" onClick={() => setDemoPosition(walkTarget(anchor.lngLat, tree.lngLat))}>
+                    走過去
+                  </button>
+                )}
+                <button type="button" className={isDemoMode() ? 'btn' : 'btn primary'} data-testid="whisper-route" onClick={() => navigate('/', { state: { routeTreeId: treeId } })}>
+                  怎麼走{range?.remaining ? `（還有約 ${range.remaining} 公尺）` : ''}
+                </button>
+              </div>
+            )}
           </section>
         )}
       </div>

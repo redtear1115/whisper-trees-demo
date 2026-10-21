@@ -10,7 +10,7 @@ const TABS = [
   { value: 'wishes', label: '許願', testId: 'journal-tab-wishes' },
 ] as const
 
-/** 樹洞：我的日記／許願在上，附近的樹在下（留言要先走到樹旁、再掃樹牌打卡） */
+/** 樹洞：我的日記／許願在上，附近的樹在下（走到樹旁就能留言，不用掃樹牌） */
 export default function JournalPage() {
   const [tab, setTab] = useState<(typeof TABS)[number]['value']>('diary')
 

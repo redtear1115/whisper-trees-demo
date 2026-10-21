@@ -27,19 +27,15 @@ export function pickNearby(points: TreePoint[], center: LngLat, radius = NEARBY_
   return rows.sort((a, b) => a.distance - b.distance || a.id.localeCompare(b.id)).slice(0, max)
 }
 
-/**
- * 按「留言」要去哪：這棵樹有有效的現場打卡（30 分鐘內）就進樹的頁面的樹洞；
- * 否則去掃樹牌，並帶上這棵樹當提示。留話一律要先打卡（QR + GPS）。
- */
-export function leaveTarget(treeId: string, onSite: boolean): { to: string; state?: { hintTreeId: string } } {
-  // 掃描頁從 location.state.hintTreeId 讀要打卡的樹（和地圖點樹的「掃樹牌」同一個介面）
-  return onSite ? { to: `/tree/${treeId}#whisper` } : { to: '/scan', state: { hintTreeId: treeId } }
+/** 按「留言」去樹的頁面的樹洞：在感應圈內就能留話，不用掃樹牌 */
+export function leaveTarget(treeId: string): { to: string } {
+  return { to: `/tree/${treeId}#whisper` }
 }
 
 export type NearbyAction = 'leave' | 'walk' | 'route'
 
 /**
- * 附近的樹那一列的按鈕：在打卡範圍內才是「留言」；太遠要先走過去——
+ * 附近的樹那一列的按鈕：在感應圈內才是「留言」；太遠要先走過去——
  * Demo 是「走過去」（模擬位置移到樹旁），真實定位是「怎麼走」（回地圖畫出步行路線）。
  * radius 是和地圖感應圈、打卡判斷同一個半徑（ringRadius）。
  */
@@ -48,12 +44,9 @@ export function nearbyAction(distance: number, radius: number, demo: boolean): N
   return demo ? 'walk' : 'route'
 }
 
-/**
- * 按鈕上的字要說實話：沒有現場打卡時，「留言」其實是去掃樹牌，所以寫「掃樹牌留言」；
- * 30 分鐘內已在這棵樹打卡過（onSite），才是直接「留言」。
- */
-export function nearbyLabel(action: NearbyAction, onSite = false): string {
-  if (action === 'leave') return onSite ? '留言' : '掃樹牌留言'
+/** 按鈕上的字：在感應圈內是「留言」；太遠是「走過去」（Demo）或「怎麼走」 */
+export function nearbyLabel(action: NearbyAction): string {
+  if (action === 'leave') return '留言'
   return action === 'walk' ? '走過去' : '怎麼走'
 }
 

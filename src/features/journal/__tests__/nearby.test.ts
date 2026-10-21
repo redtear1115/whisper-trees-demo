@@ -22,9 +22,9 @@ describe('pickNearby', () => {
 })
 
 describe('leaveTarget', () => {
-  it('goes to the tree whisper when checked in, else to scan with a hint', () => {
-    expect(leaveTarget('DA0030211045', true).to).toBe('/tree/DA0030211045#whisper')
-    expect(leaveTarget('DA0030211045-001', false)).toEqual({ to: '/scan', state: { hintTreeId: 'DA0030211045-001' } })
+  it('goes straight to the tree whisper (no scan needed inside the ring)', () => {
+    expect(leaveTarget('DA0030211045').to).toBe('/tree/DA0030211045#whisper')
+    expect(leaveTarget('DA0030211045-001')).toEqual({ to: '/tree/DA0030211045-001#whisper' })
   })
 })
 
@@ -55,14 +55,10 @@ describe('nearbyAction', () => {
 })
 
 describe('nearbyLabel', () => {
-  it('留言 only promises what it does: without an on-site check-in it is 掃樹牌留言', () => {
-    expect(nearbyLabel('leave')).toBe('掃樹牌留言')
-    expect(nearbyLabel('leave', false)).toBe('掃樹牌留言')
-    expect(nearbyLabel('leave', true)).toBe('留言')
-  })
-  it('walk and route keep their labels', () => {
+  it('inside the ring it is 留言; too far it is 走過去 (Demo) or 怎麼走', () => {
+    expect(nearbyLabel('leave')).toBe('留言')
     expect(nearbyLabel('walk')).toBe('走過去')
-    expect(nearbyLabel('route', true)).toBe('怎麼走')
+    expect(nearbyLabel('route')).toBe('怎麼走')
   })
 })
 
