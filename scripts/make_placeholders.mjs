@@ -20,9 +20,9 @@ const icons = [...src.matchAll(/\{ file: '([^']+)', size: (\d+), brief: '([^']+)
 const hue = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 360, 7)
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
-// 動物的占位（行動圈圖示已改成程式內的線條圖示 src/components/icons.tsx，不再有 action-* 佔位檔，第六輪）。
+// 動物的占位（行動圈圖示已改成程式內的線條圖示 src/components/icons.tsx，不再有 action-* 佔位檔）。
 // 五隻動物沒有任何一個 emoji 是對的（穿山甲被當成刺蝟、石虎不是家貓、黑冠麻鷺不是黑鳥），所以不用 emoji。
-// 第五輪（2026-10-21）曾經五隻都用同一片葉子剪影；第六輪（2026-10-20 批評）改成各自一枚圓形徽章：
+// 五隻動物各自一枚圓形徽章：
 // 柔和的底色加一個字（狗、石、鵲、鷺、甲），在美術交件前就分得出是哪一隻。底色刻意避開綠色（地圖上的樹是綠點）。
 // 底色與字色的對比 ≥ 6.5:1（WCAG AA 需要 4.5:1）
 const ANIMAL_BADGE = {
@@ -102,7 +102,7 @@ const outDir = join(root, 'public/assets/ph')
 const debugDir = join(root, 'public/assets/ph-debug')
 mkdirSync(outDir, { recursive: true })
 mkdirSync(debugDir, { recursive: true })
-// 已交件的素材（ph/ 裡不是這支腳本產生的檔案，例如設計交的動物美術）不覆蓋：只認這支腳本寫出的開頭（2026-10-21）
+// 已交件的素材（ph/ 裡不是這支腳本產生的檔案，例如設計交的動物美術）不覆蓋：只認這支腳本寫出的開頭
 const placeholderHead = (a) => `<svg xmlns="http://www.w3.org/2000/svg" width="${a.w}" height="${a.h}" viewBox="0 0 ${a.w} ${a.h}">\n`
 const delivered = new Set(
   assets
@@ -266,7 +266,7 @@ const md = `# UI 美術素材清單（交給 UX/UI）
 > 由 \`node scripts/make_placeholders.mjs\` 依 \`src/assets.ts\` 產生，請勿手改。
 > 新增素材：在 \`src/assets.ts\` 加一筆，跑上面的指令，畫面用 \`<Art id="…">\`。「程式參照」欄是掃描 \`src/\` 自動找出的。
 
-風格：2.5D 斜俯視、蠟筆手繪繪本風（簡報 v15）。語氣是慢下來、無壓陪伴。
+風格：2.5D 斜俯視、蠟筆手繪繪本風。語氣是慢下來、無壓陪伴。
 
 ## 交件方式
 
@@ -285,7 +285,7 @@ ${assets.map((a) => `| \`${a.id}\`${delivered.has(a.id) ? '（已交件）' : ''
 
 ## PWA 圖示（加到手機主畫面）
 
-佔位檔是 PNG（\`public/assets/pwa/<file>\`，由同一支腳本產生）；交件時用同名檔案取代。\`public/manifest.webmanifest\` 與 \`index.html\` 的 \`apple-touch-icon\` 指向這些檔案。
+佔位檔是 PNG（\`public/assets/pwa/<file>\`，由同一支腳本產生）；交件時用同名檔案替換。\`public/manifest.webmanifest\` 與 \`index.html\` 的 \`apple-touch-icon\` 指向這些檔案。
 
 | 檔名 | 尺寸（px） | 放置位置 | 說明 |
 |---|---|---|---|

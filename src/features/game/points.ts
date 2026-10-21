@@ -1,5 +1,4 @@
 // 在樹旁的光點怎麼算：純函式，不碰 store。規則表見 docs/specs/08-extensions.md §1。
-// 團隊簡報 v17 第 19、23 頁。
 
 import { ACTION_LABEL, type GameConfig } from './config'
 

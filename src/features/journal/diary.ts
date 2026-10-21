@@ -2,7 +2,7 @@
 // 打卡、樹洞、回報本身各有自己的紀錄（checkins、whispers、reports），這裡只另外存兩樣東西：
 //   1. 摸摸樹（呼吸、冥想、擁抱）做完的紀錄，它沒有別的地方存；
 //   2. 每一次互動選的心情，用「種類 + 樹 + 互動的時間」對回那一次互動。
-// 存在使用者自己的資料：ext.diary（雲端是 users/{uid}.diary 的 map 欄位，整份取代）。不用改 firestore.rules。
+// 存在使用者自己的資料：ext.diary（雲端是 users/{uid}.diary 的 map 欄位，整份覆寫）。不用改 firestore.rules。
 // 規格：docs/specs/04-tree-page.md「跟樹互動時的心情」。
 
 import { getExt, setExt, useStore, type State } from '../../store'

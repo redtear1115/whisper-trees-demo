@@ -18,7 +18,7 @@ const ICON: Record<FocusActionId, ReactNode> = {
   adopt: <IconActionAdopt />,
 }
 
-/** 提示浮在畫面上多久（毫秒；夥伴回饋 3～5 秒） */
+/** 提示浮在畫面上多久（毫秒） */
 export const NOTE_MS = 4000
 
 interface Props {
@@ -39,10 +39,10 @@ interface Props {
 }
 
 /**
- * 點樹之後的拉近畫面（2026-10-21，依使用者給的「拉近的介面」設計圖）：蓋住地圖與底部導覽，
+ * 點樹之後的拉近畫面：蓋住地圖與底部導覽，
  * 中間一棵大樹，樹冠上是三個互動的大圈（摸摸樹、回報、留言在樹洞）和兩個小圈（樹的資料、認養），
  * 你的動物站在樹下；底部是「返回」與「樹的資料」，範圍外再加「怎麼走」「走過去」。
- * 底部導覽留著；打過卡的互動點了在畫面裡打開一張卡；還沒打卡，在感應圈內直接去掃樹牌，圈外先走過去（第三版）。
+ * 底部導覽留著；打過卡的互動點了在畫面裡打開一張卡；還沒打卡，在感應圈內直接去掃樹牌，圈外先走過去。
  * 是對話框（role=dialog）：焦點移到第一個圈、Esc 關閉。
  */
 export function TreeFocusView({ tree, range, checkedIn, animal, demo, onClose, intro, onIntroDone, onScan, onRoute, onWalk }: Props) {

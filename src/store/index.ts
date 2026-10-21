@@ -4,7 +4,7 @@
 //     讀取靠 onSnapshot 鏡射成下面的 State，寫入先樂觀更新記憶體、再用 batch 寫 Firestore（格式需符合 firestore.rules）。
 //     `seen`（提示點）只存在這台裝置，不上雲端。
 //   - localStorage：沒有 Firebase 設定、或 Vitest 時使用。同一台電腦的兩個分頁靠 storage 事件即時同步。
-//     雲端模式連不上（登入失敗、Firestore 斷線、額度用完）不會退回這裡（2026-10-21 使用者決定）：
+//     雲端模式連不上（登入失敗、Firestore 斷線、額度用完）不會退回這裡：
 //     頂端顯示連線狀態（session.connection）並一直重連，這段時間的寫入由 Firestore 排著、連回來同步。
 // 非承辦人在後台（/gov、/vendor、/gm）的改動只寫本機覆寫層（overlay.ts），不進雲端。
 
@@ -388,7 +388,7 @@ export function exitDemoMode() {
   demoPosListeners.forEach((l) => l())
 }
 
-// Demo 模式的模擬位置（2026-10-19）：可以拖曳地圖上的人物移動，只存在這個瀏覽器分頁（sessionStorage）。
+// Demo 模式的模擬位置：可以拖曳地圖上的人物移動，只存在這個瀏覽器分頁（sessionStorage）。
 // null = 還沒移動過，站在示範樹旁（預設位置由 src/lib/demoPosition.ts 決定）。
 
 const DEMO_POS_KEY = 'whisper-trees:demo-pos'

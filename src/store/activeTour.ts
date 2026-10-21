@@ -1,4 +1,4 @@
-// 進行中的里路線（2026-10-20）：集章冊按「開始」後，大地圖畫出這條路線；只存在這個瀏覽器分頁（sessionStorage），
+// 進行中的里路線：集章冊按「開始」後，大地圖畫出這條路線；只存在這個瀏覽器分頁（sessionStorage），
 // 換頁、重新整理還在，按「結束」或關掉分頁就沒了。不進 localStorage 與雲端：它只是這次散步的計畫。
 
 import { useMemo, useSyncExternalStore } from 'react'

@@ -19,7 +19,7 @@ const VIEW_OPTIONS = [
   { value: 'time', label: '依取得時間', testId: 'view-time' },
 ] as const
 
-/** 集章冊：「集章」是各區的章與地圖，「探索」是迷霧地圖、新手任務與樹的圖鑑（2026-10-20 起探索併進這裡） */
+/** 集章冊：「集章」是各區的章與地圖，「探索」是迷霧地圖、新手任務與樹的圖鑑 */
 export default function StampsPage() {
   const [params, setParams] = useSearchParams()
   const tab = stampsTabFromSearch(params.toString())
@@ -75,7 +75,7 @@ export default function StampsPage() {
         <div {...segmentedPanelProps('stamps-tab', 'stamps')} className="stamps-panel" data-testid="stamps-panel">
           {/* 切換鈕在「地圖」卡片的頂端（地圖之前，讀屏先遇到它），不浮在畫面上；
               已集到的章數併進「我的區」那一行（沒有我的區就在切換鈕旁）。依取得時間檢視沒有地圖，切換鈕與章數自成一列。 */}
-          {/* 說明放在地圖下面：手機第一屏要留給「我的區」與地圖（見 08 §10 第四輪 X） */}
+          {/* 說明放在地圖下面：手機第一屏要留給「我的區」與地圖（見 08 §10） */}
           {view === 'time' && (
             <div className="atlas-head standalone" data-testid="atlas-head">
               {toggle}

@@ -28,7 +28,7 @@ export function activeTab(pathname: string): TabId | null {
   return TABS.find((t) => t.to === path)?.id ?? null
 }
 
-/** 中間的大按鈕：每個分頁都是「掃樹牌」，直接到掃描頁（2026-10-20 決定） */
+/** 中間的大按鈕：每個分頁都是「掃樹牌」，直接到掃描頁 */
 export interface CenterAction {
   kind: 'scan'
   to: '/scan'

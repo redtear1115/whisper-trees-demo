@@ -17,7 +17,7 @@ export function wishMarkerLabel(road: string): string {
 }
 
 /**
- * 許願中的樹苗今天能不能澆（2026-10-21 夥伴回饋：要分今天還能澆、今天澆過）：
+ * 許願中的樹苗今天能不能澆（分成今天還能澆、今天澆過）：
  * can＝今天還沒澆（水滴）、done＝今天澆過（勾）；已種植、不可種的不標（null）
  */
 export type WishWaterMark = 'can' | 'done' | null

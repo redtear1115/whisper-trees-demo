@@ -29,7 +29,7 @@ export interface CheckinState {
 export type FocusCardAfterScan = 'touch' | 'report' | 'whisper'
 
 /**
- * 打卡成功後回到地圖的拉近畫面（2026-10-21 使用者決定）：先跳一張獎勵卡（光點、掉落），收起後打開剛剛點的互動。
+ * 打卡成功後回到地圖的拉近畫面：先跳一張獎勵卡（光點、掉落），收起後打開剛剛點的互動。
  * 樹的頁面只從「樹的資料」打開；掃了但太遠、沒有位置，照舊到樹的頁面看原因。
  */
 export interface FocusAfterScan {

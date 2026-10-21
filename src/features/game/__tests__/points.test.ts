@@ -250,7 +250,7 @@ describe('award with the ledger', () => {
   })
 })
 
-describe('摸摸樹（2026-10-21）', () => {
+describe('摸摸樹', () => {
   it('counts like a whisper: never the first slot, +2 then +1, nothing from the 4th', () => {
     const cfg = { ...DEFAULT_CONFIG, multiplier: 1 }
     const base = { treeOrder: 1, daylight: 1, lonelyDays: 0, protectedTree: false, eventMult: 1 }

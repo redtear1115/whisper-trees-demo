@@ -20,7 +20,7 @@ describe('關於曦語', () => {
       expect(html).toContain(m.title.replace('&', '&amp;'))
     }
   })
-  it('第五輪：職稱、本案做的事與專長三行，依使用者給的文字', () => {
+  it('職稱、本案做的事與專長三行', () => {
     expect(TEAM.map((m) => [m.name, m.title, m.role])).toEqual([
       ['愛皮卡', '概念發起人', '發想曦語的遊戲概念、世界觀與蠟筆繪本畫風'],
       ['Ray', '軟體工程師', '整理臺北市樹木開放資料，做出這個網頁 Demo'],

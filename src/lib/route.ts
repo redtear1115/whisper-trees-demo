@@ -173,7 +173,7 @@ interface Snap {
   /** 從這裡走到邊的 b 端的路程 */
   toB: number
   point: LngLat
-  /** 原本的點到吸附點的直線距離 */
+  /** 原始的點到吸附點的直線距離 */
   gap: number
 }
 

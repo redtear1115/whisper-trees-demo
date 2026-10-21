@@ -1,5 +1,5 @@
 // 陪你的動物：地圖上代表使用者的小動物。純資料與驗證，不碰 store（hook 在 useAnimal.ts）。
-// 五隻動物、順序與個性來自團隊簡報 v20（2026-10-20）p13，取代 v17 的四隻。
+// 五隻動物、順序與個性來自團隊簡報。
 
 export const ANIMAL_IDS = ['taiwan-dog', 'leopard-cat', 'blue-magpie', 'malayan-night-heron', 'pangolin'] as const
 export type AnimalId = (typeof ANIMAL_IDS)[number]
@@ -21,10 +21,10 @@ export const ANIMALS: Animal[] = [
   { id: 'pangolin', name: '穿山甲', art: 'avatar-pangolin', blurb: '容易緊張，一害怕就捲成球' },
 ]
 
-/** 預設是臺灣黑狗（團隊簡報 v20，2026-10-20；v17 時是穿山甲）：新使用者、沒選過、舊資料沒存動物的人都是牠 */
+/** 預設是臺灣黑狗：新使用者、沒選過、舊資料沒存動物的人都是牠 */
 export const DEFAULT_ANIMAL: AnimalId = 'taiwan-dog'
 
-/** 舊版存過的值：夜鷺（v17 前叫黑冠麻鷺、id 一直是 night-heron）對應到黑冠麻鷺；赤腹松鼠已移除，落到預設 */
+/** 舊版存過的值：夜鷺（舊名黑冠麻鷺、id 一直是 night-heron）對應到黑冠麻鷺；赤腹松鼠已移除，落到預設 */
 const LEGACY_ANIMAL: Record<string, AnimalId> = { 'night-heron': 'malayan-night-heron' }
 
 /** 存的值不認得（沒選過、舊資料、被改過）就用預設的臺灣黑狗 */

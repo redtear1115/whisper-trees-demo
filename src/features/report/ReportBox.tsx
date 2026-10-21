@@ -9,7 +9,7 @@ import { gameConfig } from '../game/config'
 import { reportPointsLine } from '../game/checkinLine'
 import { InteractionMood } from '../journal/InteractionMood'
 
-/** 樹況回報：五個類別一鍵選（團隊簡報 v17 第 22 頁）。只有在現場（打卡或遠觀）才能送出。送出得光點（GM 可調，預設 +15）。 */
+/** 樹況回報：五個類別一鍵選。只有在現場（打卡或遠觀）才能送出。送出得光點（GM 可調，預設 +15）。 */
 export function ReportBox({ tree, onSite, openForm = false, onCancel }: { tree: Tree; onSite: boolean; openForm?: boolean; onCancel?: () => void }) {
   // openForm：從拉近畫面的「回報」卡、#report 連結來，直接把表單展開；onCancel：拉近畫面的卡片按「取消」就收起整張卡
   const [open, setOpen] = useState(openForm)
@@ -34,7 +34,7 @@ export function ReportBox({ tree, onSite, openForm = false, onCancel }: { tree: 
         <h2>樹況回報</h2>
         <p className="muted small">樹修剪得不對、生病了、擋路了？到樹旁掃樹牌就能回報。</p>
         {/* 這一頁的主要按鈕只留一個：樹洞區的「掃樹牌」是主要的，這裡降成次要。和樹洞的「掃樹牌」同一個介面：掃描頁從 state.hintTreeId 知道要打卡哪一棵。
-            和拉近畫面的「回報」同一個流程（2026-10-21 夥伴回饋）：掃完回到拉近畫面，直接打開回報卡（openCard） */}
+            和拉近畫面的「回報」同一個流程：掃完回到拉近畫面，直接打開回報卡（openCard） */}
         <Link className="btn block report-scan" to="/scan" state={{ hintTreeId: tree.id, openCard: 'report' }} data-testid="report-scan">
           去掃樹牌
         </Link>

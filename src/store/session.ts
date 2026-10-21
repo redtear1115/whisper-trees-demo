@@ -14,7 +14,7 @@ export interface MigrationSummary {
 
 export interface Session {
   backend: 'local' | 'cloud'
-  /** 雲端的連線狀態：不是 ok 時頂端顯示（2026-10-21 起連不上也不退回本機模式，見 unavailable.ts） */
+  /** 雲端的連線狀態：不是 ok 時頂端顯示（連不上也不退回本機模式，見 unavailable.ts） */
   connection: Connection
   /** Google 登入且在 admins 白名單裡 */
   admin: 'checking' | 'yes' | 'no'

@@ -23,7 +23,7 @@ describe('心情表', () => {
     expect(new Set(MOODS.map((m) => m.id)).size).toBe(7)
     for (const m of MOODS) expect(m.emoji && m.name && m.light && m.response).toBeTruthy()
   })
-  it('第五輪改寫：名稱與森林此刻的回應（一句、第二人稱、不評價）', () => {
+  it('名稱與森林此刻的回應（一句、第二人稱、不評價）', () => {
     const row = (id: string) => {
       const m = moodById(id)!
       return [m.emoji, m.name, m.response]
@@ -45,7 +45,7 @@ describe('心情表', () => {
   })
 })
 
-describe('存取（2026-10-21 起沒有詢問間隔，ext.mood 只留現在的心情）', () => {
+describe('存取（沒有詢問間隔，ext.mood 只留現在的心情）', () => {
   it('沒選過：沒有心情', () => {
     expect(moodState()).toEqual({})
     expect(currentMood()).toBeNull()

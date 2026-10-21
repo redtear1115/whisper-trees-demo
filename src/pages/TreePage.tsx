@@ -44,7 +44,7 @@ export default function TreePage() {
   const [sealOpen, setSealOpen] = useState(false)
   const sealNoteId = useId()
 
-  // 剛打卡完的光點說明（2026-10-20 使用者決定）：只在這次打卡後顯示。記在 state 裡之後，把路由 state 的 glow 清掉，
+  // 剛打卡完的光點說明：只在這次打卡後顯示。記在 state 裡之後，把路由 state 的 glow 清掉，
   // 所以重新整理、返回再進來都不會再出現（其他欄位照舊保留）。
   const [freshGlow, setFreshGlow] = useState<{ treeId: string; glow: number } | null>(null)
   useEffect(() => {
@@ -92,7 +92,7 @@ export default function TreePage() {
   const whispers = useMemo(() => whispersOf(treeId), [treeId, myWhispers])
   const capsule = onSite ? whispers.find((w) => w.at < sessionStart) : undefined
   const thisVisit = whispers.filter((w) => w.at >= sessionStart && !w.mock)
-  // 跟樹互動時的心情（2026-10-21）：打卡成功後回到拉近畫面，不主動問打卡的心情（做完摸摸樹、回報、樹洞時才問）；
+  // 跟樹互動時的心情：打卡成功後回到拉近畫面，不主動問打卡的心情（做完摸摸樹、回報、樹洞時才問）；
   // 這裡縮成一行，想補選可以展開。有慶祝視窗開著時先不出現。樹洞的心情在樹洞卡裡（每一句話各自一個）。
   const celebrating = useCelebrationBlocking()
   const checkinMood =

@@ -42,7 +42,7 @@ export function Scanner({ onResult, onClose, hint, hintId }: Props) {
     onResult(text)
   }
 
-  // 開後鏡頭。開不了、或開了沒畫面（全黑），都在取景框的位置說明怎麼打開權限（2026-10-21，見 camera.ts）
+  // 開後鏡頭。開不了、或開了沒畫面（全黑），都在取景框的位置說明怎麼打開權限（見 camera.ts）
   useEffect(() => {
     let controls: IScannerControls | undefined
     let cancelled = false

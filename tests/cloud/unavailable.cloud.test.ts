@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // 連不上雲端時的連線狀態，對本機 Firebase emulator（demo-whisper-trees）。只經 `npm run test:rules` 跑。
-// 2026-10-21：不再退回離線模式。到期時先問伺服器，問不到只顯示狀態、一直重連；在背景不算。
+// 不退回離線模式。到期時先問伺服器，問不到只顯示狀態、一直重連；在背景不算。
 import { deleteApp, getApps } from 'firebase/app'
 import { disableNetwork, enableNetwork } from 'firebase/firestore'
 import { afterEach, describe, expect, it, vi } from 'vitest'

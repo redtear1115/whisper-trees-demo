@@ -48,7 +48,7 @@ describe('geographic order of the 12 chips', () => {
     expect(DISTRICTS_NORTH_TO_SOUTH.slice(9)).toEqual(['文山區', '信義區', '南港區'])
   })
   it('each row of 3 is a latitude band: the band centroids never go north again', () => {
-    // 村里界重心緯度（public/data/villages，2026-10-20 量）；每列平均要由北往南
+    // 村里界重心緯度（public/data/villages）；每列平均要由北往南
     const lat: Record<string, number> = {
       北投區: 25.129, 士林區: 25.104, 內湖區: 25.077, 大同區: 25.062, 中山區: 25.062, 松山區: 25.054,
       萬華區: 25.03, 中正區: 25.03, 大安區: 25.03, 文山區: 24.994, 信義區: 25.035, 南港區: 25.047,

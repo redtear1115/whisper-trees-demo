@@ -2,7 +2,7 @@ import { TasksCard } from '../onboarding/TasksCard'
 import { CodexSection } from '../codex/CodexSection'
 import { FogMap } from '../fog/FogMap'
 
-/** 集章冊裡的「探索」：迷霧地圖（打卡過的樹周圍散開）、新手任務、樹的圖鑑（原本是獨立的 /explore 分頁） */
+/** 集章冊裡的「探索」：迷霧地圖（打卡過的樹周圍散開）、新手任務、樹的圖鑑 */
 export function ExploreSection() {
   return (
     <>

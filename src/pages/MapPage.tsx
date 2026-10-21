@@ -60,14 +60,14 @@ interface View {
 /** 使用者設了「減少動態」就不要動畫 */
 const motionMs = (ms: number) => (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : ms)
 
-// 市民端地圖只有「附近」：45° 俯視、街景、只能在目前位置半徑內移動（2026-10-19 決定，全市模式已移除）
+// 市民端地圖只有「附近」：45° 俯視、街景、只能在目前位置半徑內移動
 
 /**
  * 地圖上緣被頂端列蓋住的高度（px）：Demo 細條 34 + 光點餘額晶片（44 px 高、離細條 10 px）。
  * 用 `map.setPadding({ top })`，鏡頭置中與框選都以這條下面為準；Demo 外沒有細條，仍留同樣的高度（餘額晶片還在）。
  */
 const MAP_TOP_INSET = 90
-/** 往上抬 `px`（畫面像素）的 easeTo／flyTo offset。padding 讓中心下移 MAP_TOP_INSET / 2，扣回去，原本的構圖位置不變 */
+/** 往上抬 `px`（畫面像素）的 easeTo／flyTo offset。padding 讓中心下移 MAP_TOP_INSET / 2，扣回去，構圖位置不變 */
 function liftOffset(px: number): number {
   return -px - MAP_TOP_INSET / 2
 }
@@ -274,7 +274,7 @@ export default function MapPage() {
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 1, 15, 3.5, 17, 6, 19, 10],
         },
       })
-      // 拉近到街景（18 級起）：每棵樹站起來變成插畫小樹，原本的圓點變成它腳下的底座（2026-10-21「拉近的介面」）。
+      // 拉近到街景（18 級起）：每棵樹站起來變成插畫小樹，圓點變成它腳下的底座。
       // 圈內（可以摸）亮綠、圈外灰藍綠；圖示永遠面向畫面。點擊仍以樹為準（見下面的點擊處理，圖示也算點到）
       const treeIcon = (layerId: string, image: string, extra: Partial<maplibregl.SymbolLayerSpecification> = {}) =>
         m.addLayer({
@@ -318,7 +318,7 @@ export default function MapPage() {
           'icon-rotation-alignment': 'viewport',
         },
       })
-      // 空樹穴拉近時標「樹穴」：褐底淡字，和設計圖一樣
+      // 空樹穴拉近時標「樹穴」：褐底淡字
       m.addLayer({
         id: 'pits-label',
         type: 'symbol',
@@ -907,7 +907,7 @@ export default function MapPage() {
     }
   }, [follow])
 
-  // 今天互動過的樹（夥伴回饋 2026-10-21）：日記的四種互動，今天的那些樹，腳邊長小花
+  // 今天互動過的樹：日記的四種互動，今天的那些樹，腳邊長小花
   const metWhispers = useStore((s) => s.whispers)
   const metReports = useStore((s) => s.reports)
   const metEntries = useDiary().entries
@@ -954,7 +954,7 @@ export default function MapPage() {
         tag.textContent = '許願中'
         node.appendChild(tag)
       }
-      // 今天還能澆：水滴；今天澆過：勾（夥伴回饋 2026-10-21）
+      // 今天還能澆：水滴；今天澆過：勾
       const water = wishWaterMark(live, hasWateredToday(w.id))
       if (water) {
         const badge = document.createElement('span')

@@ -98,7 +98,7 @@ function StepDistrict() {
       </p>
       <DistrictPicker name="tour-district" />
       <div className="tour-actions sticky">
-        {/* 不選區也可以往下走（2026-10-20 使用者決定）：沒選時按鈕寫「先不選，下一步」。後面還有 4 步，所以不寫「出發」 */}
+        {/* 不選區也可以往下走：沒選時按鈕寫「先不選，下一步」。後面還有 4 步，所以不寫「出發」 */}
         <button className="btn primary" onClick={() => go(STEP_INTRO)} data-testid="district-go">
           {chosen ? '下一步' : '先不選，下一步'}
         </button>

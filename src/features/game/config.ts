@@ -2,7 +2,7 @@
 
 import { getExt, setExt, useStore, type State } from '../../store'
 
-/** `sun` 是舊版的獨立日照加成（2026-10-20 前的流水帳還有），現在日照是倍率，不再單獨發 */
+/** `sun` 是舊版的獨立日照加成（舊流水帳還有），現在日照是倍率，不再單獨發 */
 export type Action = 'checkin' | 'farView' | 'sun' | 'whisper' | 'touch' | 'report' | 'wish' | 'water' | 'insect'
 
 export const ACTION_LABEL: Record<Action, string> = {
@@ -58,7 +58,7 @@ export interface GameConfig {
   lonelyMin: number
   lonelyMax: number
   lonelyStepDays: number
-  /** 受保護樹木打卡的基礎光點（取代 points.checkin） */
+  /** 受保護樹木打卡的基礎光點（用來代替 points.checkin） */
   protectedBase: number
   /** 一天裡從第幾棵不同的樹起，打卡光點減半 */
   halveFrom: number
@@ -71,7 +71,7 @@ export interface GameConfig {
   shop: ShopItem[]
 }
 
-// 商店只賣虛擬造型與相框（團隊簡報 v20 p25，2026-10-20）；造型要能疊在五隻動物與小芽身上。
+// 商店只賣虛擬造型與相框；造型要能疊在五隻動物與小芽身上。
 export const DEFAULT_SHOP: ShopItem[] = [
   { id: 'hat-acorn', name: '橡實帽', kind: 'outfit', price: 30, active: true, art: 'item-hat-acorn', brief: '用橡實殼做的小帽子' },
   { id: 'crown-feather', name: '花冠羽毛', kind: 'outfit', price: 50, active: true, art: 'item-crown-feather', brief: '野花編的花冠，插著一根羽毛' },
@@ -80,7 +80,7 @@ export const DEFAULT_SHOP: ShopItem[] = [
   { id: 'frame-autumn', name: '秋楓相框', kind: 'frame', price: 40, active: true, art: 'item-frame-autumn', brief: '樹的頁面換上秋天' },
 ]
 
-/** 簡報 v20 前的造型 id 對應到新的（只有這三個；稀有的古木紋理頭飾 hat-ancient 與相框不動）。讀 inventory 與 GM 存過的商品時都要走這個 */
+/** 舊的造型 id 對應到新的（只有這三個；稀有的古木紋理頭飾 hat-ancient 與相框不動）。讀 inventory 與 GM 存過的商品時都要走這個 */
 export const LEGACY_ITEM_ID: Record<string, string> = {
   'hat-straw': 'hat-acorn',
   'scarf-leaf': 'crown-feather',
