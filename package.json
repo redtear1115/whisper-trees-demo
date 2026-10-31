@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": "26.x"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -25,7 +28,7 @@
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^6.0.0",
-    "@types/node": "^24.13.3",
+    "@types/node": "^26",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@types/suncalc": "^1.9.2",
